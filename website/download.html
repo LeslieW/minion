@@ -1,0 +1,36 @@
+<?php include("page_top.html"); ?>
+<font size="6"><b>Download</b></font>
+<br>
+<p align=left>
+From time to time we release executables of Minion and source files.   
+These reflect stable points in development or versions of particular interest.  
+<ul>
+<p>August 27, 2006: While no stable releases have been made, progress on Minion has been
+continuing! This release fixes a number of bugs and add a few new command line switches
+(run minion without command line options to see them). One major point to note in this version
+is for sanity checking, Minion now checks any solutions generated to make sure they satisfy all
+the constraints. This should stop any false positive results but does create a slight slowdown
+on problems with very many solutions. For benchmarking a version should be compiled without the
+-DMORE_SEARCH_INFO command line flag. This version of Minion has also been compiled to support the
+largest possible array of processors, and compiling specifically for a certain level of processor can
+often improve speed substansally. E-mail if you want a version for benchmarking on a specific machine!
+This release is based on subversion release 240.
+
+<p><a href="minion-mac-universal-0.3.zip">Mac version - Universal (intel, g4 and g5 supported)</a></p>
+<p><a href="minion-windows-0.3.zip">Windows version</a><p>
+
+
+<p>May 11, 2006:  We released version 0.2.2 of Minion, which is the version reported in our <a href="MinionECAI06.pdf">ECAI 2006 paper on Minion</a>.
+This corresponds to revision 170 in <a href="http://svn.sourceforge.net/viewcvs.cgi/minion/">Minion's subversion repository.</a>
+</p>
+<p>
+<a href="https://sourceforge.net/project/showfiles.php?group_id=159145">
+All files from currently available releases of Minion are available from sourceforge.</a></p>
+</ul>
+</p>
+<p align=left>
+At all times the source code of the latest version of Minion is available through the use of a Subversion server. Subversion is a version control system for source code. Details of how to use subversion are given at <a href=http://sourceforge.net/svn/?group_id=159145>the Minion project page at sourceforge.net.</a>
+It is important to note that this source code is subject to more changes than our periodic releases and hence is less stable.  
+The subversion server can also be viewed through a web browser at: <a href=http://svn.sourceforge.net/viewcvs.cgi/minion/>http://svn.sourceforge.net/viewcvs.cgi/minion/ </a>
+</p>
+<?php include("page_base.html"); ?>
