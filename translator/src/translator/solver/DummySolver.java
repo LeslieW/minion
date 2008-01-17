@@ -60,8 +60,8 @@ public class DummySolver extends GeneralTargetSolver {
 
 		// nesting of constraints in other constraints
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NEGATION), new Boolean(false));
-		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_DISJUNCTION), new Boolean(true));
-		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_CONJUNCTION), new Boolean(true));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_DISJUNCTION), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_CONJUNCTION), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_EQ), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NEQ), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_LEQ), new Boolean(false));

@@ -269,7 +269,7 @@ public class Flattener {
 		
 		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
 		//        is supported by the target solver
-		if(this.targetSolver.supportsNaryDisjunction()) {
+		if(this.targetSolver.supportsConstraint(Expression.NARY_DISJUNCTION)) {
 			return disjunction;
 		}
 		// 2. --- else the solver does not support n-ary disjunction, we have to flatten it to binary
@@ -308,7 +308,7 @@ public class Flattener {
 		
 		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
 		//        is supported by the target solver
-		else if(this.targetSolver.supportsNaryConjunction()) {
+		else if(this.targetSolver.supportsConstraint(Expression.NARY_CONJUNCTION)) {
 			return conjunction;
 		}
 		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
@@ -382,7 +382,7 @@ public class Flattener {
 		
 		// then continue to flatten the whole expression
 		if(expression.getType() == Expression.NEGATION) {
-			if(this.targetSolver.supportsConstraintsNestedInNegation())
+			if(this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION))
 				return new Negation(argument);
 			else {
 			   return reifyConstraint(new Negation(argument));

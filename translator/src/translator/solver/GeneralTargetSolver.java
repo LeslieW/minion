@@ -47,6 +47,10 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			featureMap.put(new Integer(feature), new Boolean(turnOn));
 	}
 	
+	public boolean supportsNestedExpressions() {
+		return this.featureMap.get(new Integer(NESTED_EXPRESSIONS));
+	}
+	
 	// ======= SOLVING PROCESS ==============
 	
 	public String getBranchingStrategy() {
@@ -98,41 +102,6 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	}
 	
 	// ======= CONSTRAINT FEATURES ===========
-	
-	public boolean supportsNaryConjunction() {
-		return this.featureMap.get(new Integer(NARY_CONJUNCTION));
-	}
-
-	public boolean supportsNaryDisjunction() {
-		return this.featureMap.get(new Integer(NARY_DISJUNCTION));
-	}
-
-	public boolean supportsNaryMultiplication() {
-		return this.featureMap.get(new Integer(NARY_MULTIPLICATION));
-	}
-
-	public boolean supportsNarySum() {
-		return this.featureMap.get(new Integer(NARY_SUM));
-	}
-
-	public boolean supportsNestedExpressions() {
-		return this.featureMap.get(new Integer(NESTED_EXPRESSIONS));
-	}
-
-	public boolean supportsWeightedNarySum() {
-		return this.featureMap.get(new Integer(NARY_WEIGHTED_SUM));
-	}
-
-	public boolean supportsConstraintsNestedInNegation() {
-		return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_NEGATION));
-	}
-	
-	
-	
-	public boolean supportsReifiedAllDifferent() {
-		return this.featureMap.get(new Integer(REIFIED_ALLDIFFERENT));
-	}
-	
 	
 	/**
 	 * Given the constraint alias (defined in Expression.java) for 
@@ -198,6 +167,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.BINARY_SUMLESS_CONSTRAINT: 
 			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMLESS_CONSTRAINT));
 	
+		case Expression.NARY_CONJUNCTION:
+			return this.featureMap.get(new Integer(TargetSolver.NARY_CONJUNCTION));
+		
+		case Expression.NARY_DISJUNCTION:
+			return this.featureMap.get(new Integer(TargetSolver.NARY_CONJUNCTION));
+			
 		}
 		
 		
@@ -286,6 +261,9 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	public boolean supportsConstraintsNestedAsArgumentOf(int operator) {
 		
 		switch(operator) {
+		
+		case Expression.NEGATION:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_NEGATION));
 		
 		case Expression.IF:
 			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_IF));

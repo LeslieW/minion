@@ -3,7 +3,7 @@ package translator.gui;
 import javax.swing.*;
 import java.awt.*;
 import translator.solver.*;
-
+import translator.expression.Expression;
 
 public class ConstraintsPanel extends JPanel implements SelectionPanel {
 
@@ -54,23 +54,23 @@ public class ConstraintsPanel extends JPanel implements SelectionPanel {
 		nestedExpressions.setEnabled(isSupported);
 		nestedExpressions.setSelected(isSupported);
 		
-		isSupported = this.solver.supportsNaryDisjunction();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_DISJUNCTION);
 		naryDisjunction.setEnabled(isSupported);
 		naryDisjunction.setSelected(isSupported);
 		
-		isSupported = this.solver.supportsNaryConjunction();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_CONJUNCTION);
 		naryConjunction.setEnabled(isSupported);
 		naryConjunction.setSelected(isSupported);
 		
-		isSupported = this.solver.supportsNarySum();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT);
 		narySum.setEnabled(isSupported);
 		narySum.setSelected(isSupported);
 		
-		isSupported = this.solver.supportsWeightedNarySum();
-		naryWeightedSum.setEnabled(isSupported);
-		naryWeightedSum.setSelected(isSupported);
+		//isSupported = this.solver.supportsWeightedNarySum();
+		//naryWeightedSum.setEnabled(isSupported);
+		//naryWeightedSum.setSelected(isSupported);
 		
-		isSupported = this.solver.supportsNaryMultiplication();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_PRODUCT_CONSTRAINT);
 		naryMultiplication.setEnabled(isSupported);
 		naryMultiplication.setSelected(isSupported);
 	}
@@ -97,8 +97,8 @@ public class ConstraintsPanel extends JPanel implements SelectionPanel {
 		selectedChoice = this.narySum.isSelected();
 		this.solver.setFeature(TargetSolver.NARY_SUM, selectedChoice);
 		
-		selectedChoice = this.naryWeightedSum.isSelected();
-		this.solver.setFeature(TargetSolver.NARY_WEIGHTED_SUM, selectedChoice);
+		//selectedChoice = this.naryWeightedSum.isSelected();
+		//this.solver.setFeature(TargetSolver.NARY_WEIGHTED_SUM, selectedChoice);
 	}
 	
 	public TargetSolver getSolver() {
@@ -117,27 +117,27 @@ public class ConstraintsPanel extends JPanel implements SelectionPanel {
 		nestedExpressions.setSelected(isSupported);
 		
 		naryDisjunction = new JCheckBox("Use n-ary disjunction");
-		isSupported = this.solver.supportsNaryDisjunction();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_DISJUNCTION);
 		naryDisjunction.setEnabled(isSupported);
 		naryDisjunction.setSelected(isSupported);
 		
 		naryConjunction = new JCheckBox("Use n-ary conjunction");
-		isSupported = this.solver.supportsNaryConjunction();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_CONJUNCTION);
 		naryConjunction.setEnabled(isSupported);
 		naryConjunction.setSelected(isSupported);
 		
 		narySum = new JCheckBox("Use n-ary sum");
-		isSupported = this.solver.supportsNarySum();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT);
 		narySum.setEnabled(isSupported);
 		narySum.setSelected(isSupported);
 		
-		naryWeightedSum = new JCheckBox("Use n-ary weighted sum");
-		isSupported = this.solver.supportsWeightedNarySum();
-		naryWeightedSum.setEnabled(isSupported);
-		naryWeightedSum.setSelected(isSupported);
+		//naryWeightedSum = new JCheckBox("Use n-ary weighted sum");
+		//isSupported = this.solver.supportsWeightedNarySum();
+		//naryWeightedSum.setEnabled(isSupported);
+		//naryWeightedSum.setSelected(isSupported);
 		
 		naryMultiplication = new JCheckBox("Use n-ary multiplication");
-		isSupported = this.solver.supportsNaryMultiplication();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_PRODUCT_CONSTRAINT);
 		naryMultiplication.setEnabled(isSupported);
 		naryMultiplication.setSelected(isSupported);
 		
@@ -156,7 +156,7 @@ public class ConstraintsPanel extends JPanel implements SelectionPanel {
 		checkPanel.add(naryDisjunction);
 		checkPanel.add(naryConjunction);
 		checkPanel.add(narySum);
-		checkPanel.add(naryWeightedSum);
+		//checkPanel.add(naryWeightedSum);
 		checkPanel.add(naryMultiplication);
 		
 	}

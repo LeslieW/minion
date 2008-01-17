@@ -97,6 +97,8 @@ public interface Expression {
 	public final int NARY_SUMLESS_CONSTRAINT = 253; 
 	public final int NARY_SUMGREATER_CONSTRAINT = 255; 
 	public final int NARY_PRODUCT_CONSTRAINT = 290;
+	public final int NARY_DISJUNCTION = 291;
+	public final int NARY_CONJUNCTION = 292;
 	public final int BINARY_SUMEQ_CONSTRAINT = 270;
 	public final int BINARY_SUMNEQ_CONSTRAINT = 271;
 	public final int BINARY_SUMLESS_CONSTRAINT = 272;

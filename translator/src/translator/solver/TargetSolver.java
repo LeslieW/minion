@@ -159,13 +159,18 @@ public interface TargetSolver {
 	
 	public boolean supportsSparseVariables();
 	public boolean supportsVariableArrayIndexing();
+	public boolean supportsDiscreteBoundVariables();
 	
 	//========= CONSTRAINTS FEATURES ===============
 	
 	public boolean supportsNestedExpressions();
 	public boolean supportsConstraint(int constraint);
+	public boolean supportsReificationOf(int operation);
+	public boolean supportsConstraintsNestedAsArgumentOf(int operator);
+	    
 	
-	public boolean supportsNaryDisjunction();
+	
+/*	public boolean supportsNaryDisjunction();
 	public boolean supportsNaryConjunction();
     public boolean supportsNarySum();
     public boolean supportsNaryMultiplication();
@@ -173,9 +178,7 @@ public interface TargetSolver {
     public boolean supportsConstraintsNestedInNegation();
     
     public boolean supportsReifiedAllDifferent();
-    public boolean supportsReificationOf(int operation);
-    public boolean supportsConstraintsNestedAsArgumentOf(int operator);
-    
+ */
     
     
     //=========	SETTING FEATURES ====================

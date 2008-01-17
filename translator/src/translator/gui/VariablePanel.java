@@ -6,6 +6,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import translator.solver.TargetSolver;
+import translator.expression.Expression;
 
 public class VariablePanel extends JPanel implements SelectionPanel {
 
@@ -71,7 +72,7 @@ public class VariablePanel extends JPanel implements SelectionPanel {
 		boolean isSupported = this.solver.supportsSparseVariables();
 		sparseVariables.setSelected(isSupported);
 		
-		isSupported = this.solver.supportsNaryConjunction();
+		isSupported = this.solver.supportsConstraint(Expression.NARY_CONJUNCTION);
 		discreteBoundVariables.setEnabled(isSupported);
 		discreteBoundVariables.setSelected(isSupported);
 		
@@ -96,7 +97,7 @@ public class VariablePanel extends JPanel implements SelectionPanel {
 		sparseVariables.setSelected(isSupported);
 		
 		discreteBoundVariables = new JCheckBox("Use discrete bounds variables");
-		isSupported = this.solver.supportsNaryConjunction();
+		isSupported = this.solver.supportsDiscreteBoundVariables();
 		discreteBoundVariables.setEnabled(isSupported);
 		discreteBoundVariables.setSelected(isSupported);
 		
