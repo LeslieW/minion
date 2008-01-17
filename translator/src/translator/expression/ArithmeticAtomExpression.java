@@ -3,7 +3,7 @@ package translator.expression;
 public class ArithmeticAtomExpression implements ArithmeticExpression {
 
 	private int constantValue;
-	private Variable variable;
+	private SingleVariable variable;
 	
 	private int type;
 	private boolean isParameter;
@@ -25,7 +25,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	 * @param upperBound
 	 * @param lowerBound
 	 */
-	public ArithmeticAtomExpression(Variable variable, 
+	public ArithmeticAtomExpression(SingleVariable variable, 
 			                        boolean isParameter) {
 		this.variable = variable;
 		this.type = this.variable.getType();
@@ -41,7 +41,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	 * @param upperBound
 	 * @param lowerBound
 	 */
-	public ArithmeticAtomExpression(Variable variable) {
+	public ArithmeticAtomExpression(SingleVariable variable) {
 		this.variable = variable;
 		this.type = this.variable.getType();
 		this.isParameter = false;
@@ -110,7 +110,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		return this.constantValue;
 	}
 	
-	public Variable getVariable() {
+	public SingleVariable getVariable() {
 		return this.variable;
 	}
 	

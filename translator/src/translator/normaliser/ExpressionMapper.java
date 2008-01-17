@@ -30,14 +30,14 @@ import java.util.ArrayList;
 public class ExpressionMapper {
 
 	/** A hashmap containing all decision variables with their corresponding domains  */
-	HashMap<String, Domain> decisionVariables;
+	HashMap<String, translator.conjureEssenceSpecification.Domain> decisionVariables;
 	/** A hashmap containing all parameters with their corresponding domains */
-	HashMap<String, Domain> parameters;
+	HashMap<String, translator.conjureEssenceSpecification.Domain> parameters;
 	
     String debug = "";
 	
-	public ExpressionMapper(HashMap<String,Domain> decisionVariables,
-			                HashMap<String, Domain> parameters) {
+	public ExpressionMapper(HashMap<String,translator.conjureEssenceSpecification.Domain> decisionVariables,
+			                HashMap<String, translator.conjureEssenceSpecification.Domain> parameters) {
 		
 		this.decisionVariables = decisionVariables;
 		this.parameters = parameters;
@@ -63,6 +63,9 @@ public class ExpressionMapper {
 		case EssenceGlobals.ATOMIC_EXPR:	
 			return mapAtomicExpression(oldExpression.getAtomicExpression()); 
 			
+		case EssenceGlobals.NONATOMIC_EXPR:
+			return mapNonAtomicExpression(oldExpression.getNonAtomicExpression());
+			
 		case EssenceGlobals.UNITOP_EXPR:
 			return mapUnaryExpression(oldExpression.getUnaryExpression());
 				
@@ -79,8 +82,79 @@ public class ExpressionMapper {
 	}
 	
 	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @param oldArrayElement
+	 * @return
+	 * @throws NormaliserException
+	 */
+	protected translator.expression.Expression mapNonAtomicExpression(NonAtomicExpression oldArrayElement) 
+		throws NormaliserException {
+		
+		//--------------------- matrix name -----------------------------------------------
+		if(oldArrayElement.getExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR) 
+			throw new NormaliserException("Illegal arrayname: expected identifier instead of:"+oldArrayElement.getExpression());
+		if(oldArrayElement.getExpression().getAtomicExpression().getRestrictionMode() != EssenceGlobals.IDENTIFIER) 
+			throw new NormaliserException("Illegal arrayname: expected identifier instead of:"+oldArrayElement.getExpression());
+		
+		String arrayName = oldArrayElement.getExpression().getAtomicExpression().getString();
+		
+		// ------------- matrix domain ----------------------------------------------------
+		// get the domain of the matrixElement
+		translator.conjureEssenceSpecification.Domain domain = this.decisionVariables.get(arrayName);
+		if(domain == null)
+			throw new NormaliserException("Unknown array element:"+oldArrayElement);
+		
+		// should we just map the base domain, or also the dimensions??
+		if(domain.getRestrictionMode() != EssenceGlobals.MATRIX_DOMAIN) 
+			throw new NormaliserException("Identifier '"+arrayName+"' does not correspond to an array element, but to domain: "+domain);
+		
+		// we only care about the base domain, not about the dimensions of the array 
+		translator.conjureEssenceSpecification.Domain baseDomain = domain.getMatrixDomain().getRangeDomain();
+		translator.expression.Domain mappedDomain = mapDomain(baseDomain);
+		
+		// TODO: should we check if the dimensions fit?
+		// just store the base domain, right?
+		
+		
+		// ---------- Matrix indices -------------------------------------------------------
+		translator.conjureEssenceSpecification.Expression[] indices = oldArrayElement.getExpressionList();
+		boolean allIndicesAreInteger = true;
+		
+		for(int i=0; i<indices.length; i++) {
+			if(indices[i].getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+				if(indices[i].getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
+					allIndicesAreInteger = false;
+			}
+			else allIndicesAreInteger = false;
+		}
+		
+		if(allIndicesAreInteger) {
+			int[] intIndices = new int[indices.length];
+			for(int i=0; i<indices.length; i++) {
+				intIndices[i] = indices[i].getAtomicExpression().getNumber();
+			}
+			return new ArrayVariable(arrayName,
+					                 intIndices,
+					                 mappedDomain);
+			
+		}
+		// end if: allIndices are integer
+		else { 
+			translator.expression.Expression[] expressionIndices = new translator.expression.Expression[indices.length];
+			for(int i=0; i<indices.length; i++) {
+				expressionIndices[i] = mapExpression(indices[i]);
+			}
+			return new ArrayVariable(arrayName,
+	                 expressionIndices,
+	                 mappedDomain);
+		}
+	}
 	
-	protected translator.expression.Expression mapQuantification(QuantificationExpression oldQuantification) 
+	
+/*	protected translator.expression.Expression mapQuantification(QuantificationExpression oldQuantification) 
 	throws NormaliserException {
 		
 		// get the quantified expression
@@ -164,7 +238,7 @@ public class ExpressionMapper {
 		}
 		
 		return null;
-	}
+	}*/
 	
 	/**
 	 * Map a binary expression to the advanced expression representation. The expressions are mapped
@@ -248,7 +322,17 @@ public class ExpressionMapper {
 	}
 	
 
-	
+	/**
+	 * Maps the operator types from the old system to the operator types 
+	 * of the new system. Operator types are constant numbers that 
+	 * stand for an operation. In the new system, the operator constants
+	 * are also ordered according to the precedence (and the ordering of 
+	 * expressions as well)
+	 * 
+	 * @param oldOperator
+	 * @return the corresponding constant value for the operator in the 'new'
+	 * advanced expression representation
+	 */
 	protected int mapOperator(int oldOperator) {
 		
 		switch(oldOperator) {
@@ -348,8 +432,8 @@ public class ExpressionMapper {
 		case EssenceGlobals.IDENTIFIER: 
 			// the identifier is a decision variable
 			if(this.decisionVariables.containsKey(oldAtom.getString())) {
-				Domain domain = this.decisionVariables.get(oldAtom.getString());
-				translator.expression.Variable decisionVar = createVariableFromDomain(oldAtom.getString(),
+				translator.conjureEssenceSpecification.Domain domain = this.decisionVariables.get(oldAtom.getString());
+				translator.expression.SingleVariable decisionVar = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
 				if(decisionVar.getType() == translator.expression.Expression.BOOL_VARIABLE)
 					return new RelationalAtomExpression(decisionVar);
@@ -357,8 +441,8 @@ public class ExpressionMapper {
 			}
 			// the identifier is a parameter
 			else if(this.parameters.containsKey(oldAtom.getString())) {
-				Domain domain = this. parameters.get(oldAtom.getString());
-				translator.expression.Variable parameter = createVariableFromDomain(oldAtom.getString(),
+				translator.conjureEssenceSpecification.Domain domain = this. parameters.get(oldAtom.getString());
+				translator.expression.SingleVariable parameter = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
 				if(parameter.getType() == translator.expression.Expression.BOOL_VARIABLE)
 					return new RelationalAtomExpression(parameter);
@@ -375,83 +459,227 @@ public class ExpressionMapper {
 	
 	
 	/**
-	 * Creates a variable according to the type of the domain.
+	 * Creates a variable according to the type of the domain. This method is only intended
+	 * for single variables, i.e. NO ARRAY variables.
 	 * 
 	 * @param domain
 	 * @param isParameter
 	 * @return
 	 * @throws NormaliserException
 	 */
-	public translator.expression.Variable createVariableFromDomain(String variableName,
-			                                                       Domain domain) 
+	public translator.expression.SingleVariable createVariableFromDomain(String variableName,
+			                                                       translator.conjureEssenceSpecification.Domain domain) 
 		throws NormaliserException {
+		
+		
+		translator.expression.Domain mappedDomain = mapDomain(domain);
+		return new SingleVariable(variableName, mappedDomain);
+		
+	}
+	
+	
+	/**
+	 * Maps the old domain representation to the new domain representation (that is used throughout 
+	 * the translation process).  
+	 * 
+	 * @param domain
+	 * @return the corresponding domain in the new domain representation
+	 * @throws NormaliserException
+	 */
+	protected translator.expression.Domain mapDomain(translator.conjureEssenceSpecification.Domain domain) 
+	throws NormaliserException {
 		
 		
 		switch(domain.getRestrictionMode()) {
 		
 		case EssenceGlobals.BOOLEAN_DOMAIN:
-			return new translator.expression.Variable(variableName,0,1);
+			return new BoolDomain();
 		
 		case EssenceGlobals.INTEGER_RANGE:
-			IntegerDomain intDomain = domain.getIntegerDomain();
-			
-			// we have a bounds domain	
-			if(intDomain.getRangeList().length == 1) {
-				translator.expression.Expression lb = mapExpression(intDomain.getRangeList()[0].getLowerBound());
-				translator.expression.Expression ub = mapExpression(intDomain.getRangeList()[0].getUpperBound());
-				
-				if(!(lb instanceof translator.expression.ArithmeticExpression))
-					throw new NormaliserException("Unfeasible lower bound for variable '"
-							+variableName+"':"+lb+". Expected a relational expression.");
-				
-				if(!(ub instanceof translator.expression.ArithmeticExpression))
-					throw new NormaliserException("Unfeasible upper bound for variable '"
-							+variableName+"':"+ub+". Expected a relational expression.");
-				
-				return new translator.expression.Variable(variableName, 
-						                                  (ArithmeticExpression) lb,
-						                                  (ArithmeticExpression) ub);
-			}
-			//  we have a sparse domain
-			else {
-				RangeAtom[] rangeAtom = intDomain.getRangeList();
-				ArrayList<Integer> sparseDomain = new ArrayList<Integer>();
-				
-				for(int i=0; i<rangeAtom.length; i++) {
-					translator.expression.Expression lb = mapExpression(rangeAtom[i].getLowerBound());
-					
-					// if the sparse element is not an atom, raise an exception
-					if(!(lb instanceof translator.expression.ArithmeticAtomExpression))
-						throw new NormaliserException("Unfeasible element in sparse domain for variable '"
-								+variableName+"':"+lb+". Expected an integer value.");
-					
-					ArithmeticAtomExpression sparseElement = (ArithmeticAtomExpression) lb;
-					
-					//if the sparse element is not an integer, raise and exception (we cannot order it otherwise)
-					if(sparseElement.getType() == translator.expression.Expression.INT)
-						sparseDomain.add(sparseElement.getConstant());
-					else throw new NormaliserException("Unfeasible element in sparse domain for variable '"
-							+variableName+"':"+lb+". Expected an integer value.");
-				}
-				
-				return new translator.expression.Variable(variableName,
-						                                  sparseDomain);
-			}
+			return mapIntegerDomain(domain.getIntegerDomain());
 			
 		case EssenceGlobals.BRACKETED_DOMAIN:
-			return createVariableFromDomain(variableName, domain.getDomain());
+			return mapDomain(domain.getDomain());
 			
 		case EssenceGlobals.IDENTIFIER_RANGE:
-			throw new NormaliserException("Unknown identifier in domain "+domain.toString()+" of variable '"+variableName+
-					"' or internal error (normalising before insertion of all identifier domains).");
+			return new translator.expression.IdentifierDomain(domain.getIdentifierDomain().getIdentifier());
 			
-		
-		default: throw new NormaliserException("Unknown identifier in domain "+domain.toString()+" of variable '"+variableName+
+		case EssenceGlobals.MATRIX_DOMAIN:
+			;// TODO:!
+			
+			
+		default: throw new NormaliserException("Unknown domain type '"+domain.toString()+ 
 		"' or internal error (normalising before insertion of all identifier domains).");
 			
 		}
 		
+		
+	
 	}
+	
+	
+	/**
+	 * the integer domain must not purely consist of integer values.
+	 * 
+	 * @param intDomain
+	 * @return the corresponding expression.Domain for the conjureEssenceSpecification.Domain
+	 * @throws NormaliserException
+	 */
+	protected translator.expression.Domain mapIntegerDomain(IntegerDomain intDomain) 
+		throws NormaliserException {
+		
+		
+		// we have a bounds domain or a single element domain
+		if(intDomain.getRangeList().length == 1) {
+			translator.expression.Expression lb = mapExpression(intDomain.getRangeList()[0].getLowerBound());
+			translator.expression.Expression ub = mapExpression(intDomain.getRangeList()[0].getUpperBound());
+			
+			if(!(lb instanceof translator.expression.ArithmeticExpression))
+				throw new NormaliserException("Unfeasible lower bound '"
+						+lb+". Expected a relational expression.");
+			
+			if(!(ub instanceof translator.expression.ArithmeticExpression))
+				throw new NormaliserException("Unfeasible upper bound '"+ub+
+						". Expected a relational expression.");
+			
+			ArithmeticExpression lowerBound = (ArithmeticExpression) lb;
+			ArithmeticExpression upperBound = (ArithmeticExpression) ub;
+			
+			// we have an integer bound
+			if(lowerBound.getType() == translator.expression.Expression.INT && 
+			   upperBound.getType() == translator.expression.Expression.INT)  {
+				
+				int lower = ((ArithmeticAtomExpression) lb).getConstant();
+				int upper = ((ArithmeticAtomExpression) ub).getConstant();
+				
+				if(lower > upper) throw new NormaliserException
+				 ("Infeasible bound domain: lower bound '"+lower+
+						 "' is higher than upper bound '"+upper+"'.");						
+				
+				else if(lower == upper) 
+					return new SparseIntRange(new int[] {lower});
+				
+				else return new BoundedIntRange(((ArithmeticAtomExpression) lb).getConstant(),
+					                        ((ArithmeticAtomExpression) ub).getConstant());
+			}
+			// we have an expression bound
+			else return new BoundedExpressionRange(lowerBound,
+     		                                       upperBound);
+		}
+		
+		
+		//  we have a sparse domain or mixed domain
+		else {
+			RangeAtom[] rangeAtom = intDomain.getRangeList();
+			ArrayList<Integer> integerRange = new ArrayList<Integer>();
+			ArrayList<translator.expression.Expression> expressionRange = new ArrayList<translator.expression.Expression>();
+			
+			ArrayList<IntRange> intRangeList = new ArrayList<IntRange>();
+			ArrayList<ExpressionRange> exprRangeList = new ArrayList<ExpressionRange>();
+			
+			int i = 0;
+			while(i<rangeAtom.length) {
+				
+				// ------------ either the range atom is sparse -----------------------------------------
+				// this is piece of a sparse domain -> collect them all
+				while(rangeAtom[i].getRestrictionMode() == EssenceGlobals.RANGE_EXPR) {
+					translator.expression.Expression sparseElement = mapExpression(rangeAtom[i].getLowerBound());
+					
+					if(!(sparseElement instanceof translator.expression.ArithmeticExpression))
+						throw new NormaliserException("Unfeasible element in sparse domain '"
+								+sparseElement+". Expected an integer value.");
+					
+					// as long as there are no composed range expressions we can separate 
+					// pure integer expressions
+					if(sparseElement.getType() == translator.expression.Expression.INT &&
+							expressionRange.size() == 0 &&
+							exprRangeList.size() ==0) 
+						integerRange.add( ((ArithmeticAtomExpression) sparseElement).getConstant());
+					
+					else expressionRange.add(sparseElement);
+					
+					i++;	
+				} // after detecting a set of sparse elements, add them all together into a Int/ExpressionRange
+				if(integerRange.size() > 0){
+					int[] sparseIntRange = new int[integerRange.size()];
+					for(int j=sparseIntRange.length-1; j >=0; j--)
+						sparseIntRange[j] = integerRange.remove(j); 
+					intRangeList.add(new SparseIntRange(sparseIntRange));
+				}
+				integerRange.clear();
+				
+				if(expressionRange.size() > 0) {
+					translator.expression.Expression[] sparseIntRange = new translator.expression.Expression[integerRange.size()];
+					for(int j=sparseIntRange.length-1; j >=0; j--)
+						sparseIntRange[j] = expressionRange.remove(j); 
+					exprRangeList.add(new SparseExpressionRange(sparseIntRange));
+				}
+				expressionRange.clear();
+				
+				
+				// ------------------------ or the range atom consists of a lb and ub ---------------------------
+				// now we have to consider the i-th element that is a bounded domain 		
+				translator.expression.Expression lb = mapExpression(rangeAtom[i].getLowerBound());
+				translator.expression.Expression ub = mapExpression(rangeAtom[i].getUpperBound());
+				
+				if(!(lb instanceof translator.expression.ArithmeticExpression))
+					throw new NormaliserException("Unfeasible lower bound '"
+							+lb+". Expected a relational expression.");
+				
+				if(!(ub instanceof translator.expression.ArithmeticExpression))
+					throw new NormaliserException("Unfeasible upper bound '"+ub+
+							". Expected a relational expression.");
+				
+				ArithmeticExpression lowerBound = (ArithmeticExpression) lb;
+				ArithmeticExpression upperBound = (ArithmeticExpression) ub;
+				
+				// we have an integer bound
+				if(lowerBound.getType() == translator.expression.Expression.INT && 
+				   upperBound.getType() == translator.expression.Expression.INT)  {
+					
+					int lower = ((ArithmeticAtomExpression) lb).getConstant();
+					int upper = ((ArithmeticAtomExpression) ub).getConstant();
+					
+					if(lower > upper) throw new NormaliserException
+					 ("Infeasible bound domain: lower bound '"+lower+
+							 "' is higher than upper bound '"+upper+"'.");						
+					
+					else if(lower == upper) 
+						intRangeList.add(new SparseIntRange(new int[] {lower}));
+					
+					else {
+					    intRangeList.add(new BoundedIntRange(((ArithmeticAtomExpression) lb).getConstant(),
+						                        ((ArithmeticAtomExpression) ub).getConstant()));
+					}
+				}
+				// we have an expression bound
+				else exprRangeList.add(new BoundedExpressionRange(lowerBound,
+         		                                       upperBound));
+				
+				i++;
+			} // end while i<rangeAtom.length
+			
+			// there are only integer range atoms
+			if(exprRangeList.size() == 0) {
+				if(intRangeList.size() == 1) {
+					return intRangeList.get(i);
+				}
+				else return new MultipleIntRange(intRangeList);
+			}
+			// there are expression and int range atoms
+			else {
+				// the order is OK here: we only collect integer expressions if
+				// there are no composed expression atoms. So if there are some,
+				// they need to be put into the front of the range
+				for(int j=intRangeList.size()-1; j>=0; j--) {
+					exprRangeList.add(0,intRangeList.get(j).toExpressionRange());
+				}
+				return new MultipleExpressionRange(exprRangeList);
+			}
+			
+		}
+	}
+	
 	
 	protected void print_debug(String message) {
 		

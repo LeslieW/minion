@@ -13,7 +13,7 @@ public class RelationalAtomExpression implements
 		  RelationalExpression {
 
 	boolean bool;
-	Variable variable;
+	SingleVariable variable;
 	boolean isParameter;
 	
    //============== Constructors ==================
@@ -24,12 +24,12 @@ public class RelationalAtomExpression implements
 		this.isParameter = false;
 	}
 	
-	public RelationalAtomExpression(Variable variableName) {
+	public RelationalAtomExpression(SingleVariable variableName) {
 		this.variable = variableName;
 		this.isParameter = false;
 	}
 	
-	public RelationalAtomExpression(Variable variableName, boolean isParameter) {
+	public RelationalAtomExpression(SingleVariable variableName, boolean isParameter) {
 		this.variable = variableName;
 		this.isParameter = isParameter;
 	}
@@ -51,7 +51,7 @@ public class RelationalAtomExpression implements
 	public Expression copy() {
 		return (variable == null) ? 
 				new RelationalAtomExpression(bool) :
-					new RelationalAtomExpression((Variable) this.variable.copy());
+					new RelationalAtomExpression((SingleVariable) this.variable.copy());
 	}
 
 	public int[] getDomain() {
@@ -108,7 +108,7 @@ public class RelationalAtomExpression implements
 		return this.bool;
 	}
 	
-	public Variable getVariable() {
+	public SingleVariable getVariable() {
 		return this.variable;
 	}
 	

@@ -22,25 +22,11 @@ public interface Expression {
 	
 	// internal types for Variables
 	/** a decision variable that is indexed by a constant value and has an integer bounds domain */
-	public final int INT_VARIABLE = 11;
-	/** a decision variable that is indexed by a constant value and has a sparse domain */
-	public final int INT_VARIABLE_SPARSE = 12;
-	/** a decision variable that is indexed by a constant value and has a domain that is composed of expressions (unknown parameters exist)*/
-	public final int INT_VARIABLE_PARAM = 13;
+	public final int SINGLE_VARIABLE = 11;
 	
 	/** an array element that is indexed by a constant value and has an integer bounds domain */
-	public final int INT_ARRAY_ELEM = 14;
-	/** an array element that is indexed by a constant value and has a sparse domain */
-	public final int INT_ARRAY_ELEM_SPARSE = 15;
-	/** an array element that is indexed by a constant value and has a domain that is composed of expressions (unknown parameters exist)*/
-	public final int INT_ARRAY_ELEM_PARAM = 17;
-	
-	/** an array element that is indexed by a non-constant value and has an integer bounds domain */
-	public final int INT_ARRAY_ELEM_INDEX = 18;
-	/** an array element that is indexed by a non-constant value and has a domain that is composed of expressions (unknown parameters exist)*/
-	public final int INT_ARRAY_ELEM_INDEX_PARAM = 19;
-	/** an array element that is indexed by a non-constant value and has a sparse domain */
-	public final int INT_ARRAY_ELEM_INDEX_SPARSE = 20;
+	public final int ARRAY_VARIABLE = 14;
+
 	
     //	 --------------------------------------------------------
 	// Unary Relational Expressions
