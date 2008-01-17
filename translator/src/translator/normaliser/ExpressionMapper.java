@@ -81,10 +81,24 @@ public class ExpressionMapper {
 		case EssenceGlobals.LEX_EXPR:
 			return mapLexConstraint(oldExpression.getLexExpression());
 			
+		case EssenceGlobals.TABLE_CONSTRAINT:
+			;
+			
 		default: 
 			throw new NormaliserException("Cannot map expression yet or unknown expression type:\n"+oldExpression);
 				
 		}
+	}
+	
+	
+	
+	protected translator.expression.TableConstraint mapTableConstraint(translator.conjureEssenceSpecification.TableConstraint oldConstraint)
+	   throws NormaliserException {
+		
+		return new translator.expression.TableConstraint(oldConstraint)
+		
+		
+		return null;
 	}
 	
 	

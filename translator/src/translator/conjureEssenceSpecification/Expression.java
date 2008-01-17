@@ -23,7 +23,7 @@ public class Expression implements EssenceGlobals {
     QuantificationExpression quantifierop;
     LexExpression lexExpression;
     LinearExpression linearExpression;
-    
+    TableConstraint tableConstraint;
     
     public int getRestrictionMode(){
 	return restriction_mode;
@@ -63,6 +63,10 @@ public class Expression implements EssenceGlobals {
     	return this.linearExpression;
     }
     
+    public TableConstraint getTableConstraint() {
+    	return this.tableConstraint;
+    }
+    
     public Expression copy() {
 	switch(this.getRestrictionMode()) {
 	    
@@ -92,6 +96,9 @@ public class Expression implements EssenceGlobals {
 		
 	case EssenceGlobals.LINEAR_EXPR:
 		return new Expression(this.linearExpression.copy());
+		
+	case EssenceGlobals.TABLE_CONSTRAINT:
+		return new Expression(this.tableConstraint.copy());
 		
 	default:
 	    return null;
@@ -173,6 +180,11 @@ public class Expression implements EssenceGlobals {
 		this.linearExpression = e;
 	}
 	
+	public Expression(TableConstraint t) {
+		this.restriction_mode = TABLE_CONSTRAINT;
+		this.tableConstraint = t;
+	}
+	
 	public String toString() {
 		
 		switch(restriction_mode){
@@ -186,6 +198,7 @@ public class Expression implements EssenceGlobals {
 		case QUANTIFIER_EXPR : return quantifierop.toString();
 		case LEX_EXPR: return lexExpression.toString();
 		case LINEAR_EXPR: return this.linearExpression.toString();
+		case TABLE_CONSTRAINT: return this.tableConstraint.toString();
 		}		
 		return "";
 	}

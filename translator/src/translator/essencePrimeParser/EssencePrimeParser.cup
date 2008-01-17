@@ -117,6 +117,7 @@ non terminal expression, expression_list;
 non terminal atom_expression, deref_expression;
 non terminal unitop_expression, binaryop_expression, lex_expression,  functionop_expression;
 non terminal quantifierop_expression, quantifier, binding_expression;
+non terminal table_constraint, constant_tuple_list, constant_tuple, integer_list;
 non terminal constant_list, constant;
 non terminal user_def_type, variable_list;
 
@@ -388,7 +389,10 @@ expression ::= 	  LPAREN expression:e RPAREN
 			{: RESULT = new Expression( (QuantificationExpression) qe); :}
 			
 		| lex_expression:le
-		    {: RESULT = new Expression((LexExpression) le);  :}	
+		    {: RESULT = new Expression((LexExpression) le);  :}
+		    
+		|  table_constraint:tab_constraint
+	        {: RESULT = new Expression((TableConstraint) tab_constraint);:}	
 ;
 
 
@@ -524,8 +528,12 @@ functionop_expression ::= 	  ALLDIFF LPAREN expression:e RPAREN
 	                {: RESULT = new FunctionExpression(EssenceGlobals.ELEMENT,
 	                									(Expression) e1,
 	                									(Expression) e2,
-	                									(Expression) e3);   :}	
+	                									(Expression) e3);   
+	              :}	   									
+	           
 ;
+
+
 
 
 lex_expression ::=   expression:e1  LEXLESS expression:e2 
@@ -562,6 +570,58 @@ binding_expression ::=	identifier_list:id_list COLON domain:d
  			   	 id_array[i] = (String) tmp[i];
 				 
 			    RESULT = new BindingExpression(new DomainIdentifiers(id_array,(Domain) d )); :}
+;
+
+
+table_constraint ::= TABLE LPAREN LBRACK identifier_list:id_list RBRACK COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
+                   {:  
+                  	Object[] tmp = ((LinkedList) id_list).toArray();
+			        String[] id_array = new String[tmp.length];
+			        for(int i=0;i<id_array.length;i++)
+ 				          id_array[i] =  (String) tmp[i];                   
+                   
+                    Object[] tmp2 = ((LinkedList) t_list).toArray();
+			        ConstantTuple[] t_array = new ConstantTuple[tmp2.length];
+			        for(int i=0;i<t_array.length;i++)
+ 				          t_array[i] =  (ConstantTuple) tmp2[i];        
+                   
+                   RESULT = new TableConstraint(id_array,
+                                                t_array);
+                   :}
+
+;
+
+constant_tuple_list ::= constant_tuple:c_tuple
+                         {: LinkedList list = new LinkedList();
+				            list.addFirst((ConstantTuple) c_tuple);
+				            RESULT = list; :}
+
+                        | constant_tuple:c_tuple COMMA constant_tuple_list:t_list
+                        {: ((LinkedList) t_list).addFirst((ConstantTuple) c_tuple); 
+				            RESULT = t_list; :}
+;                        
+                        
+
+constant_tuple ::= LESS  integer_list:int_list GREATER
+                   {:
+                   	Object[] tmp = ((LinkedList) int_list).toArray();
+			        int[] int_array = new int[tmp.length];
+			        for(int i=0;i<int_array.length;i++)
+ 				          int_array[i] = (Integer) tmp[i];
+ 				          
+ 				    RESULT = new ConstantTuple(int_array);     
+                   :}
+;                   
+
+integer_list ::=  INTEGER:i 
+                 {: LinkedList list = new LinkedList();
+				    list.addFirst((Integer) i);
+				    RESULT = list;
+                 :}
+                 | INTEGER:i COMMA  integer_list:int_list 
+                {: ((LinkedList) int_list).addFirst((Integer) i); 
+				    RESULT = int_list; 
+				 :}
 ;
 
 

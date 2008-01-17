@@ -6,10 +6,17 @@ public class TableConstraint {
 	String[] identifierList;
 	ConstantTuple[] tupleList;
 	
-	
+	AtomExpression[] atomExpressionList;
+ 	
 	public TableConstraint(String[] identifierList,
 			               ConstantTuple[] tupleList) {
 		this.identifierList = identifierList;
+		this.tupleList = tupleList;
+	}
+	
+	public TableConstraint(AtomExpression[] atomExpressions,
+			               ConstantTuple[]  tupleList) {
+		this.atomExpressionList = atomExpressions;
 		this.tupleList = tupleList;
 	}
 	
@@ -27,6 +34,7 @@ public class TableConstraint {
 		return new TableConstraint(copiedIdentifiers,
 				                   copiedTuples);
 	}
+	
 	
 	
 	public String toString() {
