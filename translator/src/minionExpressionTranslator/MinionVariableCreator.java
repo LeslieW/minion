@@ -109,12 +109,12 @@ public class MinionVariableCreator implements MinionTranslatorGlobals {
 			// then create a Minion Identifier and insert it into the minionModel
 				
 				if(!useDiscreteVariables) {
-					MinionBoundsVariable intDomainVariable = new MinionBoundsVariable(upperBound,lowerBound,variableName);
+					MinionBoundsVariable intDomainVariable = new MinionBoundsVariable(lowerBound,upperBound,variableName);
 					myMinionModel.addBoundsVariable(intDomainVariable);
 					minionVariables.put(variableName, intDomainVariable); 
 				}
 				else {
-					MinionDiscreteVariable intDomainVariable = new MinionDiscreteVariable(upperBound,lowerBound,variableName);
+					MinionDiscreteVariable intDomainVariable = new MinionDiscreteVariable(lowerBound,upperBound,variableName);
 					myMinionModel.addDiscreteVariable(intDomainVariable);
 					minionVariables.put(variableName, intDomainVariable);
 				}

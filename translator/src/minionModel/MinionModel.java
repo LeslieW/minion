@@ -339,7 +339,7 @@ public class MinionModel implements MinionGlobals {
     	if(!(boundsVariable.getOriginalName().startsWith("freshVariable")))
  			originalVariables.add(boundsVariable);
     	
-    	print_debug("added bounds variable: "+boundsVariable.getOriginalName());
+    	print_debug("added bounds variable: "+boundsVariable.getOriginalName()+" with lb:"+boundsVariable.getLowerBound()+", ub:"+boundsVariable.getUpperBound());
     	minionIdentifiers.add(boundsVariable);
     	int[] bounds = new int[] { boundsVariable.getLowerBound(), boundsVariable.getUpperBound(), 1 };
     	
@@ -1242,7 +1242,9 @@ public class MinionModel implements MinionGlobals {
 	print_debug("written down size og boundsVariables..:"+boundsVariables.size());
 	
 	for(i=0; i<boundsList.size(); i++) {
+
 		int[] bounds = boundsList.get(i);
+	    print_debug("bounds variable def"+bounds[0]+" to "+bounds[1]+" amount "+bounds[2]);
 		result.append(bounds[0]+" "+bounds[1]+" "+bounds[2]+"\n");
 	}
 	

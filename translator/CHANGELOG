@@ -1,7 +1,9 @@
-2006-05-04
+2007
+
+2007-05-04
 - added negation and tested it
 
-2006-04-26
+2007-04-26
 - implemented new method to deal with equality assignment (variable reuse)
   works only if the assignment is explicit for each variable. Does not
   work with whole vectors or matrices yet, but binary expressions in the 
@@ -9,30 +11,30 @@
   "filling up" of unset spaces still needs to be implemented (tomorrow..)
 - variable reuse also works for 3-dim matrices now
  
-2006-04-25
+2007-04-25
 - added 3-dimensional matrices of decision variables
   and basic operation on them work (any binary relations,
   quantifications, except variable reuse and global constraints) 
 - fixed some bugs
 
-2006-04-04
+2007-04-04
 - fixed bug with iterated arithm. expressions
 - updated and extended problem samples with
   problem descriptions etc
 
-2006-04-02
+2007-04-02
 - fixed and tested constant arrays
 - added new version of sudoku
 - still got to fix bug for iterated sum != iterated sum:
   could be adapted to handle to iterated arithmetic subtrees
   (see n-queens)
 
-2006-04-02
+2007-04-02
 - added iterated disjunction/conjunction
 - added constant arrays, but still buggy if they occurr in 
 quantifications
 
-2006-03-30
+2007-03-30
 - fixed iterated arithmetic constraints (mapping to (weighted) sum)
 - still to do: map partwise structures
 - map disjunctions/conjunctions (should be rather easy now with the new structure
@@ -41,40 +43,40 @@ quantifications
 - still todo: don't apply watch/weighted etc if we need to reify->
   clashes with global willBeReified (so stupid!)
 
-2006-03-29
+2007-03-29
 - added objective
 - extended and fixed matrix indexing with variables
 - little bug fixes
 - updated tutorial
 
-2006-03-22
+2007-03-22
 - added discrete bounds variables 
 - added discrete bound variable flag
 - added langford problem
 - bug fixes and little changes
 
-2006-03-21
+2007-03-21
 - a lot of bug fixes
 - added some smarter translation parts 
   (in dynamic matrix assignments)
 - added quasiGroup problem
 - still struggling with the golomb ruler *grrr*
 
-2006-03-20
+2007-03-20
 - added watched literal constraints
 - bug fixes
 
-2006-03-17
+2007-03-17
 - eq basically works, only problem with offsets of matrices, seems as 
   if we might have to add an own matrix-type to minionModel
 
-2006-03-16
+2007-03-16
 - added equality thing and did not test it -> probably totally buggy
 - still missing: indices that are binary expressions
 - checkIfEqualityThing-method need checking if dynamic matrix-accessing is done
   (in which case we cannot aply the eq-thing)
 
-2006-03-15
+2007-03-15
 - lex constraint/operators added
 - reification flag added to every translation method (when necessary):
   allows smarter translation when we the generated constraint won't be reified
@@ -82,7 +84,7 @@ quantifications
 - unused binding variableas are removed and quantifiers reduced if possible
 - to be done: matrix assignments for special quantified eq-constraints, baeeeh
 
-2006-03-05
+2007-03-05
 - quantification translation works now
 - added element constraint for "dynamic" matrix/vector accessing
 - some little thing still to do (undefined parameters in binding variable domains,
@@ -90,13 +92,13 @@ quantifications
 - added tutorial in html
 - translated bombasticProblem
 
-2006-03-02
+2007-03-02
 - quantification translation seems to work now
 - still need to implement to apply the element constraint in cases
   like YYY [6, XXX[6]].
 - bibd and sudoku are both translatable and solvable by Minion :) 
 
-2006-28-02
+2007-28-02
 - the quantification translation seems to work now pretty well
 - there is still a bug with the sum quantification -> there
   are too many variables introduced than should be (and which are never used).
@@ -105,23 +107,23 @@ quantifications
   determine which decision variables are actually used :(
   (that's why the BIBD instance would not work)
 
-2006-02-19
+2007-02-19
 - added 2-dim arrays, still VERY buggy!!
 - added element constraint, not tested yet
 
-2006-02-16
+2007-02-16
 - added allDifferent constraint and facilities to translate other 
   global Constraints
 - extended the parser so that "element" and "occurrence" are also part
   of the global constraints
 - several bug-fixes 
 
-2006-02-07
+2007-02-07
 - all single quantifiers work now - including the existential
   quantifier!!!
 - tested them -> see testcases in /test folder
 
-2006-02-06
+2007-02-06
 had to reimplement and rethink the quantification translation part:
 - added smart translation background, that allows nesting 
   of up to 3 quantifiers (vector, matrix, cube representation
@@ -129,31 +131,31 @@ had to reimplement and rethink the quantification translation part:
 - expression generation (for up to 3 nested quantifiers) implemented and tested :)
 - translation of single universal quantifier and sum works
 
-2006-02-03
+2007-02-03
 - total thing is restructered and looks much better :)
 - quantification is working for universal quantifier
 - forall-nestings still don't not work yet...
 - almost fully documented, still needs a revision
 
-2006-02-01
+2007-02-01
 - stuff is almost completely restructered. Just the quantifications are 
   missing in the expressionTranslation part
 - needs further documentation
 - put the whole new thing into the src-folder of SVN - still have to test if everything
  works!
 
-2006-01-30/31
+2007-01-30/31
 - further restructoring and refactoring
 
-2006-01-29
+2007-01-29
 - further restructuring
 - refactoring EssencePrime specification
 
-2006-01-23
+2007-01-23
 - restructered the whole thing to make it more extendable and understandable.
 - divide into significant parts: solver independent <-> solver dependent
 
-2006-01-03
+2007-01-03
 - fixed some bugs (all that were mentioned before, except the problem with
   unused variables in quantifications).
 - matrx-indices work now completely
@@ -164,7 +166,7 @@ had to reimplement and rethink the quantification translation part:
 - new PROBLEM: Minion cannot translate refied min,max,diseq constraints. 
   Should we ignore that or alter the translation (if even possible?)
 
-2006-01-02
+2007-01-02
 - weird problem solved: fixed the bug
 - still has a bug: if variable in quantification declared but not 
   used, it prints the expressions multiple times.
