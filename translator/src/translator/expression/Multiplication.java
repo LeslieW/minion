@@ -6,6 +6,7 @@ public class Multiplication extends NaryArithmeticExpression {
 
 	
 	private ArrayList<Expression> arguments;
+	private boolean isNested = true;
 	
 	// ==================== CONSTRUCTOR ====================
 	public Multiplication(ArrayList<Expression> arguments) {
@@ -157,5 +158,14 @@ public class Multiplication extends NaryArithmeticExpression {
 		}
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 	
 }

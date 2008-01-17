@@ -5,8 +5,35 @@ import java.util.ArrayList;
 
 public interface NormaliserSpecification {
 
+	
+	// different types of normalisation
+	public static final char NORMALISE_BASIC = 0;
+	public static final char NORMALISE_EVAL = 1;
+	public static final char NORMALISE_ORDER = 2;
+	public static final char NORMALISE_CANCELLATION =3;
+	public static final char NORMALISE_FULL = 4;
+	
 	public final int UNDEFINED_PARAMETER_ARRAY_ELEMENT = -99999;
 	
+	/**
+	 * Normalises the problem- and parameter-specification and returns a 
+	 * normalised model. This approach does FULL normalisation.
+	 *  
+	 * @return a normalised model. 
+	 * @throws NormaliserException
+	 */
+	public NormalisedModel normalise() throws NormaliserException;
+	
+	/**
+	 * Normalises the problem- and parameter-specification and returns a 
+	 * normalised model. Normalises corresponding to the normalisation type
+	 * (evaluation only, ordering only, etc)
+	 * 
+	 * @param normaliseType
+	 * @return a normalised model. 
+	 * @throws NormaliserException
+	 */
+	public NormalisedModel normalise(char normaliseType) throws NormaliserException;
 	
 	/**
 	 * Provides FULL normalisation: basics (parameter insertion), 
@@ -15,7 +42,7 @@ public interface NormaliserSpecification {
 	 * @return the list of ordered, evaluated and reduces constraints
 	 * @throws NormaliserException
 	 */
-	public ArrayList<translator.expression.Expression> normalise() throws NormaliserException;
+	public ArrayList<translator.expression.Expression> normaliseConstraints() throws NormaliserException;
 	
 	
 	/**
@@ -27,7 +54,7 @@ public interface NormaliserSpecification {
 	 * @return
 	 * @throws NormaliserException
 	 */
-	public ArrayList<translator.expression.Expression> normaliseEvaluate() throws NormaliserException;
+	//protected ArrayList<translator.expression.Expression> normaliseEvaluate() throws NormaliserException;
 	
 	/**
 	 * Basic normalisation inserts parameter values into expressions, some evaluation of 
@@ -36,7 +63,7 @@ public interface NormaliserSpecification {
 	 * @return
 	 * @throws NormaliserException
 	 */
-	public ArrayList<translator.expression.Expression> normaliseBasic() throws NormaliserException;
+	//protected ArrayList<translator.expression.Expression> normaliseBasic() throws NormaliserException;
 	
 	/**
 	 * Insert the parameters, specified in the parameterSpecification. Is it important insert parameters
@@ -76,16 +103,16 @@ public interface NormaliserSpecification {
 	/**
 	 * Returns the evaluated list of Expressions
 	 */
-	public ArrayList<translator.expression.Expression> evaluateConstraints(ArrayList<translator.expression.Expression> constraints) 
-		throws NormaliserException;
+	//public ArrayList<translator.expression.Expression> evaluateConstraints(ArrayList<translator.expression.Expression> constraints) 
+	//	throws NormaliserException;
 	
 	
-	public ArrayList<translator.expression.Expression> orderConstraints(ArrayList<translator.expression.Expression> constraints) 
-		throws NormaliserException;
+	//public ArrayList<translator.expression.Expression> orderConstraints(ArrayList<translator.expression.Expression> constraints) 
+	//	throws NormaliserException;
 
 	
-	public ArrayList<translator.expression.Expression> reduceExpressions(ArrayList<translator.expression.Expression> constraints) 
-		throws NormaliserException;
+	//public ArrayList<translator.expression.Expression> reduceExpressions(ArrayList<translator.expression.Expression> constraints) 
+	//	throws NormaliserException;
 	
 	
 }

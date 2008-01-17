@@ -3,10 +3,12 @@ package translator.expression;
 public class AbsoluteValue implements UnaryArithmeticExpression {
 
 	private Expression argument;
+	boolean isNested;
 	
 	//============== Constructors ==================
 	public AbsoluteValue(Expression argument) {
 		this.argument = argument;
+		this.isNested = true;
 	}
 	
 	
@@ -78,5 +80,13 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 	public Expression insertValueForVariable(int value, String variableName) {
 		this.argument = this.argument.insertValueForVariable(value, variableName);
 		return this;
+	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
 	}
 }

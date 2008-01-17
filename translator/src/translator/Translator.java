@@ -24,15 +24,7 @@ import translator.expression.Expression;
 
 public class Translator {
 	
-	
-	// different types of normalisation
-	public static final char NORMALISE_BASIC = 0;
-	public static final char NORMALISE_EVAL = 1;
-	public static final char NORMALISE_ORDER = 2;
-	public static final char NORMALISE_CANCELLATION =3;
-	public static final char NORMALISE_FULL = 4;
-	
-	
+		
 	/** Essence' parser */
     EssencePrimeParser parser ;
     /** Essence' syntax tree of problem file */
@@ -41,8 +33,8 @@ public class Translator {
     EssenceSpecification parameterSpecification ; 
 	/** normalises the Essence' model */
     Normaliser normaliser;
-    /** list of constraint expressions */
-    ArrayList<Expression> constraintList;
+    /** the normalised model. is produced by the normalise() method */
+    NormalisedModel normalisedModel;
     
 	String errorMessage;
     String debug;
@@ -141,53 +133,16 @@ public class Translator {
 			return false;
 		}
 			
-		
-		// ====== first do the basic stuff ============
 		try { 
 			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.constraintList = this.normaliser.normaliseBasic();	
+			this.normalisedModel = this.normaliser.normalise(normaliseType);	
 		} catch(NormaliserException e) {
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}
-		if(normaliseType == NORMALISE_BASIC) return true;
 		
+		return true;   
 		
-		switch(normaliseType) {
-		
-		case NORMALISE_EVAL:
-			try {
-				this.constraintList = this.normaliser.evaluateConstraints(constraintList);	
-			} catch(NormaliserException e) {
-				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
-				return false;
-			}
-			return true;
-		
-		case NORMALISE_ORDER:
-			try { 
-				this.constraintList = this.normaliser.orderConstraints(constraintList);
-			
-			} catch(NormaliserException e) {
-				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
-				return false;
-			}
-		
-		case NORMALISE_FULL:
-			try {
-				this.constraintList = this.normaliser.evaluateConstraints(constraintList);	
-				this.constraintList = this.normaliser.orderConstraints(constraintList);
-			} catch(NormaliserException e) {
-				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
-				return false;
-			}
-			return true;			
-		
-			
-			
-		default: return true;   
-		}
-	
 	}
 	
   
@@ -203,7 +158,30 @@ public class Translator {
     	return error;
     }
     
+    
+    /**
+     * Collects the debug messages from all packages that
+     * are involved in the translation process.
+     * 
+     * @return the debug messages of all packages
+     */
+    public String getDebugMessages() {
+    	String s = "";
+    	if(normaliser != null)
+    		s = s.concat(normaliser.getDebugMessage());
+    	
+    	s = s.concat(this.debug);
+    	return s;
+    }
+    
+    public EssenceSpecification getInitialProblemSpecification() {
+    	return this.problemSpecification;
+    }
 	
+    public EssenceSpecification getInitialParameterSpecification() {
+    	return this.parameterSpecification;
+    }
+    
 	protected void print_debug(String message) {
 		
 		this.debug = debug.concat(" [ DEBUG translator ] "+message+"\n");
@@ -218,7 +196,34 @@ public class Translator {
 		return this.parameterSpecification.toString();
 	}
 	
+	/**
+	 * Print the constraints in the current state they are in.
+	 * @return
+	 */
+	public String printConstraints() {
+		if(this.normalisedModel != null) {
+			ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
+			String s= constraints.get(0).toString();
+			for(int i=1; i<constraints.size(); i++)
+				s = s.concat(",\n\t"+constraints.get(i));
+			return s+"\n";
+		}
+		else {
+			translator.conjureEssenceSpecification.Expression[] constraints = this.problemSpecification.getExpressions();
+			String s = constraints[0].toString();
+			for(int i=1; i<constraints.length; i++) 
+				s = s.concat(",\n\t"+constraints[i].toString());
+			return s+"\n";
+		}
+	}
+	
+	/**
+	 * Print the model in the current state that it is in.
+	 * @return
+	 */
 	public String printAdvancedModel() {
-		return this.normaliser.printModel(this.constraintList);
+		if(this.normalisedModel != null)
+			return this.normalisedModel.toString();
+		else return this.problemSpecification.toString();
 	}
 }

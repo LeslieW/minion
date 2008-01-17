@@ -3,12 +3,12 @@ package translator.expression;
 public class AllDifferent implements UnaryRelationalExpression {
 
 	private Expression argument;
-	
+	private boolean isNested;
 	
 	//============== Constructors ==================
 	public AllDifferent(Expression argument) {
 		this.argument = argument;
-		
+		this.isNested = true;
 	}
 	
 	//============== Interfaced Methods ==================
@@ -63,5 +63,13 @@ public class AllDifferent implements UnaryRelationalExpression {
 	public Expression insertValueForVariable(int value, String variableName) {
 		this.argument = this.argument.insertValueForVariable(value, variableName);
 		return this;
+	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
 	}
 }

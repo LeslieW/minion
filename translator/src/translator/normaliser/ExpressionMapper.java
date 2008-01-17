@@ -1,4 +1,4 @@
- package translator.normaliser;
+package translator.normaliser;
 
 import translator.conjureEssenceSpecification.*;
 import translator.expression.*;
@@ -490,6 +490,28 @@ public class ExpressionMapper {
 		return new SingleVariable(variableName, mappedDomain);
 		
 	}
+	
+	
+    /**
+     * Transforms the old decision variable hashMap into a decision variable hashmap using the
+     * advanced domain representation.
+     * 
+     * @return a decision variable hashmap using the
+     * advanced domain representation.
+     */
+    public HashMap<String,translator.expression.Domain> getNewDecisionVariables(ArrayList<String> decisionVariablesNames) 
+    	throws NormaliserException {
+    
+    	HashMap<String, translator.expression.Domain> newDecisionVariables = new HashMap<String, translator.expression.Domain>();
+    	
+    	for(int i=0; i<decisionVariablesNames.size(); i++) {
+    		String variable = decisionVariablesNames.get(i);
+    		if(this.decisionVariables.get(variable) != null)
+    			newDecisionVariables.put(variable, mapDomain(this.decisionVariables.get(variable)));
+    	}
+    	
+    	return newDecisionVariables;
+    }
 	
 	
 	/**

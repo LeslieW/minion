@@ -15,6 +15,7 @@ public class NonCommutativeRelationalBinaryExpression implements
 	private Expression rightArgument;
 	
 	private int type;
+	private boolean isNested = true;
 	
 	//============== Constructors ==================
 	public NonCommutativeRelationalBinaryExpression(Expression leftArgument,
@@ -172,4 +173,14 @@ public class NonCommutativeRelationalBinaryExpression implements
 		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
+	
 }

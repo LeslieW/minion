@@ -38,7 +38,7 @@ public class Translate {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	    //Add content to the window.
-		frame.add(new TranslatorGUI());
+		frame.add(new translator.gui.TranslatorGUI());
 
 	    //Display the window.
 		frame.pack();

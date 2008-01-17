@@ -8,6 +8,7 @@ public class CommutativeBinaryRelationalExpression implements
 	private Expression rightArgument;
 	
 	private int type;
+	private boolean isNested = true;
 	
 	//============== Constructors ==================
 	
@@ -161,4 +162,13 @@ public class CommutativeBinaryRelationalExpression implements
 		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 }

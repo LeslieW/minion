@@ -21,8 +21,8 @@ import translator.conjureEssenceSpecification.RangeAtom;
 import translator.conjureEssenceSpecification.UnaryExpression;
 import translator.conjureEssenceSpecification.IntegerDomain;
 import translator.conjureEssenceSpecification.IdentifierDomain;
-import translator.minionExpressionTranslator.TranslationUnsupportedException;
-import translator.minionModel.MinionException;
+//import translator.minionExpressionTranslator.TranslationUnsupportedException;
+//import translator.minionModel.MinionException;
 
 
 
@@ -134,7 +134,7 @@ public class ParameterInsertion {
 	     * @return
 	     * @throws NormaliserException
 	     */
-	    public HashMap<String, Domain> getDecisionVariables(EssenceSpecification problemSpecification) 
+	    protected HashMap<String, Domain> getOldDecisionVariables(EssenceSpecification problemSpecification) 
 	    	throws NormaliserException {
 	    	
 	    	if(problemSpecification.getDeclarations() == null)
@@ -147,6 +147,8 @@ public class ParameterInsertion {
 	    	return this.decisionVariables;
 	    }
 	    
+	
+	    
 	    /**
 	     * Returns the datastructure that contains parameters that are 
 	     * specified in an array.
@@ -155,6 +157,11 @@ public class ParameterInsertion {
 	     */
 	    public Parameters getParameters() {
 	    	return this.parameterArrays;
+	    }
+	    
+	    
+	    public ArrayList<String> getDecisionVariablesNames() {
+	    	return this.decisionVariablesNames;
 	    }
 	    
 	    /**

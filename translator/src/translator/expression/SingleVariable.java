@@ -8,6 +8,7 @@ public class SingleVariable implements Variable {
 	private Domain domain;
 	
 	private boolean isSearchVariable;
+	private boolean isNested = true;
 	
 	//============== Constructors ==================
 	
@@ -100,5 +101,13 @@ public class SingleVariable implements Variable {
 		else return this;
 	}
 
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 	
 }

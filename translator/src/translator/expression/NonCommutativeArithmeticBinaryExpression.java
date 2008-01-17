@@ -18,7 +18,7 @@ public class NonCommutativeArithmeticBinaryExpression implements
 	private Expression rightArgument;
 	
 	private int type;
-	
+	private boolean isNested = true;
 	//============== Constructors ==================
 	
 	public NonCommutativeArithmeticBinaryExpression(Expression leftArgument,
@@ -142,6 +142,15 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		this.rightArgument = this.rightArgument.reduceExpressionTree();
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 	
 	
 	//======================== ADDITIONAL METHODS ===============================

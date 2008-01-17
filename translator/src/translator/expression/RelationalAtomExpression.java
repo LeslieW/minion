@@ -12,9 +12,10 @@ package translator.expression;
 public class RelationalAtomExpression implements
 		  RelationalExpression {
 
-	boolean bool;
-	Variable variable;
-	boolean isParameter;
+	private boolean bool;
+	private Variable variable;
+	private boolean isParameter;
+	private boolean isNested = true;
 	
    //============== Constructors ==================
 	
@@ -131,4 +132,14 @@ public class RelationalAtomExpression implements
 		}
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
+	
 }

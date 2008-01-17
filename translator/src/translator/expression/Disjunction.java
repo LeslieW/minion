@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Disjunction extends NaryRelationalExpression {
 
 	private ArrayList<Expression> disjointExpressions;
-	
+	private boolean isNested = true;
 	
 	//============== Constructors ==================
 	
@@ -156,4 +156,13 @@ public class Disjunction extends NaryRelationalExpression {
 		}
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 }

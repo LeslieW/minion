@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 
 	//public ArrayList<Expression> getArguments();
-	
+	private boolean isNested = true;
 // ==================== Additional Methods =====================
 	
 	/**
@@ -87,5 +87,12 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 		System.out.println("[ DEBUG n-ary arithm expression ] "+message);
 	}
 
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
 	
 }

@@ -3,6 +3,7 @@ package translator.expression;
 public class UnaryMinus implements UnaryArithmeticExpression {
 
 	private Expression argument;
+	private boolean isNested = true;
 	
 	//============== Constructors ==================
 	public UnaryMinus(Expression argument) {
@@ -80,4 +81,13 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 		this.argument = this.argument.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 }

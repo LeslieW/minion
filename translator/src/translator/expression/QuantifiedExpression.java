@@ -10,7 +10,7 @@ public class QuantifiedExpression implements RelationalExpression {
 	
 	private Domain domain;
 	private Expression quantifiedExpression;
-	
+	private boolean isNested = true;
 	
 	// ===================== CONSTRUCTORS =======================
 	
@@ -168,4 +168,14 @@ public class QuantifiedExpression implements RelationalExpression {
 	
 		return s;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
+	
 }

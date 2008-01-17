@@ -7,6 +7,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	
 	private int type;
 	private boolean isParameter;
+	private boolean isNested;
 	
 	//============== Constructors ==================
 	
@@ -14,6 +15,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		this.constantValue = value;
 		this.type = INT;
 		this.isParameter = false;
+		this.isNested = true;
 	}
 	
 	/**
@@ -139,5 +141,11 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		return this;
 	}
 	
+	public boolean isNested() {
+		return isNested;
+	}
 	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
 }

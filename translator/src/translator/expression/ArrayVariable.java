@@ -20,6 +20,7 @@ public class ArrayVariable implements Variable {
 	
 	private Domain domain;
 	private boolean isSearchVariable;
+	private boolean isNested;
 	
 	// ========== CONSTRUCTORS ==========================
 	
@@ -30,6 +31,7 @@ public class ArrayVariable implements Variable {
 		this.intIndices = intIndices;
 		this.domain = domain;
 		this.isSearchVariable = true;
+		this.isNested = true;
 	}
 	
 	
@@ -41,6 +43,7 @@ public class ArrayVariable implements Variable {
 		this.exprIndices = indices;
 		this.domain = domain;
 		this.isSearchVariable = true;
+		this.isNested = true;
 	}
 	
 	
@@ -213,5 +216,12 @@ public class ArrayVariable implements Variable {
 		return this;
 	}
 	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
 	
 }

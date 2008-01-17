@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public abstract class NaryRelationalExpression implements RelationalExpression {
 
 	private ArrayList<Expression> conjointExpressions;
-
+	private boolean isNested = true;
 	
 	
 	public ArrayList<Expression> getArguments() {
@@ -99,6 +99,13 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 			System.out.println("[ DEBUG n-ary rel expression ] "+message);
 		}
 
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
 	
 	
 }

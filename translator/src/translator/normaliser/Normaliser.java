@@ -13,7 +13,7 @@ public class Normaliser implements NormaliserSpecification {
 	EssenceSpecification problemSpecification;
 	EssenceSpecification parameterSpecification;
 	
-	//ExpressionMapper expressionMapper;
+	ExpressionMapper expressionMapper;
 	
 	String errorMessage;
 	String debugMessage;
@@ -43,7 +43,77 @@ public class Normaliser implements NormaliserSpecification {
 	
 	///=========================== INTERFACED METHODS ===============================================================
 	
-	public ArrayList<translator.expression.Expression> normalise() throws NormaliserException { 
+	
+	/**
+	 * General method to normalise the given problem- and parameter specification. Returns a 
+	 * normalised model containing normalised constraints, a list of parameters that have not
+	 * yet been inserted (because they appear in unenrolled quantifications) and a list of
+	 * decision variables and their corresponding domain.
+	 *  
+	 * @return a normalised model
+	 */
+	public NormalisedModel normalise() throws NormaliserException {
+		
+		ArrayList<Expression> constraintsList = normaliseConstraints();
+		//if(this.expressionMapper != null) -> not necessary since normalisation creates an expressionMapper
+		ArrayList<String> decisionVariablesNames = this.parameterInserter.getDecisionVariablesNames();
+ 		HashMap<String,translator.expression.Domain> decisionVariables = this.expressionMapper.getNewDecisionVariables(decisionVariablesNames);
+		Parameters parameterArrays = this.parameterInserter.getParameters();
+	
+		
+		return new NormalisedModel(decisionVariables,
+				                   decisionVariablesNames,
+				                   constraintsList,
+				                   parameterArrays);
+	}
+	
+	/**
+	 * Normalise the expressions only to a certain extent: either full, evaluate only,
+	 * order only etc...
+	 * 
+	 * @return a normalised model
+	 * 
+	 */
+	public NormalisedModel normalise(char normalisationType) throws NormaliserException {
+		
+		//	first insert parameters and map the expressions to the new format
+		ArrayList<translator.expression.Expression> constraintsList = insertParametersAndMapExpression();
+		
+		ArrayList<String> decisionVariablesNames = this.parameterInserter.getDecisionVariablesNames();
+ 		HashMap<String,translator.expression.Domain> decisionVariables = this.expressionMapper.getNewDecisionVariables(decisionVariablesNames);
+		Parameters parameterArrays = this.parameterInserter.getParameters();
+		
+		if(normalisationType == NormaliserSpecification.NORMALISE_BASIC) {
+			// do nothing
+		}
+		
+		else if(normalisationType == NormaliserSpecification.NORMALISE_ORDER) {
+			constraintsList = reduceExpressions(constraintsList);
+			constraintsList = orderConstraints(constraintsList);
+	
+		}
+		else if(normalisationType == NormaliserSpecification.NORMALISE_EVAL) {
+			constraintsList = reduceExpressions(constraintsList);
+			constraintsList = evaluateConstraints(constraintsList);
+			constraintsList = reduceExpressions(constraintsList);
+		}
+		else if(normalisationType == NormaliserSpecification.NORMALISE_FULL) {
+			constraintsList = reduceExpressions(constraintsList);
+			constraintsList = orderConstraints(constraintsList);
+			constraintsList = evaluateConstraints(constraintsList);
+			constraintsList = reduceExpressions(constraintsList);
+			constraintsList = orderConstraints(constraintsList);
+		}
+		
+		return new NormalisedModel(decisionVariables,
+                decisionVariablesNames,
+                constraintsList,
+                parameterArrays);
+	
+	}
+	
+	
+	public ArrayList<translator.expression.Expression> normaliseConstraints() throws NormaliserException { 
 	
 		// first insert parameters and map the expressions to the new format
 		ArrayList<translator.expression.Expression> constraintList = insertParametersAndMapExpression();
@@ -64,27 +134,8 @@ public class Normaliser implements NormaliserSpecification {
 	}
 	
 	
-	public ArrayList<translator.expression.Expression> normaliseEvaluate() throws NormaliserException {
-		ArrayList<translator.expression.Expression> constraintList = insertParametersAndMapExpression();
-		return evaluateConstraints(constraintList);
-	}
 	
-	
-	public ArrayList<translator.expression.Expression> normaliseBasic() throws NormaliserException {
-		return insertParametersAndMapExpression();
-	}
-	
-	
-	public ArrayList<Expression> evaluateConstraints(ArrayList<Expression> constraints) throws NormaliserException {
-		
-		reduceExpressions(constraints);
-		
-		for(int i=0; i<constraints.size(); i++) {
-			constraints.add(i, constraints.remove(i).evaluate());
-		}
-		
-		return reduceExpressions(constraints);	
-	}
+
 
 	
 	
@@ -100,48 +151,34 @@ public class Normaliser implements NormaliserSpecification {
 	public ArrayList<Expression> mapExpressionList(ArrayList<translator.conjureEssenceSpecification.Expression> oldExpressionList)
 			throws NormaliserException {
 		
-			HashMap<String, Domain> decisionVariables = this.parameterInserter.getDecisionVariables(this.problemSpecification);
+			HashMap<String, Domain> decisionVariables = this.parameterInserter.getOldDecisionVariables(this.problemSpecification);
 			
-			ExpressionMapper expressionMapper = null;
+			//ExpressionMapper expressionMapper = null;
 			
 			// if there were no parameters specified
 			if(this.parameterSpecification ==null || 
 					this.parameterSpecification.getDeclarations() == null ||
 					  this.parameterSpecification.getDeclarations().length == 0)
-				expressionMapper =  new ExpressionMapper(decisionVariables, 
+				this.expressionMapper =  new ExpressionMapper(decisionVariables, 
 					                                 	new HashMap<String, Domain> ());
 			// if there have been parameters specified
 			else 
-				expressionMapper = new ExpressionMapper(decisionVariables, 
-						this.parameterInserter.getDecisionVariables(this.problemSpecification));
+				this.expressionMapper = new ExpressionMapper(decisionVariables, 
+						this.parameterInserter.getParameterDomainMap());
 			
 			
 			ArrayList<Expression> newExpressionList = new ArrayList<Expression>();
 			
 			for(int i=0; i < oldExpressionList.size(); i++) {
-				newExpressionList.add(expressionMapper.mapExpression(oldExpressionList.get(i)));
+				translator.expression.Expression mappedExpression = expressionMapper.mapExpression(oldExpressionList.get(i));
+				mappedExpression.setIsNotNested();
+				newExpressionList.add(mappedExpression);
 			}
 			
 		return newExpressionList;
 	}
 
 	
-	public ArrayList<Expression> orderConstraints(
-			ArrayList<Expression> constraints) throws NormaliserException {
-		for(int i=0; i<constraints.size(); i++) {
-			constraints.get(i).orderExpression();
-		}
-		return constraints;	
-	}
-
-	
-	public ArrayList<Expression> reduceExpressions(
-			ArrayList<Expression> constraints) throws NormaliserException {
-		for(int i=0; i<constraints.size(); i++) {
-			constraints.add(i, constraints.remove(i).reduceExpressionTree());
-		}
-		return constraints;	
-	}
 
 	
 	public String printModel(ArrayList<Expression> constraints) {
@@ -162,6 +199,41 @@ public class Normaliser implements NormaliserSpecification {
 	public void clearParameters() {
 		this.parameterInserter.clearParameters();
 	}
+	
+	
+	                                                             
+	   
+	public String getDebugMessage() {
+		String debug = new String(this.debugMessage);
+		this.debugMessage = "";
+		return debug;
+	}
+	
+	protected void print_debug(String s) {
+		this.debugMessage = debugMessage.concat(s);
+	}
+	
+	
+	// ===================== OTHER METHODS ===========================================
+	
+	
+	private ArrayList<Expression> orderConstraints(
+			ArrayList<Expression> constraints) throws NormaliserException {
+		for(int i=0; i<constraints.size(); i++) {
+			constraints.get(i).orderExpression();
+		}
+		return constraints;	
+	}
+
+	
+	private ArrayList<Expression> reduceExpressions(
+			ArrayList<Expression> constraints) throws NormaliserException {
+		for(int i=0; i<constraints.size(); i++) {
+			constraints.add(i, constraints.remove(i).reduceExpressionTree());
+		}
+		return constraints;	
+	}
+
 	
 	/**
 	 * Inserts parameters into the constraints (given by the EssenceSpec) and 
@@ -198,16 +270,16 @@ public class Normaliser implements NormaliserSpecification {
 		return constraintList;
 		
 	}
-	                                                             
-	   
-	public String getDebugMessage() {
-		String debug = new String(this.debugMessage);
-		this.debugMessage = "";
-		return debug;
-	}
 	
-	protected void print_debug(String s) {
-		this.debugMessage = debugMessage.concat(s);
-	}
 	
+	private ArrayList<Expression> evaluateConstraints(ArrayList<Expression> constraints) throws NormaliserException {
+		
+		reduceExpressions(constraints);
+		
+		for(int i=0; i<constraints.size(); i++) {
+			constraints.add(i, constraints.remove(i).evaluate());
+		}
+		
+		return reduceExpressions(constraints);	
+	}
 }

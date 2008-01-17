@@ -3,7 +3,7 @@ package translator.expression;
 public class Negation implements UnaryRelationalExpression {
 
 	private Expression argument;
-	
+	private boolean isNested;
 	
 	//============== Constructors ==================
 	public Negation(Expression argument) {
@@ -68,4 +68,13 @@ public class Negation implements UnaryRelationalExpression {
 		this.argument = this.argument.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public boolean isNested() {
+		return isNested;
+	}
+	
+	public void setIsNotNested() {
+		this.isNested = false;
+	}
+	
 }

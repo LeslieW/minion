@@ -185,9 +185,28 @@ public interface Expression {
 	 */
 	public Expression reduceExpressionTree();
 	
-	
+	/**
+	 * Insert the int value for the variable/parameter/identifier with the 
+	 * name variableName.
+	 * 
+	 * @param value
+	 * @param variableName
+	 * @return the expression with all occurrences of variableName replaced with
+	 * int value
+	 */
 	public Expression insertValueForVariable(int value, String variableName);
 	
 		
 	
+	/**
+	 * Gives information if the expression is a subexpression. By default, all
+	 * expressions are nested when created.
+	 * @return true if the expression is nested by another expression
+	 */
+	public boolean isNested();
+	
+	/**
+	 * Sets the expression to be not nested. By default, every expression is nested.
+	 */
+	public void setIsNotNested();
 }
