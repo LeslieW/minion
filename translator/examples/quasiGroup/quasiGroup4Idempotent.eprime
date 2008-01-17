@@ -5,36 +5,31 @@ $ where each element occurrs exactly once in each row and column and certain
 $ multiplication axioms hold (in this case, we want axiom 4 to hold). 
 $
 
-ESSENCE' 1.0
-given n : int(1..1000)
+language ESSENCE' 1.b.a
+given n : int
 letting nDomain be domain int(0..n-1)
 
 find quasiGroup : matrix indexed by [nDomain, nDomain] of nDomain
-find quasiGroupColumns : matrix indexed by [nDomain, nDomain] of nDomain
 find qgDiagonal : matrix indexed by [nDomain] of nDomain
 
 such that 
-     
-     $ assign the "reflected" quasigroup to qGColumns to access its columns
-     forall row,col : nDomain .
-         quasiGroupColumns[col,row] = quasiGroup[row,col],
-
+    
      $ accessor for diagonal
      forall i : nDomain .
          qgDiagonal[i] = quasiGroup[i,i],
 
      $ All rows have to be different
      forall row : nDomain . 
-          allDifferent(quasiGroup[row]),
+          allDifferent(quasiGroup[row,..]),
 
      $ All columns have to be different	       
      forall col : nDomain . 
-          allDifferent(quasiGroupColumns[col]),
+          allDifferent(quasiGroup[..,col]),
 
      $ (j*i)*(i*j) = i
      forall i : nDomain .
           forall j : nDomain .	
-	        quasiGroup[quasiGroup[j,i],quasiGroup[i,j]] = i,
+	 quasiGroup[quasiGroup[j,i],quasiGroup[i,j]] = i,
 
      $ Idempotency
      forall i : nDomain . 
@@ -42,16 +37,18 @@ such that
 
      $ Implied (from Colton,Miguel 01)
      $ All-diff diagonal
-     allDifferent(qgDiagonal),
+         allDifferent(qgDiagonal),
+
      $ anti-Abelian
      forall i : nDomain .
        forall j : nDomain .
-         (i != j) ->
-         (quasigroup[i,j] != quasigroup[j,i]),
+         (i != j) =>
+         (quasiGroup[i,j] != quasiGroup[j,i]),
+
      $ if (i*i)=j then (j*j) = i
      forall i : nDomain .
        forall j : nDomain .
-         (quasigroup[i,i]=j) -> (quasigroup[j,j]=i),
+         (quasiGroup[i,i]=j) => (quasiGroup[j,j]=i),
 
      $ Symmetry-breaking constraints	
      forall i : nDomain .

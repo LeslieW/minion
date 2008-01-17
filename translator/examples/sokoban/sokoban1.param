@@ -10,32 +10,24 @@ $  ###
 $ by Geetha Ramachandran
 $ geetha.ramachandran@gmail.com
 
-ESSENCE' 1.0
+language ESSENCE' 1.b.a
 
-letting n be 9
-letting w be 3
-letting noWalls be 6
-letting noInvalidMoves be 3
-letting noCrates be 1
-letting noGoals be 1
+parameter n be 9
+parameter w be 3
+parameter noWalls be 6
+parameter noInvalidMoves be 3
+parameter  noCrates be 1
+parameter noGoals be 1
 
-letting pInit be 3
+parameter pInit be 3
 
-letting stps be 2
+parameter stps be 2
 
-where
+parameter walls is [0,1,2,6,7,8]
 
-walls[0] = 0,
-walls[1] = 1,
-walls[2] = 2,
-walls[3] = 6,
-walls[4] = 7,
-walls[5] = 8,
+parameter invalidMoves is [2,0,-2]
 
-invalidMoves[0] = 2,
-invalidMoves[1] = 0,
-invalidMoves[2] = -2,
+parameter crates is [4]
 
-crates[0] = 4,
+parameter goals is [5]
 
-goals[0] = 5

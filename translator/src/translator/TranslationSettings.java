@@ -36,17 +36,33 @@ public class TranslationSettings {
 	
 	public String readPathToMinion() {
 		
-		File file = new File(this.settingsFileName);
-		
 		 try {
-		    	BufferedReader reader = new BufferedReader(new FileReader(file));
-		    	String loadedString = reader.readLine();
-		    	if(loadedString == null || loadedString.equals(""))
-		    		this.pathToMinion = System.getProperty("user.home")+"/minion/bin/minion";;
-		    	this.pathToMinion = loadedString;
+			 File file = new File(this.settingsFileName);	 
+			 String loadedString = "";
+			 BufferedReader reader = null;
+			 if(file.createNewFile()) {
+				 String minionDirectory = System.getProperty("user.dir");
+				 // currentDirectory - translator =>  minion directory
+				 minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
+				 this.pathToMinion = minionDirectory+"bin/minion";;
+			 }
+			 else {
+				 reader = new BufferedReader(new FileReader(file));
+				 loadedString = reader.readLine();
+				 if(loadedString == null || loadedString.equals("")) {
+					 String minionDirectory = System.getProperty("user.dir");
+					 // currentDirectory - translator =>  minion directory
+					 minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
+					 this.pathToMinion = minionDirectory+"bin/minion";
+				 }
+				 else this.pathToMinion = loadedString;
+			 }
 		    	
-		    	reader.close();
-		    	return loadedString;
+		    	
+		    
+		    	if(reader != null)
+		    		reader.close();
+		    	return this.pathToMinion;
 		    	
 		    } catch(Exception e) {
 		    	e.printStackTrace(System.out);

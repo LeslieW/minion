@@ -5,7 +5,7 @@ $ game was invented by Hiroyuki Imabayashi, and was published by
 $ Thinking Rabbit, a computer games company in the town of Takarazuka,
 $ Japan. The game is composed of a two dimensional layout of a
 $ warehouse laid out on a rectangular grid. An empty cell indicates a 
-$ part of the warehouse¡Çs floor where the porter can move freely. The 
+$ part of the warehouse floor where the porter can move freely. The 
 $ walls constitute the boundaries of the warehouse. Some of the floor 
 $ cells contain crates. Each crate is a 1x1 square occupying a single 
 $ cell. These crates are to be moved into designated target positions
@@ -43,10 +43,10 @@ given invalidMoves : matrix indexed by [INVALIDMOVEINDICES] of MOVES
 given goals : matrix indexed by [GOALINDICES] of int(0..n-1)
 given crates : matrix indexed by [CRATEINDICES] of int(0..n-1)
 
-letting WALLINDICES be domain int(0..noWalls-1)
-letting INVALIDMOVEINDICES be domain int(0..noInvalidMoves-1)
-letting GOALINDICES be domain int(0..noGoals-1)
-letting CRATEINDICES be domain int(0..noCrates-1)
+letting WALLINDICES be domain int(1..noWalls)
+letting INVALIDMOVEINDICES be domain int(1..noInvalidMoves)
+letting GOALINDICES be domain int(1..noGoals)
+letting CRATEINDICES be domain int(1..noCrates)
 
 letting MOVES be domain int(-w..w)
 
@@ -84,12 +84,12 @@ forall i : int(0..stps-2) .
 
 $$ initialization of the crates' positions
 
-forall ck : int(0..noCrates-1) .
+forall ck : CRATEINDICES .
 
 crateGoalPosns[0,ck] = crates[ck],
 
 forall s : STEPS .
-	alldifferent(crateGoalPosns[s]),
+	alldifferent(crateGoalPosns[s,..]),
 	
 $$ pushing the crates
 

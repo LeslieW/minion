@@ -9,7 +9,7 @@ $ (This model is a slightly simplified version of the problem,
 $ since it does not specify the amount of each shiptype.)
 
 
-ESSENCE' 1.0
+language ESSENCE' 1.b.a
 
 letting   GRID_RANGE     be domain int(1..10)
 letting   SQUARE_STATUS  be domain int(0..7)
@@ -235,27 +235,8 @@ such that
              ((row+1 <11) => 
            (grid[row+1,col] =   0))
             
-           )$,
+           )
 
 
 
-  $ TODO: - amount of cruisers, submarines, etc
-  $       - no ship may be going around the corner (no edges)
-         
-
-  $ amount of types of battleships
-
-  $ amount of destroyers
- $ sum row, col : int(2..9) .
-  $   ((grid[row,col] = 1) /\ 
-  $       (((grid[row+1,col] = 1) /\
-  $         (grid[row+2,col] = 0)
-  $       )
-  $         \/
-  $        (grid[row-1,col] = 1) \/
-  $        (grid[row,col+1] = 1) \/
-   $        (grid[row,col-1] = 1)
-  $       )
-     
-  $   )
-
+  
