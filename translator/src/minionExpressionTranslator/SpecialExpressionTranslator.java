@@ -268,6 +268,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 		
 			
 		case EssenceGlobals.IF:
+			print_debug("Translating an IF relation.");
+			
 			if(willBeReified) throw new TranslationUnsupportedException("Cannot translate expression '"+e.toString()+
 						"', because Minion does not support reification of inequalities yet.");
 			
@@ -275,14 +277,16 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			if(left.getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR && 
 					left.getRestrictionMode() != EssenceGlobals.NONATOMIC_EXPR) {
 				MinionConstraint constraintLeftIf = translateSpecialExpression(left,true);
+				
 				if(constraintLeftIf==null)
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				
+				print_debug("Left part of the IF thing is translated to constraint :"+constraintLeftIf);
+	
 				auxVar1If = reifyConstraint((MinionReifiableConstraint) constraintLeftIf);
 				//minionModel.addReificationConstraint((MinionReifiableConstraint) constraintLeftIf,auxVar1If);
 				//if(reifiedConstraint)
-				
+				print_debug("reified left part of IF operation");
 			} else auxVar1If = translateAtomExpression(left); 
 			
 			
@@ -295,6 +299,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			
 				auxVar2If = reifyConstraint((MinionReifiableConstraint) constraintRightIf); //variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
 				//minionModel.addReificationConstraint((MinionReifiableConstraint) constraintRightIf,auxVar2If);
+				print_debug("reified right part of IF operation");
 			}
 			else auxVar2If = translateAtomExpression(right);
 			
@@ -341,24 +346,27 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
      * Handles reification
      * If we have to reify a sum, then we need 2 variables to reify it because we only have sumgeq and sumleq in Minion.
      * 
-     * @param reifiedConstraint
+     * @param constraint
      * @return
      * @throws MinionException
      */
 	
-  protected MinionBoolVariable reifyConstraint(MinionReifiableConstraint reifiedConstraint) throws 
+  protected MinionBoolVariable reifyConstraint(MinionReifiableConstraint constraint) throws 
   	MinionException {
 	  
-	  if(reifiedConstraint.getClass().toString().endsWith("minionModel.MinionSumConstraint") ||
-			  reifiedConstraint.getClass().toString().endsWith("minionModel.MinionWeightedSumConstraint")) {
+	  //print_debug("RRRRRRRRRRreifying constraint:"+constraint);
+	  
+	  if(constraint.getClass().toString().endsWith("minionModel.MinionSumConstraint") ||
+			  constraint.getClass().toString().endsWith("minionModel.MinionWeightedSumConstraint")) {
 			MinionBoolVariable reifiedVariable1 = (MinionBoolVariable) variableCreator.addFreshVariable
 			                         (0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
 			MinionBoolVariable reifiedVariable2 = (MinionBoolVariable) variableCreator.addFreshVariable
 			                         (0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
 		    // reify(sumleq, r1)
 		    // reify(sumgeq, r2)
+			
 			MinionReifyConstraint reifiedSumConstraint = new MinionReifyConstraint(
-					                     (MinionReifiableConstraint) reifiedConstraint, (MinionIdentifier) reifiedVariable1, reifiedVariable2);
+					                     (MinionReifiableConstraint) constraint, (MinionIdentifier) reifiedVariable1, reifiedVariable2);
 		    this.minionModel.addConstraint(reifiedSumConstraint);
 		    		    
 		    MinionBoolVariable reifiedVariable = (MinionBoolVariable) variableCreator.addFreshVariable(
@@ -372,7 +380,11 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			return reifiedVariable ;
 	  }
 	  else {
-		MinionBoolVariable reifiedVariable = reifyConstraint((MinionReifiableConstraint) reifiedConstraint);
+		MinionBoolVariable reifiedVariable = (MinionBoolVariable) variableCreator.addFreshVariable
+                 (0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+		MinionReifyConstraint reifiedConstraint = new MinionReifyConstraint(
+                (MinionReifiableConstraint) constraint, (MinionIdentifier) reifiedVariable);
+		this.minionModel.addConstraint(reifiedConstraint);
 		return reifiedVariable;
 	  }
   }
@@ -831,6 +843,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	MinionInEqConstraint if_constraint = new MinionInEqConstraint(ids[0],ids[1],new MinionConstant(0));
 			    	
+			    	print_debug("translating a IF constraint that will be reified now:"+if_constraint);
 			    	MinionBoolVariable v = reifyConstraint((MinionReifiableConstraint) if_constraint);
 				
 			    	return new MinionEqConstraint(id3,v);
