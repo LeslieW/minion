@@ -46,4 +46,8 @@ public class BoolDomain implements ConstantDomain {
 		return new BoundedExpressionRange(new ArithmeticAtomExpression(0),
 				                          new ArithmeticAtomExpression(1));
 	}
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
 }

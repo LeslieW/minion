@@ -75,4 +75,9 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 		this.argument = this.argument.reduceExpressionTree();
 		return this;
 	}
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+		this.argument = this.argument.insertValueForVariable(value, variableName);
+		return this;
+	}
 }

@@ -181,4 +181,9 @@ public interface Expression {
 	 */
 	public Expression reduceExpressionTree();
 	
+	
+	public Expression insertValueForVariable(int value, String variableName);
+	
+		
+	
 }

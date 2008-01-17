@@ -55,4 +55,8 @@ public class BoundedIntRange implements IntRange {
 		return new BoundedExpressionRange(new ArithmeticAtomExpression(lowerBound),
 				                          new ArithmeticAtomExpression(upperBound));
 	}
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
 }

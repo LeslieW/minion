@@ -65,4 +65,20 @@ public class BoundedExpressionRange implements ExpressionRange {
 	public boolean isConstantDomain() {
 		return false;
 	}
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+	
+		this.lowerBound = this.lowerBound.insertValueForVariable(value, variableName);
+		this.upperBound = this.upperBound.insertValueForVariable(value, variableName);
+		
+		if(this.lowerBound.getType() == Expression.INT && 
+				this.upperBound.getType() == Expression.INT) {
+			return new BoundedIntRange(( (ArithmeticAtomExpression) this.lowerBound).getConstant(),
+				  	                   ( (ArithmeticAtomExpression) this.upperBound).getConstant() 
+					                   );
+		}
+		
+		return this;
+	}
+	
 }

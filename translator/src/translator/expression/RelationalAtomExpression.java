@@ -13,7 +13,7 @@ public class RelationalAtomExpression implements
 		  RelationalExpression {
 
 	boolean bool;
-	SingleVariable variable;
+	Variable variable;
 	boolean isParameter;
 	
    //============== Constructors ==================
@@ -24,13 +24,13 @@ public class RelationalAtomExpression implements
 		this.isParameter = false;
 	}
 	
-	public RelationalAtomExpression(SingleVariable variableName) {
-		this.variable = variableName;
+	public RelationalAtomExpression(Variable variable) {
+		this.variable = variable;
 		this.isParameter = false;
 	}
 	
-	public RelationalAtomExpression(SingleVariable variableName, boolean isParameter) {
-		this.variable = variableName;
+	public RelationalAtomExpression(Variable variable, boolean isParameter) {
+		this.variable = variable;
 		this.isParameter = isParameter;
 	}
 	
@@ -51,7 +51,7 @@ public class RelationalAtomExpression implements
 	public Expression copy() {
 		return (variable == null) ? 
 				new RelationalAtomExpression(bool) :
-					new RelationalAtomExpression((SingleVariable) this.variable.copy());
+					new RelationalAtomExpression((Variable) this.variable.copy());
 	}
 
 	public int[] getDomain() {
@@ -89,16 +89,23 @@ public class RelationalAtomExpression implements
 			else return (!this.bool &  otherAtom.bool) ?
 					SMALLER : BIGGER;
 		}
-		else return this.variable.isSmallerThanSameType(otherAtom.variable);
+		else if(this.variable.getType() == otherAtom.variable.getType()){
+			return this.variable.isSmallerThanSameType(otherAtom.variable);
+		}
+		else {	
+			return (this.variable.getType() < otherAtom.variable.getType()) ?
+					SMALLER : BIGGER;
+		}
 	}
 
 	
-	public Expression evaluate() {
+	public RelationalAtomExpression evaluate() {
+		this.variable = (Variable) this.variable.evaluate();
 		return this;
 	}
 	
 
-	public Expression reduceExpressionTree() {
+	public RelationalAtomExpression reduceExpressionTree() {
 		return this;
 	}
 	
@@ -108,7 +115,7 @@ public class RelationalAtomExpression implements
 		return this.bool;
 	}
 	
-	public SingleVariable getVariable() {
+	public Variable getVariable() {
 		return this.variable;
 	}
 	
@@ -116,5 +123,11 @@ public class RelationalAtomExpression implements
 		return this.isParameter;
 	}
 
-	
+	public Expression insertValueForVariable(int value, String variableName) {
+		
+		if(this.variable != null) {
+			this.variable = (Variable) this.variable.insertValueForVariable(value, variableName);
+		}
+		return this;
+	}
 }

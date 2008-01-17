@@ -229,7 +229,7 @@ public class TranslatorGUI extends JPanel  {
 		
 		// ================== translator button panel =======================
 		
-		Dimension buttonDimension = new Dimension(170,30);
+		Dimension buttonDimension = new Dimension(180,30);
 		
 		JButton parseButton = new JButton("Parse >>");
 		parseButton.setPreferredSize(buttonDimension);
@@ -249,7 +249,7 @@ public class TranslatorGUI extends JPanel  {
 			  }
 			});
 		
-		JButton orderButton = new JButton("Order >>");
+		JButton orderButton = new JButton("Normalise: Order >>");
 		orderButton.setPreferredSize(buttonDimension);
 		orderButton.setActionCommand(ORDER);
 		orderButton.addActionListener(new java.awt.event.ActionListener() {
@@ -258,7 +258,7 @@ public class TranslatorGUI extends JPanel  {
 			  }
 			});
 		
-		JButton evaluateButton = new JButton("Evaluate >>");
+		JButton evaluateButton = new JButton("Normalise: Evaluate >>");
 		evaluateButton.setPreferredSize(buttonDimension);
 		evaluateButton.setActionCommand(EVALUATE);
 		evaluateButton.addActionListener(new java.awt.event.ActionListener() {
@@ -268,7 +268,7 @@ public class TranslatorGUI extends JPanel  {
 			});
 		
 		
-		JButton normaliseButton = new JButton("Normalise >>");
+		JButton normaliseButton = new JButton("Full Normalisation >>");
 		normaliseButton.setPreferredSize(buttonDimension);
 		normaliseButton.setActionCommand(NORMALISE);
 		normaliseButton.addActionListener(new java.awt.event.ActionListener() {
@@ -365,9 +365,9 @@ public class TranslatorGUI extends JPanel  {
 		    // TODO: write this into a text-area instead of printing it on out
 		    if(returnVal == JFileChooser.APPROVE_OPTION) {
 		    	if(command.endsWith(LOAD_PROBLEM))
-		    		writeOnMessageOutput("Loading problem file: " +fileName);
+		    		writeOnMessageOutput("Loading problem file: " +fileName+"\n");
 		    	else if(command.endsWith(LOAD_PARAMETER))
-		    		writeOnMessageOutput("Loading parameter file: " +fileName);
+		    		writeOnMessageOutput("Loading parameter file: " +fileName+"\n");
 		    }
 		    else {
 	            output.append("Choosing file cancelled by user.\n");
@@ -409,9 +409,9 @@ public class TranslatorGUI extends JPanel  {
 					FileWriter writer = new FileWriter(file);
                 
 					if(!file.canRead())
-						writeOnMessageOutput("Cannot read file: "+file.toString());
+						writeOnMessageOutput("Cannot read file: "+file.toString()+"\n");
 					else if(!file.canWrite())
-						writeOnMessageOutput("Cannot write file: "+file.toString());
+						writeOnMessageOutput("Cannot write file: "+file.toString()+"\n");
 					
 					
 					if(command == SAVE_PROBLEM) { 
@@ -446,7 +446,11 @@ public class TranslatorGUI extends JPanel  {
 		
 	}
 	
-	
+	/**
+	 * Translate the speicification given in the spec input area and the 
+	 * parameters given in the parameter input area
+	 * @param command
+	 */
 	protected void translate(String command) {
 		
 		if(command == PARSE) {
@@ -525,14 +529,22 @@ public class TranslatorGUI extends JPanel  {
 		if(this.translator.normaliseBasic()) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Basic Normalisation successful.\n");
+			printDebugMessages();
 		}
 		else {
 			writeOnMessageOutput("Basic Normalisation failed.\n");
 			writeOnMessageOutput(this.translator.getErrorMessage());
+			printDebugMessages();
+
 		}
 		
 	}
 	
+	
+	
+	protected void printDebugMessages() {
+		writeOnMessageOutput(this.translator.normaliser.getDebugMessage());
+	}
 	
 	/**
 	 * Parse the input given in the Essence' problem and 

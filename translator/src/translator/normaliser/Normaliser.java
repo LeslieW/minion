@@ -16,6 +16,7 @@ public class Normaliser implements NormaliserSpecification {
 	//ExpressionMapper expressionMapper;
 	
 	String errorMessage;
+	String debugMessage;
 	
 	//=========================== CONSTRUCTOR =====================================================================
 	
@@ -23,6 +24,8 @@ public class Normaliser implements NormaliserSpecification {
 		
 		this.problemSpecification = problemSpecification;
 		this.parameterInserter = new ParameterInsertion();
+		this.debugMessage = new String("");
+		this.errorMessage = new String("");
 	}
 	
 	public Normaliser(EssenceSpecification problemSpecification,
@@ -31,6 +34,8 @@ public class Normaliser implements NormaliserSpecification {
 		this.problemSpecification = problemSpecification;
 		this.parameterSpecification = parameterSpecification;
 		this.parameterInserter = new ParameterInsertion();
+		this.debugMessage = new String("");
+		this.errorMessage = new String("");
 
 	}
 	
@@ -177,6 +182,7 @@ public class Normaliser implements NormaliserSpecification {
 				this.parameterSpecification.getDeclarations() == null ||
 				   this.parameterSpecification.getDeclarations().length == 0) {
 		
+			print_debug("Empty parameter spec.");
 			oldConstraints = new ArrayList<translator.conjureEssenceSpecification.Expression>();
 			for(int i=0; i<this.problemSpecification.getExpressions().length; i++)
 				oldConstraints.add(this.problemSpecification.getExpressions()[i]);
@@ -191,7 +197,15 @@ public class Normaliser implements NormaliserSpecification {
 		
 	}
 	                                                             
-	                                                          
+	   
+	public String getDebugMessage() {
+		String debug = new String(this.debugMessage);
+		this.debugMessage = "";
+		return debug;
+	}
 	
+	protected void print_debug(String s) {
+		this.debugMessage = debugMessage.concat(s);
+	}
 	
 }

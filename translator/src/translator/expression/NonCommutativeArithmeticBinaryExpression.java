@@ -162,4 +162,10 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		
 		return result;
 	}
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+		this.leftArgument = this.leftArgument.insertValueForVariable(value, variableName);
+		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
+		return this;
+	}
 }

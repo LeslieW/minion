@@ -187,6 +187,31 @@ public class ArrayVariable implements Variable {
 			for(int i=1; i<exprIndices.length; i++)
 				s = s.concat(","+exprIndices[i].toString());			
 		}
-		return "]"+s;
+		return s+"]";
 	}
+	
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+	
+		if(this.exprIndices != null) {
+			boolean allIndicesAreInteger = true;
+			for(int i=0; i< this.exprIndices.length; i++) {
+				this.exprIndices[i] = this.exprIndices[i].insertValueForVariable(value, variableName);
+				if(exprIndices[i].getType() != INT)
+					allIndicesAreInteger = false;
+			}
+		
+			if(allIndicesAreInteger) {
+				int[] newIntIndices = new int[this.exprIndices.length];
+				for(int i=0; i<this.exprIndices.length;i++)
+					newIntIndices[i] = ((ArithmeticAtomExpression) exprIndices[i]).getConstant();
+				return new ArrayVariable(this.arrayName,
+						newIntIndices,
+						this.domain);
+			}
+		}
+		return this;
+	}
+	
+	
 }

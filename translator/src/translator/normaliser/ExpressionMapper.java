@@ -73,7 +73,7 @@ public class ExpressionMapper {
 			return mapBinaryExpression(oldExpression.getBinaryExpression());
 			
 		case EssenceGlobals.QUANTIFIER_EXPR:
-			//return mapQuantification(oldExpression.getQuantification());
+			return mapQuantification(oldExpression.getQuantification());
 			
 		default: 
 			throw new NormaliserException("Cannot map expression yet or unknown expression type:\n"+oldExpression);
@@ -81,13 +81,45 @@ public class ExpressionMapper {
 		}
 	}
 	
+	/**
+	 * Maps a quantification of the old syntax tree representation to the new representation. Universal and 
+	 * existential quantification are translated to the QuantifiedExpression data structure, sums are 
+	 * directly translated to an n-ary sum.
+	 * 
+	 * @param oldQExpression
+	 * @return
+	 * @throws NormaliserException
+	 */
+	protected translator.expression.Expression mapQuantification(QuantificationExpression oldQExpression) 
+		throws NormaliserException {
+		
+		// if it is a sum, we can express it as a n-ary sum
+		if(oldQExpression.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM)
+			throw new NormaliserException("Cannot map sum quantifications yet :"+oldQExpression.toString());
+		
+		translator.expression.Domain quantifiedDomain = mapDomain(oldQExpression.getBindingExpression().getDomainIdentifiers().getDomain());
+		String[] quantifiedVariables = oldQExpression.getBindingExpression().getDomainIdentifiers().getIdentifiers();
+		translator.expression.Expression quantifiedExpression = mapExpression(oldQExpression.getExpression());
+		
+		return (oldQExpression.getQuantifier().getRestrictionMode() == EssenceGlobals.FORALL) ? 
+				new QuantifiedExpression(true, // is universal quantification == true
+						                 quantifiedVariables,
+						                 quantifiedDomain,
+						                 quantifiedExpression)
+		:
+			new QuantifiedExpression(false,// is universal quantification == false
+	                 quantifiedVariables,
+	                 quantifiedDomain,
+	                 quantifiedExpression)
+		;
+	}
 	
 	/**
-	 * 
+	 * Maps array elements to the advanced expression representation.
 	 * 
 	 * 
 	 * @param oldArrayElement
-	 * @return
+	 * @return either an relational or arithmetic atom expression, depending on the type of the domain.
 	 * @throws NormaliserException
 	 */
 	protected translator.expression.Expression mapNonAtomicExpression(NonAtomicExpression oldArrayElement) 
@@ -136,9 +168,14 @@ public class ExpressionMapper {
 			for(int i=0; i<indices.length; i++) {
 				intIndices[i] = indices[i].getAtomicExpression().getNumber();
 			}
-			return new ArrayVariable(arrayName,
-					                 intIndices,
-					                 mappedDomain);
+			return (mappedDomain.getType() == translator.expression.Domain.BOOL) ?
+					  new RelationalAtomExpression(new ArrayVariable(arrayName,
+                                                                     intIndices,
+                                                                     mappedDomain))
+				:
+				  new ArithmeticAtomExpression(new ArrayVariable(arrayName,
+					                                intIndices,
+					                                mappedDomain));
 			
 		}
 		// end if: allIndices are integer
@@ -146,99 +183,20 @@ public class ExpressionMapper {
 			translator.expression.Expression[] expressionIndices = new translator.expression.Expression[indices.length];
 			for(int i=0; i<indices.length; i++) {
 				expressionIndices[i] = mapExpression(indices[i]);
-			}
-			return new ArrayVariable(arrayName,
-	                 expressionIndices,
-	                 mappedDomain);
+			} 
+			return (mappedDomain.getType() == translator.expression.Domain.BOOL) ?
+					  new RelationalAtomExpression(new ArrayVariable(arrayName,
+                                                                   expressionIndices,
+                                                                   mappedDomain))
+				:			
+			new ArithmeticAtomExpression(new ArrayVariable(arrayName,
+					                                              expressionIndices,
+					                                              mappedDomain));
 		}
 	}
 	
 	
-/*	protected translator.expression.Expression mapQuantification(QuantificationExpression oldQuantification) 
-	throws NormaliserException {
-		
-		// get the quantified expression
-		translator.expression.Expression newQuantifiedExpression = mapExpression(oldQuantification.getExpression());
-		
-		// get the quantified variables and the domain they are quantified over
-		DomainIdentifiers quantifiers = oldQuantification.getBindingExpression().getDomainIdentifiers();
-		String[] quantifiedVariables = quantifiers.getIdentifiers();
-		
-		Domain quantifiedDomain = quantifiers.getDomain();
-		
-		// test here if the quantifier is a sum or not!
-		
-		
-		if(quantifiedDomain.getRestrictionMode() == EssenceGlobals.INTEGER_RANGE) {
-			
-			RangeAtom[] intDomainRange = quantifiedDomain.getIntegerDomain().getRangeList();
-			
-			
-			// just one range (1..n) or (1)
-			if(intDomainRange.length == 1) {
-				RangeAtom range = intDomainRange[0];
-				translator.expression.Expression lowerBound = mapExpression(range.getLowerBound()).evaluate();
-				translator.expression.Expression upperBound = mapExpression(range.getLowerBound()).evaluate();
-				
-				// if the bounds of the domain are integers
-				if(lowerBound.getType() == translator.expression.Expression.INT && 
-						upperBound.getType() == translator.expression.Expression.INT) {
-					
-					int lb = ((ArithmeticAtomExpression) lowerBound).getConstant();
-					int ub = ((ArithmeticAtomExpression) upperBound).getConstant();
-					
-					if(lb > ub) 
-						throw new NormaliserException("Illegal bounds for quantification: lowerbound '"+lb+"' is greater than upperBound '"
-								+ub+"' for quantified variables in :"+oldQuantification);
-					
-					
-					int[] quantifiedRange = new int[(ub-lb)+1];
-					for(int i=0; i<quantifiedRange.length; i++) {
-						quantifiedRange[i] = i+lb;
-					}
-					
-					return (oldQuantification.getQuantifier().getRestrictionMode() == EssenceGlobals.FORALL) ?
-							new QuantifiedExpression(true,
-							                          quantifiedVariables,
-							                          quantifiedRange,
-							                          newQuantifiedExpression) 
-					: 
-						new QuantifiedExpression(false,
-		                          quantifiedVariables,
-		                          quantifiedRange,
-		                          newQuantifiedExpression); 
-				}
-				
-				// the quantified domain bounds are composed of expressions
-				else {
-					
-					return (oldQuantification.getQuantifier().getRestrictionMode() == EssenceGlobals.FORALL) ?
-							new QuantifiedExpression(true,
-							                          quantifiedVariables,
-							                          new translator.expression.Expression[] {lowerBound, upperBound},
-							                          newQuantifiedExpression) 
-					: 
-						new QuantifiedExpression(false,
-		                          quantifiedVariables,
-		                          new translator.expression.Expression[] {lowerBound, upperBound},
-		                          newQuantifiedExpression); 
-				}
-				
-			}
-			// we have several ranges, like (1..4, 7..19 , 34)
-			else {
-				ArrayList<translator.expression.Expression> domainElements = new ArrayList<translator.expression.Expression>();
-				
-				for(int i=0; i<intDomainRange.length; i++) {
-				
-					
-					
-				}
-			}
-		}
-		
-		return null;
-	}*/
+
 	
 	/**
 	 * Map a binary expression to the advanced expression representation. The expressions are mapped
@@ -536,11 +494,11 @@ public class ExpressionMapper {
 			
 			if(!(lb instanceof translator.expression.ArithmeticExpression))
 				throw new NormaliserException("Unfeasible lower bound '"
-						+lb+". Expected a relational expression.");
+						+lb+". Expected an arithmetic expression.");
 			
 			if(!(ub instanceof translator.expression.ArithmeticExpression))
 				throw new NormaliserException("Unfeasible upper bound '"+ub+
-						". Expected a relational expression.");
+						". Expected an arithmetic expression.");
 			
 			ArithmeticExpression lowerBound = (ArithmeticExpression) lb;
 			ArithmeticExpression upperBound = (ArithmeticExpression) ub;

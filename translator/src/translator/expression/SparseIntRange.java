@@ -69,4 +69,9 @@ public class SparseIntRange implements IntRange {
 		
 		return new SparseExpressionRange(sparseExprElements);
 	}
+	
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
 }

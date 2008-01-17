@@ -149,4 +149,11 @@ public class Disjunction extends NaryRelationalExpression {
 			System.out.println("[ DEBUG disjunction ] "+message);
 		
 	}
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+		for(int i=0; i<this.disjointExpressions.size(); i++) {
+			this.disjointExpressions.add(i, this.disjointExpressions.remove(i).insertValueForVariable(value, variableName));
+		}
+		return this;
+	}
 }

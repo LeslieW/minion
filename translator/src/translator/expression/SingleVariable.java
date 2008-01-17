@@ -92,6 +92,13 @@ public class SingleVariable implements Variable {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(int value, String variableName) {
+		
+		if(this.variableName.equals(variableName)) {
+			return new ArithmeticAtomExpression(value);
+		}
+		else return this;
+	}
 
 	
 }

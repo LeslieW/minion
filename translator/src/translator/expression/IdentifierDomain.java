@@ -34,4 +34,8 @@ public class IdentifierDomain implements Domain {
 		return this.domainName;
 	}
 
+	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
+	
 }

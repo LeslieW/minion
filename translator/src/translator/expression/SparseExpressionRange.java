@@ -70,4 +70,26 @@ public class SparseExpressionRange implements ExpressionRange {
 	public boolean isConstantDomain() {
 		return false;
 	}
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+		
+		boolean allSparseElementsAreInteger = true;
+		
+		for(int i=0; i<this.sparseElements.length; i++) {
+			this.sparseElements[i] = this.sparseElements[i].insertValueForVariable(value, variableName);
+			if(this.sparseElements[i].getType() != Expression.INT) {
+				allSparseElementsAreInteger = false;
+			}
+		}
+		
+		if(allSparseElementsAreInteger) {
+			int[] sparseIntElements = new int[this.sparseElements.length];
+			for(int i=0; i<sparseIntElements.length; i++)
+				sparseIntElements[i] = ((ArithmeticAtomExpression) this.sparseElements[i]).getConstant();
+			
+			return new SparseIntRange(sparseIntElements);
+		}
+		
+		return this;
+	}
 }

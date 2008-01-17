@@ -75,4 +75,25 @@ public class MultipleExpressionRange implements ExpressionDomain {
 	public boolean isConstantDomain() {
 		return false;
 	}
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+		boolean allExpressionsAreInteger = true;
+		
+		for(int i=0; i < this.rangeList.size(); i++) {
+			ExpressionRange range = (ExpressionRange) rangeList.remove(i).insertValueForVariable(value, variableName);
+			this.rangeList.add(i, range);
+			
+			if(!range.isConstantDomain())
+				allExpressionsAreInteger = false;
+		}
+		
+		if(allExpressionsAreInteger) {
+			ArrayList<IntRange> intRangeList = new ArrayList<IntRange>();
+			for(int i=this.rangeList.size()-1; i>=0; i++) 
+				intRangeList.add(0, (IntRange) this.rangeList.remove(i));
+			return new MultipleIntRange(intRangeList);
+		}
+		
+		return this;
+	}
 }

@@ -100,4 +100,8 @@ public class MultipleIntRange implements ConstantDomain {
 	public boolean isConstantDomain() {
 		return true;
 	}
+	
+	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
 }

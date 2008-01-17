@@ -154,5 +154,13 @@ public class Conjunction extends NaryRelationalExpression {
 			System.out.println("[ DEBUG conjunction ] "+message);
 		
 	}
+	
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+		for(int i=0; i<this.conjointExpressions.size(); i++) {
+			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).insertValueForVariable(value, variableName));
+		}
+		return this;
+	}
 }
 

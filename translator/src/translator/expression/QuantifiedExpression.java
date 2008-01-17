@@ -147,5 +147,13 @@ public class QuantifiedExpression implements RelationalExpression {
 		return orderedList;
 		
 	}
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+		
+		this.domain.insertValueForVariable(value, variableName);
+		this.quantifiedExpression.insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 }

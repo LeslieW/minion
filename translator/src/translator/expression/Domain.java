@@ -36,4 +36,14 @@ public interface Domain {
 	public int getType();
 	
 	public boolean isConstantDomain();
+	
+	/**
+	 * Insert the int value for every occurrence of variable with parameter variableName
+	 * in the bounds of the given domain.
+	 * 
+	 * @param value
+	 * @param variableName
+	 * @return the domain with every occurrence of variableName substituted with value.
+	 */
+	public Domain insertValueForVariable(int value, String variableName);
 }

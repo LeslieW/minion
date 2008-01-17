@@ -3,7 +3,7 @@ package translator.expression;
 public class ArithmeticAtomExpression implements ArithmeticExpression {
 
 	private int constantValue;
-	private SingleVariable variable;
+	private Variable variable;
 	
 	private int type;
 	private boolean isParameter;
@@ -25,7 +25,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	 * @param upperBound
 	 * @param lowerBound
 	 */
-	public ArithmeticAtomExpression(SingleVariable variable, 
+	public ArithmeticAtomExpression(Variable variable, 
 			                        boolean isParameter) {
 		this.variable = variable;
 		this.type = this.variable.getType();
@@ -41,7 +41,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	 * @param upperBound
 	 * @param lowerBound
 	 */
-	public ArithmeticAtomExpression(SingleVariable variable) {
+	public ArithmeticAtomExpression(Variable variable) {
 		this.variable = variable;
 		this.type = this.variable.getType();
 		this.isParameter = false;
@@ -53,7 +53,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		
 		return (this.variable == null) ?
 			new ArithmeticAtomExpression(this.constantValue) :
-				this.variable.copy();
+				new ArithmeticAtomExpression((Variable) this.variable.copy());
 	
 	}
 
@@ -93,13 +93,18 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 			else return (this.constantValue < otherAtom.constantValue) ?
 					SMALLER : BIGGER;
 		}
-		else {
+		else if(this.variable.getType() == otherAtom.variable.getType()){
 			return this.variable.isSmallerThanSameType(otherAtom.variable);
+		}
+		else {	
+			return (this.variable.getType() < otherAtom.variable.getType()) ?
+					SMALLER : BIGGER;
 		}
 	}
 	
 	
 	public Expression evaluate() {
+		this.variable = (Variable) this.variable.evaluate();
 		return this;
 	}
 	
@@ -110,7 +115,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		return this.constantValue;
 	}
 	
-	public SingleVariable getVariable() {
+	public Variable getVariable() {
 		return this.variable;
 	}
 	
@@ -122,4 +127,16 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	public Expression reduceExpressionTree() {
 		return this;
 	}
+	
+	public Expression insertValueForVariable(int value, String variableName) {
+		if(this.variable != null) {
+			Expression e = (SingleVariable) this.variable.insertValueForVariable(value,variableName);
+			if(e.getType() == INT)
+				return (ArithmeticAtomExpression) e;
+		}
+		
+		return this;
+	}
+	
+	
 }
