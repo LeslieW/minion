@@ -15,8 +15,8 @@ For further details see the documentation in doc/index.html.
 1. Running the Essence' Translator
 ----------------------------------
 
-The translator is packed in an executable .jar file, translator.jar, so you will need
-Java Sun's JDK[5]. To execute translator.jar changeto the translator's
+The translator is packed in an executable .jar file, tailor.jar, so you will need
+Java Sun's JDK[5]. To execute tailor.jar change to the translator's
 root directory and type
 
 java -jar tailor.jar
