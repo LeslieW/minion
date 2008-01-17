@@ -11,10 +11,14 @@ public class TranslatorFrame {
 	int state;
 	boolean parametersAreSet;
 	boolean problemIsSet;
-	boolean problemSelected;
-	boolean parameterSelected;
+	boolean problemChoosed;
+	boolean parameterChoosed;
 	boolean translationFinished;
+	boolean parameterSelected;
+	boolean problemSelected;
 
+	Color backgroundColor;
+	
 	String parameterFileName;	
 	String problemFileName;
 	String outputFileName;
@@ -37,7 +41,7 @@ public class TranslatorFrame {
 	//JRadioButton emptyParameterButton;
 	//JRadioButton specifiedParameterButton;
 	JLabel parameterLabel;
-	JLabel parameterFileNameLabel;
+	JTextArea parameterFileNameLabel;
 	JButton chooseParameterFileButton;
 	JButton selectParameterButton;
 	JFileChooser parameterFileChooser;
@@ -46,7 +50,7 @@ public class TranslatorFrame {
 	JButton chooseProblemFileButton;
 	JButton selectProblemButton;
 	JLabel problemsLabel;
-	JLabel problemFileNameLabel;
+	JTextArea problemFileNameLabel;
 	
 	// Buttons
 	JButton exitButton;
@@ -60,21 +64,12 @@ public class TranslatorFrame {
 	
 	public TranslatorFrame() {
 
-		this.parametersAreSet = false;
-		this.problemIsSet = false;
-		this.problemSelected = false;
-		this.parameterSelected = false;
-		this.translationFinished = false;
+		initialiseState();
 		
 		this.outputFileName = "out.minion";
+		this.backgroundColor = Color.orange;
 		
 		this.window = new JFrame("Essence' Translator");
-		
-
-		//scrollPane.setBounds(x, y, width, height)
-		
-		
-		//output.setLineWrap(true);
 		
 		//this.window.add(this.output);
 		contentPanel = new JPanel(new BorderLayout());
@@ -97,11 +92,11 @@ public class TranslatorFrame {
 		//parameterButtonGroup.add(emptyParameterButton);
 		//parameterButtonGroup.add(specifiedParameterButton);
 		
-		parameterLabel = new JLabel("Parameter Selection");
-		parameterLabel.setBounds(30, 170, 150, 20);
+		parameterLabel = new JLabel("Essence' Parameter Selection");
+		parameterLabel.setBounds(30, 170, 220, 20);
 		
 		selectParameterButton = new JButton("Select Parameter ");
-		selectParameterButton.setBounds(150, 240, 200, 30);
+		selectParameterButton.setBounds(220, 240, 200, 30);
 		selectParameterButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           selectParameter();   
@@ -109,23 +104,23 @@ public class TranslatorFrame {
 			});
 		
 		chooseParameterFileButton = new JButton("Choose Parameter File");
-		chooseParameterFileButton.setBounds(30, 200, 180, 20);
+		chooseParameterFileButton.setBounds(500, 200, 170, 30);
 		chooseParameterFileButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           startParameterFileChooser();      
 			  }
 			});
 		
-		parameterFileNameLabel = new JLabel();
-		parameterFileNameLabel.setBounds(30, 220, 400, 20);
-		
+		parameterFileNameLabel = new JTextArea();
+		parameterFileNameLabel.setBounds(30, 200, 450, 30);
+		parameterFileNameLabel.setEditable(false);
 		
 		// Problem selection stuff
-		problemsLabel = new JLabel("Problem File Selection");
-		problemsLabel.setBounds(30, 30, 150, 20);
+		problemsLabel = new JLabel("Essence' Problem File Selection");
+		problemsLabel.setBounds(30, 30, 220, 20);
 		
 		selectProblemButton = new JButton("Select Problem");
-		selectProblemButton.setBounds(150, 100, 200, 30);
+		selectProblemButton.setBounds(220, 100, 200, 30);
 		selectProblemButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           selectProblem();   
@@ -133,18 +128,19 @@ public class TranslatorFrame {
 			});
 		
 		chooseProblemFileButton = new JButton("Choose Problem File");
-		chooseProblemFileButton.setBounds(30, 60, 200, 20);
+		chooseProblemFileButton.setBounds(500, 60, 170, 30);
 		chooseProblemFileButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           startProblemFileChooser();      
 			  }
 			});
-		problemFileNameLabel = new JLabel();
-		problemFileNameLabel.setBounds(30, 80, 400, 20);
+		problemFileNameLabel = new JTextArea();
+		problemFileNameLabel.setBounds(30, 60, 450, 30);
+		problemFileNameLabel.setEditable(false);
 		
 		
 		translateButton = new JButton("Translate to Minion");
-		translateButton.setBounds(150,340,200,20);
+		translateButton.setBounds(220,340,200,30);
 		translateButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 				  try{ 
@@ -159,7 +155,7 @@ public class TranslatorFrame {
 		
 		// other buttons
 		exitButton = new JButton("Exit");
-		exitButton.setBounds(200, 530, 80, 20);
+		exitButton.setBounds(275, 550, 80, 30);
 		exitButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		                 System.exit(0);
@@ -169,13 +165,13 @@ public class TranslatorFrame {
 		
 		// output Text area
 		this.output = new JTextArea();
-		output.setBounds(new Rectangle (40, 380, 400, 150));
+		output.setBounds(new Rectangle (40, 380, 600, 150));
 		//output.setBackground(Color.orange);
 		output.setEditable(false);
 		
 		this.scrollPane = new JScrollPane(this.output);
 		// wenn man das Setzen der Bounds auskommentiert, sieht man die scrollbargarnicht
-		scrollPane.setBounds(new Rectangle (40, 380, 400, 150));
+		scrollPane.setBounds(new Rectangle (40, 380, 600, 150));
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.getViewport().add(output);
         //scrollPane.setAutoscrolls(true);
@@ -204,7 +200,7 @@ public class TranslatorFrame {
 		contentPanel.add(chooseParameterFileButton);
 		contentPanel.add(translateButton);
 		
-		contentPanel.setBackground(Color.orange);
+		contentPanel.setBackground(this.backgroundColor);
 		
 		this.window.setVisible(true);
 		this.window.setBackground(Color.orange);
@@ -215,7 +211,7 @@ public class TranslatorFrame {
 	  	  }
 	  	});
 
-	    window.setSize(500,600);
+	    window.setSize(700,630);
 
 		//scrollPane.setBorder(new Border(1));
 		
@@ -226,6 +222,17 @@ public class TranslatorFrame {
 		//for(int i=0; i<50; i++)
 		//	System.out.println("oida... "+i);
 		
+	}
+	
+	void initialiseState() {
+	
+	this.parametersAreSet = false;
+	this.problemIsSet = false;
+	this.problemChoosed = false;
+	this.parameterChoosed = false;
+	this.translationFinished = false;
+	this.problemSelected = false;
+	this.parameterSelected = false;
 	}
 	
 	
@@ -252,7 +259,7 @@ public class TranslatorFrame {
 	    else {
             output.append("Choosing parameter file cancelled by user.\n");
         }
-		this.parameterSelected = true;
+		this.parameterChoosed = true;
 	    //this.parameterFileName = parameterFileChooser.getSelectedFile().getName();
 	    adaptToState();
 	}
@@ -279,7 +286,7 @@ public class TranslatorFrame {
 	    else {
             output.append("Choosing problem file cancelled by user.\n");
         }
-		this.problemSelected = true;
+		this.problemChoosed = true;
 		//this.problemFileName = fileChooser.getSelectedFile().getName();
 	    adaptToState();
 	}
@@ -287,13 +294,17 @@ public class TranslatorFrame {
 	
 	void selectProblem() {
 		this.problemIsSet = true;
+		this.problemSelected = true;
 		this.chooseProblemFileButton.setEnabled(false);
+		this.problemFileNameLabel.setBackground(this.backgroundColor);
 		adaptToState();
 	}
 	
 	void selectParameter() {
 		this.parametersAreSet = true;
+		this.parameterSelected = true;
 		this.chooseParameterFileButton.setEnabled(false);
+		this.parameterFileNameLabel.setBackground(this.backgroundColor);
 		adaptToState();
 	}
 	
@@ -312,6 +323,8 @@ public class TranslatorFrame {
 	    saveTranslatedFile(); 
 	    adaptToState();
 	    this.translationFinished = false;
+	    this.problemSelected = false;
+		this.parameterSelected = false;
 	}
 	
 	void saveTranslatedFile() throws IOException  {
@@ -332,21 +345,8 @@ public class TranslatorFrame {
         } else {
             output.append("Save command cancelled by user.\n");
         }
-        //output.setCaretPosition(output.getDocument().getLength());
-
-		
-		
-	    //int returnVal = fileChooser.showOpenDialog(contentPanel);
-	    // TODO: what if person cancels the choosen parameter file?
+     
 	    File file = fileChooser.getSelectedFile();
-	    //this.problemFileName = file.getPath();
-	    
-	    // TODO: write this into a text-area instead of printing it on out
-	    //if(returnVal == JFileChooser.APPROVE_OPTION) {
-	    //   System.out.println("Problem file choosen: " +
-	    //        this.problemFileName);
-	       		
-	   // }
 	    
 	    FileWriter outputFile = new FileWriter(file);
 	    outputFile.write(this.minionOutput);
@@ -365,17 +365,17 @@ public class TranslatorFrame {
 			this.translateButton.setEnabled(false);	
 		
 		
-		if(this.parametersAreSet) {
+		if(this.parameterSelected) {
 			this.chooseParameterFileButton.setEnabled(false);
 			this.selectParameterButton.setEnabled(false);
 		}
 		
-		if(this.problemIsSet) {
+		if(this.problemSelected) {
 			this.chooseProblemFileButton.setEnabled(false);
 			this.selectProblemButton.setEnabled(false);
 		}
 		
-		if(this.problemSelected) {
+		if(this.problemChoosed) {
 			//if(!this.problemIsSet)
 				this.selectProblemButton.setEnabled(true);
 			this.problemFileNameLabel.setText(this.problemFileName);
@@ -384,7 +384,7 @@ public class TranslatorFrame {
 			this.selectProblemButton.setEnabled(false);
 		}
 		
-		if(this.parameterSelected) {
+		if(this.parameterChoosed) {
 			//if(!this.parametersAreSet)
 				this.selectParameterButton.setEnabled(true);
 			this.parameterFileNameLabel.setText(this.parameterFileName);
@@ -396,6 +396,9 @@ public class TranslatorFrame {
 		if(this.translationFinished) {
 			this.chooseParameterFileButton.setEnabled(true);
 			this.chooseProblemFileButton.setEnabled(true);
+			this.parameterFileNameLabel.setBackground(Color.white);
+			this.problemFileNameLabel.setBackground(Color.white);
+			
 		}
 		
 		

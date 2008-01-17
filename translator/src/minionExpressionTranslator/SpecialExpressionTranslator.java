@@ -718,18 +718,21 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			case EssenceGlobals.BINARYOP_EXPR:
 			    
 			    MinionIdentifier[] ids = new MinionIdentifier[2];
-			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
-			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
+
 			    
 			    //MinionIdentifier id3 = translateAtomExpression(simpleExpression);		   
 
 			    switch (complexExpression.getBinaryExpression().getOperator().getRestrictionMode()) {
 				
 			    case EssenceGlobals.PLUS:
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	return new MinionSumConstraint(ids,id3, useWatchedLiterals && !reifiable);
 
 				
 			    case EssenceGlobals.MINUS:
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 				// use weighted sum -> first has to be implemented in 
 			    	MinionConstant[] consts = new MinionConstant[2];
 			    	consts[0] = new MinionConstant(1);
@@ -738,6 +741,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 
 				
 			    case EssenceGlobals.MULT:
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	if(!reifiable)
 			    		return new MinionProductConstraint(ids[0], ids[1], id3);
 			    	else {
@@ -761,12 +766,16 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    		
 			    	
 			    case EssenceGlobals.DIVIDE: // wait till Chris implements divison constraint
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	throw new TranslationUnsupportedException
 				    ("Translation of division not supported yet: "+simpleExpression.toString()+" = "+complexExpression.toString());
 			    	// minionModel.addProductConstraint(ids[1], id3, ids[0]);		       
 
 			    case EssenceGlobals.OR:  // a OR b  ---> reify(max([a,b],1), tmp)
-			
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());			
+
 			    	MinionBoolVariable reifiedOrVar = new MinionBoolVariable(1, "freshVariable"+noTmpVars);
 			    	minionModel.add01Variable(reifiedOrVar);
 					minionVariables.put("freshVariable"+(noTmpVars++), reifiedOrVar);
@@ -778,6 +787,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			 
 
 			    case EssenceGlobals.AND:// a AND b ---> reify( min([a,b], 1), tmp) 
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	MinionBoolVariable reifiedAndVar = new MinionBoolVariable(1, "freshVariable"+noTmpVars);	 
 			    	minionModel.add01Variable(reifiedAndVar);
 					minionVariables.put("freshVariable"+(noTmpVars++), reifiedAndVar);
@@ -790,6 +801,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    	
 				
 			    case EssenceGlobals.IF:// a => b   --->   a >= b			
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	MinionInEqConstraint if_constraint = new MinionInEqConstraint(ids[0],ids[1],new MinionConstant(0));
 			    	
 			    	MinionBoolVariable v = new MinionBoolVariable(1, "freshVariable"+noTmpVars);
@@ -802,6 +815,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    
 
 			    case EssenceGlobals.IFF: // a <=> b ---> a = b						
+			    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+			    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());
 			    	MinionEqConstraint eq_constraint = new MinionEqConstraint(ids[0],ids[1]);
 			    	MinionBoolVariable v_iff = new MinionBoolVariable(1, "freshVariable"+noTmpVars);
 			    	minionModel.add01Variable(v_iff);
@@ -812,13 +827,41 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    	
 			    	
 			    case EssenceGlobals.EQ: 
+				if(isIteratedArithmeticExpression(complexExpression, true)) { // true: is reifiable
+				    //print_debug("This is an arithemtic iterated expression: "+e.toString());
+				    MinionConstraint sumConstraint = translateIteratedArithmeticExpression(complexExpression.getBinaryExpression(),true);
+				    MinionBoolVariable var1 = (MinionBoolVariable) this.variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+				    //minionModel.add01Variable(var1);
+					//minionVariables.put("freshVariable"+(noTmpVars++), var1);
+				    MinionBoolVariable var2 = (MinionBoolVariable) this.variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+				    //minionModel.add01Variable(var2);
+					//minionVariables.put("freshVariable"+(noTmpVars++), var2);
+					
+				    MinionReifyConstraint reifiedConstraint = new MinionReifyConstraint((MinionReifiableConstraint) sumConstraint,(MinionIdentifier)var1,(MinionIdentifier) var2);
+				    minionModel.addConstraint(reifiedConstraint);
+				    
+				    
+				    MinionBoolVariable var = (MinionBoolVariable) this.variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+				    //minionModel.add01Variable(var);
+					//minionVariables.put("freshVariable"+(noTmpVars++), var);
+					
+				    //MinionProductConstraint productConstraint = new MinionProductConstraint(var1, var2, var);
+				    minionModel.addProductConstraint(var1, var2, var);
+				    return new MinionEqConstraint(id3, var);
+				}
+				else {
+				    ids[0] = translateMulopExpression(complexExpression.getBinaryExpression().getLeftExpression());
+				    ids[1] = translateMulopExpression(complexExpression.getBinaryExpression().getRightExpression());				
+				
+				    print_debug("Equality constraint nested in a simple xpression");
 			    	MinionEqConstraint eq_constraint1 = new MinionEqConstraint(ids[0],ids[1]);
 			    	MinionBoolVariable v_eq = new MinionBoolVariable(1, "freshVariable"+noTmpVars);
 			    	minionModel.add01Variable(v_eq);
 					minionVariables.put("freshVariable"+(noTmpVars++), v_eq);
 
 			    	minionModel.addReificationConstraint(eq_constraint1, v_eq);
-			    	return new MinionEqConstraint(id3,v_eq);	    						    	
+			    	return new MinionEqConstraint(id3,v_eq);	
+				}
 			    	
 			    case EssenceGlobals.NEQ: 
 			    	MinionDisEqConstraint neq_constraint = new MinionDisEqConstraint(ids[0],ids[1]);
