@@ -84,9 +84,10 @@ action code {:
 terminal	   ALLDIFF, ATLEAST, ATMOST;
 terminal       BE, BE_DOMAIN, BE_NEW_TYPE;
 terminal       ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL;
-terminal 	   GIVEN, HEADER, LETTING, MATRIX_INDEXED_BY;
+terminal 	   GIVEN, HEADER, INT, LETTING, MATRIX_INDEXED_BY;
 terminal	   MAXIMISING, MAX, MINIMISING, MIN;
-terminal 	   OCCURRENCE, OF, SUCH_THAT, SUM, TRUE, WHERE;
+terminal 	   OCCURRENCE, OF, SUCH_THAT, SUM, TABLE; 
+terminal       TRUE, WHERE;
 
 
 /* separators  */
@@ -110,7 +111,7 @@ terminal Integer   INTEGER;
 non terminal essencemodel, body;
 non terminal declarations, declaration_list, declaration, objective, constraint_block;
 non terminal given_block, where_block, letting_block, find_block;
-non terminal parameter_list, parameter, domain_identifiers, identifier_list;
+non terminal parameter_list, parameter, infinite_parameter_domain, domain_identifiers, identifier_list;
 non terminal domain, domain_list, range_atom_list, range_atom;
 non terminal expression, expression_list;
 non terminal atom_expression, deref_expression;
@@ -186,11 +187,11 @@ declarations ::=	 declaration_list:d
 
 declaration_list ::=      declaration:d
 				{: LinkedList list = new LinkedList();
-				   list.add((Declaration) d); 
+				   list.addFirst((Declaration) d); 
 				   RESULT = list; :}
 
   			| declaration:d declaration_list:d_list
-				{: ((LinkedList) d_list).add((Declaration) d);
+				{: ((LinkedList) d_list).addFirst((Declaration) d);
 				  RESULT = d_list; :} 
 ;
  
@@ -224,22 +225,51 @@ given_block ::= GIVEN parameter_list:p_list
 parameter_list ::= parameter:p
 			{: 
 			   LinkedList list = new LinkedList();
-			   list.add(p); 
+			   list.addFirst(p); 
 			   RESULT = list; :}
 
 	           | parameter_list:p_list COMMA parameter:p
-			{: ((LinkedList) p_list).add(p); 
+			{: ((LinkedList) p_list).addFirst(p); 
 		            RESULT = p_list; :} 
 ;
 
 
 parameter ::= 	domain_identifiers:di 
 			{: RESULT = new Parameter((DomainIdentifiers) di); :}
-
 		| IDENTIFIER:id ENUM LPAREN DOT DOT DOT RPAREN
-			{: RESULT = new Parameter(id); :}			
+			{: RESULT = new Parameter(id); :}	
+		| identifier_list:id_list COLON infinite_parameter_domain:d 
+		    {:
+		      Object[] tmp = ((LinkedList) id_list).toArray();
+			  String[] id_array = new String[tmp.length];
+			  for(int i=0;i<id_array.length;i++)
+ 				id_array[i] = (String) tmp[i];
+		    
+		    RESULT = new Parameter(new DomainIdentifiers(id_array, (Domain) d)); :}                        			
 ;
 
+
+infinite_parameter_domain ::= 
+                   INT LPAREN expression:e DOTDOT RPAREN
+                     {: 
+                        RESULT = new Domain(
+                                     new IntegerDomain(
+                                           new RangeAtom[] {new RangeAtom(EssenceGlobals.RANGE_EXPR_DOTS ,(Expression) e) } 
+                                 )); 
+                      :}
+                  | INT LPAREN DOTDOT expression:e RPAREN
+                   {: 
+                      RESULT = new Domain(new IntegerDomain(new RangeAtom[] {new RangeAtom(EssenceGlobals.RANGE_DOTS_EXPR ,(Expression) e) } )); :}
+                  |
+                    INT LPAREN RPAREN
+                     {: RESULT = new Domain(new IntegerDomain()); :} 
+                  |
+                     INT LPAREN DOTDOT RPAREN
+                     {: RESULT = new Domain(new IntegerDomain()); :} 
+                  |
+                   INT
+                     {: RESULT = new Domain(new IntegerDomain()); :} 
+;
 
 domain_identifiers ::= identifier_list:id_list COLON domain:d
 			{: 
@@ -255,11 +285,11 @@ domain_identifiers ::= identifier_list:id_list COLON domain:d
 identifier_list ::=	  IDENTIFIER:id
 				   {: 	
 			           LinkedList list = new LinkedList();
-				   list.add(new String(id));
+				   list.addFirst(new String(id));
 				   RESULT = list; :}
 
 			| IDENTIFIER:id COMMA identifier_list:id_list
-				{: ((LinkedList) id_list).add(new String(id)); 
+				{: ((LinkedList) id_list).addFirst(new String(id)); 
 				    RESULT = id_list; :}
 ;
 
@@ -273,16 +303,14 @@ domain ::= 	LPAREN domain:d RPAREN
 	                   else 
 			     RESULT = new Domain(new IdentifierDomain(new String(id) )); :}
 
-              | IDENTIFIER:id LPAREN range_atom_list:ra_list RPAREN   
+          
+          | INT LPAREN range_atom_list:ra_list RPAREN
                	        {:  Object[] tmp = ((LinkedList) ra_list).toArray();	
 	        	    RangeAtom[] ra_array = new RangeAtom[tmp.length];
 			    for(int i=0;i<ra_array.length;i++)
  			   	 ra_array[i] = (RangeAtom) tmp[i];			  
-
-			   if(id.equalsIgnoreCase("int")) 
-			      RESULT = new Domain(new IntegerDomain(ra_array)); 			    
-			   else 
-	           	      RESULT = new Domain(new IdentifierDomain(new String(id), ra_array)); :}
+	  
+			   RESULT = new Domain(new IntegerDomain(ra_array)); :}			   
 
 
 	      | MATRIX_INDEXED_BY LBRACK domain_list:d_list RBRACK OF domain:d
@@ -298,22 +326,22 @@ domain ::= 	LPAREN domain:d RPAREN
 
 domain_list ::= domain:d
 		   {: LinkedList list = new LinkedList();
-		      list.add(  d); 
+		      list.addFirst(  d); 
 		      RESULT = list; :}
 
               | domain_list:d_list COMMA domain:d
-		   {: ((LinkedList) d_list).add(  d); 
+		   {: ((LinkedList) d_list).addFirst(  d); 
 		       RESULT = d_list; :}
 ;
 
 
 range_atom_list ::= 	range_atom:ra
 				{: LinkedList list = new LinkedList();
-				   list.add(  ra);
+				   list.addFirst(  ra);
 				   RESULT = list; :}
 
 		      | range_atom:ra COMMA range_atom_list:ra_list
-				{: ((LinkedList) ra_list).add(  ra); 
+				{: ((LinkedList) ra_list).addFirst(  ra); 
 				   RESULT = ra_list; :}
 ;
 	

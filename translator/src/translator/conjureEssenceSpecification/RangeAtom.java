@@ -61,7 +61,7 @@ public class RangeAtom implements EssenceGlobals {
 			lowerBound = e;
 	}
 	
-	
+
 	/**
 	 * Range of form exp .. exp
 	 * 

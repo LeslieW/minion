@@ -48,7 +48,7 @@ public class SparseIntRange implements IntRange {
 	public String toString() {
 		String s = "(";
 		if(this.sparseElements.length > 0)
-			s = ""+this.sparseElements[0];
+			s = s.concat(""+this.sparseElements[0]);
 			
 		for(int i=1;i<this.sparseElements.length; i++)
 			s = s.concat(", "+sparseElements[i]);

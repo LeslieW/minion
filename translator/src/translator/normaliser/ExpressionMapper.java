@@ -618,7 +618,7 @@ public class ExpressionMapper {
 				
 				// ------------ either the range atom is sparse -----------------------------------------
 				// this is piece of a sparse domain -> collect them all
-				while(rangeAtom[i].getRestrictionMode() == EssenceGlobals.RANGE_EXPR) {
+				while(i<rangeAtom.length && rangeAtom[i].getRestrictionMode() == EssenceGlobals.RANGE_EXPR) {
 					translator.expression.Expression sparseElement = mapExpression(rangeAtom[i].getLowerBound());
 					
 					if(!(sparseElement instanceof translator.expression.ArithmeticExpression))
@@ -653,8 +653,12 @@ public class ExpressionMapper {
 				expressionRange.clear();
 				
 				
+				if(i== rangeAtom.length)
+					break;
+				
 				// ------------------------ or the range atom consists of a lb and ub ---------------------------
-				// now we have to consider the i-th element that is a bounded domain 		
+				// now we have to consider the i-th element that is a bounded domain 	
+				
 				translator.expression.Expression lb = mapExpression(rangeAtom[i].getLowerBound());
 				translator.expression.Expression ub = mapExpression(rangeAtom[i].getUpperBound());
 				
@@ -698,7 +702,7 @@ public class ExpressionMapper {
 			// there are only integer range atoms
 			if(exprRangeList.size() == 0) {
 				if(intRangeList.size() == 1) {
-					return intRangeList.get(i);
+					return intRangeList.get(0);
 				}
 				else return new MultipleIntRange(intRangeList);
 			}

@@ -54,7 +54,7 @@ public class FunctionExpression implements EssenceGlobals {
 
 	case EssenceGlobals.ATMOST :
 	    return new FunctionExpression(rm, exp1.copy(), exp2.copy(), exp3.copy());
-
+	    
 	default:
 	    return new FunctionExpression(rm, exp1.copy());
 

@@ -117,6 +117,7 @@ public class Domain implements EssenceGlobals {
 	case EssenceGlobals.MATRIX_DOMAIN:
 	    return new Domain(this.getMatrixDomain().copy());
 
+	    
 	default: // i know, very ugly, but I don't care right now
 	    return null;
 
@@ -177,6 +178,8 @@ public class Domain implements EssenceGlobals {
 		rpartition = d;
 	}
 	
+	
+	
 	public String toString(){
 		
 		switch(restriction_mode){
@@ -190,7 +193,8 @@ public class Domain implements EssenceGlobals {
 		case FUNCTION_DOMAIN : return function.toString();
 		case REL_DOMAIN : return rel.toString();
 		case PARTITION_DOMAIN : return partition.toString();
-		case RPARTITION_DOMAIN : return rpartition.toString();		
+		case RPARTITION_DOMAIN : return rpartition.toString();	
+
 		}		
 		return "";
 	}

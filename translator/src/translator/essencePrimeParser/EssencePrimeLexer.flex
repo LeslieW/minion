@@ -39,7 +39,7 @@ Comment     = "$" {InputCharacter}* {LineTerminator}
 Integer = 0 | [1-9][0-9]*
 Identifier = [:jletter:][:jletterdigit:]*
 
-Header  = "ESSENCE' 1.0"  
+Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteSpace}"1.2" 
 
 
 
@@ -49,7 +49,7 @@ Header  = "ESSENCE' 1.0"
 <YYINITIAL> "alldiff"            { return getSymbol(sym.ALLDIFF); }
 <YYINITIAL> "allDiff"            { return getSymbol(sym.ALLDIFF); }
 <YYINITIAL> "alldifferent"       { return getSymbol(sym.ALLDIFF); }
-<YYINITIAL> "allDifferent"            { return getSymbol(sym.ALLDIFF); }
+<YYINITIAL> "allDifferent"       { return getSymbol(sym.ALLDIFF); }
 <YYINITIAL> "atleast"            { return getSymbol(sym.ATLEAST); }
 <YYINITIAL> "atmost"             { return getSymbol(sym.ATMOST); }
 <YYINITIAL> "be"                 { return getSymbol(sym.BE); }
@@ -62,6 +62,7 @@ Header  = "ESSENCE' 1.0"
 <YYINITIAL> "find"               { return getSymbol(sym.FIND); }
 <YYINITIAL> "forall"             { return getSymbol(sym.FORALL); }
 <YYINITIAL> "given"          	 { return getSymbol(sym.GIVEN); }
+<YYINITIAL> "int"                { return getSymbol(sym.INT); }
 <YYINITIAL> "letting"            { return getSymbol(sym.LETTING); }
 <YYINITIAL> "matrix indexed by"  { return getSymbol(sym.MATRIX_INDEXED_BY); }
 <YYINITIAL> "maximising"         { return getSymbol(sym.MAXIMISING); }
@@ -72,6 +73,7 @@ Header  = "ESSENCE' 1.0"
 <YYINITIAL> "of"                 { return getSymbol(sym.OF); }
 <YYINITIAL> "such that"          { return getSymbol(sym.SUCH_THAT); }
 <YYINITIAL> "sum"                { return getSymbol(sym.SUM); }
+<YYINITIAL> "table"              { return getSymbol(sym.TABLE);}
 <YYINITIAL> "true"               { return getSymbol(sym.TRUE); }
 <YYINITIAL> "where"               { return getSymbol(sym.WHERE); }
 
