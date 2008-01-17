@@ -2,7 +2,7 @@ $ The quasiGroup existence problem (CSP lib problem 3)
 $
 $ An m order quasigroup  is an mxm multiplication table of integers 1..m, 
 $ where each element occurrs exactly once in each row and column and certain 
-$ multiplication axioms hold (in this case, we want axiom 7 to hold). 
+$ multiplication axioms hold (in this case, we want axiom 6 to hold). 
 $
 
 ESSENCE' 1.0
@@ -22,20 +22,20 @@ such that
      forall row : nDomain . 
           allDifferent(quasiGroup[row]),
 
-     $ Implied constraint: Idempotency
-     forall i : nDomain . 
-          (quasiGroup[i,i] = i), 
-
      $ All columns have to be different	       
      forall col : nDomain . 
           allDifferent(quasiGroupColumns[col]),
 
      $ this strange constraint
      $ corresponds to:
-     $ quasiGroup[i, quasiGroup[j,i]] = quasiGroup[quasiGroup[j,i], j]	
+     $ quasiGroup[i, quasiGroup[i,j]] = quasiGroup[quasiGroup[i,j], j]	
      forall i : nDomain .
           forall j : nDomain .	
-	        quasiGroup[i, quasiGroup[j,i]] = quasiGroupColumns[j,quasiGroup[j,i]],
+	        quasiGroup[i, quasiGroup[i,j]] = quasiGroupColumns[j,quasiGroup[i,j]],
+
+     $ Implied constraint: Idempotency
+     forall i : nDomain . 
+          (quasiGroup[i,i] = i), 
 
      $ Symmetry-breaking constraints	
      forall i : nDomain .
