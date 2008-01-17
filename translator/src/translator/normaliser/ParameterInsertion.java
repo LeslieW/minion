@@ -819,6 +819,7 @@ public class ParameterInsertion {
 	    	  // insert parameter values 
 	    	  for(int i=0; i<expressions.length; i++) {
 	    		  //expressions[i] = evaluator.evalExpression(insertValueForParameters(expressions[i]));
+	    		  System.out.println("Inserting parameters in expression:"+expressions[i]);
 	    		  expressions[i] = insertValueForParameters(expressions[i]);
 
 	    		  
@@ -839,14 +840,17 @@ public class ParameterInsertion {
 	    private Domain insertValueForParameters(Domain domain) 
 	    	throws NormaliserException {
 	    	
+	    	//	System.out.println("Gonna insert parameters into domain:"+domain.toString()+" with restriction mode:"+domain.getRestrictionMode());
+	    	
 	    	switch(domain.getRestrictionMode()) {
 	    	
-	    	case EssenceGlobals.IDENTIFIER_DOMAIN:
+	    	case EssenceGlobals.IDENTIFIER_RANGE:
 	    		IdentifierDomain identifierDomain = domain.getIdentifierDomain();
 	    		
 	    		for(int i=0; i<this.parameterNames.size(); i++) {
 	    			
 	    			String parameterName = parameterNames.get(i);
+	    			//System.out.println("Comparing parameter '"+parameterName+"' with domain: "+identifierDomain.getIdentifier());
 	    			
 	    			if(identifierDomain.getIdentifier().equals(parameterName)) {
 	    				Constant parameter = this.parameters.get(parameterName);
@@ -927,7 +931,11 @@ public class ParameterInsertion {
 							       insertValueForParameters(expression.getUnaryExpression().getExpression())));
 
 		case EssenceGlobals.QUANTIFIER_EXPR: 
-			Domain bindingDomain = expression.getQuantification().getBindingExpression().getDomainIdentifiers().getDomain();
+			//System.out.println("quantifier domain before parameter insertion:"
+			//		+expression.getQuantification().getBindingExpression().getDomainIdentifiers().getDomain());
+			Domain bindingDomain = insertValueForParameters(expression.getQuantification().getBindingExpression().getDomainIdentifiers().getDomain());
+			//System.out.println("quantifier domain after parameter insertion:"
+			//		+expression.getQuantification().getBindingExpression().getDomainIdentifiers().getDomain());
 			bindingDomain = insertValueForParameters(bindingDomain);
 			expression.getQuantification().getBindingExpression().getDomainIdentifiers().setDomain(bindingDomain);
 			
