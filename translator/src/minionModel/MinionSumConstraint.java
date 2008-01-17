@@ -41,7 +41,6 @@ public class MinionSumConstraint extends MinionReifiableConstraint {
 	    	String resultP = (resultPolarity) ? "" : "n";
 	    	r= r.concat("], "+resultP+result+")\n");	
 	    	
-	    	System.out.println("p is(for fiorst arg):"+p);
 	    	r = r.concat(constraintNameLeq+"(["+p+variables[0]);
 
 	    	for(int j = 1; j < variables.length; j++) {

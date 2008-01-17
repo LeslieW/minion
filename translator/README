@@ -46,9 +46,8 @@ contains a directory of generated Minion files.
 -----------------------------
 The translator is still under development, so there are some limitations. 
 The following is not supported yet:
-- decision variable arrays with 3 or more dimensions
+- decision variable arrays with 4 or more dimensions
 - parameter arrays with 4 or more dimensions
-- boolean negation
 - absolute value
 - power with decision variable as exponent
 - element constraint on 2-dimensional arrays
