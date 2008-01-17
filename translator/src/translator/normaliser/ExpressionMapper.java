@@ -88,6 +88,34 @@ public class ExpressionMapper {
 	}
 	
 	
+	/**
+	 * Converts the objective representation of the old syntax tree into the new syntax tree.
+	 * 
+	 * @param oldObjective
+	 * @return the advanced representation of the objective
+	 * @throws NormaliserException
+	 */
+	public Objective mapObjective(translator.conjureEssenceSpecification.Objective oldObjective)
+		throws NormaliserException {
+		
+		if(oldObjective.getExpression() != null) {
+			translator.expression.Expression objectiveExpression = mapExpression(oldObjective.getExpression());
+			return new Objective(objectiveExpression,
+					             !oldObjective.isMinimising());
+		}
+		
+		else return new Objective();
+			
+	}
+	
+	
+	/**
+	 * Maps a lex constraint
+	 * 
+	 * @param oldLexConstraint
+	 * @return the advanced representation of a lex constraint
+	 * @throws NormaliserException
+	 */
 	protected translator.expression.Expression mapLexConstraint(LexExpression oldLexConstraint) 
 		throws NormaliserException {
 		

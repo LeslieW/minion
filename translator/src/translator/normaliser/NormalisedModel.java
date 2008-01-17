@@ -18,28 +18,34 @@ public class NormalisedModel {
 	/** constraints list */
 	ArrayList<Expression> constraintList;
 	
+	/** the objective expression */
+	Objective objective;
 	
 	//=============== CONSTRUCTORS ==================================
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
             ArrayList<String> decisionVariablesNames,
-            ArrayList<Expression> constraints) {
+            ArrayList<Expression> constraints,
+            Objective objective) {
 
 		this.decisionVariables = decisionVariables;
 		this.decisionVariablesNames = decisionVariablesNames;
 		this.constraintList = constraints;
+		this.objective = objective;
 
 	}
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
 			               ArrayList<String> decisionVariablesNames,
 			               ArrayList<Expression> constraints,
-			               Parameters parameterArrays) {
+			               Parameters parameterArrays,
+			               Objective objective) {
 		
 		this.decisionVariables = decisionVariables;
 		this.decisionVariablesNames = decisionVariablesNames;
 		this.constraintList = constraints;
 		this.parameterArrays = parameterArrays;
+		this.objective = objective;
 	}
 	 
 	// =============== METHODS =======================================
@@ -80,9 +86,9 @@ public class NormalisedModel {
 		}
 		
 		// objective
+		s = s.concat("\n"+this.objective.toString()+"\n\n");
 		
 		// constraints
-		
 		s = s.concat("such that\n");
 		
 		for(int i=0; i<this.constraintList.size()-1; i++)

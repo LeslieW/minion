@@ -126,6 +126,31 @@ public class ParameterInsertion {
 	    }
 	    
 	    
+	    /**
+	     * Insert parameters into the objective expression
+	     * 
+	     * @param objective
+	     * @return
+	     * @throws NormaliserException
+	     */
+	    protected translator.conjureEssenceSpecification.Objective insertParametersInObjective(translator.conjureEssenceSpecification.Objective objective) 
+	    	throws NormaliserException {
+	    	
+	    	
+	    	if(objective.getExpression() != null) {
+	    		ArrayList<Expression> objectiveExpression = preprocessConstraints(new Expression[] {objective.getExpression()} );
+	    		if(objectiveExpression.size() != 1)
+	    			throw new NormaliserException
+	    			("Illegal objective expression: expected just one expression instead of:"+objectiveExpression.toString());
+	    		else {
+	    			objective.setExpression(objectiveExpression.get(0));
+	    			return objective;
+	    			
+	  	    	}
+	    	}
+	    	// there is no objective, so what should we 
+	    	return objective;
+	    }
 	   
 	    
 	    /**

@@ -57,6 +57,12 @@ public class Normaliser implements NormaliserSpecification {
 		ArrayList<Expression> constraintsList = normaliseConstraints();
 		//if(this.expressionMapper != null) -> not necessary since normalisation creates an expressionMapper
 		ArrayList<String> decisionVariablesNames = this.parameterInserter.getDecisionVariablesNames();
+		Objective objective = this.expressionMapper.mapObjective(
+                this.parameterInserter.insertParametersInObjective(
+                		      this.problemSpecification.getObjective())
+                		      );
+		objective.normalise();
+		
  		HashMap<String,translator.expression.Domain> decisionVariables = this.expressionMapper.getNewDecisionVariables(decisionVariablesNames);
 		Parameters parameterArrays = this.parameterInserter.getParameters();
 	
@@ -64,7 +70,8 @@ public class Normaliser implements NormaliserSpecification {
 		return new NormalisedModel(decisionVariables,
 				                   decisionVariablesNames,
 				                   constraintsList,
-				                   parameterArrays);
+				                   parameterArrays,
+				                   objective);
 	}
 	
 	/**
@@ -78,10 +85,16 @@ public class Normaliser implements NormaliserSpecification {
 		
 		//	first insert parameters and map the expressions to the new format
 		ArrayList<translator.expression.Expression> constraintsList = insertParametersAndMapExpression();
+		Objective objective = this.expressionMapper.mapObjective(
+				                                this.parameterInserter.insertParametersInObjective(
+				                                		      this.problemSpecification.getObjective())
+				                                		      );
 		
 		ArrayList<String> decisionVariablesNames = this.parameterInserter.getDecisionVariablesNames();
  		HashMap<String,translator.expression.Domain> decisionVariables = this.expressionMapper.getNewDecisionVariables(decisionVariablesNames);
 		Parameters parameterArrays = this.parameterInserter.getParameters();
+		
+		
 		
 		if(normalisationType == NormaliserSpecification.NORMALISE_BASIC) {
 			// do nothing
@@ -90,12 +103,14 @@ public class Normaliser implements NormaliserSpecification {
 		else if(normalisationType == NormaliserSpecification.NORMALISE_ORDER) {
 			constraintsList = reduceExpressions(constraintsList);
 			constraintsList = orderConstraints(constraintsList);
+			objective.order();
 	
 		}
 		else if(normalisationType == NormaliserSpecification.NORMALISE_EVAL) {
 			constraintsList = reduceExpressions(constraintsList);
 			constraintsList = evaluateConstraints(constraintsList);
 			constraintsList = reduceExpressions(constraintsList);
+			objective.evaluate();
 		}
 		else if(normalisationType == NormaliserSpecification.NORMALISE_FULL) {
 			constraintsList = reduceExpressions(constraintsList);
@@ -103,12 +118,14 @@ public class Normaliser implements NormaliserSpecification {
 			constraintsList = evaluateConstraints(constraintsList);
 			constraintsList = reduceExpressions(constraintsList);
 			constraintsList = orderConstraints(constraintsList);
+			objective.normalise();
 		}
 		
 		return new NormalisedModel(decisionVariables,
                 decisionVariablesNames,
                 constraintsList,
-                parameterArrays);
+                parameterArrays,
+                objective);
 	
 	}
 	
