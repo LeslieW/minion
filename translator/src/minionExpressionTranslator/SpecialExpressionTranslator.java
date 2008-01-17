@@ -361,15 +361,15 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 					                     (MinionReifiableConstraint) reifiedConstraint, (MinionIdentifier) reifiedVariable1, reifiedVariable2);
 		    this.minionModel.addConstraint(reifiedSumConstraint);
 		    		    
-		    // r1*r2 = 1
-		    //MinionProductConstraint productConstraint = new MinionProductConstraint(reifiedVariable1, reifiedVariable2, new MinionConstant(1));
+		    MinionBoolVariable reifiedVariable = (MinionBoolVariable) variableCreator.addFreshVariable(
+		    		0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
 		    
-		    // r1 + r2 >= 2
-		    MinionSumGeqConstraint sumgeqConstraint = new MinionSumGeqConstraint(
-		    		new MinionIdentifier[] { reifiedVariable1, reifiedVariable2 }, new MinionConstant(2), false);
+		    // r1*r2 = r
+		    MinionProductConstraint productConstraint = new MinionProductConstraint(reifiedVariable1, reifiedVariable2, reifiedVariable);
+		    this.minionModel.addConstraint(productConstraint);
 		    
-		    // reify( (r1*r2=1), r), return r
-			return reifyConstraint(sumgeqConstraint) ;
+		    //  return r
+			return reifiedVariable ;
 	  }
 	  else {
 		MinionBoolVariable reifiedVariable = reifyConstraint((MinionReifiableConstraint) reifiedConstraint);
