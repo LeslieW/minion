@@ -1,4 +1,0 @@
-ESSENCE' 1.0
-given a:int
-find x:bool,y:bool
-such that x /\ y = a

@@ -1,3 +1,0 @@
-given box:int
-find x:int(1) , y:bool , z:int(1..2)
-such that x < 2

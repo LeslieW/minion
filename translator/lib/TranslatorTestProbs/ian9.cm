@@ -1,4 +1,0 @@
-given box:int
-find x:int(1) , y:bool , z:int(1..2)
-find ginze:matrix indexed by int(1..3) of bool
-such that x < 2

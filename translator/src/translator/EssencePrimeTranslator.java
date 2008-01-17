@@ -194,7 +194,7 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
 	    print_message("\t\t\t'-watched' for watched literal constraints "+watchedDefault);
 	    print_message("\t vartype:\t'-discrete' for discrete bound variables "+discreteDefault);
 	    print_message("\t\t\t'-bounds' for bound variables "+boundsDefault);
-	    print_message("\nexample:\n shell> java EssencePrimeTranslator problem.cm parameters.param out.minion -unwatched -discrete");	
+            print_message("\nexample:\n shell> java translator.EssencePrimeTranslator problem.cm parameters.param out.minion -unwatched -discrete");	
     }
     
     

@@ -1,4 +1,0 @@
-ESSENCE' 1.0
-given a:int
-find x:int(3..7),y:int(0..2)
-such that x-y = a

@@ -1,4 +1,0 @@
-ESSENCE' 1.0
-given box:int
-find x:bool
-such that x = x

@@ -1,3 +1,0 @@
-given box:int
-find x:int(1..2, 3..4)
-such that x < 2

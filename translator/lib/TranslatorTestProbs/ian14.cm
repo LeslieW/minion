@@ -1,4 +1,0 @@
-given box:int
-find x:int(1) , y:bool , z:int(1..2)
-find alan:matrix indexed by int(0..1) of int(1..20)
-such that alan[0] = 2
