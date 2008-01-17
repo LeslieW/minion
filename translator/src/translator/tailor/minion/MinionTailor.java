@@ -514,6 +514,28 @@ public class MinionTailor {
 		resultExpression.willBeFlattenedToVariable(true);
 		MinionAtom result = (MinionAtom) toMinion(resultExpression);
 		
+		// check for the case when E1 - E2 RELOP 0   ===>   E1 RELOP E2
+		if(positiveArguments.length == 1 && 
+				negativeArguments.length == 1 &&
+				resultExpression.getType() == Expression.INT) {
+			
+			if(((ArithmeticAtomExpression) resultExpression).getConstant() == 0) {
+				Expression posArg = positiveArguments[0];
+				posArg.willBeFlattenedToVariable(true);
+				Expression negArg = negativeArguments[0];
+				negArg.willBeFlattenedToVariable(true);
+				if(operator == Expression.LEQ)
+					return new IneqConstraint((MinionAtom) toMinion(posArg), (MinionAtom) toMinion(negArg));
+				
+				else if(operator == Expression.GEQ)
+					return new IneqConstraint((MinionAtom) toMinion(negArg), (MinionAtom) toMinion(posArg));
+				
+				else if(operator == Expression.EQ) 
+					return new EqConstraint((MinionAtom) toMinion(negArg), (MinionAtom) toMinion(posArg));	
+			}	
+		}
+		
+		
 		int[] weights = new int[positiveArguments.length + negativeArguments.length];
 		MinionAtom[] arguments = new MinionAtom[positiveArguments.length + negativeArguments.length];
 			

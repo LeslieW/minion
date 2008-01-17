@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class IntIndex implements ArrayIndex {
+public class IntIndex implements Index {
 
 	private int index;
 	
@@ -13,23 +13,23 @@ public class IntIndex implements ArrayIndex {
 	// =========== INHERITED METHODS =============
 	
 	
-	public Domain copy() {
+	public Index copy() {
 		return new IntIndex(this.index);
 	}
 
-	public Domain evaluate() {
+	public Index evaluate() {
 		return this;
 	}
 
 	public int getType() {
-		return Domain.INT_INDEX;
+		return Index.INT_INDEX;
 	}
 
-	public Domain insertValueForVariable(int value, String variableName) {
+	public Index insertValueForVariable(int value, String variableName) {
 		return this;
 	}
 
-	public boolean isConstantDomain() {
+	public boolean isConstantIndex() {
 		return true;
 	}
 

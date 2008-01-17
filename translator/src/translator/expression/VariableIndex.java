@@ -10,7 +10,7 @@ import translator.expression.ArithmeticAtomExpression;
  *
  */
 
-public class VariableIndex implements ArrayIndex {
+public class VariableIndex implements Index {
 
 	private Variable indexVariable;
 	
@@ -20,20 +20,20 @@ public class VariableIndex implements ArrayIndex {
 	
 	// ======= INHERITED METHODS ====================
 	
-	public Domain copy() {
+	public Index copy() {
 		return new VariableIndex((Variable) this.indexVariable.copy());
 	}
 
-	public Domain evaluate() {
+	public Index evaluate() {
 		this.indexVariable = (Variable) this.indexVariable.evaluate();
 		return this;
 	}
 
 	public int getType() {
-		return Domain.VAR_INDEX;
+		return Index.VAR_INDEX;
 	}
 
-	public Domain insertValueForVariable(int value, String variableName) {
+	public Index insertValueForVariable(int value, String variableName) {
 		Expression insertion = this.indexVariable.insertValueForVariable(value, variableName);
 		if(insertion.getType() == INT_INDEX)
 			return new IntIndex( ((ArithmeticAtomExpression) insertion).getConstant());
@@ -41,7 +41,7 @@ public class VariableIndex implements ArrayIndex {
 		return this;
 	}
 
-	public boolean isConstantDomain() {
+	public boolean isConstantIndex() {
 		return false;
 	}
 
