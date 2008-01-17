@@ -13,179 +13,208 @@
 <h2> Essence' -> MINION translator Manual</h2>
 </center>
 
-<h3>Content</h3>
+<h3>Frequently Asked Questions (FAQ)</h3>
 
 <ol>
-<li><a href="#introduction">Introduction<a>
+<li><a href="#introduction">What is all this?<a>
 </li>
 
-<li><a href="#compiling">Compiling the translator</a>
+<li><a href="#essence">What is Essence'?</a>
 </li>
 
-<li><a href="#running">Running the translator<a/>
+<li><a href="#minion">What is Minion?</a>
 </li>
 
-<li><a href ="grammar.pdf">Essence' grammar</a>
+<li><a href="whyTranslator">Why should I use this Translator?</a>
 </li>
 
-<li><a href="http://minion.sourceforge.net/manual.pdf">MINION manual</a> (includes the grammar of the input language)
+<li><a href="#running">How can I run the Translator?<a/>
 </li>
 
-<li><a href="modelling.html">Modelling with Essence'</a>
+<li><a href="#compiling">How can I compile the Translator?</a>
 </li>
 
-<li><a href="../problems">Essence' Examples</a>
+<li><a href="#bug">I found a bug...again! Where can I report it?</a>
 </li>
 
-<li><a href="html/index.html">Translator API</a>
+<li><a href="#gui">How does the graphical user interface work?</a>
+</li>
+
+<li><a href ="#grammar">Where can I find the grammar of Essence'?</a>
+</li>
+
+<li><a href="modelling.html">How do I model problems with Essence'?</a>
+</li>
+
+<li><a href="#examples">Where can I find Essence' Examples?</a>
+</li>
+
+<li><a href="#translator">How does the Translator work?</a>
+</li>
+
+<li><a href="#question">I have a question that has not been answered
+here. What can I do?</a>
 </li>
 
 </ol>
 
 
 
-<h3 id="introduction">Introduction</h3>
+<h3 id="introduction">What is all this?</h3>
 This is the manual for the Essence' to MINION translator. 
-Please note that the translator and this manual are still 
-under developement.
 
 <a href ="grammar.pdf">Essence'</a>
 is a solver-independent constraint modelling language
 and <a href="http://minion.sourceforge.net/">MINION</a> is a fast
- constraint solver. MINION's input language is very restricted 
-and therefore problem modelling is a challening task.
+ constraint solver. MINION's input language is very simple
+and restricted 
+and therefore problem modelling is a challenging task.
 This translator creates (mostly very effective)
 MINION input instance from an Essence' problem model.
 Essence' examples can be found <a href="../problems">here</a>.
+Please note that the translator and this manual are still 
+under developement.
+
+<h3 id="essence">What is Essence'?</h3>
+Essence' is a solver-independent Constraint modelling language.
+It allows to express a lot of Constraint problems rather easily
+and on a rather abstract level. It is solver-independent because 
+it is no input language for a specific Constraint solver, but
+is on a level that most Constraint Solvers support.
+Furthermore, Essence' is a subset of the more
+abstract problem specification language Essence. 
+<a href="http://www.cs.york.ac.uk/aig/constraints/AutoModel/">Here</a> 
+you can find out more about Essence and Essence' and its related 
+research. If you want to see some examples of Essence', click
+<a href="../examples">here</a>.  
 
 
+<h3 id="minion">What is Minion?</h3>
+<a href="http://minion.sourceforge.net/">Minion</a> is a very fast 
+Constraint solver which is available for free under the GNU GPL licence
+over sourceforge at <a href="http://sourceforge.net/projects/minion/">
+http://sourceforge.net/projects/minion/</a>.
+Its input language is very simple and therefore modelling efficiently is rather difficult
+(and not very pleasant). 
+<a href="http://minion.sourceforge.net/">Here</a> you can find out
+more about Minion.  
 
 
-<h3 id="compiling">Compiling the Translator</h3>
+<h3 id="whyTranslator">Why should I use this Translator?</h3>
+The Translator allows you to formulate your Constraint problem in
+Essence' and can then 
+<ol>
+<li> translate the problem instance into an effective Minion input
+file (by applying several model-enhancing reformulations) and 
+gives you an overview of the translation steps
+</li>
+
+<li> run the generated Minion instance 
+in Minion (provided  you have a version of Minion installed)
+</li>
+
+<li>return the results of your problem instance 
+(if there are any) together with some statistical data 
+in Essence' format. 
+</li>
+</ol>
+
+Hence you have a pleasant environment for modelling, are sure to get
+an efficient Minion instance without having
+to interfere with Minion at all.
+
+More experienced Constraint modeller can also adapt features 
+for the solving process such as branching strategies or variable
+orderings. 
+
+
+<h3 id="compiling">How can I compile the Translator?</h3>
+Compiling the translator is not necessary in order to run the
+translator since it comes with a .jar file but you are still welcome
+to modify the code.
 The Translator is written in <a href="http://www.java.com/">Java</a>, so you will need a current version
 (>= 1.5.0) of Java for compilation.
 Run the script <code>compile.sh</code> on the root directory. 
-Developers: If you want to rebuild the Essence' parser, run  <code>build.sh</code> instead of <code>compile.sh</code>
+If you want to rebuild the Essence' parser, run  <code>build.sh</code> instead of <code>compile.sh</code>
 (please note, that you will need the Lexer Generator <a href=" http://www.jflex.de/">jflex</a> and 
 the parser generator <a href="http://www2.cs.tum.edu/projects/cup/">java-cup</a> 
 installed in order to do that).
 
 
-
-
-<h3 id="running">Running the Translator</h3>
-Change to the root directory of the translator and call the Essence' Translator with:<br>
+<h3 id="running">How can I run the Translator?</h3>
+The translator is packed in an executable .jar file, <code>translator.jar</code>, so you will need
+Java's <a
+href="http://en.wikipedia.org/wiki/JAR_(file_format)">jar</a> that
+comes with Sun's JDK which is available <a href="http://java.sun.com/javase/downloads/index.jsp">here</a>. 
+To execute <code>translator.jar</code>
+change to the root directory of the translator and execute the Essence' Translator with:<br>
 <br>
 <center>
-<code>java translator.Translate</code><br>
+<code>java -jar translator.jar</code><br>
  </center>
 <br>
 which will start the graphical user interface of the translator.
 
-<h3 id="modelling">Modelling with Essence'</h3>
-Essence' is a declarative modelling language to specify constraint
-problems. The problem specification is usually stored in a file with
-the ending <code> .cm</code> and the parameters in a <code>
-.param</code> file. An Essence' file consists of the following parts:
+
+<h3 id="#bug">I found a bug...again! Where should I report it?</h3>
+Thanks for finding that bug! Please report it to 
+<a href="andrea@cs.st-and.ac.uk">Andrea</a>.
+
+<h3 id="gui">How those the graphical user interface work?</h3>
+You can find a more detailed description of the graphical user
+interface (GUI) here.
+
+
+
+<h3 id="grammar">Where can I find the grammar of Essence'?</h3>
+You can find the grammar of Essence' <a href="grammar.pdf">here</a>.
+
+
+<h3 id="modelling">How do I model problems with Essence'?</h3>
+You can find a little introduction into modelling with 
+Essence' <a href="modelling.html">here</a>.
+
+
+<h3 id="examples">Where can I find Essence' Examples?</h3>
+There are several Essence' examples in the <code>examples/</code>
+directory which is <a href="../examples">here</a>.
+
+<h3 id="translator">How does the Translator work?</h3>
+
+The translator works in several steps:
 
 <ol>
-<li> Header (stating the version of Essence')
+
+<li>Parse input
 </li>
-<li> Declarations (of constants, parameters, domains, decision
-variables) [optional]
+
+<li>Map the syntax tree to an advanced representation
 </li>
-<li> Constraints [optional]
+
+<li>Insert parameter values and constant values
 </li>
+
+<li>Normalise model (ordering, evaluation and restructuring of expressions)
+</li>
+
+<li>Flatten model
+</li>
+
+<li>Tailor flat model to solver constraints
+</li>
+
 </ol>
-Let's construct an example by modelling the
-<a href="http://www.math.uah.edu/mathclub/puzzles/money.html"> Send More Money problem</a>,
-where one has to find a
-solution  to the following sum where every letter stands for a distinct
-number between 0 and 9:
-	     <pre>
-	     S E N D + 
-	     M O R E
-	   ----------
-	   M O N E Y  
-	    </pre> 
 
-We start with the header
-<center>
-<table  bgcolor="#eeeeee" width="500">
-  <tr>
-    <td>
-    <pre>
-    ESSENCE' 1.0
-    </pre>
-     </td>
-    </tr>
-</table>
-</center>
-Our decision variables are <code> S, E, N,
-D, M, O, R, Y</code> which are in the domain of 0..9. We state that
-<code>S</code> and <code>M</code>  must not equal zero and define two
-domains: one reaching from 0..9 and the other from 1..9. Domains and
-constants can be defined by the <code> letting </code> statement:
-<center>
-<table  bgcolor="#eeeeee" width="500">
-  <tr>
-    <td>
-    <pre>
-    ESSENCE' 1.0
+If you want to learn more about the structure of the Translator, then 
+please consult the <a href="api/index.html">API</a> of the translator.
 
-    letting DOMAIN0 be domain int(0..9)
-    letting DOMAIN1 be domain int(1..9)
-    </pre>
-     </td>
-    </tr>
-</table>
-</center>
-Now we can define our decision variables that range over domains
-    <code>DOMAIN0</code>
-and <code>DOMAIN1</code> by using the <code>find</code> statement.
-<center>
-<table  bgcolor="#eeeeee" width="500">
-  <tr>
-    <td>
-    <pre>
-    ESSENCE' 1.0
 
-    letting DOMAIN0 be domain int(0..9)
-    letting DOMAIN1 be domain int(1..9)
 
-    find S,M : DOMAIN1, 
-         E,N,D,O,R,Y : DOMAIN0
-    </pre>
-     </td>
-    </tr>
-</table>
-</center>
-All declarations have been done now and we can define our
-constraint. The constraints are stated after <code>such that</code>:
-<center>
-<table  bgcolor="#eeeeee" width="500">
-  <tr>
-    <td>
-    <pre>
-    ESSENCE' 1.0
+<h3 id="question">I have a question that has not been answered here. What can I do?</h3>
 
-    letting DOMAIN0 be domain int(0..9)
-    letting DOMAIN1 be domain int(1..9)
+If you have any questions or comments concerning the Translator
+ then please feel free to contact <a href="http://www.cs.st-andrews.ac.uk/~andrea/">Andrea Rendl</a>.
 
-    find S,M : DOMAIN1, 
-         E,N,D,O,R,Y : DOMAIN0
-
-    such that 
-              1000*S + 100*E + 10*N + D 
-            + 1000*M + 100*O + 10*R + E =
-    10000*M + 1000*O + 100*N + 10*E + Y 
-         
-    </pre>
-     </td>
-    </tr>
-</table>
-</center>
-More examples can be found in the <a href="../problems">/problems</a> directory.
 
 </td>
 </tr>
