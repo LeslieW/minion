@@ -62,17 +62,44 @@ public class QuantifiedMulopExpressionTranslator extends
 	
 	ArrayList<MinionIdentifier> identifiers;
 	
+	/*public QuantifiedMulopExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
+	HashMap<String, MinionIdentifier[]> minionVecs,
+	HashMap<String, MinionIdentifier[][]> minionMatrixz,
+	HashMap<String, MinionIdentifier[][][]> minionCubes, 
+	ArrayList<String> decisionVarsNames, 
+	HashMap<String, Domain> decisionVars, 
+	MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, 
+	Parameters parameterArrays) {
+		this(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames, decisionVars, mm, useWatchedLiterals, useDiscreteVariables, parameterArrays, subExpressionCollection);
+	}
+*/
+
+	/*public QuantifiedMulopExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
+	HashMap<String, MinionIdentifier[]> minionVecs,
+	HashMap<String, MinionIdentifier[][]> minionMatrixz,
+	HashMap<String, MinionIdentifier[][][]> minionCubes, 
+	ArrayList<String> decisionVarsNames, 
+	HashMap<String, Domain> decisionVars, 
+	MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, 
+	Parameters parameterArrays, SubexpressionCollection subExpressionCollection) {
+		this(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames, decisionVars, mm, subExpressionCollection, parameterArrays, useWatchedLiterals, useDiscreteVariables);
+	}
+*/
+
 	public QuantifiedMulopExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
 			HashMap<String, MinionIdentifier[]> minionVecs,
 			HashMap<String, MinionIdentifier[][]> minionMatrixz,
 			HashMap<String, MinionIdentifier[][][]> minionCubes, 
 			ArrayList<String> decisionVarsNames, 
 			HashMap<String, Domain> decisionVars, 
-			MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, 
-			Parameters parameterArrays) {	
+			MinionModel mm,
+			Parameters parameterArrays, 
+			SubexpressionCollection subExpressionCollection, 
+			boolean useWatchedLiterals, 
+			boolean useDiscreteVariables) {	
 		
 		super(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames, decisionVars, 
-				mm, useWatchedLiterals, useDiscreteVariables, parameterArrays);
+				mm, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 		
 		
 		this.quantifiers = new ArrayList<Quantifier>();

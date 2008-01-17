@@ -24,15 +24,27 @@ import translator.preprocessor.PreprocessorException;
 
 public class RelationalExpressionTranslator extends MulopExpressionTranslator {
 
+	/*public RelationalExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
+	HashMap<String, MinionIdentifier[]> minionVecs,
+	HashMap<String, MinionIdentifier[][]> minionMatrixz,
+	ArrayList<String> decisionVarsNames, 
+	HashMap<String, Domain> decisionVars, 
+	MinionModel mm, 
+	boolean useWatchedLiterals, boolean useDiscreteVariables, 
+	Parameters parameterArrays, HashMap<String, MinionIdentifier[][][]> minionCubes) {
+		this(minionVars, minionVecs, minionMatrixz, decisionVarsNames, decisionVars, minionCubes, mm, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
+	}
+*/
+
 	public RelationalExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
 			HashMap<String, MinionIdentifier[]> minionVecs,
 			HashMap<String, MinionIdentifier[][]> minionMatrixz,
 			ArrayList<String> decisionVarsNames, 
 			HashMap<String, Domain> decisionVars, 
-			MinionModel mm, 
-			boolean useWatchedLiterals, boolean useDiscreteVariables, 
-			Parameters parameterArrays, HashMap<String, MinionIdentifier[][][]> minionCubes) {	
-		super(minionVars, minionVecs, minionMatrixz, decisionVarsNames, decisionVars,mm, useWatchedLiterals, useDiscreteVariables, parameterArrays, minionCubes);
+			HashMap<String, MinionIdentifier[][][]> minionCubes, 
+			MinionModel mm, Parameters parameterArrays, 
+			SubexpressionCollection subExpressionCollection, boolean useWatchedLiterals, boolean useDiscreteVariables) {	
+		super(minionVars, minionVecs, minionMatrixz, decisionVarsNames, decisionVars,mm, useWatchedLiterals, useDiscreteVariables, parameterArrays, minionCubes, subExpressionCollection);
 		
 	}
 	

@@ -38,14 +38,26 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 	
 	MinionBoundsVariable partwiseScalarFreshVariable;
 	
+	/*public SpecialExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
+	HashMap<String, MinionIdentifier[]> minionVecs,
+	HashMap<String, MinionIdentifier[][]> minionMatrixz,
+	HashMap<String, MinionIdentifier[][][]> minionCubes, 
+	ArrayList<String> decisionVarsNames, HashMap<String, Domain> decisionVars, 
+	MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, 
+	Parameters parameterArrays) {
+		this(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames, decisionVars, mm, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
+	}
+*/
+
+
 	public SpecialExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
 			HashMap<String, MinionIdentifier[]> minionVecs,
 			HashMap<String, MinionIdentifier[][]> minionMatrixz,
 			HashMap<String, MinionIdentifier[][][]> minionCubes, 
 			ArrayList<String> decisionVarsNames, HashMap<String, Domain> decisionVars, 
-			MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, 
-			Parameters parameterArrays) {	
-		super(minionVars, minionVecs, minionMatrixz,decisionVarsNames, decisionVars, mm, useWatchedLiterals, useDiscreteVariables, parameterArrays, minionCubes);
+			MinionModel mm, Parameters parameterArrays, SubexpressionCollection subExpressionCollection, 
+			boolean useWatchedLiterals, boolean useDiscreteVariables) {	
+		super(minionVars, minionVecs, minionMatrixz,decisionVarsNames, decisionVars, minionCubes, mm, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 		
 		scalarsList = new ArrayList<Expression> ();
 		weightedScalarsList = new ArrayList<Expression> ();

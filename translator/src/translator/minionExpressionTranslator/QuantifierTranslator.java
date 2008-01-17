@@ -43,6 +43,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	HashMap<String, Domain> decisionVariables;
 	ArrayList<String> decisionVariablesNames;
 	Parameters parameterArrays;
+	SubexpressionCollection subExpressionCollection;
 	
 	ExpressionEvaluator evaluator;
 	QuantifiedMulopExpressionTranslator translator;
@@ -73,6 +74,21 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	/** If we translate an objective, we just have a variable */
 	MinionIdentifier objectiveVariable;
 	
+	/*public QuantifierTranslator(HashMap<String, MinionIdentifier> minionVars,
+		HashMap<String, MinionIdentifier[]> minionVecs,
+		HashMap<String, MinionIdentifier[][]> minionMatrixz, 
+		HashMap<String, MinionIdentifier[][][]> minionCubes, 
+		ArrayList<String> decisionVarsNames, 
+		MinionModel mm, 
+		HashMap<String, Domain> decisionVars, 
+		Parameters parameterArrays, boolean useWatchedLiterals, boolean useDiscreteVariables) 
+	throws MinionException, ClassNotFoundException {
+		this(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames, mm, decisionVars, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
+	}
+
+*/
+
+
 	public QuantifierTranslator(HashMap<String, MinionIdentifier> minionVars,
 				HashMap<String, MinionIdentifier[]> minionVecs,
 				HashMap<String, MinionIdentifier[][]> minionMatrixz, 
@@ -80,7 +96,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				ArrayList<String> decisionVarsNames, 
 				MinionModel mm, 
 				HashMap<String, Domain> decisionVars, 
-				Parameters parameterArrays, boolean useWatchedLiterals, boolean useDiscreteVariables) 
+				Parameters parameterArrays, SubexpressionCollection subExpressionCollection, boolean useWatchedLiterals, boolean useDiscreteVariables) 
 			throws MinionException, ClassNotFoundException {
 		
 		this.quantifiers = new ArrayList<Quantifier>();
@@ -97,6 +113,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		this.decisionVariablesNames = decisionVarsNames;
 		this.translatorMinionModel = mm;
 		this.parameterArrays = parameterArrays;
+		this.subExpressionCollection = subExpressionCollection;
 		
 		this.evaluator = new ExpressionEvaluator(bindingParameters, parameterArrays);
 		this.noOfReifiedVariables =0;
@@ -106,7 +123,12 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				minionMatrixz, //new ArrayList<String>(),
 				minionCubes, 
 				 decisionVarsNames,
-				decisionVars, translatorMinionModel, useWatchedLiterals, useDiscreteVariables, parameterArrays);
+				decisionVars, 
+				translatorMinionModel, 
+				parameterArrays, 
+				subExpressionCollection, 
+				useWatchedLiterals, 
+				useDiscreteVariables);
 		
 		this.variableCreator = new MinionVariableCreator(minionVariables,
 				 minionVectors,
@@ -790,7 +812,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				if(hasOtherQuantifications(constraint)) {
 					print_debug("THere are OOOOOOOOOOTHER quantified constraints, but nested... in"+constraint.toString()); 
 					QuantifierTranslator quantifierTranslator = new QuantifierTranslator(minionVariables, minionVectors,
-										minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
+										minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 					reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(constraint, reifiable);
 				}
 				else 
@@ -807,7 +829,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			  if(hasOtherQuantifications(constraint)) {
 				print_debug("THere are OOOOOOOOOOTHER quantified constraints, but nested... in"+constraint.toString()); 
 				QuantifierTranslator quantifierTranslator = new QuantifierTranslator(minionVariables, minionVectors,
-									minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
+									minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 				minionConstraint = quantifierTranslator.translate(constraint, reifiable);
 						//this.evaluator.evalExpression(constraint), reifiable);
 				if(minionConstraint != null)
@@ -837,7 +859,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			if(hasOtherQuantifications(constraint)) {
 				print_debug("THere are OOOOOOOOOOTHER quantified constraints, but nested... in"+constraint.toString()); 
 				QuantifierTranslator quantifierTranslator = new QuantifierTranslator(minionVariables, minionVectors,
-									minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
+									minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 				reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(constraint, reifiable);
 			}
 			else 

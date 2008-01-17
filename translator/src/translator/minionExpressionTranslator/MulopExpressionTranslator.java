@@ -50,15 +50,30 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 	
 	MinionIdentifier freshVariableBuffer;
 	
+	/*public MulopExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
+	HashMap<String, MinionIdentifier[]> minionVecs,
+	HashMap<String, MinionIdentifier[][]> minionMatrixz,
+	ArrayList<String> decisionVarsNames,
+	HashMap<String, Domain> decisionVariables,
+	MinionModel mm, 
+	boolean useWatchedLiterals, boolean useDiscreteVariables, 
+	Parameters parameterArrays, HashMap<String, MinionIdentifier[][][]> minionCubes) {
+		this(minionVars, minionVecs, minionMatrixz, decisionVarsNames, decisionVariables, mm, useWatchedLiterals, useDiscreteVariables, parameterArrays, minionCubes, subExpressionCollection);
+	}
+*/
+
 	public MulopExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
 			HashMap<String, MinionIdentifier[]> minionVecs,
 			HashMap<String, MinionIdentifier[][]> minionMatrixz,
 			ArrayList<String> decisionVarsNames,
 			HashMap<String, Domain> decisionVariables,
 			MinionModel mm, 
-			boolean useWatchedLiterals, boolean useDiscreteVariables, 
-			Parameters parameterArrays, HashMap<String, MinionIdentifier[][][]> minionCubes) {	
-		super(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames,decisionVariables, mm, useWatchedLiterals, useDiscreteVariables, parameterArrays);
+			boolean useWatchedLiterals, 
+			boolean useDiscreteVariables, 
+			Parameters parameterArrays, 
+			HashMap<String, MinionIdentifier[][][]> minionCubes, 
+			SubexpressionCollection subExpressionCollection) {	
+		super(minionVars, minionVecs, minionMatrixz, minionCubes, decisionVarsNames,decisionVariables, mm, subExpressionCollection, parameterArrays, useWatchedLiterals, useDiscreteVariables);
 		
 		expressionDepth = 0;
 		
@@ -81,13 +96,26 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 		
 		print_debug("translating mulop expression: "+e.toString());
 		
+		// check if we have already translated this expression
+		ExpressionRepresentation alreadyTranslatedExpression = this.subExpressionCollection.getExpressionRepresentation(e);
+		if(alreadyTranslatedExpression != null){
+			return alreadyTranslatedExpression.getVariable();
+		}
+		
+		
+		
+		
+		MinionIdentifier translatedExpression = null;
+		
+		
 		if(e.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR ||
 				e.getRestrictionMode() == EssenceGlobals.NONATOMIC_EXPR)
-			return translateAtomExpression(e);
+			translatedExpression =  translateAtomExpression(e);
+		
 		
 		else if(e.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
 		    QuantifierTranslator quantifierTranslator = new QuantifierTranslator(minionVariables, minionVectors,
-											 minionMatrices, minionCubes,decisionVariablesNames, minionModel, decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
+											 minionMatrices, minionCubes,decisionVariablesNames, minionModel, decisionVariables, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 		    MinionReifiableConstraint reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(e, true);
 		    if(reifiableConstraint == null)
 			throw new TranslationUnsupportedException
@@ -97,15 +125,23 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
             	minionModel.add01Variable(reifiedVariable);
             	minionModel.addReificationConstraint(reifiableConstraint, reifiedVariable);
             	print_debug("returning reified variable after translating in translateMulopE:"+e.toString());
-            	return reifiedVariable;
+            	translatedExpression =  reifiedVariable;
 		    }
 		}
+		
+		
 		else if(e.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR)
-			return translateUnaryExpression(e.getUnaryExpression());
+			translatedExpression =  translateUnaryExpression(e.getUnaryExpression());
+		
+		
 		
 		else if(e.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
-			return translateMulopExpression(e.getExpression());
+			translatedExpression = translateMulopExpression(e.getExpression());
 		
+		
+		
+		
+		else { 
 		print_debug("translating mulop expression: "+e.toString()+" with operator :"+e.getBinaryExpression().getOperator().toString());
 		
 		int operator = e.getBinaryExpression().getOperator().getRestrictionMode();
@@ -115,13 +151,13 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 				operator == EssenceGlobals.MULT ||
 				operator == EssenceGlobals.DIVIDE ||
 				operator == EssenceGlobals.POWER)
-			return translateArithmeticExpression(e.getBinaryExpression());
+			translatedExpression = translateArithmeticExpression(e.getBinaryExpression());
 		
 		else if(operator == EssenceGlobals.AND ||
 				operator == EssenceGlobals.OR ||
 				operator == EssenceGlobals.IF ||
 				operator == EssenceGlobals.IFF)
-			return translateBooleanExpression(e.getBinaryExpression());
+			translatedExpression = translateBooleanExpression(e.getBinaryExpression());
 		
 		else if(operator == EssenceGlobals.EQ ||
 				operator == EssenceGlobals.NEQ ||
@@ -129,12 +165,20 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 				operator == EssenceGlobals.GEQ ||
 				operator == EssenceGlobals.GREATER ||
 				operator == EssenceGlobals.LESS) {
-			return translateRelExpression(e.getBinaryExpression());
+			translatedExpression = translateRelExpression(e.getBinaryExpression());
 		}
 			
 		else 
 			throw new TranslationUnsupportedException
 				("Internal error: trying to translate a relational expression '"+e.toString()+"' in the MulopExpressionTranslator.");
+		
+		}
+		
+		
+		// collect the subExpression we just translated
+		this.subExpressionCollection.addSubExpression(translatedExpression, e);
+		return translatedExpression;
+		
 	}
 	/**
 	 * Translates Expression e to a MinionIdentifier. The Expression HAS to be 
@@ -560,6 +604,7 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 	    int lower_right = right.getLowerBound();
 	    int upper_right = right.getUpperBound();	   
 	
+	    
 		
 		int lower_tmp = 0;
 		int upper_tmp = 0;
@@ -579,7 +624,29 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
     	break;
 	
     case EssenceGlobals.MULT:
-    		if(upper_left < 0 && upper_right < 0 ||  // all negative
+	
+	if(lower_left == upper_left) { // we have a constant
+	    lower_tmp = lower_left * lower_right;
+	    upper_tmp = lower_left * upper_right;
+
+	}
+	else if(lower_right == upper_right) { // we have a constant
+	    lower_tmp = lower_left * lower_right;
+	    upper_tmp = lower_right * upper_left;
+
+	}
+	else if((lower_left == 0) && (lower_right == 0)) {
+	    lower_tmp = 0;
+	    upper_tmp = upper_left*lower_left;
+	} 
+	else if((lower_left == 0 && lower_right == 1) ||
+		(lower_left == 1 && lower_right == 0)) {
+	    lower_tmp = 0;
+	    upper_tmp = upper_left*upper_right;
+
+	}
+
+	else if(upper_left < 0 && upper_right < 0 ||  // all negative
     		lower_left >= 0 && lower_right >= 0) { // all positive => 2 cases 
     			lower_tmp = lower_left * lower_right;
     			upper_tmp = upper_left * upper_right;
@@ -608,6 +675,9 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
     			upper_tmp = upper_left * upper_right;
     		}
 	
+
+	print_debug("Lb left:"+lower_left+",ub left:"+upper_left+", |||| lb right:"+lower_right+", ub right:"+upper_right);
+		print_debug("Lower and upper bound of new tmp variable for PRODUCT constraint: lb"+lower_tmp+", ub: "+upper_tmp);
     		break;
 
     case EssenceGlobals.DIVIDE:
@@ -628,6 +698,8 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 		if(upper_tmp > MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND)
 			upper_tmp = MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND;
 		
+
+
 		return new int[] {lower_tmp, upper_tmp};
 	}
 	

@@ -36,6 +36,7 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
         MinionModel minionModel;
 	MinionVariableCreator variableCreator;
 	Parameters parameterArrays;
+	SubexpressionCollection subExpressionCollection;
 	
 	//GlobalConstraintTranslator globalConstraintTranslator;
 	int noTmpVars;
@@ -49,8 +50,10 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 			ArrayList<String> decisionVarsNames, 
 			HashMap<String, Domain> decisionVars, 
 			MinionModel mModel, 
+			SubexpressionCollection subExpressionCollection, 
+			Parameters parameterArrays, 
 			boolean useWatchedLiterals, 
-			boolean useDiscreteVars, Parameters parameterArrays) {	
+			boolean useDiscreteVars) {	
 		
 		this.minionVariables = minionVars;
 		this.minionVectors = minionVecs;
@@ -62,6 +65,7 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 		this.useWatchedLiterals = useWatchedLiterals;
 		this.useDiscreteVariables = useDiscreteVars;
 		this.parameterArrays = parameterArrays;
+		this.subExpressionCollection = subExpressionCollection;
 		this.variableCreator = new MinionVariableCreator(minionVariables,
 								 minionVectors,
 								 minionMatrices,
@@ -85,15 +89,28 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 	protected MinionIdentifier translateAtomExpression(Expression e)
 		throws TranslationUnsupportedException, MinionException, PreprocessorException {
 		
-		if(e.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR)
-			return translateAtomicExpression(e.getAtomicExpression());
+		// check if we have already translated this subexpression before
+		ExpressionRepresentation alreadyTranslatedExpression = this.subExpressionCollection.getExpressionRepresentation(e);
+		if(alreadyTranslatedExpression != null) {
+			return alreadyTranslatedExpression.getVariable();
+		}
+			
+		MinionIdentifier translatedExpression = null;
 		
+		if(e.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) 
+			translatedExpression = translateAtomicExpression(e.getAtomicExpression());
+	
 		else if (e.getRestrictionMode() == EssenceGlobals.NONATOMIC_EXPR)
-		  return translateNonAtomicExpression(e.getNonAtomicExpression());
+			translatedExpression = translateNonAtomicExpression(e.getNonAtomicExpression());
+			
 		
-		else 
-			throw new TranslationUnsupportedException 
+		else throw new TranslationUnsupportedException 
 			("Internal error. Trying to translate a non atom expression '"+e.toString()+"' with the AtomExpressionTranslator.");
+		
+		// add the <expression,MinionIdentifier> we have just translated to our collection
+		this.subExpressionCollection.addSubExpression(translatedExpression, e);
+		return translatedExpression;
+		
 	}
 
  /** Translate an atomic expression to a Minion Identifier

@@ -10,6 +10,8 @@ public final class MinionConstant extends MinionIdentifier {
     this.c = c ;
     originalName = "constant";
     polarity = -1;
+    this.upperBound = c;
+    this.lowerBound = c;
   }
 
   /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

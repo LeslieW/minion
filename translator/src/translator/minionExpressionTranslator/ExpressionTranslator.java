@@ -32,6 +32,7 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 	ArrayList<String> decisionVariablesNames;
         MinionModel minionModel;
 	Parameters parameterArrays;
+	SubexpressionCollection subExpressionCollection;
 	
 	//GlobalConstraintTranslator globalConstraintTranslator;
 	
@@ -63,15 +64,22 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 		print_debug("ExpressionTranslator: useWatchedLiterals is "+useWatchedLiterals);
 
 		
+		this.subExpressionCollection = new SubexpressionCollection();
+		
 		this.expressionTranslator = new QuantifiedMulopExpressionTranslator(this.minionVariables,
 				                                                    this.minionVectors,
 				                                                    this.minionMatrices, 
-				                                            minionCubes,decisionVarsNames,decisionVariables, 
-				                                            this.minionModel, useWatchedLiterals, useDiscreteVariables, parameterArrays);	
+				                                                    minionCubes,decisionVarsNames,
+				                                                    decisionVariables, 
+				                                                    this.minionModel,
+				                                                    parameterArrays,
+				                                                    subExpressionCollection,
+				                                                    useWatchedLiterals, 
+				                                                    useDiscreteVariables);	
 		
 		this.quantificationTranslator = new QuantifierTranslator(this.minionVariables, this.minionVectors, this.minionMatrices, 
 									 minionCubes, decisionVariablesNames, minionModel, 
-				                                                 decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
+				                                                 decisionVariables, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 	}
 	
 	
