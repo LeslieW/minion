@@ -16,7 +16,7 @@ import translator.solver.Minion;
 
 public class Translate {
 
-	public static final String GUI_NAME = "The Reformulator I";
+	public static final String GUI_NAME = "TAILOR v0.1";
 	public static final String EMPTY_PARAM_STRING = "Essence' 1.0\n";
 	
 	/**
