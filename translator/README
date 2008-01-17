@@ -1,10 +1,10 @@
 =================================================================================================
- Essence' Translator  v1.0
+ Essence' Translator (Tailor) v1.0
 =================================================================================================
 support: andrea@cs.st-andrews.ac.uk (Andrea Rendl)
 
 
-This translator converts models expressed in Essence'[1] to the Minion
+This translator (called Tailor) converts models expressed in Essence'[1] to the Minion
 input format. The parser of the Essence' language has been constructed
 using the LALR parser generator Java Cup[2] in combination with the 
 Scanner generator jflex[3], both released under GPL[4]. 
@@ -19,12 +19,12 @@ The translator is packed in an executable .jar file, translator.jar, so you will
 Java Sun's JDK[5]. To execute translator.jar changeto the translator's
 root directory and type
 
-java -jar translator.jar
+java -jar tailor.jar
 
 which will start the graphical version of the translator. For the
 command line version type 
 
-java -jar translator.jar -help
+java -jar tailor.jar -help
 
 for further details.
 
@@ -45,21 +45,22 @@ need jflex[2] and Java-Cup[3] installed).
 
 3. Documentation
 ----------------
-Documentation can be found at doc/index.html, that contains links to several 
-Essence' examples, the Essence' grammar specification, the Minion manual 
-and the translator API.
+Documentation can be found at tailor-doc/index.html in a release archive, 
+or doc/index.html in SVN, that contains links to several Essence' examples, 
+the Essence' grammar specification, and the translator API.
 
 
 
 4. Essence' examples
 --------------------
 4.1 Problem Samples
-Several problem samples can be found in the /problems directory. All problem
-samples are documented.
+Several problem samples can be found in the /tailor-examples directory in a 
+release archive, or the /problems directory in SVN. All problem samples are 
+documented.
 
 4.2 Test Instances
-A large amount of test instances can be found in the /test directory. It also
-contains a directory of generated Minion files. 
+A large amount of test instances can be found in the /test directory in SVN. 
+It also contains a directory of generated Minion files. 
 
 
 
