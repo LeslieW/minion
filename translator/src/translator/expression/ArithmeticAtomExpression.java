@@ -119,7 +119,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	}
 	
 	
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		return this;
 	}
 }

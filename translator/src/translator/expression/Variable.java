@@ -490,7 +490,7 @@ public class Variable implements Expression {
 		
 	}
 	
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		return this;
 	}
 	

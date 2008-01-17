@@ -70,8 +70,8 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 				SMALLER : BIGGER;
 	}
 	
-	public Expression merge() {
-		this.argument = this.argument.merge();
+	public Expression reduceExpressionTree() {
+		this.argument = this.argument.reduceExpressionTree();
 		return this;
 	}
 }

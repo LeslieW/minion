@@ -153,9 +153,9 @@ public class NonCommutativeRelationalBinaryExpression implements
 		return this;
 	}
 	
-	public Expression merge() {
-		this.leftArgument = this.leftArgument.merge();
-		this.rightArgument = this.rightArgument.merge();
+	public Expression reduceExpressionTree() {
+		this.leftArgument = this.leftArgument.reduceExpressionTree();
+		this.rightArgument = this.rightArgument.reduceExpressionTree();
 		return this;
 	}
 	

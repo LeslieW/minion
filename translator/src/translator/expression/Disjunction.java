@@ -32,7 +32,7 @@ public class Disjunction extends NaryRelationalExpression {
 	}
 
 	public void orderExpression() {
-		orderExpressionList(this.disjointExpressions);
+		this.disjointExpressions = orderExpressionList(this.disjointExpressions);
 
 	}
 	
@@ -103,21 +103,26 @@ public class Disjunction extends NaryRelationalExpression {
 			newConstant = constants.get(i) || newConstant;
 		}
 	
-		if(newConstant == false) {
-			return new RelationalAtomExpression(false);
+		print_debug("evaluated atoms to constant:"+newConstant);
+		
+		if(newConstant == true) {
+			return new RelationalAtomExpression(true);
 		}
 		else {
-		// 	add the constant to the beginning of the list, since it is smallest for sure
-			this.disjointExpressions.add(0,new RelationalAtomExpression(newConstant));
+			if(this.disjointExpressions.size() == 0)
+				return new RelationalAtomExpression(newConstant);
+			
+		    // 	the constant can only be false now, which we can neglect
+			//this.disjointExpressions.add(0,new RelationalAtomExpression(newConstant));
 			return this;
 		}
 	}
 	
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		
 		for(int i=this.disjointExpressions.size()-1; i>=0; i--) {
 			// merge the argument
-			this.disjointExpressions.add(i, disjointExpressions.remove(i).merge());
+			this.disjointExpressions.add(i, disjointExpressions.remove(i).reduceExpressionTree());
 			
 			// if the argument is a nested disjunction
 			if(disjointExpressions.get(i).getType() == OR) {
@@ -125,12 +130,23 @@ public class Disjunction extends NaryRelationalExpression {
 				
 				// add the disjointExpressions of the nested conjunction
 				for(int j=nestedDisjunction.disjointExpressions.size()-1; j >=0; j--) {
-					this.disjointExpressions.add(nestedDisjunction.disjointExpressions.remove(i));
+					this.disjointExpressions.add(nestedDisjunction.disjointExpressions.remove(j));
 				}
 			}
 		}
 		
+		// if there is only one argument left, we have no disjunction but a single element
+		if(this.disjointExpressions.size() == 1)
+			return this.disjointExpressions.remove(0);
+		
 		return this;
 	}
 	
+	
+	protected void print_debug(String message) {
+		
+		if(DEBUG)
+			System.out.println("[ DEBUG disjunction ] "+message);
+		
+	}
 }

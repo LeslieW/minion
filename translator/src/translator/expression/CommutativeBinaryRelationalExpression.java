@@ -54,6 +54,14 @@ public class CommutativeBinaryRelationalExpression implements
 			this.leftArgument = this.rightArgument;
 			this.rightArgument = swap;
 		}
+		else if(this.leftArgument.getType() == this.rightArgument.getType()) {
+			char argumentRelation = this.leftArgument.isSmallerThanSameType(this.rightArgument);
+			if(argumentRelation == BIGGER) {
+				Expression swap = this.leftArgument;
+				this.leftArgument = this.rightArgument;
+				this.rightArgument = swap;
+			}	
+		}
 	}
 	
 	public String toString() {
@@ -142,9 +150,9 @@ public class CommutativeBinaryRelationalExpression implements
 		
 	}
 	
-	public Expression merge() {
-		this.leftArgument = this.leftArgument.merge();
-		this.rightArgument = this.rightArgument.merge();
+	public Expression reduceExpressionTree() {
+		this.leftArgument = this.leftArgument.reduceExpressionTree();
+		this.rightArgument = this.rightArgument.reduceExpressionTree();
 		return this;
 	}
 }

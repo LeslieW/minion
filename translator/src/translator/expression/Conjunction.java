@@ -33,7 +33,7 @@ public class Conjunction extends NaryRelationalExpression {
 	}
 
 	public void orderExpression() {
-		this.orderExpressionList(this.conjointExpressions);
+		this.conjointExpressions = this.orderExpressionList(this.conjointExpressions);
 
 	}
 
@@ -93,7 +93,7 @@ public class Conjunction extends NaryRelationalExpression {
 		
 		// then look for constants and collect them
 		//(start loop from the tail of the list, because we are removing elements)
-		for(int i=this.conjointExpressions.size(); i>=0; i--) {
+		for(int i=this.conjointExpressions.size()-1; i>=0; i--) {
 			
 			if(this.conjointExpressions.get(i).getType() == BOOL)
 				constants.add( ( (RelationalAtomExpression) conjointExpressions.remove(i) ).getBool());
@@ -112,19 +112,22 @@ public class Conjunction extends NaryRelationalExpression {
 			return new RelationalAtomExpression(false);
 		}
 		else {
-			// add the constant to the beginning of the list, since it is smallest for sure
-			this.conjointExpressions.add(0,new RelationalAtomExpression(newConstant));
+			if(this.conjointExpressions.size() == 0)
+				return new RelationalAtomExpression(newConstant);
+			
+			// the constant can only be true now, which means we can leave it out 
+			//this.conjointExpressions.add(0,new RelationalAtomExpression(newConstant));
 			return this;
 		}
 	}
 	
 	
 	
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		
 		for(int i=this.conjointExpressions.size()-1; i>=0; i--) {
 			// merge the argument
-			this.conjointExpressions.add(i, conjointExpressions.remove(i).merge());
+			this.conjointExpressions.add(i, conjointExpressions.remove(i).reduceExpressionTree());
 			
 			// if the argument is a nested conjunction
 			if(conjointExpressions.get(i).getType() == AND) {
@@ -132,13 +135,24 @@ public class Conjunction extends NaryRelationalExpression {
 				
 				// add the conjointExpressions of the nested conjunction
 				for(int j=nestedConjunction.conjointExpressions.size()-1; j >=0; j--) {
-					this.conjointExpressions.add(nestedConjunction.conjointExpressions.remove(i));
+					this.conjointExpressions.add(nestedConjunction.conjointExpressions.remove(j));
 				}
 			}
 		}
 		
+		// if there is only one argument left, we have no disjunction but a single element
+		if(this.conjointExpressions.size() == 1)
+			return this.conjointExpressions.remove(0);
+		
 		return this;
 	}
 	
+	
+	protected void print_debug(String message) {
+		
+		if(DEBUG)
+			System.out.println("[ DEBUG conjunction ] "+message);
+		
+	}
 }
 

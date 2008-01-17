@@ -37,7 +37,7 @@ public class Multiplication extends NaryArithmeticExpression {
 	}
 
 	public void orderExpression() {
-		this.orderExpressionList(this.arguments);
+		this.arguments = this.orderExpressionList(this.arguments);
 
 	}
 
@@ -95,6 +95,7 @@ public class Multiplication extends NaryArithmeticExpression {
 		//(start loop from the tail of the list, because we are removing elements)
 		for(int i=this.arguments.size()-1; i>=0; i--) {
 			Expression argument = this.arguments.get(i);
+			
 			if(argument.getType() == INT) 
 				constants.add(((ArithmeticAtomExpression) arguments.remove(i)).getConstant());
 			
@@ -113,7 +114,12 @@ public class Multiplication extends NaryArithmeticExpression {
 		
 		if(newConstant == 0)
 			return new ArithmeticAtomExpression(0);
+		else if(newConstant == 1)
+			return this; // don't add it to the list since it is the identity
 		else {
+			if(this.arguments.size() == 0)
+				return new ArithmeticAtomExpression(newConstant);
+			
 		    // add the constant to the beginning of the list, since it is smallest for sure
 			this.arguments.add(0,new ArithmeticAtomExpression(newConstant));
 			return this;
@@ -121,11 +127,11 @@ public class Multiplication extends NaryArithmeticExpression {
 	}
 	
 	
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		
 		for(int i=this.arguments.size()-1; i>=0; i--) {
 			// merge the argument
-			this.arguments.add(i, arguments.remove(i).merge());
+			this.arguments.add(i, arguments.remove(i).reduceExpressionTree());
 			
 			// if the argument is a nested mutliplication
 			if(arguments.get(i).getType() == MULT) {
@@ -133,10 +139,14 @@ public class Multiplication extends NaryArithmeticExpression {
 				
 				// add the arguments of the nested multiplication 
 				for(int j=nestedMultiplication.arguments.size()-1; j >=0; j--) {
-					this.arguments.add(nestedMultiplication.arguments.remove(i));
+					this.arguments.add(nestedMultiplication.arguments.remove(j));
 				}
 			}
 		}
+		
+		// if the multiplication only consists of one element, then return just the one element
+		if(this.arguments.size() == 1) 
+			return this.arguments.remove(0);
 		
 		return this;
 	}

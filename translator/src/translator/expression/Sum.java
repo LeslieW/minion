@@ -68,25 +68,45 @@ public class Sum extends NaryArithmeticExpression {
 	}
 
 	public void orderExpression() {
-		this.orderExpressionList(this.positiveArguments);
-		this.orderExpressionList(this.negativeArguments);
+		this.positiveArguments = this.orderExpressionList(this.positiveArguments);
+		this.negativeArguments = this.orderExpressionList(this.negativeArguments);
 	}
 
 	public String toString() {
 		
 		String s = "";
 		
-		// first the positive arguments
+		 // first the positive arguments
 		if(this.positiveArguments.size() > 0)
 			s = s.concat(positiveArguments.get(0).toString());
-		for(int i=0; i<this.positiveArguments.size(); i++) {
+		for(int i=1; i<this.positiveArguments.size(); i++) {
 			s = s.concat(" + "+this.positiveArguments.get(i));
 		}
 		
 		for(int i=0; i< this.negativeArguments.size(); i++)
 			s = s.concat("-"+this.negativeArguments.get(i));
-		
+				
 		return s;
+		
+		
+		/*
+	//	INFIX representation
+	  
+		if(this.positiveArguments.size() > 0)
+			s = s.concat("+("+positiveArguments.get(0).toString());
+		
+		for(int i=1; i<this.positiveArguments.size(); i++) {
+			s = s.concat(" "+this.positiveArguments.get(i));
+		}
+		
+		s = s.concat("), -(");
+		
+		for(int i=0; i< this.negativeArguments.size(); i++)
+			s = s.concat(" "+this.negativeArguments.get(i));
+		
+		
+		return s.concat(")");
+		*/
 	}
 	
 	/**
@@ -110,6 +130,8 @@ public class Sum extends NaryArithmeticExpression {
 		Sum otherSum = (Sum) e;
 		int thisNoOfArguments = this.positiveArguments.size() + this.negativeArguments.size();
 		int otherNoOfArguments = otherSum.positiveArguments.size() + otherSum.positiveArguments.size();
+		
+		//print_debug("Number of arguments: this ("+this+") has:"+thisNoOfArguments+" and other ("+otherSum+") has:"+otherNoOfArguments);
 		
 		if(thisNoOfArguments < otherNoOfArguments) 
 			return SMALLER;
@@ -218,11 +240,16 @@ public class Sum extends NaryArithmeticExpression {
 		
 		/** 4. merge the resulting new constant with the rest of the sum  */
 		
-        // constant is 0: don't add it back to the list
-		if(newConstant == 0)
+        
+		if(this.positiveArguments.size() == 0 && this.negativeArguments.size() == 0)
+			return new ArithmeticAtomExpression(newConstant);
+		
+		// constant is 0: don't add it back to the list -> only do this if 
+		//                we have some other elements      
+		else if(newConstant == 0)
 			return this; 
 		
-		else if(newConstant > 0){
+		else if(newConstant > 0){	
 		    // add the constant to the beginning of the list, since it is smallest for sure
 			this.positiveArguments.add(0,new ArithmeticAtomExpression(newConstant));
 			return this;
@@ -237,45 +264,75 @@ public class Sum extends NaryArithmeticExpression {
 	
 	
 	
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		
 		for(int i=this.positiveArguments.size()-1; i>=0; i--) {
 			// merge the argument
-			this.positiveArguments.add(i, positiveArguments.remove(i).merge());
+			this.positiveArguments.add(i, positiveArguments.remove(i).reduceExpressionTree());
+			
+			//print_debug("looking if we can merge this element to the sum:"+this.positiveArguments.get(i));
 			
 			// if the argument is a nested addition
 			if(positiveArguments.get(i).getType() == SUM) {
 				Sum nestedPositiveSum = (Sum) positiveArguments.remove(i);
 				
+				//print_debug("we can merge this element :"+nestedPositiveSum+" to the sum:"+this);
+				
 				// add the positive and negative Arguments of the nested sum
 				for(int j=nestedPositiveSum.positiveArguments.size()-1; j >=0; j--) {
-					this.positiveArguments.add(nestedPositiveSum.positiveArguments.remove(i));
+					//print_debug("about to remove positive element '"+nestedPositiveSum.positiveArguments.get(j)+"' at position "+j+" from subSum and put it to this sum.");
+					this.positiveArguments.add(nestedPositiveSum.positiveArguments.remove(j));
 				}
 				for(int j=nestedPositiveSum.negativeArguments.size()-1; j >=0; j--) {
-					this.negativeArguments.add(nestedPositiveSum.negativeArguments.remove(i));
+					//print_debug("about to remove negative element '"+nestedPositiveSum.negativeArguments.get(j)+"' at position "+j+" from subSum and put it to this sum.");
+					this.negativeArguments.add(nestedPositiveSum.negativeArguments.remove(j));
 				}
+			}
+			 //if the argument is an expression that is negated by a unary minus 
+			else if(positiveArguments.get(i).getType() == U_MINUS) {
+				this.negativeArguments.add( ( (UnaryMinus) this.positiveArguments.remove(i)).getArgument());
 			}
 		}
 		
+		//print_debug("Merged positive elements: "+this.positiveArguments);
+		
 		for(int i=this.negativeArguments.size()-1; i>=0; i--) {
 			// merge the argument
-			this.negativeArguments.add(i, negativeArguments.remove(i).merge());
+			this.negativeArguments.add(i, negativeArguments.remove(i).reduceExpressionTree());
 			
 			// if the argument is a nested addition
-			if(negativeArguments.get(i).getType() == MINUS) {
+			if(negativeArguments.get(i).getType() == SUM) {
 				Sum nestedNegativeSum = (Sum) negativeArguments.remove(i);
 				
 				// add the positive and negative Arguments of the nested sum 
 				// BUT SWITCH THE OPERATORS!! (since we have a minus in front of it)
 				for(int j=nestedNegativeSum.positiveArguments.size()-1; j >=0; j--) {
-					this.negativeArguments.add(nestedNegativeSum.positiveArguments.remove(i));
+					this.negativeArguments.add(nestedNegativeSum.positiveArguments.remove(j));
 				}
 				for(int j=nestedNegativeSum.negativeArguments.size()-1; j >=0; j--) {
-					this.positiveArguments.add(nestedNegativeSum.negativeArguments.remove(i));
+					this.positiveArguments.add(nestedNegativeSum.negativeArguments.remove(j));
 				}
+			}
+			
+			// if the argument is an expression that is negated by a unary minus 
+			else if(negativeArguments.get(i).getType() == U_MINUS) {
+				this.positiveArguments.add( ( (UnaryMinus) this.negativeArguments.remove(i)).getArgument());
 			}
 		}		
 		
+		//print_debug("Merged negative elements: "+this.negativeArguments);
+		
+		// if there is only one element left, then reduce the sum to the element-expression
+		if(this.positiveArguments.size() == 1 && this.negativeArguments.size() == 0)
+			return this.positiveArguments.remove(0);
+		else if(this.positiveArguments.size() == 0 && this.negativeArguments.size() == 1)
+			return new Negation(this.negativeArguments.remove(0));
+		
 		return this;
+	}
+	
+	protected void print_debug(String message) {
+		if(DEBUG)
+			System.out.println("[ DEBUG sum ] "+message);
 	}
 }

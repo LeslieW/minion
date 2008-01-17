@@ -6,6 +6,8 @@ import translator.expression.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 
+
+
 /**
  * Maps expression of the syntax tree to a different expression
  * representation that encaptures several features and which is 
@@ -32,7 +34,7 @@ public class ExpressionMapper {
 	/** A hashmap containing all parameters with their corresponding domains */
 	HashMap<String, Domain> parameters;
 	
-	
+	private final boolean DEBUG = true;
 	
 	public ExpressionMapper(HashMap<String,Domain> decisionVariables,
 			                HashMap<String, Domain> parameters) {
@@ -94,6 +96,7 @@ public class ExpressionMapper {
 		translator.expression.Expression leftArgument = mapExpression(oldBinExpression.getLeftExpression());
 		translator.expression.Expression rightArgument = mapExpression(oldBinExpression.getRightExpression());
 		
+		//print_debug("Left mapped expression:"+leftArgument+", right mapped expression:"+rightArgument);
 		
 		// non-commutative relational operator
 		if(operator == EssenceGlobals.LEQ ||
@@ -357,6 +360,14 @@ public class ExpressionMapper {
 		default: throw new NormaliserException("Unknown identifier in domain "+domain.toString()+" of variable '"+variableName+
 		"' or internal error (normalising before insertion of all identifier domains).");
 			
+		}
+		
+	}
+	
+	protected void print_debug(String message) {
+		
+		if(DEBUG) {
+			System.out.println(" [ DEBUG expressionMapper ] "+message);
 		}
 		
 	}

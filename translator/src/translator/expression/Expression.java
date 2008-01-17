@@ -5,15 +5,17 @@ package translator.expression;
 
 public interface Expression {
 
+	public final boolean DEBUG = true;
+	
 	// RelationalAtomExpression.java
 	public final int BOOL = 0;
-	public final int BOOL_VARIABLE = 1;
-	public final int BOOL_VARIABLE_ARRAY_ELEM = 2;
+	public final int BOOL_VARIABLE = 5;
+	public final int BOOL_VARIABLE_ARRAY_ELEM = 6;
 		
 	// --------------------------------------------------------
 	
 	//ArithmeticAtomExpressions.java
-	public final int INT = 10;
+	public final int INT = 3;
 	public final int INT_VAR = 21;
 	public final int INT_ARRAY_VAR = 22;
 	
@@ -185,5 +187,6 @@ public interface Expression {
 	 * 
 	 * @return
 	 */
-	public Expression merge();
+	public Expression reduceExpressionTree();
+	
 }

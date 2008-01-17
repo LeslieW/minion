@@ -27,9 +27,14 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 		
 		ArrayList<Expression> orderedList = new ArrayList<Expression>();
 		
-		for(int i=0; i<list.size(); i++)
-			orderedList = insertIntoOrderedList(list.get(i), orderedList);
+		print_debug("About to order list:"+list+" with size:"+list.size());
 		
+		for(int i=0; i<list.size(); i++) {
+			print_debug("Inserting element "+list.get(i)+" into ordered list:"+orderedList);
+			orderedList = insertIntoOrderedList(list.get(i), orderedList);
+		}
+		
+		print_debug("Ordered list:"+orderedList);
 		return orderedList;
 	}
 
@@ -44,6 +49,10 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 	 */
 	private ArrayList<Expression> insertIntoOrderedList(Expression expression, 
 				                                        ArrayList<Expression> list) {
+		
+       // first order the expression
+		expression.orderExpression();
+		
 		// if this is the first element (list is empty) just insert it
 		if(list.size() == 0) {
 			list.add(expression);
@@ -56,20 +65,40 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 			otherElement = list.get(i);
 		
 			// if the element is smaller the element we are comparing to
-			if(otherElement.getType() > expression.getType())
+			if(otherElement.getType() > expression.getType()) {
+				print_debug("smaller element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
 				list.add(i,expression);
+				return list;
+			}
 			
 			else if(otherElement.getType() == expression.getType()) {
-			
+				char expressionRelation = expression.isSmallerThanSameType(otherElement);
+				if(expressionRelation == EQUAL || expressionRelation == SMALLER) {
+				    print_debug("smaller element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
+					list.add(i,expression);
+					return list;
+				}		
 				
 			}
 			// if the element is the most expensive one, add it to the end of the list 
-			else if(i == list.size())
+			else if(i == list.size()-1) {
+				print_debug("last element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
 				list.add(expression);
+				return list;
+			}
 		}
 		
+		list.add(expression);
 		return list;
 	}
+	
+	
+	protected void print_debug(String message) {
+		
+		if(DEBUG)
+			System.out.println("[ DEBUG n-ary rel expression ] "+message);
+		}
+
 	
 	
 }

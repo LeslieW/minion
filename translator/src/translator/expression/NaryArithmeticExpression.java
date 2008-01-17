@@ -1,4 +1,4 @@
-package translator.expression;
+	package translator.expression;
 
 import java.util.ArrayList;
 
@@ -21,9 +21,10 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 		
 		ArrayList<Expression> orderedList = new ArrayList<Expression>();
 		
-		for(int i=0; i<list.size(); i++)
+		for(int i=0; i<list.size(); i++) {
 			orderedList = insertIntoOrderedList(list.get(i), orderedList);
-		
+		}
+
 		return orderedList;
 	}
 
@@ -38,6 +39,9 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 	 */
 	private ArrayList<Expression> insertIntoOrderedList(Expression expression, 
 				                                        ArrayList<Expression> list) {
+		// first order the expression
+		expression.orderExpression();
+		
 		// if this is the first element (list is empty) just insert it
 		if(list.size() == 0) {
 			list.add(expression);
@@ -49,16 +53,39 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 		for(int i=0; i<list.size(); i++) {
 			otherElement = list.get(i);
 		
+			//print_debug("element '"+expression+"' to put into ordered list: "+list);
+			
 			// if the element is smaller the element we are comparing to
-			if(otherElement.getType() > expression.getType())
+			if(otherElement.getType() > expression.getType()) {
 				list.add(i,expression);
+				return list;
+			}
+			
+			else if(otherElement.getType() == expression.getType()) {
+				char expressionRelation = expression.isSmallerThanSameType(otherElement);
+				if(expressionRelation == EQUAL || expressionRelation == SMALLER) {
+				    //print_debug(" element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
+					list.add(i,expression);
+					return list;
+				}		
+			}
 			
 			// if the element is the most expensive one, add it to the end of the list 
-			else if(i == list.size())
+			if(i == list.size()-1) {
 				list.add(expression);
+				return list;
+			}
 		}
+		
 		
 		return list;
 	}
+	
+	protected void print_debug(String message) {
+		
+	if(DEBUG)
+		System.out.println("[ DEBUG n-ary arithm expression ] "+message);
+	}
+
 	
 }

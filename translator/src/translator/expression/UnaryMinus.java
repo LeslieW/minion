@@ -71,8 +71,8 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 		else return this;
 	}
 	
-	public Expression merge() {
-		this.argument = this.argument.merge();
+	public Expression reduceExpressionTree() {
+		this.argument = this.argument.reduceExpressionTree();
 		return this;
 	}
 }

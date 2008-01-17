@@ -181,6 +181,26 @@ public class Preprocessor implements PreprocessorGlobals {
     		print_debug(i+": "+constraintList.get(i));
     	}
     	
+    	/*print_debug("About to evaluate constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		constraintList.add(i,constraintList.remove(i).evaluate());
+    	}
+    	
+    	print_debug("Evaluated constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		print_debug(i+": "+constraintList.get(i));
+    	}
+    	*/
+    	print_debug("About to merge constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		constraintList.add(i,constraintList.remove(i).reduceExpressionTree());
+    	}
+    	
+    	print_debug("Merged constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		print_debug(i+": "+constraintList.get(i));
+    	}
+    	
     	print_debug("About to evaluate constraints.");
     	for(int i=0; i<constraintList.size(); i++) {
     		constraintList.add(i,constraintList.remove(i).evaluate());
@@ -191,16 +211,15 @@ public class Preprocessor implements PreprocessorGlobals {
     		print_debug(i+": "+constraintList.get(i));
     	}
     	
-    	print_debug("About to merge constraints.");
+    	print_debug("About to re-order constraints.");
     	for(int i=0; i<constraintList.size(); i++) {
-    		constraintList.add(i,constraintList.remove(i).merge());
+    		constraintList.get(i).orderExpression();
     	}
     	
-    	print_debug("Merged constraints.");
+    	print_debug("Re-Ordered constraints.");
     	for(int i=0; i<constraintList.size(); i++) {
     		print_debug(i+": "+constraintList.get(i));
     	}
-    	
     	// END new stuff
     	
     	/** just for testing new structure

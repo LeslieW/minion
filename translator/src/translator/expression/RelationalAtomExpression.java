@@ -98,7 +98,7 @@ public class RelationalAtomExpression implements
 	}
 	
 
-	public Expression merge() {
+	public Expression reduceExpressionTree() {
 		return this;
 	}
 	
