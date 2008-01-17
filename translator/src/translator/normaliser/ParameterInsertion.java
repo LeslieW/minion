@@ -806,7 +806,7 @@ public class ParameterInsertion {
 	  	* @throws PreprocessorException
 	      */
 	      
-	      private ArrayList<Expression> splitExpressionToConstraints(Expression constraint) 
+	    /*  private ArrayList<Expression> splitExpressionToConstraints(Expression constraint) 
 	  	throws NormaliserException {
 	  	
 	  	ArrayList<Expression> constraintList = new ArrayList<Expression>();
@@ -838,7 +838,7 @@ public class ParameterInsertion {
 	  	return constraintList;
 	      }
 
-	      
+	      */
 	    
 	    
 	    /** 

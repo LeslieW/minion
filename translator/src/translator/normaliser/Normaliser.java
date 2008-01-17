@@ -75,7 +75,8 @@ public class Normaliser implements NormaliserSpecification {
 		for(int i=0; i<constraints.size(); i++) {
 			constraints.add(i, constraints.remove(i).evaluate());
 		}
-		return constraints;	
+		
+		return reduceExpressions(constraints);	
 	}
 
 	
@@ -150,6 +151,10 @@ public class Normaliser implements NormaliserSpecification {
 		
 	}
 	
+	
+	public void clearParameters() {
+		this.parameterInserter.clearParameters();
+	}
 	
 	/**
 	 * Inserts parameters into the constraints (given by the EssenceSpec) and 

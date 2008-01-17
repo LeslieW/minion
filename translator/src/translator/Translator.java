@@ -61,6 +61,9 @@ public class Translator {
 	public boolean parse(String problemString, String parameterString) {
 			
 		try {
+			// clear the old parameters
+			//this.normaliser.clearParameters();
+			
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(problemString)) );
 			this.problemSpecification = (EssenceSpecification) parser.parse().value;
@@ -78,6 +81,35 @@ public class Translator {
     	return true;
 		
 	}
+	
+	
+	public boolean parseAndBasicNormalisation(String problemString, String parameterString) {
+		
+		try {
+			// clear the old parameters
+			//this.normaliser.clearParameters();
+			
+			this.parser = new EssencePrimeParser(new EssencePrimeLexer
+					(new StringReader(problemString)) );
+			this.problemSpecification = (EssenceSpecification) parser.parse().value;
+			//print_debug(problemSpec.toString());
+    	
+			this.parser = new EssencePrimeParser(new EssencePrimeLexer
+					(new StringReader(parameterString)) );
+			this.parameterSpecification = (EssenceSpecification) parser.parse().value;
+			//print_debug(parameterSpec.toString());
+			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
+			this.constraintList = this.normaliser.normaliseBasic();
+		}
+		catch(Exception e) {
+			this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+			return false;
+		}
+    	return true;
+		
+	}
+	
+	
 	
 	public String printEssenceSpecification() {
 		return this.problemSpecification.toString();
@@ -226,6 +258,7 @@ public class Translator {
     	try { 
 			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
 			this.constraintList = this.normaliser.normaliseBasic();
+			this.constraintList = this.normaliser.reduceExpressions(constraintList);
 			this.constraintList = this.normaliser.orderConstraints(constraintList);
 			
 		} catch(NormaliserException e) {

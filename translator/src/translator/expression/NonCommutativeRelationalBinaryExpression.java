@@ -110,7 +110,7 @@ public class NonCommutativeRelationalBinaryExpression implements
 		if(this.type == IF) {
 			if(leftArgument.getType() == BOOL && rightArgument.getType() == BOOL) {
 				boolean leftConstant = ((RelationalAtomExpression) leftArgument).getBool();
-				boolean rightConstant = ((RelationalAtomExpression) leftArgument).getBool();
+				boolean rightConstant = ((RelationalAtomExpression) rightArgument).getBool();
 				return new RelationalAtomExpression(!leftConstant || rightConstant);
 			}
 			// T => E  ----> E
@@ -133,12 +133,12 @@ public class NonCommutativeRelationalBinaryExpression implements
 				leftConstant = ((RelationalAtomExpression) leftArgument).toArithmeticExpression().getConstant();
 			
 			if(rightArgument.getType() == BOOL)
-				rightConstant = ((RelationalAtomExpression) leftArgument).toArithmeticExpression().getConstant();
+				rightConstant = ((RelationalAtomExpression) rightArgument).toArithmeticExpression().getConstant();
 			
 			else if(leftArgument.getType() == INT && rightArgument.getType() == INT) {
 			
 				leftConstant = ((ArithmeticAtomExpression) leftArgument).getConstant();
-				rightConstant = ((ArithmeticAtomExpression) leftArgument).getConstant();
+				rightConstant = ((ArithmeticAtomExpression) rightArgument).getConstant();
 			}
 			
 			if(leftConstant != -11111 && rightConstant != -11111) {

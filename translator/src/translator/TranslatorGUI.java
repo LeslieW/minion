@@ -51,7 +51,9 @@ public class TranslatorGUI extends JPanel  {
 	final String SAVE_PROBLEM = "save_problem";
 	final String SAVE_PARAMETER = "save_parameter";
 	final String SAVE_OUTPUT = "save_output";
-	
+	final String LOAD_PROBLEM = "load_problem";
+	final String LOAD_PARAMETER = "load_parameter";
+	final String MINION = "to_minion";
 	
 	public TranslatorGUI() {
 	
@@ -83,6 +85,14 @@ public class TranslatorGUI extends JPanel  {
 
 		// problem buttons
 		JButton loadProblemButton = new JButton("Load problem");
+		//loadProblemButton.setEnabled(false);
+		loadProblemButton.setActionCommand(LOAD_PROBLEM);
+		loadProblemButton.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           load(e.getActionCommand());   
+			  }
+			});		
+		
 		JButton saveProblemButton = new JButton("Save problem");
 		saveProblemButton.setActionCommand(SAVE_PROBLEM);
 		saveProblemButton.addActionListener(new java.awt.event.ActionListener() {
@@ -92,6 +102,7 @@ public class TranslatorGUI extends JPanel  {
 			});
 		
 		JButton clearProblemButton = new JButton("Clear problem");
+		clearProblemButton.setEnabled(false);
 		
 		JPanel problemButtonPanel = new JPanel(new GridLayout(0,3));
 		problemButtonPanel.add(saveProblemButton,0);
@@ -140,6 +151,13 @@ public class TranslatorGUI extends JPanel  {
 		
 		// parameter button panel
 		JButton loadParameterButton = new JButton("Load parameter");
+		loadParameterButton.setActionCommand(LOAD_PROBLEM);
+		loadParameterButton.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           load(e.getActionCommand());   
+			  }
+			});		
+		
 		JButton saveParameterButton = new JButton("Save parameter");
 		saveParameterButton.setActionCommand(SAVE_PARAMETER);
 		saveParameterButton.addActionListener(new java.awt.event.ActionListener() {
@@ -267,6 +285,18 @@ public class TranslatorGUI extends JPanel  {
 		           translate(e.getActionCommand());   
 			  }
 			});
+		flattenButton.setEnabled(false);
+		
+		JButton minionButton = new JButton("To Minion >>");
+		minionButton.setPreferredSize(buttonDimension);
+		minionButton.setActionCommand(MINION);
+		minionButton.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           translate(e.getActionCommand());   
+			  }
+			});
+		minionButton.setEnabled(false);
+		
 		
 		JPanel translationButtonPanel = new JPanel(new FlowLayout());
 		translationButtonPanel.add(parseButton);
@@ -275,6 +305,7 @@ public class TranslatorGUI extends JPanel  {
 		translationButtonPanel.add(evaluateButton);
 		translationButtonPanel.add(normaliseButton);
 		translationButtonPanel.add(flattenButton);
+		translationButtonPanel.add(minionButton);
 		
 		translationButtonPanel.setBorder(
 				BorderFactory.createCompoundBorder(
@@ -307,6 +338,61 @@ public class TranslatorGUI extends JPanel  {
 		add(leftPanel, BorderLayout.WEST);
 		add(translationButtonPanel, BorderLayout.CENTER);
 		add(rightPanel, BorderLayout.EAST); 
+		
+	}
+	
+	
+	
+	protected void load(String command) {
+		
+			
+			fileChooser = new JFileChooser();
+			
+			String type = "";
+			if(command.endsWith(LOAD_PROBLEM))
+				type = "problem";
+			else if(command.equalsIgnoreCase(LOAD_PARAMETER))
+				type = "parameter";
+
+			fileChooser.setDialogTitle("Choose "+type+" File");
+		    int returnVal = fileChooser.showOpenDialog(this);
+		   
+		    File file = fileChooser.getSelectedFile();
+		    String fileName = file.getPath();
+		    
+		    
+		    // TODO: write this into a text-area instead of printing it on out
+		    if(returnVal == JFileChooser.APPROVE_OPTION) {
+		    	if(command.endsWith(LOAD_PROBLEM))
+		    		writeOnMessageOutput("Loading problem file: " +fileName);
+		    	else if(command.endsWith(LOAD_PARAMETER))
+		    		writeOnMessageOutput("Loading parameter file: " +fileName);
+		    }
+		    else {
+	            output.append("Choosing file cancelled by user.\n");
+	        }
+			
+		    try {
+		    	BufferedReader reader = new BufferedReader(new FileReader(file));
+		    	String loadedString = "";
+		    	String s = reader.readLine();
+		    	while(s != null && !(s.equalsIgnoreCase("null"))) {
+		    		//s = reader.readLine();
+		    		//if(s != null || s.equalsIgnoreCase("null")) break;
+		    		loadedString = loadedString.concat(s+"\n");
+		    		s = reader.readLine();
+		    	}
+		    	
+		    	
+		    	if(command.equalsIgnoreCase(LOAD_PROBLEM))
+		    		writeOnProblemInput(loadedString);
+		    	else if(command.equalsIgnoreCase(LOAD_PARAMETER))
+		    		writeOnParameterInput(loadedString);
+		    	
+		    } catch(Exception e) {
+		    	writeOnMessageOutput(e.getMessage());
+		    	return;
+		    }
 		
 	}
 	
@@ -375,12 +461,31 @@ public class TranslatorGUI extends JPanel  {
 		else if(command == ORDER) {
 			order();
 		}
+		else if(command == NORMALISE) {
+			normalise();
+		}
+	}
+	
+	
+	protected void normalise() {
+		
+		if(this.translator.problemSpecification == null)
+			parse();
+		if(this.translator.normalise()) {
+			writeOnOutput(this.translator.printAdvancedModel());
+			writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) successful.\n");
+		}
+		else {
+			writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) failed.\n");
+			writeOnMessageOutput(this.translator.getErrorMessage());
+		}
 	}
 	
 	
 	protected void order() {
 		
-		parse();
+		if(this.translator.problemSpecification == null)
+			parse();
 		if(this.translator.normaliseOrder()) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Basic Normalisation with Ordering successful.\n");
@@ -397,7 +502,8 @@ public class TranslatorGUI extends JPanel  {
 	 */
 	protected void evaluate() {
 		
-		parse();
+		if(this.translator.problemSpecification == null)
+			parse();
 		if(this.translator.normaliseEvaluate()) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Basic Normalisation with Evaluation successful.\n");
@@ -465,6 +571,11 @@ public class TranslatorGUI extends JPanel  {
 	}
 	
 	
+	protected void writeOnParameterInput(String s) {
+		this.parameterInput.setText("");
+		this.parameterInput.append(s);
+	}
+	
 	/**
 	 * Append the message on the message output
 	 * 
@@ -474,7 +585,10 @@ public class TranslatorGUI extends JPanel  {
 		this.messageOutput.append(outputMessage);
 	}
 	
-	
+	protected void writeOnProblemInput(String s) {
+		this.problemInput.setText("");
+		this.problemInput.append(s);
+	}
 	
 	
 }
