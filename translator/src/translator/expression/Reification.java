@@ -48,8 +48,8 @@ public class Reification implements RelationalExpression {
 		return this;
 	}
 
-	public boolean isGonnaBeReified() {
-		return this.isGonnaBeReified();
+	public boolean isGonnaBeFlattenedToVariable() {
+		return this.isGonnaBeFlattenedToVariable();
 	}
 
 	public boolean isNested() {
@@ -113,6 +113,12 @@ public class Reification implements RelationalExpression {
 		return s+")";
 	}
 	
+	
+	public Expression restructure() {
+		this.reifiedExpression = this.reifiedExpression.restructure();
+		
+		return this;
+	}
 	
 	// ================= OTHER METHODS =========================================
 	

@@ -118,6 +118,7 @@ public class Normaliser implements NormaliserSpecification {
 			constraintsList = evaluateConstraints(constraintsList);
 			constraintsList = reduceExpressions(constraintsList);
 			constraintsList = orderConstraints(constraintsList);
+			constraintsList = restructureExpressions(constraintsList);
 			objective.normalise();
 		}
 		
@@ -255,6 +256,16 @@ public class Normaliser implements NormaliserSpecification {
 		return constraints;	
 	}
 
+	
+	private ArrayList<Expression> restructureExpressions(ArrayList<Expression> constraints) 
+		throws NormaliserException {
+		
+		for(int i=0; i<constraints.size(); i++) {
+			constraints.add(i, constraints.remove(i).restructure());
+		}
+		
+		return constraints;
+	}
 	
 	/**
 	 * Inserts parameters into the constraints (given by the EssenceSpec) and 

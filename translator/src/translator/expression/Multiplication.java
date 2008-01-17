@@ -168,12 +168,19 @@ public class Multiplication extends NaryArithmeticExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+	
+	public Expression restructure() {
+		for(int i=0; i<this.arguments.size(); i++)
+			this.arguments.add(i, this.arguments.remove(i).restructure());
+		
+		return this;
 	}
 	
 }

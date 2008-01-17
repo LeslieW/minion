@@ -70,7 +70,7 @@ public class ProductConstraint implements GlobalConstraint {
 		return this;
 	}
 
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 
@@ -142,6 +142,14 @@ public class ProductConstraint implements GlobalConstraint {
 		
 	}
 
+	public Expression restructure() {
+		this.result = this.result.restructure();
+		
+		for(int i=0; i<this.arguments.length; i++) 
+			this.arguments[i] = this.arguments[i].restructure();
+		
+		return this;
+	}
 	
 	// ==================== ADDITIONAL METHODS ============================
 	

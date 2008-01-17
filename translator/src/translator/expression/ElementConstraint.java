@@ -57,7 +57,7 @@ public class ElementConstraint implements GlobalConstraint {
 		return this;
 	}
 
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 
@@ -129,6 +129,15 @@ public class ElementConstraint implements GlobalConstraint {
 		String s = "element("+this.variableArray+", "+this.index+", "+this.value+")";
 		
 		return s;
+	}
+
+	public Expression restructure() {
+		
+		this.index = this.index.restructure();
+		this.variableArray = this.variableArray.restructure();
+		this.value = this.value.restructure();
+		
+		return this;
 	}
 	
 }

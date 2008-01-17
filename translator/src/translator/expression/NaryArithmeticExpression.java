@@ -122,7 +122,7 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	

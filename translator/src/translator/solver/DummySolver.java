@@ -109,6 +109,8 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMLEQ_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMGREATER_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMLESS_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_CONJUNCTION), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_DISJUNCTION), new Boolean(true));
 
 		
 		

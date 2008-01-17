@@ -1,5 +1,6 @@
 package translator.expression;
 
+import java.util.ArrayList;
 
 public class CommutativeBinaryRelationalExpression implements
 		BinaryRelationalExpression {
@@ -200,11 +201,61 @@ public class CommutativeBinaryRelationalExpression implements
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+	
+	
+	public Expression restructure() {
+	
+		if(this.type == Expression.EQ) {
+		
+			if(this.leftArgument instanceof Sum) {
+				Sum leftSum = (Sum) this.leftArgument;
+			    // sum = - E   ====>   sum + E = 0
+				if(this.rightArgument instanceof UnaryMinus) {
+					ArrayList<Expression> positiveArgs = leftSum.getPositiveArguments();
+					positiveArgs.add(((UnaryMinus) rightArgument).getArgument());
+					this.rightArgument = new ArithmeticAtomExpression(0);
+				}
+				else { // sum = E     ====>   sum - E = 0
+					ArrayList<Expression> negativeArgs = leftSum.getNegativeArguments();
+					negativeArgs.add(this.rightArgument.copy());
+					this.rightArgument = new ArithmeticAtomExpression(0);
+					
+				}
+				// then flatten the sum
+				this.leftArgument = this.leftArgument.reduceExpressionTree();
+				this.leftArgument = this.leftArgument.restructure();
+				this.leftArgument.orderExpression();
+				this.leftArgument = this.leftArgument.evaluate();
+			}
+			else if(this.rightArgument instanceof Sum) {
+				Sum rightSum = (Sum) this.rightArgument;
+			    // sum = - E   ====>   sum + E = 0
+				if(this.leftArgument instanceof UnaryMinus) {
+					ArrayList<Expression> positiveArgs = rightSum.getPositiveArguments();
+					positiveArgs.add(((UnaryMinus) leftArgument).getArgument());
+					this.leftArgument = new ArithmeticAtomExpression(0);
+				}
+				else { // sum = E     ====>   sum - E = 0
+					ArrayList<Expression> negativeArgs = rightSum.getNegativeArguments();
+					negativeArgs.add(this.leftArgument.copy());
+					this.leftArgument = new ArithmeticAtomExpression(0);
+					
+				}
+				// then flatten the sum
+				this.rightArgument = this.rightArgument.reduceExpressionTree();
+				this.rightArgument = this.rightArgument.restructure();
+				this.rightArgument.orderExpression();
+				this.rightArgument = this.rightArgument.evaluate();
+			}
+		} // else: not EQ
+		
+		return this;
 	}
 }

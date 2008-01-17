@@ -242,12 +242,16 @@ public class ArrayVariable implements Variable {
 	}
 
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+
+	public Expression restructure() {
+		return this;
 	}
 	
 	// ====================== OTHER METHODS ========================

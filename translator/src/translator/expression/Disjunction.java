@@ -165,4 +165,11 @@ public class Disjunction extends NaryRelationalExpression {
 		this.isNested = false;
 	}
 	
+	public Expression restructure() {
+		for(int i=0; i<this.disjointExpressions.size(); i++) {
+			this.disjointExpressions.add(i, this.disjointExpressions.remove(i).restructure());
+		}
+		return this;
+	}
+	
 }

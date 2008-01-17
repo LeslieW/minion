@@ -78,12 +78,17 @@ public class Negation implements UnaryRelationalExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+	
+	public Expression restructure() {
+		this.argument = this.argument.restructure();
+		return this;
 	}
 	
 }

@@ -142,7 +142,7 @@ public class RelationalAtomExpression implements
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
@@ -150,5 +150,8 @@ public class RelationalAtomExpression implements
 		this.willBeReified = reified;
 	}
 	
+	public Expression restructure() {		
+		return this;
+	}
 	
 }

@@ -7,9 +7,6 @@ import java.io.*;
 import javax.swing.*;
 import translator.Translator;
 
-import translator.normaliser.NormaliserSpecification;
-import translator.solver.*;
-
 public class ModellingPanel extends JPanel  {
 	
 	static final long serialVersionUID = 0;
@@ -27,8 +24,10 @@ public class ModellingPanel extends JPanel  {
 	JTextArea messageOutput;
 	JScrollPane messageScrollPane;
 	
-	// Buttons
-	JButton parseButton;
+	
+	// the panels
+	TranslationPanel translationButtonPanel;
+	
 	
 	JFileChooser fileChooser;
 	
@@ -42,22 +41,17 @@ public class ModellingPanel extends JPanel  {
 	Color backgroundColor = Color.GREEN;
 	String problemFieldLabel = "Essence' Problem Model";
 	String parameterFieldLabel = "Essence' Parameter Specification";	
-	String outputFieldLabel = "Essence' Reformulated";
+	String outputFieldLabel = "Translation Output";
 	
 	// actionCommands
-	final String PARSE = "parse"; 
-	final String INSERT_PARAMETERS = "insertParameters";
-	final String EVALUATE = "evaluate";
-	final String ORDER = "order";
-	final String NORMALISE = "normalise";
-	final String FLATTEN = "flatten";
+
 	
 	final String SAVE_PROBLEM = "save_problem";
 	final String SAVE_PARAMETER = "save_parameter";
 	final String SAVE_OUTPUT = "save_output";
 	final String LOAD_PROBLEM = "load_problem";
 	final String LOAD_PARAMETER = "load_parameter";
-	final String MINION = "to_minion";
+	
 	
 	public ModellingPanel() {
 	
@@ -74,7 +68,7 @@ public class ModellingPanel extends JPanel  {
 		this.problemScrollPane = new JScrollPane(problemInput);
 		problemScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		problemScrollPane.setPreferredSize(new Dimension(500, 400));
+		problemScrollPane.setPreferredSize(new Dimension(500, 450));
 
 		JLabel problemLabel = new JLabel(this.problemFieldLabel);
 		problemLabel.setLabelFor(problemInput);
@@ -142,7 +136,7 @@ public class ModellingPanel extends JPanel  {
 		this.parameterScrollPane = new JScrollPane(parameterInput);
 		parameterScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		parameterScrollPane.setPreferredSize(new Dimension(500, 150));
+		parameterScrollPane.setPreferredSize(new Dimension(500, 250));
 		parameterScrollPane.setBorder(
 				BorderFactory.createCompoundBorder(
 						BorderFactory.createCompoundBorder(
@@ -220,7 +214,7 @@ public class ModellingPanel extends JPanel  {
 		this.messageOutput.setEditable(false);
 		messageScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		messageScrollPane.setPreferredSize(new Dimension(500,100));
+		messageScrollPane.setPreferredSize(new Dimension(500,200));
 		messageScrollPane.setBorder(
 				BorderFactory.createCompoundBorder(
 						BorderFactory.createCompoundBorder(
@@ -233,92 +227,7 @@ public class ModellingPanel extends JPanel  {
 		
 		// ================== translator button panel =======================
 		
-		Dimension buttonDimension = new Dimension(180,30);
-		
-		JButton parseButton = new JButton("Parse >>");
-		parseButton.setPreferredSize(buttonDimension);
-		parseButton.setActionCommand(PARSE);
-		parseButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		
-		JButton insertParametersButton = new JButton("Insert Parameters >>");
-		insertParametersButton.setPreferredSize(buttonDimension);
-		insertParametersButton.setActionCommand(INSERT_PARAMETERS);
-		insertParametersButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		
-		JButton orderButton = new JButton("Normalise: Order >>");
-		orderButton.setPreferredSize(buttonDimension);
-		orderButton.setActionCommand(ORDER);
-		orderButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		
-		JButton evaluateButton = new JButton("Normalise: Evaluate >>");
-		evaluateButton.setPreferredSize(buttonDimension);
-		evaluateButton.setActionCommand(EVALUATE);
-		evaluateButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		
-		
-		JButton normaliseButton = new JButton("Normalise: Full >>");
-		normaliseButton.setPreferredSize(buttonDimension);
-		normaliseButton.setActionCommand(NORMALISE);
-		normaliseButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		
-		
-		JButton flattenButton = new JButton("Flatten >>");
-		flattenButton.setPreferredSize(buttonDimension);
-		flattenButton.setActionCommand(FLATTEN);
-		flattenButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		
-		
-		JButton minionButton = new JButton("To Minion >>");
-		minionButton.setPreferredSize(buttonDimension);
-		minionButton.setActionCommand(MINION);
-		minionButton.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
-			  }
-			});
-		minionButton.setEnabled(false);
-		
-		
-		JPanel translationButtonPanel = new JPanel(new FlowLayout());
-		translationButtonPanel.add(parseButton);
-		translationButtonPanel.add(insertParametersButton);
-		translationButtonPanel.add(orderButton);
-		translationButtonPanel.add(evaluateButton);
-		translationButtonPanel.add(normaliseButton);
-		translationButtonPanel.add(flattenButton);
-		translationButtonPanel.add(minionButton);
-		
-		translationButtonPanel.setBorder(
-				BorderFactory.createCompoundBorder(
-						BorderFactory.createCompoundBorder(
-								BorderFactory.createTitledBorder("Translation"),
-								BorderFactory.createEmptyBorder(10,10,10,10)),
-        translationButtonPanel.getBorder()));
-		translationButtonPanel.setPreferredSize(new Dimension(180, 600));
+
 		
 		
 		// ===================== right panel ===============================
@@ -340,8 +249,15 @@ public class ModellingPanel extends JPanel  {
 		
 		
 		// =================== all together =================================
+		
+		this.translationButtonPanel = new TranslationPanel(this.translator,
+															this.problemInput,
+															this.parameterInput,
+															this.output,
+															this.messageOutput);
+		
 		add(leftPanel, BorderLayout.WEST);
-		add(translationButtonPanel, BorderLayout.CENTER);
+		add(this.translationButtonPanel, BorderLayout.CENTER);
 		add(rightPanel, BorderLayout.EAST); 
 		
 	}
@@ -459,157 +375,7 @@ public class ModellingPanel extends JPanel  {
 		
 	}
 	
-	/**
-	 * Translate the speicification given in the spec input area and the 
-	 * parameters given in the parameter input area
-	 * @param command
-	 */
-	protected void translate(String command) {
-		
-		if(command == PARSE) {
-			parse();
-			return;
-		}
-		else if(command == INSERT_PARAMETERS) {
-			insertParameters();
-		}
-		else if(command == EVALUATE) {
-			evaluate();
-		}
-		else if(command == ORDER) {
-			order();
-		}
-		else if(command == NORMALISE) {
-			normalise();
-		}
-		else if(command == FLATTEN) {
-			flatten();
-		}
-	}
-	
-	
-	protected void flatten() {
-		TargetSolver solver = new Minion();
-		
-		if(this.translator.getInitialProblemSpecification() == null)
-			parse();
-		if(!this.translator.hasBeenNormalised())
-			normalise();
-		boolean flattening = this.translator.flatten(solver);
-		
-		if(flattening) {
-			writeOnOutput(this.translator.printAdvancedModel());
-			writeOnMessageOutput("Flattened constraints for target solver "+solver.getSolverName()+"\n");
-		}
-		else {
-			writeOnMessageOutput("Flattening for target solver "+solver.getSolverName()+" failed.\n");
-			writeOnMessageOutput(this.translator.getErrorMessage());			
-		}
-		
-	}
-	
-	
-	protected void normalise() {
-		
-		if(this.translator.getInitialProblemSpecification() == null)
-			parse();
-		if(this.translator.normalise(NormaliserSpecification.NORMALISE_FULL)) {
-			writeOnOutput(this.translator.printAdvancedModel());
-			writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) successful.\n");
-		}
-		else {
-			writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) failed.\n");
-			writeOnMessageOutput(this.translator.getErrorMessage());
-		}
-	}
-	
-	
-	protected void order() {
-		
-		if(this.translator.getInitialProblemSpecification() == null)
-			parse();
-		if(this.translator.normalise(NormaliserSpecification.NORMALISE_ORDER)) {
-			writeOnOutput(this.translator.printAdvancedModel());
-			writeOnMessageOutput("Basic Normalisation with Ordering successful.\n");
-		}
-		else {
-			writeOnMessageOutput("Basic Normalisation with Ordering failed.\n");
-			writeOnMessageOutput(this.translator.getErrorMessage());
-		}
-	}
-	
-	/**
-	 * Parse, insert parameters and evaluate
-	 *
-	 */
-	protected void evaluate() {
-		
-		if(this.translator.getInitialProblemSpecification() == null)
-			parse();
-		if(this.translator.normalise(NormaliserSpecification.NORMALISE_EVAL)) {
-			writeOnOutput(this.translator.printAdvancedModel());
-			writeOnMessageOutput("Basic Normalisation with Evaluation successful.\n");
-		}
-		else {
-			writeOnMessageOutput("Basic Normalisation with Evaluation failed.\n");
-			writeOnMessageOutput(this.translator.getErrorMessage());
-		}
-	}
-	
-	/**
-	 * Just insert parameters into the file
-	 *
-	 */
-	protected void insertParameters() {
-		
-		parse();
-		if(this.translator.normalise(NormaliserSpecification.NORMALISE_BASIC)) {
-			writeOnOutput(this.translator.printAdvancedModel());
-			writeOnMessageOutput("Basic Normalisation successful.\n");
-			printDebugMessages();
-		}
-		else {
-			writeOnMessageOutput("Basic Normalisation failed.\n");
-			writeOnMessageOutput(this.translator.getErrorMessage());
-			printDebugMessages();
 
-		}
-		
-	}
-	
-	
-	
-	protected void printDebugMessages() {
-		writeOnMessageOutput(this.translator.getDebugMessages());
-	}
-	
-	/**
-	 * Parse the input given in the Essence' problem and 
-	 * parameter text area 
-	 * 
-	 *
-	 */
-	protected void parse() {
-		
-		String problemSpec = this.problemInput.getText();
-		String parameterSpec = this.parameterInput.getText();
-		
-		boolean parsingSuccessfull = false;
-		
-		if(parameterSpec.equalsIgnoreCase("")) 
-			parsingSuccessfull = translator.parse(problemSpec);
-		
-		else parsingSuccessfull = translator.parse(problemSpec, parameterSpec);
-		
-		if(parsingSuccessfull) {
-			writeOnOutput(this.translator.printInitialProblemSpecification());
-			writeOnMessageOutput("Parsing OK.\n");
-		}
-		else {
-			writeOnMessageOutput("Parse Error.\n"+this.translator.getErrorMessage()+"\n");
-		}
-	}
-	
 	/**
 	 * Clear the whole output and replace it with the parameter
 	 * String outputMessage

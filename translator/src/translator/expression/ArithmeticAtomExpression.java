@@ -168,11 +168,15 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	public void setIsNotNested() {
 		this.isNested = false;
 	}
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+	
+	public Expression restructure() {
+		return this;	
 	}
 }

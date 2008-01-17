@@ -178,7 +178,7 @@ public class QuantifiedExpression implements RelationalExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
@@ -186,4 +186,8 @@ public class QuantifiedExpression implements RelationalExpression {
 		this.willBeReified = reified;
 	}
 	
+	public Expression restructure() {
+		this.quantifiedExpression = this.quantifiedExpression.restructure();		
+		return this;
+	}
 }

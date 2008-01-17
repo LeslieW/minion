@@ -45,12 +45,21 @@ public class Tailor implements TailorSpecification {
 	
 	public String tailor(NormalisedModel normalisedModel,
 			             TargetSolver targetSolver)
-	throws TailorException {
+	throws TailorException, MinionException  {
 		this.problemModel = normalisedModel;
 		this.targetSolver = targetSolver;
-         // 	TODO Auto-generated method stub
+        
 		
-		return null;
+		if(this.targetSolver instanceof Minion) {
+			MinionTailor minionTailor = new MinionTailor(problemModel,
+					                                     (Minion) targetSolver);
+			
+			return minionTailor.tailorToMinion().toString();
+			
+		}
+		
+		else throw new TailorException("Cannot tailor model to specified solver: '"+this.targetSolver.getSolverName()
+				+"'. no tailor for solver available.");
 	}
 
 

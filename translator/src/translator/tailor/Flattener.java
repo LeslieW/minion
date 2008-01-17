@@ -187,7 +187,7 @@ public class Flattener {
 		
 		addToSubExpressions(leftSum,result);
 		
-		if(expression.isGonnaBeReified()) {
+		if(expression.isGonnaBeFlattenedToVariable()) {
 			return reifyConstraint(partWiseSumConstraint);
 		}
 		else return partWiseSumConstraint;
@@ -205,7 +205,7 @@ public class Flattener {
 		
 		addToSubExpressions(rightSum,result);
 		
-		if(expression.isGonnaBeReified()) {
+		if(expression.isGonnaBeFlattenedToVariable()) {
 			return reifyConstraint(partWiseSumConstraint);
 		}
 		else return partWiseSumConstraint;
@@ -224,14 +224,17 @@ public class Flattener {
 	
 	//3. just flatten the stuff dependeing on the implementation of the corresponding constraint
 	//    in the target solver
-	if(this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
+	if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 		leftExpression.willBeFlattenedToVariable(true);
 		rightExpression.willBeFlattenedToVariable(true);
 	}
 	leftExpression = flattenExpression(leftExpression);
 	rightExpression = flattenExpression(rightExpression);
-		
-	return expression;
+	
+	
+	return new NonCommutativeRelationalBinaryExpression(leftExpression,
+			                                            expression.getOperator(),
+			                                            rightExpression);
 	
 }
 	
@@ -267,7 +270,7 @@ public class Flattener {
 			addToSubExpressions(leftSum,result);
 			
 
-			if(expression.isGonnaBeReified()) {
+			if(expression.isGonnaBeFlattenedToVariable()) {
 				return reifyConstraint(partWiseSumConstraint);
 			}
 			else return partWiseSumConstraint;
@@ -285,7 +288,7 @@ public class Flattener {
 			
 			addToSubExpressions(rightSum,result);
 			
-			if(expression.isGonnaBeReified()) {
+			if(expression.isGonnaBeFlattenedToVariable()) {
 				return reifyConstraint(partWiseSumConstraint);
 			}
 			else return partWiseSumConstraint;
@@ -304,7 +307,7 @@ public class Flattener {
 		
 		//3. just flatten the stuff dependeing on the implementation of the corresponding constraint
 		//    in the target solver
-		if(this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 			leftExpression.willBeFlattenedToVariable(true);
 			rightExpression.willBeFlattenedToVariable(true);
 		}
@@ -382,7 +385,7 @@ public class Flattener {
 		Sum flattenedSum = new Sum(positiveElements,
 				                   negativeElements);
 		
-		if(quantifiedSum.isGonnaBeReified()) {
+		if(quantifiedSum.isGonnaBeFlattenedToVariable()) {
 			return reifyConstraint(flattenedSum);
 		}
 		
@@ -411,7 +414,7 @@ public class Flattener {
 		}
 		
 		// 2. if the constraint has to be reified	
-		if(elementConstraint.isGonnaBeReified()) {
+		if(elementConstraint.isGonnaBeFlattenedToVariable()) {
 			return reifyConstraint(elementConstraint);
 		}
 		else 			
@@ -462,14 +465,14 @@ public class Flattener {
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
 		for(int i=arguments.size()-1; i>=0; i--) {
-			if(conjunction.isGonnaBeReified() &&
+			if(conjunction.isGonnaBeFlattenedToVariable() &&
 				!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.AND))
 				arguments.get(i).willBeFlattenedToVariable(true);
 			arguments.add(i, flattenExpression(arguments.remove(i)));
 		}
 		// 2. ---- if the conjunction is not nested/will be reified
 		//         then split it into independent constraints
-		if(!conjunction.isGonnaBeReified()) {
+		if(!conjunction.isGonnaBeFlattenedToVariable()) {
 			for(int i=arguments.size()-1; i>0; i--) {
 				this.constraintBuffer.add(arguments.remove(i));
 			}
@@ -478,14 +481,16 @@ public class Flattener {
 		
 		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
 		//        is supported by the target solver
-		else if(this.targetSolver.supportsConstraint(Expression.NARY_CONJUNCTION)) {
-			return conjunction;
-		}
-		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
 		else {
-			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.AND);
-		}
+			if(this.targetSolver.supportsConstraint(Expression.NARY_CONJUNCTION)) {
+				return reifyConstraint(conjunction);
+			}
+		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
+			else {
+				return reifyConstraint(flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.AND));
+			}
 
+		}
 	}
 	
 	
@@ -562,7 +567,7 @@ public class Flattener {
 			}
 		}
 		else if(expression.getType() == Expression.ALLDIFFERENT) {
-			if(expression.isGonnaBeReified()) {
+			if(expression.isGonnaBeFlattenedToVariable()) {
                 return reifyConstraint(new AllDifferent(argument));	
 			}
 			else return new AllDifferent(argument);
@@ -611,7 +616,7 @@ public class Flattener {
 							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 								index.willBeFlattenedToVariable(true);
 							Variable auxVariable = createAuxVariable(0,1);
-							if(atom.isGonnaBeReified()) {
+							if(atom.isGonnaBeFlattenedToVariable()) {
 								return reifyConstraint(new ElementConstraint(arrayVariable,
 															  index,
 															  auxVariable));
@@ -648,6 +653,9 @@ public class Flattener {
 		if(quantification.getType() == Expression.EXISTS && 
 				this.targetSolver.supportsConstraint(Expression.EXISTS))
 			return quantification;
+		
+		
+		System.out.println("Gonna flatten the quantification:"+quantification);
 		
 		// ----- 1. get the domain over which the quantification ranges ------------
 		Domain bindingDomain = quantification.getQuantifiedDomain();
@@ -691,14 +699,14 @@ public class Flattener {
 		if(quantification.getType() == Expression.FORALL) {
 			Conjunction conjunction = new Conjunction(unfoldedExpressions);
 			conjunction.reduceExpressionTree();
-			if(quantification.isGonnaBeReified()) {
+			if(quantification.isGonnaBeFlattenedToVariable()) {
 				conjunction.willBeFlattenedToVariable(true);
 				for(int i=conjunction.getArguments().size()-1; i>=0; i--) 
 					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			}
 			
 			Expression e = flattenConjunction(conjunction);
-			//System.out.println("After flattening the resulting conjunction: "+e);
+			System.out.println("After flattening the resulting conjunction: "+e);
 			
 			return e;//flattenConjunction(conjunction);
 			
@@ -865,7 +873,7 @@ public class Flattener {
 		}
 		// treat it as a normal sum -> might be flattened to a variable
 		else {
-			if(!sum.isGonnaBeReified()) {
+			if(!sum.isGonnaBeFlattenedToVariable()) {
 				if(sum.getPositiveArguments() != null)
 					for(int i=0; i<sum.getPositiveArguments().size(); i++) {
 						sum.getPositiveArguments().add(i,flattenExpression(sum.getPositiveArguments().remove(i)));
@@ -1072,7 +1080,7 @@ public class Flattener {
 		
 		argument = flattenExpression(argument);
 		
-		if(expression.isGonnaBeReified())
+		if(expression.isGonnaBeFlattenedToVariable())
 			return reifyConstraint(expression);
 		
 		else return expression;
@@ -1114,7 +1122,7 @@ public class Flattener {
 							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 								index.willBeFlattenedToVariable(true);
 							Variable auxVariable = createAuxVariable(0,1);
-							if(atom.isGonnaBeReified()) {
+							if(atom.isGonnaBeFlattenedToVariable()) {
 								return reifyConstraint(new ElementConstraint(arrayVariable,
 															  index,
 															  auxVariable));
@@ -1170,8 +1178,8 @@ public class Flattener {
 		// if we have no common subexpression, create a new auxiliary variable
 		// and add the constraint to the list of subexpressions
 		else  {
-			Variable auxVar = createAuxVariable(0, 1);
-			this.subExpressions.put(constraint,new ArithmeticAtomExpression(auxVar));
+			auxVariable = new ArithmeticAtomExpression(createAuxVariable(0, 1));
+			this.subExpressions.put(constraint,auxVariable);
 		}
 		
 		

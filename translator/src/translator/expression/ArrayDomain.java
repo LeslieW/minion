@@ -31,9 +31,26 @@ public class ArrayDomain implements Domain {
 	}
 
 	public Domain evaluate() {
+		boolean allAreConstantDomains = true;
+		
 		this.baseDomain = this.baseDomain.evaluate();
-		for(int i=0; i<this.indexDomains.length; i++)
+		allAreConstantDomains = allAreConstantDomains && (baseDomain instanceof ConstantDomain);
+		
+		for(int i=0; i<this.indexDomains.length; i++) {
 			this.indexDomains[i] = this.indexDomains[i].evaluate();
+			allAreConstantDomains = allAreConstantDomains && (indexDomains[i] instanceof ConstantDomain);
+		}
+			
+		if(allAreConstantDomains) {
+			ConstantDomain[] indices = new ConstantDomain[this.indexDomains.length];
+			for(int i=0; i<this.indexDomains.length; i++) {
+				indices[i] = (ConstantDomain) this.indexDomains[i];
+			}
+			return new ConstantArrayDomain(indices, 
+										   (ConstantDomain) this.baseDomain);
+		}
+		
+		
 		return this;
 	}
 

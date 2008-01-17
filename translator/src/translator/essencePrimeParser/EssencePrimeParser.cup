@@ -327,11 +327,11 @@ domain ::= 	LPAREN domain:d RPAREN
 
 domain_list ::= domain:d
 		   {: LinkedList list = new LinkedList();
-		      list.addFirst(  d); 
+		      list.add(  d); 
 		      RESULT = list; :}
 
               | domain_list:d_list COMMA domain:d
-		   {: ((LinkedList) d_list).addFirst(  d); 
+		   {: ((LinkedList) d_list).add(  d); 
 		       RESULT = d_list; :}
 ;
 
@@ -755,11 +755,11 @@ find_block ::= 	FIND variable_list:v_list
 
 variable_list ::=   domain_identifiers:di
 		     {: LinkedList list = new LinkedList();
-			list.add((DomainIdentifiers) di); 
+			list.addFirst((DomainIdentifiers) di); 
 			RESULT = list;  :}
 					   
 		  | domain_identifiers:di COMMA variable_list:di_list
-		     {: ((LinkedList) di_list).add((DomainIdentifiers) di);  
+		     {: ((LinkedList) di_list).addFirst((DomainIdentifiers) di);  
 			 RESULT = di_list; :}
 ;
 

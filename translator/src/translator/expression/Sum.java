@@ -294,6 +294,11 @@ public class Sum extends NaryArithmeticExpression {
 			
 			//print_debug("looking if we can merge this element to the sum:"+this.positiveArguments.get(i));
 			
+			if(positiveArguments.get(i) instanceof UnaryMinus) {
+				UnaryMinus elem = (UnaryMinus) positiveArguments.remove(i);
+				this.negativeArguments.add(elem.getArgument());
+			}
+			
 			// if the argument is a nested addition
 			if(positiveArguments.get(i).getType() == SUM) {
 				Sum nestedPositiveSum = (Sum) positiveArguments.remove(i);
@@ -366,6 +371,33 @@ public class Sum extends NaryArithmeticExpression {
 		for(int i=0; i<this.negativeArguments.size(); i++) {
 			this.negativeArguments.add(i, this.negativeArguments.remove(i).insertValueForVariable(value, variableName));
 		}
+		return this;
+	}
+	
+	
+	public Expression restructure() {
+	
+		if(this.positiveArguments.size() ==0 || this.negativeArguments.size() ==0)
+			return this;
+		
+		// cancellation:
+		// if we find 2 equal arguments where one is in the positive list
+		// and one in the negative list, remove them both
+		for(int i=this.positiveArguments.size()-1; i>=0; i--) {
+			Expression argument = positiveArguments.get(i);
+			for(int j=this.negativeArguments.size()-1; j>=0; j--) {
+				Expression negArgument = this.negativeArguments.get(j);
+				if(negArgument.getType() == argument.getType()) {
+					if(negArgument.isSmallerThanSameType(argument) == Expression.EQUAL) {
+						positiveArguments.remove(i);
+						negativeArguments.remove(j);
+					}
+				}
+			}
+		}
+		
+
+		
 		return this;
 	}
 }

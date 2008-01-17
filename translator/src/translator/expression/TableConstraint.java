@@ -132,7 +132,7 @@ public class TableConstraint implements RelationalExpression {
 		return s+"] )";
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
@@ -140,4 +140,7 @@ public class TableConstraint implements RelationalExpression {
 		this.willBeReified = reified;
 	}
 	
+	public Expression restructure() {
+		return this;
+	}
 }

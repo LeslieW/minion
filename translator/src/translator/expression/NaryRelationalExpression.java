@@ -107,7 +107,7 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	

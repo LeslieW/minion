@@ -42,17 +42,20 @@ public class Translator {
     /** the normalised model. is produced by the normalise() method */
     NormalisedModel normalisedModel;
     
+    /** the string contains the problem model for the target solver */
+    String targetSolverInstance;
     
 	String errorMessage;
     String debug;
     
-    
+    boolean normalisedModelHasBeenFlattened;
     
     // ========================= CONSTRUCTOR ========================================
     
 	public Translator() {
 		this.errorMessage = new String("");
 		this.debug = "";
+		this.normalisedModelHasBeenFlattened = false;
 	}
 	
 	/**
@@ -108,6 +111,7 @@ public class Translator {
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 				(new StringReader(problemString)) );
 			this.problemSpecification = (EssenceSpecification) parser.parse().value;
+			this.normalisedModelHasBeenFlattened = false;
 			//print_debug(problemSpec.toString());
 		}
 		catch(Exception e) {
@@ -142,7 +146,8 @@ public class Translator {
 			
 		try { 
 			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.normalisedModel = this.normaliser.normalise(normaliseType);	
+			this.normalisedModel = this.normaliser.normalise(normaliseType);
+			this.normalisedModelHasBeenFlattened = false;
 		} catch(NormaliserException e) {
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
@@ -164,12 +169,14 @@ public class Translator {
 		
 		if(this.normalisedModel == null) {
 			this.errorMessage = errorMessage.concat("Please normalise problem model before flattening");
+			return false;
 		}
 		
 		try {
 			this.tailor = new Tailor(this.normalisedModel,
 				 				 targetSolver);
 			this.normalisedModel = tailor.flattenModel();
+			this.normalisedModelHasBeenFlattened = true;
 			
 		} catch(TailorException e) {
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
@@ -180,6 +187,83 @@ public class Translator {
 	
 	
 	
+	/**
+	 * Tailor the already normalised and flattened normalised model to the specified 
+	 * target solver. This is the final step in the translation process.
+	 * 
+	 * @param targetSolver
+	 * @return
+	 */
+	public boolean tailorTo(TargetSolver targetSolver) {
+		
+		if(this.normalisedModel == null) {
+			this.errorMessage = errorMessage.concat("Please normalise problem model before flattening");
+			return false;
+		}
+		if(this.normalisedModelHasBeenFlattened) {
+			try{ 
+				this.targetSolverInstance = this.tailor.tailor(this.normalisedModel, targetSolver);
+				return true;
+				
+			} catch (Exception e) {
+				e.printStackTrace(System.out);
+				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+				return false;
+			}
+		}
+		else { 
+			this.errorMessage = this.errorMessage.concat("Please flatten the model before tailoring it to a target solver");
+			return false;
+		}
+		
+	}
+	
+	
+	/** 
+	 * This method performs the WHOLE translation process with full normalisation.
+	 * The target solver instance/problem file is given in the field 
+	 * 'targetSolverInstance' in String format. 
+	 * 
+	 * @param problemString
+	 * @param parameterString
+	 * @param targetSolver
+	 * @return
+	 */
+	public boolean tailorTo(String problemString, 
+			                String parameterString, 
+			                TargetSolver targetSolver) {
+		
+		try {
+			
+			// ---- 1. first parse the problem and parameter string
+			this.parser = new EssencePrimeParser(new EssencePrimeLexer
+				(new StringReader(problemString)) );
+			this.problemSpecification = (EssenceSpecification) parser.parse().value;
+			
+			// ---- 2. then normalise the essence' problem model
+			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
+			this.normalisedModel = this.normaliser.normalise(NormaliserSpecification.NORMALISE_FULL);
+		
+			// ---- 3. flatten the essence' problem model according to the specified solver
+			this.tailor = new Tailor(this.normalisedModel,
+	 				                 targetSolver);
+			this.normalisedModel = tailor.flattenModel();			
+			
+			// ---- 4. tailor the essence' problem model to the target solver's input format
+			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
+			return true;			
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace(System.out);
+			this.errorMessage = e.getMessage();
+			//this.errorMessage = "\n"+this.parser.errorMessage;
+			this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+			return false;
+		}		
+	}
+	
+	
 	
 	/**
 	 * Method to determine if the problem model has already been normalised.
@@ -188,6 +272,10 @@ public class Translator {
 	public boolean hasBeenNormalised() {
 		return (this.normalisedModel == null) ?
 			false : true;
+	}
+	
+	public boolean hasBeenFlattened() {
+		return this.normalisedModelHasBeenFlattened;
 	}
 	
 	// ====================== OUTPUT METHODS =====================================================
@@ -271,5 +359,16 @@ public class Translator {
 		if(this.normalisedModel != null)
 			return this.normalisedModel.toString();
 		else return this.problemSpecification.toString();
+	}
+	
+	/**
+	 * Return the final translated problem model in the 
+	 * target solver's input language
+	 * 
+	 * @return the final translated problem model in the 
+	 * target solver's input language
+	 */
+	public String getTargetSolverInstance() {
+		return this.targetSolverInstance;
 	}
 }

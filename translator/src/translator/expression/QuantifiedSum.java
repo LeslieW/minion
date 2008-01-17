@@ -54,8 +54,6 @@ public class QuantifiedSum implements ArithmeticExpression {
 	}
 
 	public int[] getDomain() {
-		int f;
-		// TODO Auto-generated method stub
 		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
 	}
 
@@ -121,12 +119,16 @@ public class QuantifiedSum implements ArithmeticExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+	
+	public Expression restructure() {
+		return this;
 	}
 	
 	// ================ OTHER METHODS ======================================

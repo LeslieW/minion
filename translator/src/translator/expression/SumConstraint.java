@@ -169,7 +169,7 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 
@@ -366,5 +366,32 @@ public class SumConstraint implements GlobalConstraint {
 		
 		
 		return new int[] {lowerBound, upperBound};
+	}
+	
+	public Expression restructure() {
+		
+	/*	if(this.positiveArguments.length ==0 || this.negativeArguments.length ==0)
+			return this;
+		
+		// cancellation:
+		// if we find 2 equal arguments where one is in the positive list
+		// and one in the negative list, remove them both
+		for(int i=this.positiveArguments.length-1; i>=0; i--) {
+			Expression argument = positiveArguments[i];
+			for(int j=this.negativeArguments.length-1; j>=0; j--) {
+				if(argument.equals(negativeArguments[j])) {
+					positiveArguments.remove(i);
+					negativeArguments.remove(j);
+				}
+			}
+		}*/
+		
+
+		
+		return this;
+	}
+	
+	public boolean isResultOnLeftSide() {
+		return this.resultIsOnLeftSide;
 	}
 }

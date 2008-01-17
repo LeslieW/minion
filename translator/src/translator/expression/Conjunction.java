@@ -181,12 +181,19 @@ public class Conjunction extends NaryRelationalExpression {
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
+	}
+	
+	public Expression restructure() {
+		for(int i=0; i<this.conjointExpressions.size(); i++)
+			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).restructure());
+		
+		return this;
 	}
 }
 

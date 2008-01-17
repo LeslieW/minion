@@ -258,6 +258,18 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.U_MINUS:
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_UNARY_MINUS));
+
+		case Expression.NARY_CONJUNCTION:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_CONJUNCTION));
+			
+		case Expression.AND:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_CONJUNCTION));
+			
+		case Expression.OR:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_DISJUNCTION));
+			
+		case Expression.NARY_DISJUNCTION:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_DISJUNCTION));
 		}
 		
 		return false;

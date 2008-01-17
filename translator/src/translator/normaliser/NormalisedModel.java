@@ -114,6 +114,9 @@ public class NormalisedModel {
 		// constraints
 		s = s.concat("such that\n");
 		
+		if(this.constraintList.size() == 0)
+			return s;
+		
 		for(int i=0; i<this.constraintList.size()-1; i++)
 			s = s.concat("\t"+constraintList.get(i)+",\n\n");
 		s= s.concat("\t"+constraintList.get(constraintList.size()-1)+"\n");

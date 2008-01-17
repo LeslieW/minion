@@ -11,5 +11,8 @@ public class MinionConstant implements MinionAtom {
 	public String toString() {
 		return ""+value;
 	}
-	
+
+	public String getVariableName() {
+		return this.value+"";
+	}
 }

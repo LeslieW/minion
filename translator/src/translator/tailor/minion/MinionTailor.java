@@ -93,9 +93,37 @@ public class MinionTailor {
 		ArrayList<String> decisionVariablesNames = this.normalisedModel.getDecisionVariablesNames();
 		
 		for(int i=0; i<decisionVariablesNames.size(); i++) {
-			Domain domain = this.normalisedModel.getDomainOfVariable(decisionVariablesNames.get(i));
-			if(domain instanceof ConstantDomain)
-				decisionVariables.put(decisionVariablesNames.get(i), (ConstantDomain) domain);
+			String varName = decisionVariablesNames.get(i);
+			Domain domain = this.normalisedModel.getDomainOfVariable(varName);
+			domain = domain.evaluate();
+			if(domain instanceof ConstantDomain) {
+				ConstantDomain constantDomain = (ConstantDomain) domain;
+				decisionVariables.put(varName, constantDomain);
+				
+				if(constantDomain instanceof ConstantArrayDomain) {
+					ConstantDomain[] indices = ((ConstantArrayDomain) constantDomain).getIndexDomains();
+					int[] offsets = new int[indices.length];
+					System.out.println("indices of array:"+varName);
+					
+					for(int j=0; j<offsets.length; j++) {
+						
+						System.out.println(j+": "+indices[j]);
+						
+						if(indices[j] instanceof BoolDomain)
+							offsets[j] = 0;
+						else if(indices[j] instanceof BoundedIntRange)
+							offsets[j] = ((BoundedIntRange) indices[j]).getRange()[0]; // lowerBound
+						
+						else throw new MinionException("Cannot translate sparse domains as array-indices yet.");
+					}
+					System.out.println("offsets von "+varName+": ");
+					for(int k=0; k<offsets.length; k++)
+						System.out.println(k+": "+offsets[k]);
+					this.offsetsFromZero.put(varName, offsets);
+				}
+					
+				
+			}
 			else throw new MinionException("Found non-constant domain:"+domain+". Please define all parameters.");
 			
 		}
@@ -156,14 +184,92 @@ public class MinionTailor {
 	}
 	
 	
+	/**
+	 * 
+	 * @param sumConstraint
+	 * @return
+	 * @throws MinionException
+	 */
 	private MinionConstraint toMinionStrongIneqSumConstraint(SumConstraint sumConstraint)
 		throws MinionException {
 		
-		int f;
-		// TODO!
-		return null;
+		Expression[] positiveArguments = sumConstraint.getPositiveArguments();
+		Expression[] negativeArguments = sumConstraint.getNegativeArguments();
+		Expression resultExpression = sumConstraint.getResult();
+		resultExpression.willBeFlattenedToVariable(true);
+		MinionAtom result = (MinionAtom) toMinion(resultExpression);
+		
+		int operator = sumConstraint.getRelationalOperator();
+		
+		ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable());
+		
+		SumConstraint firstSum = new SumConstraint(positiveArguments,
+				                                   negativeArguments,
+				                                   Expression.EQ,
+				                                   auxVariable,
+				                                   true);
+		//System.out.println("intermediate sum consteaint:"+firstSum+" while translating: "+sumConstraint);
+		MinionConstraint firstConstraint = toMinionWeakIneqSumConstraint(firstSum);
+		this.minionModel.addConstraint(firstConstraint);
+		
+		if(sumConstraint.isGonnaBeFlattenedToVariable()) {
+			if(operator == Expression.LESS) {
+				IneqConstraint constraint =  (sumConstraint.isResultOnLeftSide()) ? 
+						new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) : 
+							new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) ;
+						
+				return reifyMinionConstraint(constraint);		
+			}
+			else if(operator == Expression.GREATER) {
+				IneqConstraint constraint =  (sumConstraint.isResultOnLeftSide()) ? 
+						new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) : 
+							new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) ;
+						
+				return reifyMinionConstraint(constraint);	
+			}
+			else if(operator == Expression.NEQ) {
+				DiseqConstraint constraint =  new DiseqConstraint((MinionAtom) toMinion(auxVariable), result);		
+				return reifyMinionConstraint(constraint);					
+				
+			}
+			else throw new MinionException("Internal error. Tried to tailor non-strong relational sum by strong sum method:"+sumConstraint);
+		}
+		else {
+			if(operator == Expression.LESS) {
+				return  (sumConstraint.isResultOnLeftSide()) ? 
+						new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) : 
+							new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) ;		
+			}
+			else if(operator == Expression.GREATER) {
+				return  (sumConstraint.isResultOnLeftSide()) ? 
+						new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) : 
+							new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) ;
+						
+			}
+			else if(operator == Expression.NEQ) {
+				return  new DiseqConstraint((MinionAtom) toMinion(auxVariable), result);		
+				
+			}
+			else throw new MinionException("Internal error. Tried to tailor non-strong relational sum by strong sum method:"+sumConstraint);
+			
+			
+		}
+
 	}
 	
+	/**
+	 * Create an auxliary variable represented as an Expression (not the minion representation)
+	 * Is added to the list of aux variables in the minion model.
+	 * 
+	 * @return
+	 */
+	private Variable createAuxVariable() {
+		
+		SingleVariable variable = new SingleVariable(this.MINION_AUXVAR_NAME+this.noMinionAuxVars++, new BoolDomain());
+		this.minionModel.addAuxiliaryVariable(variable);
+		return variable;
+		
+	}
 	
 	/**
 	 * Translate SumConstraints that have the following operators:
@@ -176,13 +282,14 @@ public class MinionTailor {
 	private MinionConstraint toMinionWeakIneqSumConstraint(SumConstraint sumConstraint)
 		throws MinionException {
 	
-		// don't use watched or weighted sum then!
-		// we have to reify the sum!!
-		if(sumConstraint.isGonnaBeReified()) {
-			
-			Expression[] positiveArgs = sumConstraint.getPositiveArguments();
-			Expression[] negativeArgs = sumConstraint.getNegativeArguments();
-			
+		Expression[] positiveArgs = sumConstraint.getPositiveArguments();
+		Expression[] negativeArgs = sumConstraint.getNegativeArguments();
+		
+		
+		// ---------------- we have to reify the sum!! --------------------------------------
+		// // don't use watched or weighted sum then!
+		if(sumConstraint.isGonnaBeFlattenedToVariable()) {
+	
 			MinionAtom[] arguments = new MinionAtom[positiveArgs.length+negativeArgs.length];
 			
 			for(int i=0; i<positiveArgs.length; i++) {
@@ -220,102 +327,225 @@ public class MinionTailor {
 					+operator+"' in constraint:"+sumConstraint);
 		}
 		
-		// else: we don't have to reify the constraint
-		else {
-			
-			Expression[] positiveArgs = sumConstraint.getPositiveArguments();
-			Expression[] negativeArgs = sumConstraint.getNegativeArguments();
-			
-			boolean hasLinearArguments = true;
+		//--------------- else: we don't have to reify the constraint -----------------------------------------
+		else {	
+			// check what kind of sum we have here and look for the right kind to match up with
 			boolean hasNegativeArguments = (negativeArgs.length > 0) ? true : false;
+			boolean hasMultiplication = false;
 			
 			for(int i=0; i<positiveArgs.length; i++) {
 				if(positiveArgs[i] instanceof UnaryMinus)
 					hasNegativeArguments = true;
 				
 				if(positiveArgs[i] instanceof Multiplication) {
-					ArrayList<Expression> productArgs = ((Multiplication) positiveArgs[i]).getArguments();
-					if(productArgs.size() > 2) 
-						throw new MinionException("Expected only binary product constraint instead of:"+positiveArgs[i]);
-					positiveArgs[i].orderExpression(); // now a constant has to be in the first position
-					if(positiveArgs[0].getType() != Expression.INT)
-						hasLinearArguments = false;
-					
+					hasMultiplication = true;
 				}
 			}
 			
-			int operator = sumConstraint.getRelationalOperator();
-			
-			if(hasLinearArguments) {
-				// TODO!!
-				int f;
+			if(hasNegativeArguments || hasMultiplication) {
+				return toMinionWeakWeightedSumConstraint(sumConstraint);
+				
 			}
-			else if(hasNegativeArguments) {
-			// TODO!!	
-			}
-			
 			// positive, non linear
-			else {
-				boolean areBooleanArguments = true;
+			else return toSimpleUnReifiedWeakSumConstraint(sumConstraint);
+		
+		}
+	}
+	
+	
+	/**
+	 * Return a weightedsumleq/weightedsumgeq (or both for =) constraint. 
+	 * It will NOT reify a constraint!!
+	 * 
+	 * @param sumConstraint
+	 * @return
+	 * @throws MinionException
+	 */
+	private MinionConstraint toMinionWeakWeightedSumConstraint(SumConstraint sumConstraint) 
+		throws MinionException {
+		
+		Expression[] positiveArguments = sumConstraint.getPositiveArguments();
+		Expression[] negativeArguments = sumConstraint.getNegativeArguments();
+		
+		int operator = sumConstraint.getRelationalOperator();
+		Expression resultExpression = sumConstraint.getResult();
+		resultExpression.willBeFlattenedToVariable(true);
+		MinionAtom result = (MinionAtom) toMinion(resultExpression);
+		
+		int[] weights = new int[positiveArguments.length + negativeArguments.length];
+		MinionAtom[] arguments = new MinionAtom[positiveArguments.length + negativeArguments.length];
+			
+			for(int i=0; i<positiveArguments.length; i++) {
+				Expression argument = positiveArguments[i];
 				
-				MinionAtom[] arguments = new MinionAtom[positiveArgs.length];
-				for(int i=0; i<positiveArgs.length; i++) {
-					positiveArgs[i].willBeFlattenedToVariable(true);
-					arguments[i] = (MinionAtom) toMinion(positiveArgs[i]);
-					if(areBooleanArguments) {
-						if(!this.minionModel.variableHasBooleanDomain(arguments[i].getVariableName())) {
-							areBooleanArguments = false;
-						}
+				if(argument instanceof Multiplication) {
+					argument.orderExpression();
+					argument.evaluate();
+					Multiplication product = (Multiplication) argument;
+					
+					if(product.getArguments().size() > 2) 
+						throw new MinionException("Cannot translate n-ary product constraint:"+argument);
+					
+					else if(product.getArguments().size() == 1) {
+						weights[i] = 1;
+						Expression onlyArg = product.getArguments().remove(0);
+						onlyArg.willBeFlattenedToVariable(true);
+						arguments[i] = (MinionAtom) toMinion(onlyArg);
 					}
-				}
-				Expression resultExpression = sumConstraint.getResult();
-				resultExpression.willBeFlattenedToVariable(true);
-				MinionAtom result = (MinionAtom) toMinion(resultExpression);
-				
-				
-				if(operator == Expression.LEQ) {
-					if(this.minionModel.solverSettings.useWatchedSum()) {
-						if(areBooleanArguments) {
-							return new SumLeqConstraint(arguments, result, true);
-						}
-						else return new SumLeqConstraint(arguments, result, false);
-					}
-					else return new SumLeqConstraint(arguments, result);
-				}
-				
-				else if(operator == Expression.GEQ) {
-					if(this.minionModel.solverSettings.useWatchedSum()) {
-						if(areBooleanArguments) {
-							return new SumGeqConstraint(arguments, result, true);
-						}
-						else return new SumGeqConstraint(arguments, result, false);
-					}
-					else return new SumGeqConstraint(arguments, result);	
-				}
-				
-				else if(operator == Expression.EQ) {
-					if(this.minionModel.solverSettings.useWatchedSum()) {
-						if(areBooleanArguments) {
-							this.minionModel.addConstraint(new SumLeqConstraint(arguments, result, true));
-							return new SumGeqConstraint(arguments, result, true);
-						}
-						else {
-							this.minionModel.addConstraint(new SumLeqConstraint(arguments, result, false));
-							return new SumGeqConstraint(arguments, result, false);
-						}
+					
+					// we have exactly 2 arguments
+					if(product.getArguments().get(0).getType() == Expression.INT) {
+						weights[i] = ((ArithmeticAtomExpression) product.getArguments().remove(0)).getConstant();
+						Expression otherArg = product.getArguments().remove(0);
+						otherArg.willBeFlattenedToVariable(true);
+						arguments[i] = (MinionAtom) otherArg;
 					}
 					else {
-						this.minionModel.addConstraint(new SumLeqConstraint(arguments, result));
-						return new SumGeqConstraint(arguments, result);	
+						product.willBeFlattenedToVariable(true);
+						weights[i] = 1;
+						arguments[i] = (MinionAtom) toMinion(product);
 					}
+				} // end if: multiplication
+				
+				else { // any other type
+					argument.willBeFlattenedToVariable(true);
+					weights[i] = 1;
+					arguments[i] = (MinionAtom) toMinion(argument);	
 				}
-				else throw new MinionException("Internal error: expected only sumconstraint with operators =,<=,>= instead of:"+sumConstraint);
+			} // end for: all positive arguments
+			
+			
+			
+			// all negative arguments
+			for(int i=positiveArguments.length; i<positiveArguments.length+negativeArguments.length; i++) {
+				Expression argument = negativeArguments[i-positiveArguments.length];
+				
+				if(argument instanceof Multiplication) {
+					argument.orderExpression();
+					argument.evaluate();
+					Multiplication product = (Multiplication) argument;
+					
+					if(product.getArguments().size() > 2) 
+						throw new MinionException("Cannot translate n-ary product constraint:"+argument);
+					
+					else if(product.getArguments().size() == 1) {
+						weights[i] = -1;
+						Expression onlyArg = product.getArguments().remove(0);
+						onlyArg.willBeFlattenedToVariable(true);
+						arguments[i] = (MinionAtom) toMinion(onlyArg);
+					}
+					
+					// we have exactly 2 arguments
+					if(product.getArguments().get(0).getType() == Expression.INT) {
+						weights[i] = -((ArithmeticAtomExpression) product.getArguments().remove(0)).getConstant();
+						Expression otherArg = product.getArguments().remove(0);
+						otherArg.willBeFlattenedToVariable(true);
+						arguments[i] = (MinionAtom) otherArg;
+					}
+					else {
+						product.willBeFlattenedToVariable(true);
+						weights[i] = -1;
+						arguments[i] = (MinionAtom) toMinion(product);
+					}
+				} // end if: multiplication
+				
+				else { // any other type
+					argument.willBeFlattenedToVariable(true);
+					weights[i] = -1;
+					arguments[i] = (MinionAtom) toMinion(argument);	
+				}
+			} // end for: all negative arguments
+			
+		
+			if(operator == Expression.LEQ) {
+				return new WeightedSumLeqConstraint(arguments,weights, result);
+			}
+			else if(operator == Expression.GEQ) {
+				return new WeightedSumGeqConstraint(arguments,weights, result);
+			}
+			else if(operator == Expression.EQ) {
+				WeightedSumGeqConstraint weightedConstraint1 =  new WeightedSumGeqConstraint(arguments,weights, result);
+				this.minionModel.addConstraint(weightedConstraint1);
+				return new WeightedSumLeqConstraint(arguments,weights, result);
+				
+				
+			}
+			else throw new MinionException("Internal error: tried to translate non-weak sumConstraint with weak-sumConstraint method:"+sumConstraint);
+	
+	}
+	
+	/**
+	 * Return a simple sumleq/sumgeq (or both for =) constraint. The sum MAY NOT contain
+	 * any negative arguments!! This method will return 
+	 * a watched literal sum constriant if the arguments are all booleans.
+	 * It will NOT reify a constraint!!
+	 * 
+	 * @param sumConstraint
+	 * @return
+	 * @throws MinionException
+	 */
+	private MinionConstraint toSimpleUnReifiedWeakSumConstraint(SumConstraint sumConstraint) 
+		throws MinionException {
+		
+		int operator = sumConstraint.getRelationalOperator();
+		Expression[] positiveArgs = sumConstraint.getPositiveArguments();
+		boolean areBooleanArguments = true;
+		
+		MinionAtom[] arguments = new MinionAtom[positiveArgs.length];
+		for(int i=0; i<positiveArgs.length; i++) {
+			positiveArgs[i].willBeFlattenedToVariable(true);
+			arguments[i] = (MinionAtom) toMinion(positiveArgs[i]);
+			if(areBooleanArguments) {
+				if(!this.minionModel.variableHasBooleanDomain(arguments[i].getVariableName())) {
+					areBooleanArguments = false && areBooleanArguments;
+				}
 			}
 		}
-		return null;
-}
-	
-	
+		Expression resultExpression = sumConstraint.getResult();
+		resultExpression.willBeFlattenedToVariable(true);
+		MinionAtom result = (MinionAtom) toMinion(resultExpression);
+		
+		
+		if(operator == Expression.LEQ) {
+			if(this.minionModel.solverSettings.useWatchedSum()) {
+				if(areBooleanArguments) {
+					return new SumLeqConstraint(arguments, result, true);
+				}
+				else return new SumLeqConstraint(arguments, result, false);
+			}
+			else return new SumLeqConstraint(arguments, result);
+		}
+		
+		else if(operator == Expression.GEQ) {
+			if(this.minionModel.solverSettings.useWatchedSum()) {
+				if(areBooleanArguments) {
+					return new SumGeqConstraint(arguments, result, true);
+				}
+				else return new SumGeqConstraint(arguments, result, false);
+			}
+			else return new SumGeqConstraint(arguments, result);	
+		}
+		
+		else if(operator == Expression.EQ) {
+			if(this.minionModel.solverSettings.useWatchedSum()) {
+				if(areBooleanArguments) {
+					this.minionModel.addConstraint(new SumLeqConstraint(arguments, result, true));
+					return new SumGeqConstraint(arguments, result, true);
+				}
+				else {
+					this.minionModel.addConstraint(new SumLeqConstraint(arguments, result, false));
+					return new SumGeqConstraint(arguments, result, false);
+				}
+			}
+			else {
+				this.minionModel.addConstraint(new SumLeqConstraint(arguments, result));
+				return new SumGeqConstraint(arguments, result);	
+			}
+		}
+		else throw new MinionException("Internal error: expected only sumconstraint with operators =,<=,>= instead of:"+sumConstraint);
+		
+		
+	}
 	
 	/**
 	 * Converts non commutative binary relations to Minion representation
@@ -373,7 +603,7 @@ public class MinionTailor {
 		else throw new MinionException("Unknown non-commutative binary relation:"+constraint);
 		
 		
-		if(constraint.isGonnaBeReified()) {
+		if(constraint.isGonnaBeFlattenedToVariable()) {
 			return reifyMinionConstraint(minionConstraint);
 		}
 		else return minionConstraint;
@@ -429,7 +659,7 @@ public class MinionTailor {
 		}
 		else throw new MinionException("Unknown commutative binary relation:"+constraint);	
 		
-		if(constraint.isGonnaBeReified()) {
+		if(constraint.isGonnaBeFlattenedToVariable()) {
 			return reifyMinionConstraint(minionConstraint);
 		}
 		else return minionConstraint;

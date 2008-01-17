@@ -1,5 +1,6 @@
 package translator.expression;
 
+
 /**
  * Represents arithmetic binary expressions that are composed by an 
  * operator that is NOT commutative. At the moment this includes
@@ -64,7 +65,7 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		}*/
 		
 		// TODO: enhance the bounds! The bounds could be smaller!
-		return this.leftArgument.getDomain();
+		return new int[] {LOWER_BOUND, UPPER_BOUND};
 	}
 
 	public Expression copy() {
@@ -162,13 +163,21 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		this.isNested = false;
 	}
 	
-	public boolean isGonnaBeReified() {
+	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
 	
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
 	}
+	
+	public Expression restructure() {
+		this.leftArgument = this.leftArgument.restructure();
+		this.rightArgument = this.rightArgument.restructure();
+		
+		return this;
+	}
+	
 	
 	//======================== ADDITIONAL METHODS ===============================
 	private int power(int base, int exponent) {

@@ -233,11 +233,36 @@ public interface Expression {
 	
 	/**
 	 * Sets the expression to be not nested. By default, every expression is nested.
+	 * This method has not been used anywhere in the flattening process.
 	 */
 	public void setIsNotNested();
 	
 	
-	public  boolean isGonnaBeReified();
+	/**
+	 * Returns true, if this expression has to be flattened to a single variable,
+	 * i.e. the flattening process (or any other process) requires the expression
+	 * to be represented as a variable only
+	 * 
+	 * @return true if the expression needs to be flattened to a single variable 
+	 * and false if not
+	 */
+	public  boolean isGonnaBeFlattenedToVariable();
 	
+	/**
+	 * Set if this expression should be represented by a single variable or not.
+	 * 
+	 * @param reified
+	 */
 	public void willBeFlattenedToVariable(boolean reified);
+	
+	
+	/**
+	 * Restructuring works mainly on equations and relations, but also on conjunctions
+	 * and disjunctions. It includes cancellation of expressions and merging sums of 
+	 * expressions to one side of a relation.
+	 * It also reduces the expression tree and performs evaluation and ordering
+	 * 
+	 * @return the restructured expression
+	 */
+	public Expression restructure(); 
 }

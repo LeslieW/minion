@@ -125,6 +125,8 @@ public interface TargetSolver {
 	public final int REIFIED_BINARY_SUMLESS_CONSTRAINT = 299;
 	public final int REIFIED_UNARY_MINUS = 250;
 	public final int REIFIED_ABSOLUTE_VALUE = 251;
+	public final int REIFIED_NARY_CONJUNCTION = 252;
+	public final int REIFIED_NARY_DISJUNCTION = 253;
 	
 	
 	
