@@ -1,0 +1,9 @@
+ESSENCE' 1.0
+find x,y,z : int(1..10),
+     XXX : matrix indexed by [int(1..10)] of int(1..10)
+such that 
+     x = y*z,
+     x = XXX[1] * XXX[2],
+     y = XXX[3] * 5,
+     z = 6 * XXX[4],
+     z = XXX[1] + y + x + XXX[7] + XXX[8]

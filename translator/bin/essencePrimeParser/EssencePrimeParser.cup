@@ -1,0 +1,605 @@
+package essencePrimeParser;
+
+import conjureEssenceSpecification.*;
+import java.util.LinkedList;
+
+
+parser code {:
+
+
+    /* Change the method report_error so it will display the line and
+       column of where the error occurred in the input as well as the
+       reason for the error which is passed into the method in the
+       String 'message'. */
+
+    public void report_error(String message, Object info) {
+
+        StringBuffer m = new StringBuffer("Error");
+
+
+        if (info instanceof java_cup.runtime.Symbol) {
+                java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                                m.append(" in line "+(s.left));
+                if (s.right >= 0)
+                        m.append(", column "+(s.right));
+            }
+        }
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+
+
+:};
+
+
+action code {:
+
+        public int errors_found = 0;
+
+:}
+
+
+
+/* Terminals (tokens returned by scanner) */
+
+/* keywords */
+terminal	   ALLDIFF, ATLEAST, ATMOST;
+terminal           BE, BE_DOMAIN, BE_NEW_TYPE;
+terminal           ENUM, EXISTS, FALSE, FIND, FORALL;
+terminal 	   GIVEN, HEADER, LETTING, MATRIX_INDEXED_BY;
+terminal	   MAXIMISING, MAX, MINIMISING, MIN;
+terminal 	   OF, SUCH_THAT, SUM, TRUE, WHERE;
+
+
+/* separators  */
+terminal	   LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK;
+terminal	   DOT, DOTDOT, COMMA, COLON, BAR;
+
+/* operators */
+terminal 	   EQ, NEQ, LESS, LEQ, GREATER, GEQ;
+terminal	   PLUS, MINUS, MULT, DIVISION, POWER, UMINUS;
+terminal 	   AND, OR, NOT, IF, IFF;
+
+
+terminal String    IDENTIFIER;
+terminal Integer   INTEGER;
+
+
+
+/* Non-terminals */
+
+non terminal essencemodel, body;
+non terminal declarations, declaration_list, declaration, objective, constraint_block;
+non terminal given_block, where_block, letting_block, find_block;
+non terminal parameter_list, parameter, domain_identifiers, identifier_list;
+non terminal domain, domain_list, range_atom_list, range_atom;
+non terminal expression, expression_list;
+non terminal atom_expression, deref_expression;
+non terminal unitop_expression, binaryop_expression, functionop_expression;
+non terminal quantifierop_expression, quantifier, binding_expression;
+non terminal constant_list, constant;
+non terminal user_def_type, variable_list;
+
+
+
+
+/* Precedences (according to "The Syntax of ESSENCE" paper) */
+
+precedence right DOT;
+precedence nonassoc EQ, NEQ;
+precedence nonassoc LESS, LEQ, GREATER, GEQ; 
+precedence left PLUS, MINUS;
+precedence left MULT, DIVISION;
+precedence left POWER;
+precedence right UMINUS;
+precedence left IFF;
+precedence left IF;
+precedence left OR;
+precedence left AND;
+precedence right NOT;
+precedence left LBRACK, RBRACK;
+precedence left LPAREN, RPAREN;
+precedence left COLON;
+precedence left COMMA;
+
+
+
+
+
+/* Essence' grammar */
+
+
+essencemodel ::= HEADER body:b
+		{: RESULT = (EssenceSpecification) b; :}
+;
+
+
+body ::= 	declarations:d_list 
+	        objective:obj 
+                constraint_block:expr_list 
+
+         	{:  Object[] tmp1 = ((LinkedList) d_list).toArray();
+	            Declaration[] d_array = new Declaration[tmp1.length];
+		    for(int i=0;i<d_array.length;i++)
+ 				d_array[i] = (Declaration) tmp1[i];
+
+                    Object[] tmp2 = ((LinkedList) expr_list).toArray();	
+	            Expression[] expr_array = new Expression[tmp2.length];
+		    for(int i=0;i<expr_array.length;i++)
+ 				expr_array[i] = (Expression) tmp2[i];
+
+		 RESULT = new EssenceSpecification(d_array,
+						   (Objective)  obj,
+						   expr_array); :} 
+
+
+/*		| objective:obj 
+                  constraint_block:expr_list 
+
+	        {:  Object[] tmp = ((LinkedList) expr_list).toArray();	
+	            Expression[] expr_array = new Expression[tmp.length];
+		    for(int i=0;i<expr_array.length;i++)
+ 				expr_array[i] = (Expression) tmp[i];
+	
+	            Declaration[] d = new Declaration[0];
+
+		 RESULT = new EssenceSpecification( d,
+						   (Objective)  obj,
+						   expr_array); :} 
+*/
+ ;
+
+
+/* Declarations  */
+
+declarations ::=	 declaration_list:d 
+				{: RESULT = d; :} 	
+	
+			| /* epsilon */
+				{:System.out.println("[ DEBUG ] empty decl block ");  
+				  RESULT = new LinkedList(); :}
+;		
+
+
+declaration_list ::=      declaration:d
+				{: LinkedList list = new LinkedList();
+				   list.add((Declaration) d); 
+				   RESULT = list; :}
+
+  			| declaration:d declaration_list:d_list
+				{: ((LinkedList) d_list).add((Declaration) d);
+				  RESULT = d_list; :} 
+;
+ 
+
+declaration ::=  given_block:d
+		    {: RESULT = (Declaration) d; :}
+	
+	         | where_block:d
+		    {: RESULT = (Declaration)  d; :}
+
+		 | letting_block:d
+		    {: RESULT = (Declaration) d; :}
+
+		 | find_block:d
+		    {: RESULT =(Declaration)  d; :}
+
+;
+	
+ 
+given_block ::= GIVEN parameter_list:p_list 
+	        {:  Object[] tmp = ((LinkedList) p_list).toArray();	
+	            Parameter[] p_array = new Parameter[tmp.length];
+		    for(int i=0;i<p_array.length;i++)
+ 				p_array[i] = (Parameter) tmp[i];
+
+ 		    RESULT = new Declaration(p_array); :}
+
+;
+
+
+parameter_list ::= parameter:p
+			{: 
+			   System.out.println("[ DEBUG ] found a parameter as part of a parameter_list.");
+			   LinkedList list = new LinkedList();
+			   list.add(  p); 
+			   RESULT = list; :}
+
+	           | parameter_list:p_list COMMA parameter:p
+			{: ((LinkedList) p_list).add(  p); 
+		            RESULT = p_list; :} 
+;
+
+
+parameter ::= 	domain_identifiers:di 
+			{: RESULT = new Parameter((DomainIdentifiers) di); :}
+
+		| IDENTIFIER:id ENUM LPAREN DOT DOT DOT RPAREN
+			{: RESULT = new Parameter(id); :}			
+;
+
+
+domain_identifiers ::= identifier_list:id_list COLON domain:d
+			{: 
+			  Object[] tmp = ((LinkedList) id_list).toArray();
+			  String[] id_array = new String[tmp.length];
+			  for(int i=0;i<id_array.length;i++)
+ 				id_array[i] = (String) tmp[i];
+
+			 RESULT = new DomainIdentifiers(id_array, (Domain) d); :}
+;
+
+
+identifier_list ::=	  IDENTIFIER:id
+				   {: System.out.println("[ DEBUG ] Parser: identifier in id_list "); 	
+			           LinkedList list = new LinkedList();
+				   list.add(new Identifier(id));
+				   RESULT = list; :}
+
+			| IDENTIFIER:id COMMA identifier_list:id_list
+				{: ((LinkedList) id_list).add(new Identifier(id)); 
+				    RESULT = id_list; :}
+;
+
+
+domain ::= 	LPAREN domain:d RPAREN	     
+			{: RESULT = (Domain) d; :}
+
+	      | IDENTIFIER:id
+			{: if(id.equals("bool")) 
+			     RESULT = new Domain();
+	                   else 
+			     RESULT = new Domain(new IdentifierDomain(new String(id) )); :}
+
+              | IDENTIFIER:id LPAREN range_atom_list:ra_list RPAREN   
+               	        {:  Object[] tmp = ((LinkedList) ra_list).toArray();	
+	        	    RangeAtom[] ra_array = new RangeAtom[tmp.length];
+			    for(int i=0;i<ra_array.length;i++)
+ 			   	 ra_array[i] = (RangeAtom) tmp[i];			  
+
+			   if(id.equalsIgnoreCase("int")) 
+			      RESULT = new Domain(new IntegerDomain(ra_array)); 			    
+			   else 
+	           	      RESULT = new Domain(new IdentifierDomain(new String(id), ra_array)); :}
+
+
+	      | MATRIX_INDEXED_BY LBRACK domain_list:d_list RBRACK OF domain:d
+               	        {:  Object[] tmp = ((LinkedList) d_list).toArray();	
+	        	    Domain[] d_array = new Domain[tmp.length];
+			    for(int i=0;i<d_array.length;i++)
+ 			   	 d_array[i] = (Domain) tmp[i];
+
+	                    System.out.println("[ DEBUG ] Parser: found a matrix-domain");
+			    RESULT = new Domain(new MatrixDomain(d_array, (Domain) d) ); :}
+;
+
+
+domain_list ::= domain:d
+		   {: LinkedList list = new LinkedList();
+		      list.add(  d); 
+		      RESULT = list; :}
+
+              | domain_list:d_list COMMA domain:d
+		   {: ((LinkedList) d_list).add(  d); 
+		       RESULT = d_list; :}
+;
+
+
+range_atom_list ::= 	range_atom:ra
+				{: LinkedList list = new LinkedList();
+				   list.add(  ra);
+				   RESULT = list; :}
+
+		      | range_atom:ra COMMA range_atom_list:ra_list
+				{: ((LinkedList) ra_list).add(  ra); 
+				   RESULT = ra_list; :}
+;
+	
+
+range_atom	 ::= 	expression:e
+				{: System.out.println("[ DEBUG] Parser: range_atom: expression: "+e.toString()); 
+				RESULT = new RangeAtom(EssenceGlobals.RANGE_EXPR, (Expression) e); :} 
+
+		      | expression:e1 DOTDOT expression:e2
+				{: RESULT = new RangeAtom((Expression) e1, (Expression) e2); :} 
+;
+
+
+expression_list ::=  	  expression:e
+				{: LinkedList e_list = new LinkedList();	
+				   e_list.add(   e); 
+				   RESULT = e_list; :}
+
+			| expression:e COMMA expression_list:e_list
+				{: ((LinkedList) e_list).add(   e); 
+				   RESULT = e_list;:}
+;
+
+
+expression ::= 	  LPAREN expression:e RPAREN
+			{: RESULT = (Expression) e; :}
+
+	      	| atom_expression:ae
+			{: RESULT = new Expression( (AtomicExpression) ae); :}
+
+		| deref_expression:de
+			{: RESULT = new Expression( (NonAtomicExpression) de); :}
+
+		| unitop_expression:ue
+			{: RESULT = new Expression( (UnaryExpression) ue); :}
+	
+		| binaryop_expression:be
+			{: RESULT = new Expression( (BinaryExpression) be); :}
+
+		| functionop_expression:fe
+			{: RESULT = new Expression( (FunctionExpression) fe); :}
+
+		| quantifierop_expression:qe
+			{: RESULT = new Expression( (QuantificationExpression) qe); :}
+;
+
+
+atom_expression ::=   	  INTEGER:i 
+				{: System.out.println("[ DEBUG ] atom-expr: int"); 
+				  RESULT = new AtomicExpression(i); :}
+
+	        	| TRUE
+				{: RESULT = new AtomicExpression(true); :}
+
+			| FALSE 
+				{: RESULT = new AtomicExpression(false); :}
+
+			| IDENTIFIER:id
+				{: RESULT = new AtomicExpression(new String(id)); :}
+;
+
+
+deref_expression ::= 	expression:e LBRACK expression_list:e_list RBRACK
+               	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
+	        	    Expression[] e_array = new Expression[tmp.length];
+			    for(int i=0;i<e_array.length;i++)
+ 			   	 e_array[i] = (Expression) tmp[i];
+	
+	                  System.out.println("[ DEBUG ] PAAAARSA: found a matrix-element: "+((Expression) e).toString());
+			  RESULT = new NonAtomicExpression(EssenceGlobals.NONATOMIC_EXPR_BRACKET, 
+								(Expression)  e,
+								 e_array ); :}
+;
+
+
+unitop_expression ::= 	  MINUS expression:e 
+		           	{: RESULT = new UnaryExpression(EssenceGlobals.NEGATION, (Expression) e); :} 
+	      		      	 %prec UMINUS   
+
+		        | BAR expression:e BAR
+				{: RESULT = new UnaryExpression(EssenceGlobals.ABS, (Expression) e); :}
+
+			| NOT expression:e
+				{: RESULT = new UnaryExpression(EssenceGlobals.NOT, (Expression) e); :}
+;
+
+
+binaryop_expression ::=  expression:e1 EQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.EQ), (Expression) e2); :}
+
+			| expression:e1 NEQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.NEQ), (Expression) e2); :}
+
+			| expression:e1 LESS expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.LESS), (Expression) e2); :}
+
+			| expression:e1 LEQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.LEQ), (Expression) e2); :}
+
+			| expression:e1 GREATER expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.GREATER), (Expression) e2); :}
+
+			| expression:e1 GEQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.GEQ), (Expression) e2); :}
+
+                        | expression:e1 PLUS expression:e2	
+			{: RESULT = new BinaryExpression(	
+			(Expression) e1, new BinaryOperator (EssenceGlobals.PLUS), (Expression) e2); :}
+
+			| expression:e1 MINUS expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.MINUS), (Expression) e2); :}
+
+			| expression:e1 MULT expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.MULT), (Expression) e2); :}
+
+			| expression:e1 DIVISION expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.DIVIDE), (Expression) e2); :}
+
+			| expression:e1 POWER expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.POWER), (Expression) e2); :}
+
+			| expression:e1 AND expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.AND), (Expression) e2); :}
+
+			| expression:e1 OR expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.OR), (Expression) e2); :}
+
+			| expression:e1 IF expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.IF), (Expression) e2); :}
+
+			| expression:e1 IFF expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.IFF), (Expression) e2); :}
+
+;
+
+
+
+functionop_expression ::= 	  ALLDIFF LPAREN expression:e RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.ALLDIFF, (Expression) e); :}
+
+			  	| MIN LPAREN expression:e RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.MIN, (Expression) e); :}
+
+				| MAX LPAREN expression:e RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.MAX, (Expression) e); :}
+
+				| ATLEAST LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.ATLEAST,
+									(Expression) e1,
+									(Expression) e2,
+									(Expression) e3); :}	
+
+				| ATMOST LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.ATMOST,
+									(Expression) e1,
+									(Expression) e2,
+									(Expression) e3); :}	
+;
+
+
+quantifierop_expression ::= quantifier:q binding_expression:bind_e DOT expression:e
+				{: RESULT = new QuantificationExpression((Quantifier) q, 
+								       (BindingExpression) bind_e, 
+								        (Expression) e); :}
+;
+
+
+quantifier ::=	  EXISTS
+			{: RESULT = new Quantifier(EssenceGlobals.EXISTS); :}	
+		| FORALL 
+			{: RESULT = new Quantifier(EssenceGlobals.FORALL); :}	
+		| SUM
+			{: RESULT = new Quantifier(EssenceGlobals.SUM); :}	
+;
+
+
+binding_expression ::=	identifier_list:id_list COLON domain:d
+               	        {:  Object[] tmp = ((LinkedList) id_list).toArray();	
+	        	    String[] id_array = new String[tmp.length];
+			    for(int i=0;i<id_array.length;i++)
+ 			   	 id_array[i] = (String) tmp[i];
+				 
+			    RESULT = new BindingExpression(new DomainIdentifiers(id_array,(Domain) d )); :}
+;
+
+
+			
+where_block ::= WHERE expression_list:e_list 
+               	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
+	        	    Expression[] e_array = new Expression[tmp.length];
+			    for(int i=0;i<e_array.length;i++)
+ 			   	 e_array[i] = (Expression) tmp[i];
+
+			    RESULT = new Declaration (e_array);  :}
+;
+
+
+letting_block ::= LETTING constant_list:c_list 
+               	        {:  Object[] tmp = ((LinkedList) c_list).toArray();	
+	        	    Constant[] c_array = new Constant[tmp.length];
+			    for(int i=0;i<c_array.length;i++)
+ 			   	 c_array[i] = (Constant) tmp[i];
+
+			    RESULT = new Declaration(c_array); :}
+;
+
+
+constant_list ::=   constant:c 
+			{: LinkedList clist = new LinkedList();
+			   clist.add((Constant)  c);  
+			   RESULT = clist; :}
+
+		  | constant:c COMMA constant_list:c_list
+			{: ((LinkedList) c_list).add(  c); 
+			    RESULT = c_list; :}
+;
+
+
+constant ::=	  IDENTIFIER:id BE_DOMAIN domain:d 
+		 	{: RESULT = new Constant(new DomainConstant(new String(id), (Domain) d)); :}
+
+		| IDENTIFIER:id COLON domain:d BE expression:e
+			{: RESULT = new Constant(new ExpressionConstant(new String(id),(Domain) d, (Expression) e)); :}
+
+		| IDENTIFIER:id BE expression:e
+			{: RESULT = new Constant(new ExpressionConstant(new String(id),(Expression) e)); :}		
+
+		| IDENTIFIER:id BE_NEW_TYPE user_def_type:t	
+			{: RESULT = new Constant(new NewTypeConstant(new String(id),(Type) t)); :}
+;	
+	
+
+
+user_def_type ::= ENUM LBRACE identifier_list:id_list RBRACE
+               	        {:  Object[] tmp = ((LinkedList) id_list).toArray();	
+	        	    Identifier[] id_array = new Identifier[tmp.length];
+			    for(int i=0;i<id_array.length;i++)
+ 			   	 id_array[i] = (Identifier) tmp[i];
+
+			    RESULT = new Type(new Enumeration(id_array)); :}
+;
+
+
+find_block ::= 	FIND variable_list:v_list 
+               	        {:  Object[] tmp = ((LinkedList) v_list).toArray();	
+	        	    DomainIdentifiers[] v_array = new DomainIdentifiers[tmp.length];
+			    for(int i=v_array.length; i>0; i--) {
+	                         System.out.println("[ DEBUG ] parser: v_array["+(i-1)+"] = "
+	                                           +tmp[v_array.length-i].toString());
+ 			   	 v_array[i-1] = (DomainIdentifiers) tmp[v_array.length-i];
+	                    }
+			    RESULT = new Declaration(v_array); :}
+;
+
+
+variable_list ::=   domain_identifiers:di
+		     {: LinkedList list = new LinkedList();
+			list.add((DomainIdentifiers) di); 
+			RESULT = list;  :}
+					   
+		  | domain_identifiers:di COMMA variable_list:di_list
+		     {: ((LinkedList) di_list).add((DomainIdentifiers) di);  
+			 RESULT = di_list; :}
+;
+
+
+
+/*  Objective */
+
+
+
+objective ::= 	  MAXIMISING expression:e
+			{: RESULT = new Objective(false, (Expression) e); :}
+
+		| MINIMISING expression:e
+			{: RESULT = new Objective(true, (Expression) e); :}
+
+		| /* epsilon */
+			{: System.out.println("[ DEBUG ] empty objective block ");   
+			  RESULT = new Objective(); :}
+;
+
+
+
+constraint_block ::=     SUCH_THAT expression_list:e_list 
+			  {: RESULT = (LinkedList) e_list; :}
+		        | /* epsilon */
+			  {:System.out.println("[ DEBUG ] empty constraint block "); 
+		            RESULT = new LinkedList(); :}	
+;

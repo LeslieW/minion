@@ -1,0 +1,9 @@
+ESSENCE' 1.0
+given n_ticks : int(1..10)
+letting INDEX be domain int(1..(2^n_ticks)),
+	ARRAY_INDEX be domain int(0..n_ticks-1)	
+find RULER : matrix indexed by [ARRAY_INDEX] of INDEX
+such that  
+           forall i,j,k,l : ARRAY_INDEX . 
+		 (RULER[i] != RULER[j]) /\
+		 (RULER[k] != RULER[l]) 

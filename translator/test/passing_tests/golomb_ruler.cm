@@ -1,0 +1,13 @@
+ESSENCE' 1.0
+given n_ticks : int(1..n)
+letting INDEX be domain int(1..(2^n_ticks))
+letting MATRIX_INDEX be domain int(0..(n_ticks-1)) 
+
+find RULER : matrix indexed by [MATRIX_INDEX] of INDEX
+minimising max(RULER)
+such that forall i,j,k,l : MATRIX_INDEX .
+                 (i != j) /\  (k != l) /\ (i != k) /\ (j != l) /\ 
+		 (k!=j) /\ 
+		 (RULER[i] != RULER[j]) /\ 
+		 (RULER[k] != RULER[l]) /\ 
+		 (RULER[i] != RULER[k]) 	  	    

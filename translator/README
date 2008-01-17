@@ -1,0 +1,61 @@
+=================================================================================================
+ Essence' Translator  v0.1
+=================================================================================================
+support: andrea@cs.st-andrews.ac.uk (Andrea Rendl)
+
+
+1. Compiling the Essence' Translator
+------------------------------------
+The Translator is written in Java, so you will need a current version
+of Java (1.5) for compilation.
+Run the script compile.sh on the root directory. Use build.sh if you
+additionally want to rebuild the Essence'-parser (for which you will
+need jflex[1] and Java-Cup[2] installed).
+
+
+2. Running the Essence' Translator
+----------------------------------
+Change to the /bin directory and call EssencePrimeTranslator with Java:
+
+java EssencePrimeTranslator <Essence'-specification-file>   <Essence'-parameter-file>   [<output-file>]
+ 
+The last parameter is optional. If the output-filename is omitted, 
+the Essence' Translator will generate the file "outFile". There are 
+also a set of flags for the translation. For further information call
+"java EssencePrimeTranslator" without arguments.
+
+
+3. Documentation
+----------------
+Documentation can be found at /doc/index.html, that contains links to several 
+Essence' examples, the Essence' grammar specification, the Minion manual 
+and the translator API.
+
+
+4. Essence' examples
+--------------------
+4.1 Problem Samples
+Several problem samples can be found in the /problems directory. 
+
+4.2 Test Instances
+A large amount of test instances can be found in the /test directory. It also
+contains a directory of generated Minion files. 
+
+
+5. Limitations and Known Bugs
+-----------------------------
+The translator is still under development, so there are some limitations. 
+The following is not supported yet:
+- decision variable arrays with 3 or more dimensions
+- parameter arrays with 4 or more dimensions
+- boolean negation
+- absolute value
+- power with decision variable as exponent
+- element constraint on 2-dimensional arrays
+- sparse domains
+
+Please report bugs to andrea@cs.st-andrews.ac.uk
+
+
+[1] jflex (Scanner Generator for Java) : http://www.jflex.de/
+[2] Java-Cup (LALR Parser Generator) http://www2.cs.tum.edu/projects/cup/

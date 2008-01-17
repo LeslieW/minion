@@ -1,0 +1,238 @@
+\documentclass{article}
+%\usepackage{math}
+%\pagestyle{fancy}
+
+%\lhead{}
+%\chead{Solving Games Symbolically}
+%\rhead{\thepage}
+%\lfoot{}
+%\cfoot{Andrea Rendl}
+%\rfoot{}
+%\renewcommand{\headrulewidth}{0.4pt}
+%\renewcommand{\footrulewidth}{0.4pt}
+
+%%\thispagestyle{plain}
+
+%%\setlength{\oddsidemargin}{0.3in}
+%%\setlength{\evensidemargin}{0.3in}
+
+\begin{document}
+
+\title{The Syntax of {\sc Essence}$'$} %Grammar, translated by the {\sc Essence'} $\rightarrow${\sc Minion} translator}
+
+\author{Alan M. Frisch, Chris Jefferson, Bernadette  Mart\'{\i}nez Hern{\'a}ndez,\\ Ian Miguel, Andrea Rendl} %Andy too?
+
+
+\date{\today}
+
+\maketitle
+%%\begin{center}
+
+
+We develop {\sc Essence}$'$, a solver-independent constraint modelling language,
+% with a layer of abstraction that is supported by most constraint solvers.
+which is a subset of {\sc Essence}~\cite{essence}. The development of {\sc Essence} is incremental, 
+so features are added to both {\sc Essence} and {\sc Essence}$'$, as we go along. This document describes the syntax of 
+{\sc Essence}$'$ version 0.1. 
+
+
+\section{{\sc Essence'} grammar}
+
+An {\sc Essence}$'$ problem model 
+consists of a problem specification, defining decision variables, domains and constraints, 
+and a parameter specification, giving parameter values to specify the problem instance. 
+Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar. 
+
+\subsection{Notation}
+
+\begin{itemize}
+
+  \item A \textit{letter} is an alphabetic character. An \textit{identifier} is 
+    a string whose first character is a \textit{letter} and the rest of its characters 
+    are alphanumeric or ``\_''.  Identifier recognition is case sensitive. 
+
+  \item A \textit{number} is any string whose elements are the numeric characters.
+  \item \{$a$\} stands for a non-empty list of $a$s.
+  \item \{$a$\}' stands for a non-empty list of $a$s separated by commas.
+  \item \{$a$\}* stands for a non-empty list of $a$s separated by the symbol ``*''.
+  \item $[a]$ stands for a nil or one occurence of $a$.
+
+\end{itemize}
+
+\subsection{CF Grammar}
+
+\subsubsection{Model}
+\begin{tabular}{rcl}
+
+\textit{model} & ::= & \textit{header}\\
+               &     & [ \textit{ \{declaration\}}' ] \\
+               &     & [ \textit{objective} ] \\
+               &     & [ \texttt{such that} \{ \textit{expression} \}' ] \\
+
+ \textit{header}& ::= & \texttt{ESSENCE} \textit{number} ``.'' \textit{number} ``.'' \textit{number} \\
+
+\textit{declaration} & ::= & \texttt{given} \{ \textit{parameter} \}'$\mid$ \\
+                     &     & \texttt{where} \{ \textit{expression} \}' $\mid$ \\
+                     &     & \texttt{letting} \{ \textit{constant} \}' $\mid$\\
+                     &     & \texttt{find} \{ \textit{variable} \}'\\
+
+\textit{objective} & ::= & \texttt{maximising} \textit{expression} $\mid$ \\
+                   &     & \texttt{minimising} \textit{expression} \\
+
+\textit{domainIdentifiers} & ::= & \{ \textit{identifier} \}' ``:'' \textit{domain} \\
+
+\textit{constant}  & ::=  & \textit{identifier}  \texttt{be domain} \textit{domain} $\mid$ \\
+                           & & \textit{identifier} [``:'' \textit{domain} ] \texttt{be} \textit{expression} \\
+%                   &     & \textit{identifier} \texttt{be new type} \textit{userDefType} \\
+\textit{parameter} & ::= & \textit{domainIdentifiers} \\
+%                   &     & \textit{identifier} \texttt{enum} ``\texttt{(...)}'' \\
+\textit{variable}  & ::= & \textit{domainIdentifiers}\\ 
+
+\end{tabular}
+
+\subsubsection{Domains}
+\begin{tabular}{rcl}
+
+\textit{simpleDomain} & :: & \texttt{bool} $\mid$ \\
+                      &    & \texttt{int} ``(`` \{ \textit{rangeAtom} \} ``)'' $\mid$ \\
+                      &    & \textit{identifier} \\
+\textit{domain} & ::= &  \textit{simpleDomain} $\mid$ \\
+                &     & ``(`` \textit{domain} ``)'' $\mid$ \\
+                &     & \texttt{matrix indexed by} ``[`` \{
+  \textit{domain} \}'  ``]'' \texttt{of} \textit{simpleDomain} \\ 
+\textit{rangeAtom} & ::= & \textit{expression} $\mid$ \\
+                   &     & \textit{expression} ``..'' \textit{expression} \\ 
+
+\end{tabular}
+
+
+\subsubsection{Expressions}
+\begin{tabular}{rcl}
+
+
+\textit{expression} & ::= & ``(`` \textit{expression} ``)'' $\mid$\\
+                    &     & \textit{atomExpression} $\mid$\\
+                    &     & \textit{deRefExpression} $\mid$\\
+%                    &     & \textit{groupOpExpression} $\mid$\\
+                    &     & \textit{unitOpExpression} $\mid$\\
+                    &     & \textit{binaryOpExpression} $\mid$\\
+                    &     & \textit{functionOpExpression} $\mid$\\
+                    &     & \textit{quantifierOpExpression} $\mid$\\
+
+\textit{atomExpression} & ::= & \textit{number} $\mid$ \texttt{true} $\mid$ \texttt{false} $\mid$ \textit{identifier} \\
+\textit{deRefExpression} & ::= & \textit{identifier} ``[`` \{ \textit{expression} \}'  ``]'' \\
+\textit{unitOpExpression} & ::= & ``-'' \textit{expression} $\mid$ \\
+                          &     & ``$\mid$'' \textit{expression} ``$\mid$'' $\mid$ \\
+                          &     & ``!'' \textit{expression}\\
+\textit{binaryOpExpression} & ::= & \textit{expression} \textit{biOp} \textit{expression}\\
+
+\textit{biOp} & ::= & {\tt +} $\mid$ {\tt -}  $\mid$ {\tt /}  $\mid$ {\tt *}  $\mid$  \verb1^1  $\mid$ \\
+              &     &  \verb1\/1  $\mid$ \verb1/\1  $\mid$ {\tt =>}  $\mid$ {\tt <=>}  $\mid$ \\
+              &     & {\tt =}  $\mid$ {\tt !=}  $\mid$ {\tt <=}  $\mid$ {\tt <}  $\mid$ {\tt >=}  $\mid$ {\tt >} $\mid$ \\
+              &     & {\tt <lex} $\mid$ {\tt <=lex} $\mid$ {\tt >lex} $\mid$ {\tt >=lex} \\
+\textit{functionOpExpression} & ::= & \texttt{alldiff} ``(`` \textit{expression} ``)'' $\mid$ \\
+                              &     & \texttt{element} ``(``
+                              \textit{expression},
+                               \textit{atomExpression},
+                              \textit{atomExpression} ``)'' \\  
+%      &     & \texttt{min} ``(`` \textit{expression} ``)'' $\mid$  \texttt{max} ``(`` \textit{expression} ``)'' $\mid$ \\
+%      &     &  \texttt{atleast}''(``  \texttt{expression}, \texttt{expression},  \texttt{expression} ``)'' $\mid$ \\ 
+%&     &  \texttt{atmost}''(``  \texttt{expression}, \texttt{expression},  \texttt{expression} ``)'' \\
+ \textit{quantifierOpExpression} & ::= & \textit{quantifier} \textit{bindingExpression} ``.'' \textit{expression} \\
+\textit{quantifier} & ::= & \texttt{forall} $\mid$ \texttt{exists} $\mid$ \texttt{sum} \\ 
+\textit{bindingExpression} & ::= & \{ \textit{identifier} \}' ``:'' \textit{simpleDomain} \\
+
+
+
+
+\end{tabular}
+
+%\clearpage
+\section{Operator Precedence}
+
+Table \ref{precedence} describes the precedence of the operators that 
+are arranged by decreasing order of precedence (the operators on top have highest precedence).
+
+\begin{table}
+     \centering
+%\begin{center}
+    \begin{tabular}{|l|lc|}
+ 
+      \hline
+       Operator & Functionality & Associativity \\
+       \hline
+       \hline
+       ,   & comma & Left \\   
+       \hline
+       :   & colon & Left \\
+       \hline
+       ( ) & left and right parenthesis & Left \\
+       \hline
+       \verb1[ ]1 & left and right brackets & Left \\
+       \hline
+       ! & not & Right \\  
+       \hline
+       \verb1/\1 & and & Left \\ 
+       \hline
+       \verb1\/1 & or & Left \\ 
+       \hline
+        {\tt =>} & if (implication)  & Left \\ 
+	\hline
+        {\tt <=>} & iff (logical equality) & Left \\ 
+	\hline
+        {\tt -} & unary minus & Right \\
+	\hline
+        \verb1^1 & power & Left \\ 
+	\hline
+        * / & multiplication, integer division & Left \\ 
+	\hline
+        {\tt + -} & addition, substraction &  Left \\
+	\hline
+        {\tt < <= > >= } & (lex)less, (lex)less or equal, &  \\ 
+	{\tt <lex <=lex >lex >=lex } & (lex)greater, (lex)greater or equal & none \\ 
+	\hline
+        {\tt = !=} & equality, disequality & none \\
+	\hline
+        . & dot & Right \\ 
+	\hline
+
+      \end{tabular}
+%\end{center}
+    \caption{Operator precedence in {\sc Essence}$'$}
+\label{precedence}
+  \end{table}
+
+\section{{\sc Essence}$'$ $\rightarrow$ {\sc Minion} Translator}
+
+A subset of {\sc Essence}$'$ can be tailored to a {\sc Minion}~\cite{minion} 
+problem instance by the {\sc Essence}$'$ $\rightarrow$ {\sc Minion} translator.
+The translator is still under development, so the
+following grammar parts are currently {\bf not supported}.
+
+\begin{itemize}
+  \item arrays of decision variables with 3 or more dimensions 
+  \item arrays of parameters with 4 or more dimensions 
+  \item absolute value
+  \item modulo
+  \item power with a decision variable as exponent
+  \item boolean negation
+  \item element constraint on 2-dimensional arrays 
+  \item sparse domains
+\end{itemize} 
+
+\begin{thebibliography}{10}
+\scriptsize
+\bibitem{essence}
+A.M. Frisch, M.~Grum, C.~Jefferson, B.~Mart\'{\i}nez~Hern{\'a}ndez, and
+  I.~Miguel.
+\newblock The design of essence: A constraint language for specifying
+  combinatorial problems.
+\newblock In {\em IJCAI}, pp 80--87, 2007.
+
+\bibitem{minion}
+I.P. Gent, C.~Jefferson, and I.~Miguel.
+\newblock Minion: A fast scalable constraint solver.
+\newblock In {\em ECAI}, pp 98--102, 2006.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,6 @@
+ESSENCE' 1.0
+given a:int,b:int
+letting RANGE1 be domain int(-10..a)
+letting RANGE2 be domain int(5..b)
+find x:RANGE1, y:RANGE2, t:RANGE1, s:RANGE2
+such that x*y = s*t

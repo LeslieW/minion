@@ -1,0 +1,6 @@
+ESSENCE' 1.0
+given box:int
+letting RANGE be domain int(0..2)
+$find x:int(1) , y:bool , z:int(1..2)
+find ginze:matrix indexed by [RANGE] of bool
+such that ginze[0] < ginze[1]

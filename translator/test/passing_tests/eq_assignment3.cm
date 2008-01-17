@@ -1,0 +1,16 @@
+ESSENCE' 1.0
+
+letting D be domain int(1..4)
+letting D2 be domain int(0..5)
+find M : matrix indexed by [D,D] of D,
+     N : matrix indexed by [D2,D2] of D
+
+such that 
+    forall i,j : D . 
+       M[i,j] = N[j-1,i+1],
+
+    alldifferent(M[1]),
+    alldifferent(N[3]),
+
+    sum i,j : D .
+      M[i,j] = 100   

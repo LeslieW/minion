@@ -1,0 +1,213 @@
+<html>
+<head>
+<title>Essence' Translator Manual</title>
+<link rel="stylesheet" type="text/css" href="tutorial.css" />
+</head>
+<body>
+
+<table align="center"  width="900">
+<tr>
+<td>
+
+<center>
+<h2> Essence' -> MINION translator Manual</h2>
+</center>
+
+<h3>Content</h3>
+
+<ol>
+<li><a href="#introduction">Introduction<a>
+</li>
+
+<li><a href="#compiling">Compiling the translator</a>
+</li>
+
+<li><a href="#running">Running the translator<a/>
+</li>
+
+<li><a href ="grammar.pdf">Essence' grammar</a>
+</li>
+
+<li><a href="http://minion.sourceforge.net/manual.pdf">MINION manual</a> (includes the grammar of the input language)
+</li>
+
+<li><a href="#modelling">Modelling with Essence'</a>
+</li>
+
+<li><a href="../problems">Essence' Examples</a>
+</li>
+
+<li><a href="html/index.html">Translator API</a>
+</li>
+
+</ol>
+
+
+
+<h3 id="introduction">Introduction</h3>
+This is the manual for the Essence' to MINION translator. 
+Please note that the translator and this manual are still 
+under developement.
+
+<a href ="grammar.pdf">Essence'</a>
+is a solver-independent constraint modelling language
+and <a href="http://minion.sourceforge.net/">MINION</a> is a fast
+ constraint solver. MINION's input language is very restricted 
+and therefore problem modelling is a challening task.
+This translator creates (mostly very effective)
+MINION input instance from an Essence' problem model.
+Essence' examples can be found <a href="../problems">here</a>.
+
+
+
+
+<h3 id="compiling">Compiling the Translator</h3>
+The Translator is written in <a href="http://www.java.com/">Java</a>, so you will need a current version
+(>= 1.5.0) of Java for compilation.
+Run the script <code>compile.sh</code> on the root directory. 
+Developers: If you want to rebuild the Essence' parser, run  <code>build.sh</code> instead of <code>compile.sh</code>
+(please note, that you will need the Lexer Generator <a href=" http://www.jflex.de/">jflex</a> and 
+the parser generator <a href="http://www2.cs.tum.edu/projects/cup/">java-cup</a> 
+installed in order to do that).
+
+
+
+
+<h3 id="running">Running the Translator</h3>
+Change to the <code>/bin</code> directory and call EssencePrimeTranslator with Java:<br>
+<br>
+<center>
+<code>java EssencePrimeTranslator problem-file.cm parameter-file.param  output-filename flags</code><br>
+ </center>
+<br>
+If <code>output-filename</code> is omitted, the Essence' Translator will generate the file
+<code>outFile</code>. The output-file will be stored in the current
+directory (<code> /bin </code>), if no other path has been specified. 
+There are also some optional flags:
+<ul>
+	<li><code>-unwatched</code>: applies only unwatched MINION constraints 
+	</li>	
+	<li><code>-watched</code>: applies watched-literal based
+	MINION constraints (if possible) 
+	</li>		
+	<li><code>-discrete</code>: use discrete domain variables 
+	</li>	
+	<li><code>-bounds</code>: use bound domain variables 
+	</li>	
+</ul>
+The translator can either always apply discrete or bound domain
+variables. The default is set to discrete variables and to apply
+watched literal based constraints (this can be changed by setting 
+the globals in the file MinionGlobals.java before compilation). 
+
+<h3 id="modelling">Modelling with Essence'</h3>
+Essence' is a declarative modelling language to specify constraint
+problems. The problem specification is usually stored in a file with
+the ending <code> .cm</code> and the parameters in a <code>
+.param</code> file. An Essence' file consists of the following parts:
+
+<ol>
+<li> Header (stating the version of Essence')
+</li>
+<li> Declarations (of constants, parameters, domains, decision
+variables) [optional]
+</li>
+<li> Constraints [optional]
+</li>
+</ol>
+Let's construct an example by modelling the
+<a href="http://www.math.uah.edu/mathclub/puzzles/money.html"> Send More Money problem</a>,
+where one has to find a
+solution  to the following sum where every letter stands for a distinct
+number between 0 and 9:
+	     <pre>
+	     S E N D + 
+	     M O R E
+	   ----------
+	   M O N E Y  
+	    </pre> 
+
+We start with the header
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+Our decision variables are <code> S, E, N,
+D, M, O, R, Y</code> which are in the domain of 0..9. We state that
+<code>S</code> and <code>M</code>  must not equal zero and define two
+domains: one reaching from 0..9 and the other from 1..9. Domains and
+constants can be defined by the <code> letting </code> statement:
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting DOMAIN0 be domain int(0..9)
+    letting DOMAIN1 be domain int(1..9)
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+Now we can define our decision variables that range over domains
+    <code>DOMAIN0</code>
+and <code>DOMAIN1</code> by using the <code>find</code> statement.
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting DOMAIN0 be domain int(0..9)
+    letting DOMAIN1 be domain int(1..9)
+
+    find S,M : DOMAIN1, 
+         E,N,D,O,R,Y : DOMAIN0
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+All declarations have been done now and we can define our
+constraint. The constraints are stated after <code>such that</code>:
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting DOMAIN0 be domain int(0..9)
+    letting DOMAIN1 be domain int(1..9)
+
+    find S,M : DOMAIN1, 
+         E,N,D,O,R,Y : DOMAIN0
+
+    such that 
+              1000*S + 100*E + 10*N + D 
+            + 1000*M + 100*O + 10*R + E =
+    10000*M + 1000*O + 100*N + 10*E + Y 
+         
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+More examples can be found in the <a href="../problems">/problems</a> directory.
+
+</td>
+</tr>
+</table>
+</body>
+</noframes>
+</html>

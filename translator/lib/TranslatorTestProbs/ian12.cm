@@ -1,0 +1,4 @@
+given box:int
+find x:int(1) , y:bool , z:int(1..2)
+find alan:matrix indexed by bool of int(1..20)
+such that x = z

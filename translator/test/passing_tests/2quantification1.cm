@@ -1,0 +1,12 @@
+ESSENCE' 1.0
+given n : int(1..20)
+letting INDEX1 be domain int(1..n)
+letting INDEX2 be domain int(1..m)
+letting RANGE be domain int(1..10)
+find xxx : matrix indexed by [INDEX1] of RANGE, 
+   yyy : matrix indexed by [INDEX2] of RANGE
+such that  forall i,j : INDEX1 .
+	    exists k : INDEX2 . 
+			    (xxx[i] < yyy[k] + j)
+                        /\  (j > i) 
+                        /\  (k > i)

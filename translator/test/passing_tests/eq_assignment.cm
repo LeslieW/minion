@@ -1,0 +1,10 @@
+ESSENCE' 1.0
+
+letting D be domain int(1..4)
+find M,N : matrix indexed by [D,D] of D
+
+such that 
+    forall i,j : D . 
+       M[i,j] = N[j,i]
+
+
