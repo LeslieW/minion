@@ -1,4 +1,5 @@
-2007
+2007-06-04
+- bug concerning bounds of single variables fixed 
 
 2007-05-04
 - added negation and tested it

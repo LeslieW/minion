@@ -270,7 +270,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			for(int i=0; i<disjunctedVars.length; i++)
 				disjunctedVars[i] = (MinionIdentifier) buffer[i];	
 			
-			return new MinionSumConstraint(disjunctedVars, new MinionConstant(1), this.useWatchedLiterals && !willBeReified);
+			return new MinionSumGeqConstraint(disjunctedVars, new MinionConstant(1), this.useWatchedLiterals && !willBeReified);
 		
 			
 		case EssenceGlobals.IF:

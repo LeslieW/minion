@@ -4,13 +4,17 @@
 support: andrea@cs.st-andrews.ac.uk (Andrea Rendl)
 
 
+This translator converts models expressed in Essence'[1] to the Minion
+input format.
+
+
 1. Compiling the Essence' Translator
 ------------------------------------
 The Translator is written in Java, so you will need a current version
 of Java (1.5) for compilation.
 Run the script compile.sh on the root directory. Use build.sh if you
 additionally want to rebuild the Essence'-parser (for which you will
-need jflex[1] and Java-Cup[2] installed).
+need jflex[2] and Java-Cup[3] installed).
 
 
 2. Running the Essence' Translator
@@ -56,5 +60,6 @@ The following is not supported yet:
 Please report bugs to andrea@cs.st-andrews.ac.uk
 
 
-[1] jflex (Scanner Generator for Java) : http://www.jflex.de/
-[2] Java-Cup (LALR Parser Generator) http://www2.cs.tum.edu/projects/cup/
+[1] http://www.cs.york.ac.uk/aig/constraints/AutoModel/
+[2] jflex (Scanner Generator for Java) : http://www.jflex.de/
+[3] Java-Cup (LALR Parser Generator) http://www2.cs.tum.edu/projects/cup/
