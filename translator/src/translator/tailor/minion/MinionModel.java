@@ -282,6 +282,7 @@ public class MinionModel {
 	
 	public void addAlias(String alias) {
 		// only add aliases that are NOT already in the list
+		
 		for(int i=0; i<this.variableAliases.size();i++) {
 			if(variableAliases.get(i).equals(alias))
 				return;
@@ -425,26 +426,45 @@ public class MinionModel {
 				}
 				
 				else if(indexDomains.length == 2) {
-					int endlinePosition = 6;
+					/*int endlinePosition = 6;
 					while(solverOutputString.charAt(endlinePosition) != '\n' &&
 							solverOutputString.charAt(endlinePosition) != '\r' ) {
 						endlinePosition++;
-					}
+					}*/
 					int amountOfRows = indexDomains[0].getRange()[1]-indexDomains[0].getRange()[0] + 1;
 					
 					String matrixString = "[ ";
 					for(int row=0;row<amountOfRows; row++) {
-						String intList = solverOutputString.substring(5, 7);
-						for(int j=8; j<endlinePosition; j++) {
-							intList = intList.concat(", "+solverOutputString.charAt(j));
-							j++;
+						boolean first = true;
+						String intList = "";
+		
+						int pos = 6;
+						
+						while(solverOutputString.charAt(pos) != '\n' &&
+								solverOutputString.charAt(pos) != '\r' ) {
+							String integer = "";
+							//System.out.println("This the current solver output: "+solverOutputString+"\n=======================\n");
+							
+							
+							while( solverOutputString.charAt(pos) != ' ' ) {
+								integer = integer+solverOutputString.charAt(pos);
+								pos++;
+							}
+						
+							if(first)
+								intList = integer;
+							else intList = intList+", "+integer;
+						
+							first = false;
+							
+							
+						
+							pos++;
 						}
 						if(row >= 1)
 							matrixString = matrixString.concat(",\n\t["+intList+"]");
 						else matrixString = matrixString.concat("["+intList+"]");
-						
-						solverOutputString = solverOutputString.delete(0, endlinePosition);
-			
+						solverOutputString = solverOutputString.delete(0, pos);
 					}
 					matrixString = matrixString.concat(" ],\n");
 					solutionString = solutionString+"variable "+variableName+" is "+matrixString;
