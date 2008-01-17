@@ -166,6 +166,7 @@ public class TranslatorGUI extends JPanel  {
 			  }
 			});
 		JButton clearParameterButton = new JButton("Clear parameter");
+		clearParameterButton.setEnabled(false);
 		
 		JPanel parameterButtonPanel = new JPanel(new GridLayout(0,3));
 		parameterButtonPanel.add(saveParameterButton,0);

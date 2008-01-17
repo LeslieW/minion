@@ -34,7 +34,7 @@ public class ExpressionMapper {
 	/** A hashmap containing all parameters with their corresponding domains */
 	HashMap<String, Domain> parameters;
 	
-	private final boolean DEBUG = true;
+    String debug = "";
 	
 	public ExpressionMapper(HashMap<String,Domain> decisionVariables,
 			                HashMap<String, Domain> parameters) {
@@ -69,12 +69,102 @@ public class ExpressionMapper {
 		case EssenceGlobals.BINARYOP_EXPR:
 			return mapBinaryExpression(oldExpression.getBinaryExpression());
 			
+		case EssenceGlobals.QUANTIFIER_EXPR:
+			//return mapQuantification(oldExpression.getQuantification());
+			
 		default: 
-			throw new NormaliserException("Cannot map expression yet or unknown expression type:"+oldExpression);
+			throw new NormaliserException("Cannot map expression yet or unknown expression type:\n"+oldExpression);
 				
 		}
 	}
 	
+	
+	
+	protected translator.expression.Expression mapQuantification(QuantificationExpression oldQuantification) 
+	throws NormaliserException {
+		
+		// get the quantified expression
+		translator.expression.Expression newQuantifiedExpression = mapExpression(oldQuantification.getExpression());
+		
+		// get the quantified variables and the domain they are quantified over
+		DomainIdentifiers quantifiers = oldQuantification.getBindingExpression().getDomainIdentifiers();
+		String[] quantifiedVariables = quantifiers.getIdentifiers();
+		
+		Domain quantifiedDomain = quantifiers.getDomain();
+		
+		// test here if the quantifier is a sum or not!
+		
+		
+		if(quantifiedDomain.getRestrictionMode() == EssenceGlobals.INTEGER_RANGE) {
+			
+			RangeAtom[] intDomainRange = quantifiedDomain.getIntegerDomain().getRangeList();
+			
+			
+			// just one range (1..n) or (1)
+			if(intDomainRange.length == 1) {
+				RangeAtom range = intDomainRange[0];
+				translator.expression.Expression lowerBound = mapExpression(range.getLowerBound()).evaluate();
+				translator.expression.Expression upperBound = mapExpression(range.getLowerBound()).evaluate();
+				
+				// if the bounds of the domain are integers
+				if(lowerBound.getType() == translator.expression.Expression.INT && 
+						upperBound.getType() == translator.expression.Expression.INT) {
+					
+					int lb = ((ArithmeticAtomExpression) lowerBound).getConstant();
+					int ub = ((ArithmeticAtomExpression) upperBound).getConstant();
+					
+					if(lb > ub) 
+						throw new NormaliserException("Illegal bounds for quantification: lowerbound '"+lb+"' is greater than upperBound '"
+								+ub+"' for quantified variables in :"+oldQuantification);
+					
+					
+					int[] quantifiedRange = new int[(ub-lb)+1];
+					for(int i=0; i<quantifiedRange.length; i++) {
+						quantifiedRange[i] = i+lb;
+					}
+					
+					return (oldQuantification.getQuantifier().getRestrictionMode() == EssenceGlobals.FORALL) ?
+							new QuantifiedExpression(true,
+							                          quantifiedVariables,
+							                          quantifiedRange,
+							                          newQuantifiedExpression) 
+					: 
+						new QuantifiedExpression(false,
+		                          quantifiedVariables,
+		                          quantifiedRange,
+		                          newQuantifiedExpression); 
+				}
+				
+				// the quantified domain bounds are composed of expressions
+				else {
+					
+					return (oldQuantification.getQuantifier().getRestrictionMode() == EssenceGlobals.FORALL) ?
+							new QuantifiedExpression(true,
+							                          quantifiedVariables,
+							                          new translator.expression.Expression[] {lowerBound, upperBound},
+							                          newQuantifiedExpression) 
+					: 
+						new QuantifiedExpression(false,
+		                          quantifiedVariables,
+		                          new translator.expression.Expression[] {lowerBound, upperBound},
+		                          newQuantifiedExpression); 
+				}
+				
+			}
+			// we have several ranges, like (1..4, 7..19 , 34)
+			else {
+				ArrayList<translator.expression.Expression> domainElements = new ArrayList<translator.expression.Expression>();
+				
+				for(int i=0; i<intDomainRange.length; i++) {
+				
+					
+					
+				}
+			}
+		}
+		
+		return null;
+	}
 	
 	/**
 	 * Map a binary expression to the advanced expression representation. The expressions are mapped
@@ -365,9 +455,8 @@ public class ExpressionMapper {
 	
 	protected void print_debug(String message) {
 		
-		if(DEBUG) {
-			System.out.println(" [ DEBUG expressionMapper ] "+message);
-		}
+		this.debug = this.debug.concat(" [ DEBUG expressionMapper ] "+message);
+		
 		
 	}
 	

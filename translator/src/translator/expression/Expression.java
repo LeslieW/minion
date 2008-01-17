@@ -81,12 +81,18 @@ public interface Expression {
 	public final int PLUS = 110;
 	public final int MINUS = 111;
 	
-	public final int SUM = 200;
+	//public final int SUM = 200;
 	
 	// Binary arithmetic non-commutative operators
 	public final int DIV = 112;
 	public final int MULT = 113;
 	public final int POWER = 114;
+	
+	// Quantifications
+	
+	public final int SUM = 200;
+	public final int FORALL = 201;
+	public final int EXISTS = 202;
 	
 	// --------------------------------------------------------
 	
