@@ -36,6 +36,16 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(NARY_WEIGHTED_SUM),new Boolean(true));
 		featureMap.put(new Integer(UNNESTED_NEGATION), new Boolean(false));
 		
+		// are the following constraints reifiable
+		featureMap.put(new Integer(REIFIED_ALLDIFFERENT), new Boolean(false));
+		featureMap.put(new Integer(REIFIED_IF), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_LEQ), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_GEQ), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_LESS), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_GREATER), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_LEX_LEQ), new Boolean(false));
+		featureMap.put(new Integer(REIFIED_LEX_GEQ), new Boolean(false));
+		
 		// variables
 		featureMap.put(new Integer(SPARSE_VARIABLES),new Boolean(true));
 		featureMap.put(new Integer(DISCRETE_BOUNDS_VARIABLES),new Boolean(true));

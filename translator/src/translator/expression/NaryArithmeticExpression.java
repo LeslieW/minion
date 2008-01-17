@@ -9,6 +9,13 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 	private boolean isNested = true;
 	private boolean willBeReified = false;
 	
+	
+	public int[] getDomain() {
+		// TODO Auto-generated method stub
+		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
+	}
+	
+	
 // ==================== Additional Methods =====================
 	
 	/**

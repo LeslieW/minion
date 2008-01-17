@@ -87,7 +87,7 @@ public interface Expression {
 	// Global Constraints
 	//public final int ALLDIFFERENT = 220;  => is defined above
 	public final int TABLE_CONSTRAINT = 221;
-	
+	public final int REIFICATION = 250;
 	
 	// --------------------------------------------------------
 	

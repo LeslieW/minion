@@ -40,7 +40,14 @@ public interface TargetSolver {
 	
 	// nesting stuff
 	public final char UNNESTED_NEGATION = 75;
-	public final char REIFIED_ALLDIFFERENT = 76;
+	public final int REIFIED_ALLDIFFERENT = 76;
+	public final int REIFIED_IF = 77;
+	public final int REIFIED_LEQ = 78;
+	public final int REIFIED_GEQ = 79;
+	public final int REIFIED_LESS = 80;
+	public final int REIFIED_GREATER = 81;
+	public final int REIFIED_LEX_LEQ = 82;
+	public final int REIFIED_LEX_GEQ = 83;
 	
 	// solving issues
 	public final char SEARCH_OVER_AUXILIARY_VARIABLES = 100;
@@ -89,6 +96,7 @@ public interface TargetSolver {
     public boolean supportsUnnestedNegation();
     
     public boolean supportsReifiedAllDifferent();
+    public boolean supportsReificationOf(int operation);
     
     
     // =============== CONSTRAINTS ==================

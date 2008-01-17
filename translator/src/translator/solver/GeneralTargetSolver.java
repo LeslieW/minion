@@ -1,7 +1,7 @@
 package translator.solver;
 
 import java.util.HashMap;
-
+import translator.expression.Expression;
 /**
  * Solver profile of the solver Minion
  * 
@@ -131,6 +131,39 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	
 	public boolean supportsReifiedAllDifferent() {
 		return this.featureMap.get(new Integer(REIFIED_ALLDIFFERENT));
+	}
+	
+	public boolean supportsReificationOf(int operation) {
+		
+		switch(operation) {
+		
+		case Expression.ALLDIFFERENT:
+			return this.featureMap.get(new Integer(REIFIED_ALLDIFFERENT));
+		
+		case Expression.IF:
+			return this.featureMap.get(new Integer(REIFIED_IF));
+			
+		case Expression.LEQ:
+			return this.featureMap.get(new Integer(REIFIED_LEQ));
+			
+		case Expression.GEQ:
+			return this.featureMap.get(new Integer(REIFIED_GEQ));
+			
+		case Expression.LESS:
+			return this.featureMap.get(new Integer(REIFIED_LESS));
+			
+		case Expression.GREATER:
+			return this.featureMap.get(new Integer(REIFIED_GREATER));
+			
+		case Expression.LEX_LEQ:
+			return this.featureMap.get(new Integer(REIFIED_LEX_LEQ));
+			
+		case Expression.LEX_GEQ:
+			return this.featureMap.get(new Integer(REIFIED_LEX_GEQ));
+			
+		}
+		
+		return false;
 	}
 	
 	// ============ VARIABLES ========================

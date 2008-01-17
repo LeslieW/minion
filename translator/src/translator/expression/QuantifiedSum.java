@@ -56,7 +56,7 @@ public class QuantifiedSum implements ArithmeticExpression {
 	public int[] getDomain() {
 		int f;
 		// TODO Auto-generated method stub
-		return null;
+		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
 	}
 
 	public int getType() {
