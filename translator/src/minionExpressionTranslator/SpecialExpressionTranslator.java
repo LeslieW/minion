@@ -169,8 +169,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 					MinionConstraint rightConstraint = translateSpecialExpression(right, willBeReified);
 					if(rightConstraint==null)
 						throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
-					MinionIdentifier auxVar1 = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-					minionModel.addReificationConstraint((MinionReifiableConstraint) rightConstraint,auxVar1);
+					MinionIdentifier auxVar1 = reifyConstraint((MinionReifiableConstraint) rightConstraint);
 					conjunction.add(auxVar1);
 				} // else we have an atom on the right side (subtree)
 				else  conjunction.add(translateAtomExpression(right));
@@ -187,8 +186,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 						if(leftRightConstraint==null)
 							throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"
 										+leftRightExpression.toString());
-						MinionIdentifier auxVar = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-						minionModel.addReificationConstraint((MinionReifiableConstraint) leftRightConstraint,auxVar);
+						MinionIdentifier auxVar = reifyConstraint((MinionReifiableConstraint) leftRightConstraint); 
 						conjunction.add(auxVar);
 					}
 					else { // we have an atom
@@ -203,8 +201,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 					if(leftConstraint == null)
 						throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"
 							+left.toString());
-					MinionIdentifier auxVar2 = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-					minionModel.addReificationConstraint((MinionReifiableConstraint) leftConstraint,auxVar2);
+					MinionIdentifier auxVar2 = reifyConstraint((MinionReifiableConstraint) leftConstraint);
 					conjunction.add(auxVar2);
 				} // we have an atom on the left side
 				else conjunction.add(translateAtomExpression(left));
@@ -226,8 +223,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(constraintRight==null) 
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				MinionIdentifier auxVar1 = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-				minionModel.addReificationConstraint((MinionReifiableConstraint) constraintRight,auxVar1);
+				MinionIdentifier auxVar1 = reifyConstraint((MinionReifiableConstraint) constraintRight);
 				disjunction.add(auxVar1);
 			}
 			else disjunction.add(translateAtomExpression(right));
@@ -245,8 +241,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 					if(leftRightConstraint==null)
 						throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"
 								+leftRightExpression.toString());
-					MinionIdentifier auxVar = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-					minionModel.addReificationConstraint((MinionReifiableConstraint) leftRightConstraint,auxVar);
+					MinionIdentifier auxVar = reifyConstraint((MinionReifiableConstraint) leftRightConstraint);
 					disjunction.add(auxVar);
 				} else disjunction.add(translateAtomExpression(leftRightExpression));
 					
@@ -259,8 +254,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(constraintLeft==null)
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				MinionIdentifier auxVar2 = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-				minionModel.addReificationConstraint((MinionReifiableConstraint) constraintLeft,auxVar2);
+				MinionIdentifier auxVar2 = reifyConstraint((MinionReifiableConstraint) constraintLeft);
 				disjunction.add(auxVar2);
 			} 
 			else disjunction.add(translateAtomExpression(left));
@@ -284,8 +278,11 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(constraintLeftIf==null)
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				auxVar1If = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-				minionModel.addReificationConstraint((MinionReifiableConstraint) constraintLeftIf,auxVar1If);
+				
+				auxVar1If = reifyConstraint((MinionReifiableConstraint) constraintLeftIf);
+				//minionModel.addReificationConstraint((MinionReifiableConstraint) constraintLeftIf,auxVar1If);
+				//if(reifiedConstraint)
+				
 			} else auxVar1If = translateAtomExpression(left); 
 			
 			
@@ -296,8 +293,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(constraintRightIf==null) 
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				auxVar2If = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-				minionModel.addReificationConstraint((MinionReifiableConstraint) constraintRightIf,auxVar2If);
+				auxVar2If = reifyConstraint((MinionReifiableConstraint) constraintRightIf); //variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+				//minionModel.addReificationConstraint((MinionReifiableConstraint) constraintRightIf,auxVar2If);
 			}
 			else auxVar2If = translateAtomExpression(right);
 			
@@ -313,8 +310,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(constraintLeftIff==null)
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				auxVar1Iff = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-				minionModel.addReificationConstraint((MinionReifiableConstraint) constraintLeftIff,auxVar1Iff);
+				auxVar1Iff = reifyConstraint((MinionReifiableConstraint) constraintLeftIff);
 			} 
 			else auxVar1Iff = translateAtomExpression(left);
 			
@@ -326,8 +322,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(constraintRightIff==null) 
 					throw new MinionException("Internal error. Could not reify constraint, because translation returned null:"+e.toString());
 			
-				auxVar2Iff = variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
-				minionModel.addReificationConstraint((MinionReifiableConstraint) constraintRightIff,auxVar2Iff);
+				auxVar2Iff = reifyConstraint((MinionReifiableConstraint) constraintRightIff);
 			}
 			else auxVar2Iff = translateAtomExpression(right);
 			
@@ -342,9 +337,42 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 
 	}
 
-    
-  
+    /**
+     * Handles reification
+     * If we have to reify a sum, then we need 2 variables to reify it because we only have sumgeq and sumleq in Minion.
+     * 
+     * @param reifiedConstraint
+     * @return
+     * @throws MinionException
+     */
 	
+  protected MinionBoolVariable reifyConstraint(MinionReifiableConstraint reifiedConstraint) throws 
+  	MinionException {
+	  
+	  if(reifiedConstraint.getClass().toString().endsWith("minionModel.MinionSumConstraint") ||
+			  reifiedConstraint.getClass().toString().endsWith("minionModel.MinionWeightedSumConstraint")) {
+			MinionBoolVariable reifiedVariable1 = (MinionBoolVariable) variableCreator.addFreshVariable
+			                         (0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+			MinionBoolVariable reifiedVariable2 = (MinionBoolVariable) variableCreator.addFreshVariable
+			                         (0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+		    // reify(sumleq, r1)
+		    // reify(sumgeq, r2)
+			MinionReifyConstraint reifiedSumConstraint = new MinionReifyConstraint(
+					                     (MinionReifiableConstraint) reifiedConstraint, (MinionIdentifier) reifiedVariable1, reifiedVariable2);
+		    this.minionModel.addConstraint(reifiedSumConstraint);
+		    		    
+		    // r1*r2 = 1
+		    MinionProductConstraint productConstraint = new MinionProductConstraint(reifiedVariable1, reifiedVariable2, new MinionConstant(1));
+		    // reify( (r1*r2=1), r), return r
+			return reifyConstraint(productConstraint) ;
+	  }
+	  else {
+		MinionBoolVariable reifiedVariable = (MinionBoolVariable) variableCreator.addFreshVariable(0, 1, "freshVariable"+noTmpVars++, this.useDiscreteVariables);
+		minionModel.addReificationConstraint((MinionReifiableConstraint) reifiedConstraint, (MinionIdentifier) reifiedVariable);
+	  
+		return reifiedVariable;
+	  }
+  }
 	/**
 	 * The constraint is simple, if one of its expressions (left or right hand) is atomic
 	 * (or non-atomic, meaning it is a vector-element) and the relation is equality.
