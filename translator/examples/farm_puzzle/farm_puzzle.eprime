@@ -4,10 +4,9 @@ $ A farmer has 7 animals on his farm: pigs and hens.
 $ They all together have 22 legs. How many pigs and how many
 $ hens does the farmer have?
 $
-$ In this version FEET should be updated to a sparse domain
-$ as soon as sparse domains are supported by the translator
 
-ESSENCE' 1.0
+language ESSENCE' 1.b.a
+
 letting numberOfLegs be 22
 letting FEET be domain int(2,4)
 find a1,a2,a3,a4,a5,a6,a7 : FEET 

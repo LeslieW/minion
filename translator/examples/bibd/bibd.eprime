@@ -7,11 +7,9 @@ $ exactly l blocks.
 $
 $ We represent the problem by a vxb matrix of booleans, where 
 $ matrix[i,j] equals 1(true) iff object i has been assign to 
-$ block j. The matrix 'columns' has the same elements as the 
-$ problem matrix 'bibd', just with the columns switched to rows
-$ in order to apply the lex constraint on each column of 'bibd'.
-$
-ESSENCE' 1.0
+$ block j. 
+
+language ESSENCE' 1.b.a
 given v, b, r, k, l : int
 find  bibd: matrix indexed by [int(1..v), int(1..b)] of bool
 
