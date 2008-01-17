@@ -25,7 +25,7 @@ public class MinionTailor {
 		this.offsetsFromZero = new HashMap<String,int[]>();
 		this.normalisedModel = normalisedModel;
 		this.solverSettings = solverSettings;
-		this.noMinionAuxVars = 0;
+		this.noMinionAuxVars = this.normalisedModel.getAuxVariables().size();
 	}
 	
 	// ====== TRANSLATION TO MINION REPRESENTATION ===========
@@ -103,11 +103,8 @@ public class MinionTailor {
 				if(constantDomain instanceof ConstantArrayDomain) {
 					ConstantDomain[] indices = ((ConstantArrayDomain) constantDomain).getIndexDomains();
 					int[] offsets = new int[indices.length];
-					System.out.println("indices of array:"+varName);
 					
 					for(int j=0; j<offsets.length; j++) {
-						
-						System.out.println(j+": "+indices[j]);
 						
 						if(indices[j] instanceof BoolDomain)
 							offsets[j] = 0;
@@ -116,9 +113,6 @@ public class MinionTailor {
 						
 						else throw new MinionException("Cannot translate sparse domains as array-indices yet.");
 					}
-					System.out.println("offsets von "+varName+": ");
-					for(int k=0; k<offsets.length; k++)
-						System.out.println(k+": "+offsets[k]);
 					this.offsetsFromZero.put(varName, offsets);
 				}
 					
@@ -152,11 +146,170 @@ public class MinionTailor {
 		if(constraint instanceof SumConstraint)
 			return toMinion((SumConstraint) constraint);
 		
+		if(constraint instanceof Reification) 
+			return toMinion((Reification) constraint);
+		
+		if(constraint instanceof Disjunction)
+			return toMinion((Disjunction) constraint);
+	
+		if(constraint instanceof Conjunction)
+			return toMinion((Conjunction) constraint);
+		
+		if(constraint instanceof translator.expression.ProductConstraint)
+			return toMinion((translator.expression.ProductConstraint) constraint);
+		
+		if(constraint instanceof Multiplication)
+			return toMinion((Multiplication) constraint);
+		
+		if(constraint instanceof RelationalAtomExpression)
+			return toMinion((RelationalAtomExpression) constraint);
+		
 		return null;
 	}
 	
 	
 	
+	
+	/**
+	 * This method always returns a minion atom, since there is NO way a multiplication
+	 * can occur in Minion without being flattened.
+	 * 
+	 * @param constraint
+	 * @return
+	 * @throws MinionException
+	 */
+	protected MinionAtom toMinion(Multiplication constraint) 
+		throws MinionException {
+		
+		ArrayList<Expression> arguments = constraint.getArguments();
+		if(arguments.size() != 2)
+			throw new MinionException("Minion's product constraint only takes two arguments. Therefore cannot translate:"+constraint);
+		
+		arguments.get(0).willBeFlattenedToVariable(true);
+		arguments.get(1).willBeFlattenedToVariable(true);
+		
+		MinionAtom leftArg = (MinionAtom) toMinion(arguments.get(0));
+		MinionAtom rightArg = (MinionAtom) toMinion(arguments.get(1));
+		
+		MinionAtom auxVariable = createMinionAuxiliaryVariable(constraint.getDomain()[0], constraint.getDomain()[1]);
+		ProductConstraint product = new ProductConstraint(leftArg,
+				 										  rightArg,
+				 										  auxVariable);
+		this.minionModel.addConstraint(product);
+		return auxVariable;
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 * @param constraint
+	 * @return
+	 * @throws MinionException
+	 */
+	protected MinionConstraint toMinion(translator.expression.ProductConstraint constraint) 
+		throws MinionException {
+		
+		Expression[] arguments = constraint.getArguments();
+		if(arguments.length != 2)
+			throw new MinionException("Minion's product constraint only takes two arguments. Therefore cannot translate:"+constraint);
+		
+		arguments[0].willBeFlattenedToVariable(true);
+		arguments[1].willBeFlattenedToVariable(true);
+		
+		MinionAtom[] productArgs = new MinionAtom[2];
+		productArgs[0] = (MinionAtom) toMinion(arguments[0]);
+		productArgs[1] = (MinionAtom) toMinion(arguments[1]);
+		
+		
+		Expression resultExpression = constraint.getResult();
+		resultExpression.willBeFlattenedToVariable(true);
+		MinionAtom result = (MinionAtom) toMinion(resultExpression);
+		
+		ProductConstraint minionProduct = new ProductConstraint(productArgs[0],
+				                                                productArgs[1],
+				                                                result);
+		
+		if(constraint.isGonnaBeFlattenedToVariable()) 
+			return reifyMinionConstraint(minionProduct);
+		else return minionProduct;
+	
+	}
+	
+	
+	/**
+	 * Translate a conjunction by a sum constraint
+	 * 
+	 * @param conjunction
+	 * @return
+	 * @throws MinionException
+	 */
+	protected MinionConstraint toMinion(Conjunction conjunction) 
+		throws MinionException {
+		
+		ArrayList<Expression> conjointArgs = conjunction.getArguments();
+		MinionAtom[] arguments = new MinionAtom[conjointArgs.size()];
+		
+		for(int i=0; i<arguments.length; i++) {
+			Expression conjointArg = conjointArgs.get(i);
+			conjointArg.willBeFlattenedToVariable(true);
+			arguments[i] = (MinionAtom) toMinion(conjointArg);
+		}
+		
+		if(conjunction.isGonnaBeFlattenedToVariable()) {
+			return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(arguments.length)));
+		}
+		else return new SumGeqConstraint(arguments, new MinionConstant(arguments.length));
+		
+		
+	}
+	
+	
+	/**
+	 * Translate a disjunction by a sum constraint
+	 * 
+	 * @param disjunction
+	 * @return
+	 * @throws MinionException
+	 */
+	protected MinionConstraint toMinion(Disjunction disjunction)
+		throws MinionException {
+		
+		ArrayList<Expression> disjointArgs = disjunction.getArguments();
+		MinionAtom[] arguments = new MinionAtom[disjointArgs.size()];
+		
+		for(int i=0; i<arguments.length; i++) {
+			Expression disjointArg = disjointArgs.get(i);
+			disjointArg.willBeFlattenedToVariable(true);
+			arguments[i] = (MinionAtom) toMinion(disjointArg);
+		}
+		
+		if(disjunction.isGonnaBeFlattenedToVariable()) {
+			return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(1)));
+		}
+		else return new SumGeqConstraint(arguments, new MinionConstant(1));
+	}
+	
+	
+	/**
+	 * Map a reification constraint to Minion. This method does not
+	 * return a variable!!
+	 * 
+	 * @param reification
+	 * @return a Reify Constraint
+	 * @throws MinionException
+	 */
+	protected MinionConstraint toMinion(Reification reification) 
+		throws MinionException {
+		
+		MinionConstraint reifiedConstraint = toMinion(reification.getReifiedConstraint());
+		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
+		
+		if(reification.isGonnaBeFlattenedToVariable())
+			return reifyMinionConstraint(new Reify(reifiedConstraint, reifiedVariable));
+		
+		return new Reify(reifiedConstraint, reifiedVariable);
+	}
 	
 	/**
 	 * Translate a sum constraint to Minion. A sum constraint is a collection
@@ -257,19 +410,6 @@ public class MinionTailor {
 
 	}
 	
-	/**
-	 * Create an auxliary variable represented as an Expression (not the minion representation)
-	 * Is added to the list of aux variables in the minion model.
-	 * 
-	 * @return
-	 */
-	private Variable createAuxVariable() {
-		
-		SingleVariable variable = new SingleVariable(this.MINION_AUXVAR_NAME+this.noMinionAuxVars++, new BoolDomain());
-		this.minionModel.addAuxiliaryVariable(variable);
-		return variable;
-		
-	}
 	
 	/**
 	 * Translate SumConstraints that have the following operators:
@@ -398,7 +538,7 @@ public class MinionTailor {
 						weights[i] = ((ArithmeticAtomExpression) product.getArguments().remove(0)).getConstant();
 						Expression otherArg = product.getArguments().remove(0);
 						otherArg.willBeFlattenedToVariable(true);
-						arguments[i] = (MinionAtom) otherArg;
+						arguments[i] = (MinionAtom) toMinion(otherArg);
 					}
 					else {
 						product.willBeFlattenedToVariable(true);
@@ -440,7 +580,7 @@ public class MinionTailor {
 						weights[i] = -((ArithmeticAtomExpression) product.getArguments().remove(0)).getConstant();
 						Expression otherArg = product.getArguments().remove(0);
 						otherArg.willBeFlattenedToVariable(true);
-						arguments[i] = (MinionAtom) otherArg;
+						arguments[i] = (MinionAtom) toMinion(otherArg);
 					}
 					else {
 						product.willBeFlattenedToVariable(true);
@@ -457,16 +597,31 @@ public class MinionTailor {
 			} // end for: all negative arguments
 			
 		
+			boolean allWeightsAreOnes = true;
+			
+			for(int i=0; i<weights.length; i++)
+				allWeightsAreOnes = allWeightsAreOnes && (weights[i] == 1);
+			
+			
 			if(operator == Expression.LEQ) {
-				return new WeightedSumLeqConstraint(arguments,weights, result);
+				return (allWeightsAreOnes) ?
+						new SumLeqConstraint(arguments, result) :
+						new WeightedSumLeqConstraint(arguments,weights, result);
 			}
 			else if(operator == Expression.GEQ) {
-				return new WeightedSumGeqConstraint(arguments,weights, result);
+				return  (allWeightsAreOnes)  ? 
+						new SumGeqConstraint(arguments, result) :
+						new WeightedSumGeqConstraint(arguments,weights, result);
 			}
 			else if(operator == Expression.EQ) {
-				WeightedSumGeqConstraint weightedConstraint1 =  new WeightedSumGeqConstraint(arguments,weights, result);
+				MinionConstraint weightedConstraint1 =  (allWeightsAreOnes) ?
+						new SumGeqConstraint(arguments, result) :
+						new WeightedSumGeqConstraint(arguments, weights, result);
+						
 				this.minionModel.addConstraint(weightedConstraint1);
-				return new WeightedSumLeqConstraint(arguments,weights, result);
+				return (allWeightsAreOnes) ? 
+						new SumLeqConstraint(arguments, result) :
+						new WeightedSumLeqConstraint(arguments,weights, result);
 				
 				
 			}
@@ -685,7 +840,7 @@ public class MinionTailor {
 		
 		return auxVariable;
 	}
-	
+		
 	
 	private MinionAtom createMinionAuxiliaryVariable() {
 		
@@ -696,6 +851,32 @@ public class MinionTailor {
 		
 		return auxVariable;
 	}
+	
+	private MinionAtom createMinionAuxiliaryVariable(int lb, int ub) {
+		
+		SingleVariable auxVar = new SingleVariable(MINION_AUXVAR_NAME+this.noMinionAuxVars++,
+                									new translator.expression.BoundedIntRange(lb,ub));
+		MinionSingleVariable auxVariable = new MinionSingleVariable(MINION_AUXVAR_NAME+(this.noMinionAuxVars-1));
+		this.minionModel.addAuxiliaryVariable(auxVar);
+		
+		return auxVariable;
+	}
+	
+	
+	/**
+	 * Create an auxliary variable represented as an Expression (not the minion representation)
+	 * Is added to the list of aux variables in the minion model.
+	 * 
+	 * @return
+	 */
+	private Variable createAuxVariable() {
+		
+		SingleVariable variable = new SingleVariable(this.MINION_AUXVAR_NAME+this.noMinionAuxVars++, new BoolDomain());
+		this.minionModel.addAuxiliaryVariable(variable);
+		return variable;
+		
+	}
+	
 	
 	/**
 	 * Return the String representation of the Atomic arithmetic expression.
@@ -738,5 +919,41 @@ public class MinionTailor {
 		}
 
 	}
+	
+	
+	protected MinionConstraint toMinion(RelationalAtomExpression atom) 
+	throws MinionException {
+	
+	if(atom.getType() == Expression.BOOL)
+		return (((RelationalAtomExpression) atom).getBool()) ? 
+				new MinionConstant(1) :
+					new MinionConstant(0);
+	
+	else {
+		Variable variable = atom.getVariable();
+		
+		if(variable instanceof ArrayVariable) {
+			ArrayVariable arrayElement = (ArrayVariable) variable;
+			
+			if(this.offsetsFromZero.containsKey(arrayElement.getArrayNameOnly())) {
+				int[] offsets = this.offsetsFromZero.get(((ArrayVariable) variable).getArrayNameOnly());
+				
+				int[] indices = arrayElement.getIntegerIndices();
+				if(indices ==null) 
+					throw new MinionException("Cannot translate array element with non-constant element index:"+atom);
+				
+				for(int i=0; i<indices.length;i++) {
+					indices[i] = indices[i]-offsets[i];
+				}
+				return new MinionArrayElement(arrayElement.getArrayNameOnly(),indices);
+			}
+			else throw new MinionException("Cannot find offsets for array element:"+atom);
+		}
+		else return new MinionSingleVariable(variable.getVariableName());
+	}
+
+	
+	
+}
 	
 }

@@ -127,7 +127,8 @@ public interface TargetSolver {
 	public final int REIFIED_ABSOLUTE_VALUE = 251;
 	public final int REIFIED_NARY_CONJUNCTION = 252;
 	public final int REIFIED_NARY_DISJUNCTION = 253;
-	
+	public final int REIFIED_SUM = 254;
+	public final int REIFIED_MULTIPLICATION = 255;
 	
 	
 	// ============== solving issues =======================

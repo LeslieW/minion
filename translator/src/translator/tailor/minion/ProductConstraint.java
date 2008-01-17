@@ -1,6 +1,5 @@
 package translator.tailor.minion;
 
-import translator.expression.*;
 
 /**
  * Represents the Minion Product constraint

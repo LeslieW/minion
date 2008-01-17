@@ -80,7 +80,7 @@ public class SumConstraint implements GlobalConstraint {
 	
 	
 	public boolean hasResult() {
-		return (this.result == null);
+		return (this.result != null);
 	}
 	
 	// ========== INHERITED METHODS ====================

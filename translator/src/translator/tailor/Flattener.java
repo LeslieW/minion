@@ -52,8 +52,15 @@ public class Flattener {
 		
 		for(int i=0; i<constraints.size(); i++) {
 			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
-			for(int j=flatExpression.size()-1; j>=0; j--)
-				flattenedConstraints.add(flatExpression.remove(j)); 
+			for(int j=flatExpression.size()-1; j>=0; j--) {
+				Expression constraint = flatExpression.remove(j);
+				// detect and remove pure TRUE statements
+				if(constraint.getType() == Expression.BOOL) {
+					if(!((RelationalAtomExpression) constraint).getBool())
+						flattenedConstraints.add(constraint);
+				}
+				else flattenedConstraints.add(constraint);
+			}
 		}
 		
 		this.normalisedModel.replaceConstraintsWith(flattenedConstraints);
@@ -173,6 +180,16 @@ public class Flattener {
 	Expression leftExpression = expression.getLeftArgument();
 	Expression rightExpression = expression.getRightArgument();
 	
+	if(leftExpression instanceof QuantifiedSum ||
+			leftExpression instanceof QuantifiedExpression)
+		leftExpression = flattenExpression(leftExpression);
+	
+	if(rightExpression instanceof QuantifiedSum ||
+			rightExpression instanceof QuantifiedExpression)
+		rightExpression = flattenExpression(rightExpression);
+	
+	System.out.println("This is the expression before: "+expression+" and these are left:"+leftExpression+" and right:"+rightExpression);
+	
 	// 1. detect sum expressions (we can only have 1 sum expression on one side due to normalisation)
 	if(leftExpression instanceof Sum) {
 		Sum leftSum = (Sum) leftExpression;
@@ -214,13 +231,28 @@ public class Flattener {
 	
 	
 	// 2. detect product constraints
-	if(leftExpression instanceof Multiplication) {
-		// TODO!!
+/*	if(leftExpression instanceof Multiplication) {
+		Multiplication multiplication = (Multiplication) leftExpression;
+		multiplication.setWillBeConverteredToProductConstraint(true);
+		ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(multiplication);
+		
+		rightExpression.willBeFlattenedToVariable(true);
+		productConstraint.setResult(rightExpression);
+		if(expression.isGonnaBeFlattenedToVariable())
+			return reifyConstraint(productConstraint);
+		else return productConstraint;
 	}
 	else if(rightExpression instanceof Multiplication) {
-		// TODO!!
-	}
-	
+		Multiplication multiplication = (Multiplication) rightExpression;
+		multiplication.setWillBeConverteredToProductConstraint(true);
+		ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(multiplication);
+		
+		leftExpression.willBeFlattenedToVariable(true);
+		productConstraint.setResult(leftExpression);
+		if(expression.isGonnaBeFlattenedToVariable())
+			return reifyConstraint(productConstraint);
+		else return productConstraint;
+	}*/
 	
 	//3. just flatten the stuff dependeing on the implementation of the corresponding constraint
 	//    in the target solver
@@ -231,6 +263,7 @@ public class Flattener {
 	leftExpression = flattenExpression(leftExpression);
 	rightExpression = flattenExpression(rightExpression);
 	
+	System.out.println("This is the strange thing: left:"+leftExpression+" op:"+expression.getOperator()+", right:"+rightExpression);
 	
 	return new NonCommutativeRelationalBinaryExpression(leftExpression,
 			                                            expression.getOperator(),
@@ -254,6 +287,15 @@ public class Flattener {
 		
 		Expression leftExpression = expression.getLeftArgument();
 		Expression rightExpression = expression.getRightArgument();
+		
+		if(leftExpression instanceof QuantifiedSum ||
+				leftExpression instanceof QuantifiedExpression)
+			leftExpression = flattenExpression(leftExpression);
+		
+		if(rightExpression instanceof QuantifiedSum ||
+				rightExpression instanceof QuantifiedExpression)
+			rightExpression = flattenExpression(rightExpression);
+		
 		
 		// 1. detect sum expressions (we can only have 1 sum expression on one side due to normalisation)
 		if(leftExpression instanceof Sum) {
@@ -298,10 +340,26 @@ public class Flattener {
 		
 		// 2. detect product constraints
 		if(leftExpression instanceof Multiplication) {
-			// TODO!!
+			Multiplication multiplication = (Multiplication) leftExpression;
+			multiplication.setWillBeConverteredToProductConstraint(true);
+			ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(multiplication);
+			
+			rightExpression.willBeFlattenedToVariable(true);
+			productConstraint.setResult(rightExpression);
+			if(expression.isGonnaBeFlattenedToVariable())
+				return reifyConstraint(productConstraint);
+			else return productConstraint;
 		}
 		else if(rightExpression instanceof Multiplication) {
-			// TODO!!
+			Multiplication multiplication = (Multiplication) rightExpression;
+			multiplication.setWillBeConverteredToProductConstraint(true);
+			ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(multiplication);
+			
+			leftExpression.willBeFlattenedToVariable(true);
+			productConstraint.setResult(leftExpression);
+			if(expression.isGonnaBeFlattenedToVariable())
+				return reifyConstraint(productConstraint);
+			else return productConstraint;
 		}
 		
 		
@@ -429,7 +487,6 @@ public class Flattener {
 	 */
 	private Expression flattenDisjunction(Disjunction disjunction) 
 		throws TailorException {
-
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = disjunction.getArguments();
@@ -462,6 +519,7 @@ public class Flattener {
 	private Expression flattenConjunction(Conjunction conjunction) 
 		throws TailorException {
 		
+
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
 		for(int i=arguments.size()-1; i>=0; i--) {
@@ -655,7 +713,7 @@ public class Flattener {
 			return quantification;
 		
 		
-		System.out.println("Gonna flatten the quantification:"+quantification);
+		//System.out.println("Gonna flatten the quantification:"+quantification);
 		
 		// ----- 1. get the domain over which the quantification ranges ------------
 		Domain bindingDomain = quantification.getQuantifiedDomain();
@@ -688,12 +746,6 @@ public class Flattener {
 				                                                             domainElements,
 				                                                             quantification.getQuantifiedExpression());
 		
-		// flatten all the unfolded expressions
-		/*for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
-			unfoldedExpressions.add(flattenExpression(unfoldedExpressions.remove(i)));
-		}*/
-		
-		//System.out.println("unfolded quantification to list: "+unfoldedExpressions);
 		
 		// universal quantification 
 		if(quantification.getType() == Expression.FORALL) {
@@ -705,7 +757,7 @@ public class Flattener {
 					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			}
 			
-			Expression e = flattenConjunction(conjunction);
+			Expression e = flattenConjunction(conjunction).evaluate();
 			System.out.println("After flattening the resulting conjunction: "+e);
 			
 			return e;//flattenConjunction(conjunction);
@@ -719,7 +771,7 @@ public class Flattener {
 			for(int i=disjunction.getArguments().size()-1; i>=0; i--) 
 				disjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			
-			return flattenDisjunction(disjunction);
+			return flattenDisjunction(disjunction).evaluate();
 		}
 		
 	}
@@ -836,9 +888,162 @@ public class Flattener {
 		if(expression instanceof Sum)
 			return flattenSum((Sum) expression);
 		
+		if(expression instanceof Multiplication)
+			return flattenMultiplication((Multiplication) expression);
+		
 		return expression;
 	}
 	
+	
+	
+	/**
+	 * Flattens a multiplication, similar to the flattening of a sum.
+	 * 
+	 * @param multiplication
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenMultiplication(Multiplication multiplication) 
+		throws TailorException {
+		
+		ArrayList<Expression> arguments= multiplication.getArguments();
+		
+		if(multiplication.willBeConvertedToProductConstraint()) {
+			System.out.println("Multiplication will be flattened to a product constraint:"+multiplication);
+			return flattenToPartWiseProductConstraint(multiplication);
+		}
+		
+		if(this.targetSolver.supportsConstraint(Expression.NARY_PRODUCT_CONSTRAINT)) {
+			for(int i=0; i<arguments.size(); i++) {
+				Expression argument = arguments.remove(i);
+				if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NARY_PRODUCT_CONSTRAINT)) {
+					argument.willBeFlattenedToVariable(true);
+				}
+				arguments.add(i, flattenExpression(argument));
+				
+			}
+			
+			if(multiplication.isGonnaBeFlattenedToVariable())
+				return reifyConstraint(multiplication);
+			else return multiplication;
+		}
+		// we have to flatten the multiplication to a binary multiplication
+		else {
+			
+			if(multiplication.isGonnaBeFlattenedToVariable()) {
+				Multiplication binaryMultiplication = flattenToBinaryMultiplication(multiplication.getArguments(), null);
+				ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(
+														 createAuxVariable(multiplication.getDomain()[0], multiplication.getDomain()[1])
+														 );
+				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().get(0),
+																								binaryMultiplication.getArguments().get(1)}, 
+																								auxVariable);
+				this.constraintBuffer.add(productConstraint);
+				return auxVariable;
+				
+			}
+			return flattenToBinaryMultiplication(multiplication.getArguments(), null);
+			
+		}
+		
+	}
+	
+	
+	
+	
+	/**
+	 * Flattens an n-ary multiplication to a multiplication with only 2 arguments.
+	 * The method works recursively, so for calling it, set the second parameter to null.
+	 * 
+	 * @param arguments
+	 * @param argument
+	 * @return
+	 * @throws TailorException
+	 */
+	private Multiplication flattenToBinaryMultiplication(ArrayList<Expression> arguments, 
+																		   Expression argument) 
+	throws TailorException {
+
+		
+		
+		if(arguments.size() == 2 && argument == null) {
+			Expression arg1 = arguments.remove(0);
+			Expression arg2 = arguments.remove(0);
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.BINARY_PRODUCT_CONSTRAINT)) {
+				arg1.willBeFlattenedToVariable(true);
+				arg2.willBeFlattenedToVariable(true);
+			}
+			return new Multiplication(new Expression[] {flattenExpression(arg1), 
+					                                    flattenExpression(arg2)});
+		
+		}
+		else if (arguments.size() < 2 && argument == null) 
+			throw new TailorException("Internal error: Cannot flatten product to binary sum with less than 2 arguments:"+arguments.toString()); 	
+
+		else {
+			Expression arg1 = null;
+			if(argument == null)
+				arg1 = arguments.remove(0);
+			else arg1 = argument;
+
+			Expression arg2 = arguments.remove(0);
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.BINARY_PRODUCT_CONSTRAINT)) {
+				arg1.willBeFlattenedToVariable(true);
+				arg2.willBeFlattenedToVariable(true);
+			}
+			arg1 = flattenExpression(arg1);
+			arg2 = flattenExpression(arg2);
+			
+			if(arguments.size() ==0) {
+				return new Multiplication(new Expression[] {arg1, arg2});
+			}
+			
+			ProductConstraint productConstraint = new ProductConstraint(new Expression[] {arg1, arg2});
+				
+			
+			Multiplication m = new Multiplication(new Expression[] {arg1, arg2} );
+			int lb = m.getDomain()[0];
+			int ub = m.getDomain()[1];
+			ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
+
+			productConstraint.setResult(auxVariable);
+			this.constraintBuffer.add(productConstraint);
+			
+			return flattenToBinaryMultiplication(arguments, auxVariable);
+		}
+}
+
+	
+	/**
+	 * This method does NOT perform reification!! It returns a product constraint without result
+	 * 
+	 * @param multiplication
+	 * @return
+	 * @throws TailorException
+	 */
+	private ProductConstraint flattenToPartWiseProductConstraint(Multiplication multiplication) 
+		throws TailorException  {
+		
+		ArrayList<Expression> arguments = multiplication.getArguments();
+		
+		if(this.targetSolver.supportsConstraint(Expression.NARY_PRODUCT_CONSTRAINT)) {
+			for(int i=0; i<arguments.size(); i++) {
+				if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NARY_PRODUCT_CONSTRAINT))
+					arguments.get(i).willBeFlattenedToVariable(true);
+				arguments.add(i, flattenExpression(arguments.remove(i)));
+			}
+			return new ProductConstraint(arguments);
+		}
+		else {
+			Multiplication binaryMultiplication = flattenToBinaryMultiplication(multiplication.getArguments(), null);
+			
+			return new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().remove(0),
+				                                                     	binaryMultiplication.getArguments().remove(0)});
+			
+		}
+	}
 	
 	
 	/**
@@ -896,8 +1101,9 @@ public class Flattener {
 				if(sumConstraint.hasResult()) 
 					throw new TailorException("Internal error: expect half empty sum constraint instead of:"+sumConstraint);
 				
-				int lb = sum.getDomain()[0];
-				int ub = sum.getDomain()[1];
+				int lb = sumConstraint.getSumDomain()[0];
+				int ub = sumConstraint.getSumDomain()[1];
+				
 				ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 				sumConstraint.setResult(auxVariable, 
 						                Expression.EQ, 
@@ -1165,6 +1371,8 @@ public class Flattener {
 	private RelationalAtomExpression reifyConstraint(Expression constraint) 
 		throws TailorException {
 		
+		System.out.println("Constraint type of:"+constraint+": "+constraint.getType());
+		
 		if(!this.targetSolver.supportsReificationOf(constraint.getType()))
 			throw new TailorException
 			("Cannot reify constraint because its reification is not supported by the target solver:"+constraint);
@@ -1203,6 +1411,8 @@ public class Flattener {
 		
 		Variable auxVariable = null;
 		
+		System.out.println("Creating aux var with bounds: lb:"+lb+" and ub:"+ub);
+		
 		if(lb ==0 && ub == 1)
 			auxVariable = new SingleVariable(AUXVARIABLE_NAME+noAuxVariables++,
 					                         new BoolDomain());
@@ -1216,7 +1426,7 @@ public class Flattener {
 		
 		return auxVariable;
 	}
-	
+	 
 	
 	/*private int max(int value1, int value2) {
 		

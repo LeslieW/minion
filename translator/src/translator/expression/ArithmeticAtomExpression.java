@@ -64,7 +64,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	public int[] getDomain() {
 
 		if(variable == null) {
-			return new int[] {this.constantValue};
+			return new int[] {this.constantValue, this.constantValue};
 		}
 		else 
 			return variable.getDomain();

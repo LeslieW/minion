@@ -111,7 +111,7 @@ public class ArrayVariable implements Variable {
 	public int[] getDomain() {
 		if(this.domain.isConstantDomain())
 			return ((ConstantDomain) this.domain).getRange();
-		else return null;
+		else return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
 	}
 
 	public int getType() {

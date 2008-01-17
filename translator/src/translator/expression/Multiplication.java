@@ -8,12 +8,20 @@ public class Multiplication extends NaryArithmeticExpression {
 	private ArrayList<Expression> arguments;
 	private boolean isNested = true;
 	private boolean willBeReified = false;
+	private boolean convertToProductConstraint = false;
 	
 	// ==================== CONSTRUCTOR ====================
 	public Multiplication(ArrayList<Expression> arguments) {
 		this.arguments = arguments;
 	}
 	
+	
+	public Multiplication(Expression[] arguments) {
+		
+		this.arguments = new ArrayList<Expression>();
+		for(int i=0; i<arguments.length; i++)
+			this.arguments.add(arguments[i]);
+	}
 	
 	// =============== INTERFACED METHODS ==================
 	public ArrayList<Expression> getArguments() {
@@ -29,9 +37,56 @@ public class Multiplication extends NaryArithmeticExpression {
 	}
 
 	public int[] getDomain() {
-		int f;
-		// TODO Auto-generated method stub
-		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
+		
+		int lowerBound = 1;
+		int upperBound = 1;
+		
+		boolean negativeBound = false;
+		boolean zeroLowerBound = false;
+		boolean zeroUpperBound = false;
+		
+		for(int i=0; i<this.arguments.size(); i++) {
+			int lb_i = this.arguments.get(i).getDomain()[0];
+			int ub_i = this.arguments.get(i).getDomain()[1];
+			if(lb_i == 0) 
+				zeroLowerBound = true;
+				// keep lower bound as it is
+			else {
+				negativeBound = (lb_i < 0);
+				lowerBound = lowerBound*lb_i;
+			}
+			
+			if(ub_i == 0) zeroUpperBound = true;
+			else {
+				negativeBound = (ub_i < 0);
+				upperBound = upperBound*ub_i;
+			}
+		}
+		
+		System.out.println("lb:"+lowerBound+" and ub:"+upperBound+", before taking care of -,0 etc");
+		
+		if(negativeBound) { // don't care about zero here, since the bounds will range over it anyway
+			if(upperBound < 0) {
+				// absolute value
+				lowerBound = upperBound;
+				upperBound = upperBound - 2*upperBound;
+			}
+			else {
+				lowerBound = upperBound - 2*upperBound;
+			}
+		}
+		else {
+			if(zeroLowerBound) {
+				if(lowerBound > 0)
+					lowerBound = 0;
+			}
+			if(zeroUpperBound) {
+				if(lowerBound > 0) lowerBound = 0;
+			}
+		}
+		
+		System.out.println("lb:"+lowerBound+" and ub:"+upperBound+", after taking care of -,0 etc");
+		return new int[] {lowerBound, upperBound};
 	}
 
 	public int getType() {
@@ -183,4 +238,15 @@ public class Multiplication extends NaryArithmeticExpression {
 		return this;
 	}
 	
+	
+	// ================== ADDITIONAL METHODS ==============================
+	
+	public boolean willBeConvertedToProductConstraint() {
+		return this.convertToProductConstraint;
+	}
+	
+	
+	public void setWillBeConverteredToProductConstraint(boolean turnOn) {
+		this.convertToProductConstraint = turnOn;
+	}
 }

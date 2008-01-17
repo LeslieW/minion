@@ -102,10 +102,21 @@ public class NormalisedModel {
 		// header
 		String s = "ESSENCE' 1.0\n\n";
 		
+		
+		
+		
 		// decision variables
 		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
 			String variableName = decisionVariablesNames.get(i);
 			s = s.concat("find\t"+variableName+"\t: "+this.decisionVariables.get(variableName)+"\n");
+		}
+		
+		
+		s = s.concat("\n\n");
+		// auxiliary variables
+		for(int i=0; i<this.auxiliaryVariables.size(); i++) {
+			Variable auxVar = auxiliaryVariables.get(i);
+			s = s.concat("$  "+auxVar+" : {"+auxVar.getDomain()[0]+", "+auxVar.getDomain()[1]+"} \n");
 		}
 		
 		// objective

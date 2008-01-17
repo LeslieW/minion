@@ -1,5 +1,7 @@
 package translator.expression;
 
+import java.util.ArrayList;
+
 /**
  * Represents a product constraint of the form:
  * arguments[0] * arguments[1] * ... * arguments[n] = result
@@ -29,6 +31,30 @@ public class ProductConstraint implements GlobalConstraint {
 		this.result = result;
 	}
 	
+	public ProductConstraint(Expression[] arguments) {
+		this.arguments = arguments;
+
+	}
+	
+	public ProductConstraint(ArrayList<Expression> argumentList) {
+		this.arguments = new Expression[argumentList.size()];
+		
+		for(int i=arguments.length-1; i>= 0; i++) {
+			arguments[i] = argumentList.remove(i);
+		}
+		
+	}
+	
+	//========= ADDITIONAL STUFF ===============================
+	
+	public void setResult(Expression result) {
+		this.result = result;
+	}
+	
+	
+	public boolean hasResult() {
+		return (this.result != null);
+	}
 	
 	// =========== INHERITED METHODS ===========================
 	
@@ -133,12 +159,19 @@ public class ProductConstraint implements GlobalConstraint {
 	
 	public String toString() {
 		
-		String s = ""+this.arguments[0];
+/*		String s = ""+this.arguments[0];
 		
 		for(int i=1; i<this.arguments.length; i++)
 			s = s.concat(" * "+arguments[i]);
 		
-		return s+" = "+this.result;
+		return s+" = "+this.result;*/
+		
+		String s = "product("+this.arguments[0];
+
+		for(int i=1; i<this.arguments.length; i++)
+			s = s.concat("* "+arguments[i]);
+		
+		return s+", "+this.result+")";
 		
 	}
 

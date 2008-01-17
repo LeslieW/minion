@@ -83,7 +83,7 @@ public class MinionModel {
 				domainString = "SPARSEBOUND";
 				int[] range = ((SparseIntRange) domain).getFullDomain();
 				rangeString = "{"+range[0];
-				for(int j=1; i<range.length; j++)
+				for(int j=1; j<range.length; j++)
 					rangeString = rangeString.concat(", "+range[j]);
 				rangeString = rangeString.concat("}");
 			}
@@ -124,7 +124,7 @@ public class MinionModel {
 						ranges[j] = 2;
 					else if(indexDomains[j] instanceof BoundedIntRange) {
 						int[] range = ((BoundedIntRange) indexDomains[j]).getRange();
-						ranges[j] = range[1]; // ub, since we have already set the bound according to their offset from zero
+						ranges[j] = range[1]-range[0]+1; // ub, since we have already set the bound according to their offset from zero
 					}
 					// continue here when we have more different types of variables arrays (with defined ranges)
 				}

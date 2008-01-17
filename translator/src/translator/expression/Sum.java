@@ -65,7 +65,7 @@ public class Sum extends NaryArithmeticExpression {
 			upperBound = upperBound - iBounds[0]; // upperBound = upperBound - lb(E) 
 		}
 		
-		
+		System.out.println("These are the lower "+lowerBound+",  and ub: "+upperBound+" for the sum:"+this);
 		return new int[] {lowerBound, upperBound};
 	}
 

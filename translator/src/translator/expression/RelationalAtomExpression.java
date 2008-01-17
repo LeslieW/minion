@@ -59,10 +59,10 @@ public class RelationalAtomExpression implements
 	public int[] getDomain() {
 		if(variable == null) {
 			return (this.bool) ? 
-					new int[] {1} :
-						new int[] {0};
+					new int[] {1,1} :
+						new int[] {0,0};
 		}
-		else return variable.getDomain();
+		else return new int[] {0,1};
 	}
 
 	public int getType() {
