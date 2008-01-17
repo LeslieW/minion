@@ -4,7 +4,7 @@ package translator.conjureEssenceSpecification;
      idea: maybe introduce a value for all nonterminals/terminals
            that should appear in Essence'?
            
-     The highest occupied number is now 136 
+     The highest occupied number is now 142 
 */
 
 public interface EssenceGlobals {
@@ -237,5 +237,13 @@ public interface EssenceGlobals {
     public final int LEX_GREATER = 130;
     public final int LEX_GEQ = 131;
     
+    
+    // matrix/array indices
+    public final int EXPRESSION_INDEX = 137;
+    public final int FULL_BOUNDED_INDEX = 138;
+    public final int LOWER_BOUNDED_INDEX = 139;
+    public final int UPPER_BOUNDED_INDEX = 140;
+    public final int UPPER_LOWER_BOUNDED_INDEX = 141;
+    public final int SPARSE_INDEX = 142;
     
 }

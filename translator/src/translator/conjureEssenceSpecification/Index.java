@@ -1,4 +1,4 @@
-package translator.expression;
+package translator.conjureEssenceSpecification;
 
 public interface Index {
 
@@ -24,13 +24,9 @@ public interface Index {
 	
 	public Index copy();
 	
-	public Index evaluate();
 	
 	public int getType();
 	
-	public boolean isConstantIndex();
-	
-	public Index insertValueForVariable(int value, String variableName);
 	
 	public String toString();
 	

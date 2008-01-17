@@ -52,4 +52,7 @@ public interface Domain {
 	 * @return the domain with every occurrence of variableName substituted with value.
 	 */
 	public Domain insertValueForVariable(int value, String variableName);
+	
+	
+	
 }

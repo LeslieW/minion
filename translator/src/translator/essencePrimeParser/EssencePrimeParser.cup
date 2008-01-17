@@ -115,6 +115,7 @@ non terminal parameter_list, parameter, infinite_parameter_domain, domain_identi
 non terminal domain, domain_list, range_atom_list, range_atom;
 non terminal expression, expression_list;
 non terminal atomic_expression, deref_expression, atom_expression;
+non terminal index, index_list;
 non terminal unitop_expression, binaryop_expression, lex_expression,  functionop_expression;
 non terminal quantifierop_expression, quantifier, binding_expression;
 non terminal table_constraint, atom_list, constant_tuple_list, constant_tuple, integer_list;
@@ -411,16 +412,50 @@ atomic_expression ::=   	  INTEGER:i
 ;
 
 
-deref_expression ::= 	expression:e LBRACK expression_list:e_list RBRACK
+deref_expression ::= 	IDENTIFIER:id LBRACK index_list:e_list RBRACK
                	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
-	        	    Expression[] e_array = new Expression[tmp.length];
-			    for(int i=0;i<e_array.length;i++)
- 			   	 e_array[i] = (Expression) tmp[i];
+	        	            Index[] e_array = new Index[tmp.length];
+			                for(int i=0;i<e_array.length;i++)
+ 			   	               e_array[i] = (Index) tmp[i];
 	
-			  RESULT = new NonAtomicExpression(EssenceGlobals.NONATOMIC_EXPR_BRACKET, 
-								(Expression)  e,
-								 e_array ); :}
+			              RESULT = new NonAtomicExpression(new String(id),
+								                           e_array ); :}
 ;
+
+
+index ::=      DOTDOT 
+               {: RESULT = new BoundedIndex(); :}
+               
+             | DOTDOT expression:e 
+               {: RESULT = new BoundedIndex( (Expression) e, false); :}
+               
+             | expression:e DOTDOT
+               {: RESULT = new BoundedIndex( (Expression) e, true); :}
+             
+             | expression:e1 DOTDOT expression:e2
+               {: RESULT = new BoundedIndex( (Expression) e1, (Expression) e2); :}
+             
+             | expression:e 
+               {: RESULT = new ExpressionIndex( (Expression) e); :}
+             
+             | LPAREN expression_list:e_list RPAREN
+               {: Object[] tmp = ((LinkedList) e_list).toArray();
+			      Expression[] e_array = new Expression[tmp.length];
+			      for(int i=0;i<e_array.length;i++)
+ 				      e_array[i] = (Expression) tmp[i];
+                  RESULT = new SparseIndex(e_array); :}
+;             
+
+
+index_list ::=   index:i 
+                 {: LinkedList e_list = new LinkedList();	
+				   e_list.addFirst(i); 
+				   RESULT = e_list;   :}
+				   
+                 |   index:i COMMA index_list:i_list 
+                 {: ((LinkedList) i_list).addFirst(i); 
+				   RESULT = i_list;  :}
+;                 
 
 
 atom_expression ::= deref_expression:deref

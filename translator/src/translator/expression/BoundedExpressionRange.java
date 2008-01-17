@@ -81,4 +81,39 @@ public class BoundedExpressionRange implements ExpressionRange {
 		return this;
 	}
 	
+	public char isSmallerThanSameType(BasicDomain d) {
+		
+		BoundedExpressionRange otherBounded = (BoundedExpressionRange) d;
+	
+		if(this.lowerBound.getType() == this.upperBound.getType()) {
+			char difference = this.lowerBound.isSmallerThanSameType(otherBounded.lowerBound);
+			
+			if(difference == Expression.EQUAL) {
+				
+				if(this.upperBound.getType() == otherBounded.upperBound.getType()) {
+					
+					return this.upperBound.isSmallerThanSameType(otherBounded.upperBound);
+				}
+				else return (this.upperBound.getType() < otherBounded.upperBound.getType()) ?
+						Expression.SMALLER : Expression.BIGGER;
+			}
+			else return difference;
+		}
+		else return (this.lowerBound.getType() < this.upperBound.getType()) ?
+				Expression.SMALLER : Expression.BIGGER;
+	}
+	
+
+	// ============ ADDITIONAL METHODS =======================================================
+	
+	
+	public Expression getLowerBound() {
+		return this.lowerBound;
+	}
+	
+	
+	public Expression getUpperBound() {
+		return this.upperBound;
+	}
+	
 }

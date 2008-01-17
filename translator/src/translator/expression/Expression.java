@@ -23,7 +23,9 @@ public interface Expression {
 	public final int INT_ARRAY_VAR = 22;
 	
 	// Array
-	public final int ARRAY = 23;
+	public final int SIMPLE_ARRAY = 24;
+	public final int INDEXED_ARRAY = 25;
+	public final int COMPOSED_ARRAY = 26;
 	
 	// internal types for Variables
 	/** a decision variable that is indexed by a constant value and has an integer bounds domain */

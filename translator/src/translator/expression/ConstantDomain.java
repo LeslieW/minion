@@ -8,7 +8,7 @@ package translator.expression;
  *
  */
 
-public interface ConstantDomain extends Domain {
+public interface ConstantDomain extends BasicDomain {
 
 	/**
 	 * Get the range of the domain. This is either a lower and an

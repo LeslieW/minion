@@ -2,12 +2,12 @@ package translator.expression;
 
 public class AllDifferent implements UnaryRelationalExpression {
 
-	private Expression argument;
+	private Array argument;
 	private boolean isNested;
 	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
-	public AllDifferent(Expression argument) {
+	public AllDifferent(Array argument) {
 		this.argument = argument;
 		this.isNested = true;
 	}
@@ -18,7 +18,7 @@ public class AllDifferent implements UnaryRelationalExpression {
 	}
 
 	public Expression copy() {
-		return new AllDifferent(this.argument.copy());
+		return new AllDifferent((Array) this.argument.copy());
 	}
 
 	public int getType() {
@@ -52,17 +52,17 @@ public class AllDifferent implements UnaryRelationalExpression {
 
 	
 	public Expression evaluate() {
-		this.argument = argument.evaluate();
+		this.argument = (Array) argument.evaluate();
 		return this;
 	}
 	
 	public Expression reduceExpressionTree() {
-		this.argument = this.argument.reduceExpressionTree();
+		//this.argument = (Array) this.argument.reduceExpressionTree();
 		return this;
 	}
 	
 	public Expression insertValueForVariable(int value, String variableName) {
-		this.argument = this.argument.insertValueForVariable(value, variableName);
+		this.argument = (Array) this.argument.insertValueForVariable(value, variableName);
 		return this;
 	}
 	
@@ -83,7 +83,7 @@ public class AllDifferent implements UnaryRelationalExpression {
 	}
 	
 	public Expression restructure() {
-		this.argument = this.argument.restructure();
+		//this.argument = (Array) this.argument.restructure();
 		return this;
 	}
 }

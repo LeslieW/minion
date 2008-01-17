@@ -21,6 +21,8 @@ import translator.conjureEssenceSpecification.RangeAtom;
 import translator.conjureEssenceSpecification.UnaryExpression;
 import translator.conjureEssenceSpecification.IntegerDomain;
 import translator.conjureEssenceSpecification.IdentifierDomain;
+import translator.conjureEssenceSpecification.Index;
+import translator.conjureEssenceSpecification.ExpressionIndex;
 //import translator.minionExpressionTranslator.TranslationUnsupportedException;
 //import translator.minionModel.MinionException;
 
@@ -836,6 +838,9 @@ public class ParameterInsertion {
 	    	  return constraintList;
 	      	}
 
+	      
+	  
+	      
 	    
 	    private Domain insertValueForParameters(Domain domain) 
 	    	throws NormaliserException {
@@ -881,6 +886,16 @@ public class ParameterInsertion {
 	    	return domain;  
 	    }
 	 
+	    
+	    
+	    private Index insertValueForParameters(Index index) 
+	    	throws NormaliserException {
+	    	
+	    	
+	    	
+	    	
+	    	return null;
+	    }
 	    
 	    /** 
 		* iterate through the expression, and whenever finding an identifier,
@@ -944,15 +959,13 @@ public class ParameterInsertion {
 					                                           insertValueForParameters(expression.getQuantification().getExpression())));
 		    
 		case EssenceGlobals.NONATOMIC_EXPR:
-			if(expression.getNonAtomicExpression().getExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
-				throw new NormaliserException("Please access array elements by m[i,j] instead of m[i][j], thank you.");
-			
 			// insert parameters in the indices of the array element
-			Expression[] indexExpressions = expression.getNonAtomicExpression().getExpressionList();
+			Index[] indexExpressions = expression.getNonAtomicExpression().getIndexList();			
+			
 			for(int i=0; i<indexExpressions.length; i++)
 				indexExpressions[i] = insertValueForParameters(indexExpressions[i]);
 			
-			String matrixName = expression.getNonAtomicExpression().getExpression().getAtomicExpression().getString();
+			String matrixName = expression.getNonAtomicExpression().getArrayName();
 			if(!this.parameterArrayNames.contains(matrixName))
 				return expression; // then this might be a decision variable
 			
@@ -960,11 +973,12 @@ public class ParameterInsertion {
 			//Expression[] indexExpressions = expression.getNonAtomicExpression().getExpressionList();
 			int[] indices = new int[indexExpressions.length];
 			for(int j=0;j<indexExpressions.length; j++) {
-				if(indexExpressions[j].getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
+				if(indexExpressions[j].getType() != EssenceGlobals.EXPRESSION_INDEX && 
+						((ExpressionIndex) indexExpressions[j]).getIndexExpression().getAtomicExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
 					throw new NormaliserException("Cannot insert parameter array with index that is not an integer or identifier:"+expression.toString());
-				if(indexExpressions[j].getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
+				if(((ExpressionIndex) indexExpressions[j]).getIndexExpression().getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
 					return expression;
-				indices[j] = indexExpressions[j].getAtomicExpression().getNumber();
+				indices[j] = ((ExpressionIndex) indexExpressions[j]).getIndexExpression().getAtomicExpression().getNumber();
 			}
 			
 			
@@ -1022,14 +1036,14 @@ public class ParameterInsertion {
 				
 			default:
 				throw new NormaliserException("Sorry, parameter arrays over 3-dimensions are not supported yet:"+expression.toString());
-			}
+			} 
 		   
 		default:
 		    // !!! do the rest later
 		    return expression;
 		    
 
-		}
+		} 
 		
 	    }
 	  
@@ -1079,12 +1093,7 @@ public class ParameterInsertion {
 						print_debug("Applying binary expression:"+expression.toString());
 						
 						NonAtomicExpression matrixElement = expression.getBinaryExpression().getLeftExpression().getNonAtomicExpression();
-						if(matrixElement.getExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
-							throw new NormaliserException("Please access array elements by m[i,j] instead of m[i][j], as in :"+matrixElement.toString());
-						if(matrixElement.getExpression().getAtomicExpression().getRestrictionMode() != EssenceGlobals.IDENTIFIER)
-							throw new NormaliserException("Please access array elements by m[i,j] instead of m[i][j], as in :"+matrixElement.toString());
-						
-						String matrixElementName = matrixElement.getExpression().getAtomicExpression().getString();
+						String matrixElementName = matrixElement.getArrayName();
 						print_debug("Matrix element Name is "+matrixElementName);
 						
 						
@@ -1095,19 +1104,20 @@ public class ParameterInsertion {
 									+expression.toString());
 						
 						// get the indices of the matrix element
-						Expression[] indexExpressions = matrixElement.getExpressionList();
+						Index[] indexExpressions = matrixElement.getIndexList();
 						int[] indices = new int[indexExpressions.length];
 						for(int i=0; i<indices.length; i++) {
 							print_debug("Working on the "+i+"th indexexpression. and indices has length:"+indices.length);
 							print_debug(i+"th indexexpression:"+indexExpressions[i].toString());
-							if(indexExpressions[i].getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
+							if(indexExpressions[i] instanceof ExpressionIndex &&
+									((ExpressionIndex) indexExpressions[i]).getIndexExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
 								throw new NormaliserException("Cannot assign parameter value to index '"+indexExpressions[i]+
 										 "' in "+expression.toString()+". Expected an integer value.");
-							if(indexExpressions[i].getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
+							if(((ExpressionIndex) indexExpressions[i]).getIndexExpression().getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
 								throw new NormaliserException("Cannot assign parameter value to index '"+indexExpressions[i]+
 										 "' in "+expression.toString()+". Expected an integer value.");
 							
-							indices[i] = indexExpressions[i].getAtomicExpression().getNumber();
+							indices[i] = ((ExpressionIndex) indexExpressions[i]).getIndexExpression().getAtomicExpression().getNumber();
 						}
 						print_debug("We survived the forloop1");
 						

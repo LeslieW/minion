@@ -763,10 +763,16 @@ public class Flattener {
 			}
 		}
 		else if(expression.getType() == Expression.ALLDIFFERENT) {
+			if(!(argument instanceof Array)) 
+				throw new TailorException("Internal error: flattening of argument of alldifferent, '"+argument+
+						"' did not result in an array.");
+				
+			
+			
 			if(expression.isGonnaBeFlattenedToVariable()) {
-                return reifyConstraint(new AllDifferent(argument));	
+                return reifyConstraint(new AllDifferent((Array) argument));	
 			}
-			else return new AllDifferent(argument);
+			else return new AllDifferent((Array) argument);
 		}
 		
 		else throw new TailorException("Unknown unary relational expression:"+expression); 

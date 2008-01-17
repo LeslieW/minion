@@ -59,4 +59,22 @@ public class BoundedIntRange implements IntRange {
 	public Domain insertValueForVariable(int value, String variableName) {
 		return this;
 	}
+	
+	
+	public char isSmallerThanSameType(BasicDomain d) {
+		
+		BoundedIntRange otherBounded = (BoundedIntRange) d;
+	
+		if(this.lowerBound== this.upperBound) {	
+			if(this.upperBound == otherBounded.upperBound) {
+					return Expression.EQUAL;
+			}
+			else return (this.upperBound < otherBounded.upperBound) ?
+					Expression.SMALLER : Expression.BIGGER;
+			
+		}
+		else return (this.lowerBound < this.upperBound) ?
+				Expression.SMALLER : Expression.BIGGER;
+	}
+	
 }

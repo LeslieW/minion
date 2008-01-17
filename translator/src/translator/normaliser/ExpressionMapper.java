@@ -177,7 +177,11 @@ public class ExpressionMapper {
 		switch(oldGlobalConstraint.getRestrictionMode()) {
 		
 		case EssenceGlobals.ALLDIFF:
-			return new AllDifferent(mapExpression(oldGlobalConstraint.getExpression1()));
+			translator.expression.Expression argument = mapExpression(oldGlobalConstraint.getExpression1());
+			if(argument instanceof Array)
+				return new AllDifferent((Array) argument);
+			else throw new NormaliserException("Illegal argument for alldifferent: '"+argument+
+					"'. Expected a decision variable of array/matrix type.");
 			
 		case EssenceGlobals.ELEMENT:
 			return new ElementConstraint(mapExpression(oldGlobalConstraint.getExpression1()),
@@ -239,17 +243,15 @@ public class ExpressionMapper {
 	protected translator.expression.Expression mapNonAtomicExpression(NonAtomicExpression oldArrayElement) 
 		throws NormaliserException {
 		
-		//--------------------- matrix name -----------------------------------------------
-		if(oldArrayElement.getExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR) 
-			throw new NormaliserException("Illegal arrayname: expected identifier instead of:"+oldArrayElement.getExpression());
-		if(oldArrayElement.getExpression().getAtomicExpression().getRestrictionMode() != EssenceGlobals.IDENTIFIER) 
-			throw new NormaliserException("Illegal arrayname: expected identifier instead of:"+oldArrayElement.getExpression());
+		//--------------------- matrix name ----------------------------------------------
+		String arrayName = oldArrayElement.getArrayName();
 		
-		String arrayName = oldArrayElement.getExpression().getAtomicExpression().getString();
+		System.out.println("Mapping the old non-atom:"+oldArrayElement);
 		
 		// ------------- matrix domain ----------------------------------------------------
 		// get the domain of the matrixElement
 		translator.conjureEssenceSpecification.Domain domain = this.decisionVariables.get(arrayName);
+		
 		if(domain == null) { // in this case the array element is a parameter
 			if(this.parameterArrays.isParameterVector(arrayName) ||	
 			    this.parameterArrays.isParameterMatrix(arrayName) ||
@@ -259,11 +261,16 @@ public class ExpressionMapper {
  		               translator.expression.Expression.UPPER_BOUND);
 				
 				// map the expression indices
-				translator.conjureEssenceSpecification.Expression[] oldIndices = oldArrayElement.getExpressionList();
+				Index[] oldIndices = oldArrayElement.getIndexList();
 				translator.expression.Expression[] newIndices = new translator.expression.Expression[oldIndices.length];
-				for(int i=0; i<oldIndices.length; i++)
-					newIndices[i] = mapExpression(oldIndices[i]);
-				
+				for(int i=0; i<oldIndices.length; i++) {
+					if(oldIndices[i] instanceof ExpressionIndex) {
+						translator.conjureEssenceSpecification.Expression oldIndex = ((ExpressionIndex) oldIndices[i]).getIndexExpression();
+						newIndices[i] = mapExpression(oldIndex);
+					}
+					else throw new NormaliserException("Cannot range-index parameter arrays yet, sorry: "+oldArrayElement);
+					
+				}
 				translator.expression.ArrayVariable parameter = new ArrayVariable(arrayName,
 						                                                          newIndices,
 						                                                          paramDomain);
@@ -283,17 +290,48 @@ public class ExpressionMapper {
 		translator.conjureEssenceSpecification.Domain baseDomain = domain.getMatrixDomain().getRangeDomain();
 		translator.expression.Domain mappedDomain = mapDomain(baseDomain);
 		
-		// TODO: should we check if the dimensions fit?
-		// just store the base domain, right?
+		// dimensions check!
+		Index[] indices = oldArrayElement.getIndexList();
+		if(domain.getMatrixDomain().getIndexDomains().length != indices.length) 
+			throw new NormaliserException("Array/Matrix dimensions do not fit in '"+arrayName+
+					"': has "+indices.length+" indices for "+domain.getMatrixDomain().getIndexDomains().length+" dimensions."
+					+"\nPlease give an index for _every_ dimension of the array element.");
+		
+		
+		// check if we have ranges (the dereferenced expression is 1- or more-dimensional) 
+		// or if this is just a single variable
+		boolean isSingleVariable = true;
+		for(int i=0; i<indices.length; i++) {
+			System.out.println("This is the index:"+indices[i]+" of variable "+arrayName);
+			isSingleVariable = isSingleVariable && (indices[i] instanceof ExpressionIndex); 
+			System.out.println("This is the index:"+indices[i]+" of variable "+arrayName);
+			
+		}
+		
+		System.out.println("indices length is:"+indices.length);
+		
+		// ----------- if this is not a single variable, then treat it in the variuable array method ---------------
+		if(!isSingleVariable) {
+			translator.expression.Domain[] indexDomains = new translator.expression.Domain[domain.getMatrixDomain().getIndexDomains().length];
+			for(int i= 0; i<indexDomains.length; i++) {
+				indexDomains[i] = mapDomain(domain.getMatrixDomain().getIndexDomains()[i]);
+				System.out.println("mapped old domain :"+domain.getMatrixDomain().getIndexDomains()[i]);
+				System.out.println("To new domain :"+indexDomains[i]);
+			}
+			
+			return mapVariableArray(arrayName, indices, mappedDomain, indexDomains);
+		}
+		
 		
 		
 		// ---------- Matrix indices -------------------------------------------------------
-		translator.conjureEssenceSpecification.Expression[] indices = oldArrayElement.getExpressionList();
+		
 		boolean allIndicesAreInteger = true;
 		
 		for(int i=0; i<indices.length; i++) {
-			if(indices[i].getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
-				if(indices[i].getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
+			translator.conjureEssenceSpecification.Expression index = ((ExpressionIndex) indices[i]).getIndexExpression();
+			if(index.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+				if(index.getAtomicExpression().getRestrictionMode() != EssenceGlobals.NUMBER)
 					allIndicesAreInteger = false;
 			}
 			else allIndicesAreInteger = false;
@@ -302,7 +340,7 @@ public class ExpressionMapper {
 		if(allIndicesAreInteger) {
 			int[] intIndices = new int[indices.length];
 			for(int i=0; i<indices.length; i++) {
-				intIndices[i] = indices[i].getAtomicExpression().getNumber();
+				intIndices[i] = ((ExpressionIndex) indices[i]).getIndexExpression().getAtomicExpression().getNumber();
 			}
 			return (mappedDomain.getType() == translator.expression.Domain.BOOL) ?
 					  new RelationalAtomExpression(new ArrayVariable(arrayName,
@@ -318,7 +356,7 @@ public class ExpressionMapper {
 		else { 
 			translator.expression.Expression[] expressionIndices = new translator.expression.Expression[indices.length];
 			for(int i=0; i<indices.length; i++) {
-				expressionIndices[i] = mapExpression(indices[i]);
+				expressionIndices[i] = mapExpression(((ExpressionIndex) indices[i]).getIndexExpression());
 			} 
 			return (mappedDomain.getType() == translator.expression.Domain.BOOL) ?
 					  new RelationalAtomExpression(new ArrayVariable(arrayName,
@@ -333,6 +371,137 @@ public class ExpressionMapper {
 	
 	
 
+	
+	
+	/**
+	 * 
+	 * 
+	 * @param arrayName
+	 * @param indices
+	 * @param baseDomain
+	 * @param indexDomains
+	 * @return
+	 * @throws NormaliserException
+	 */
+	private translator.expression.Expression mapVariableArray(String arrayName, 
+			                                                  Index[] indices,
+			                                                  translator.expression.Domain baseDomain,
+			                                                  translator.expression.Domain[] indexDomains) 
+	throws NormaliserException {
+		
+		
+		if(indices.length != indexDomains.length) throw new NormaliserException("Array/Matrix dimensions do not fit in '"+arrayName+
+					"': has "+indices.length+" indices for "+indexDomains.length+" dimensions."
+					+"Please give an index for _every_ dimension of the array element.");
+		
+		
+		BasicDomain[] basicIndexDomains = new BasicDomain[indices.length];
+		
+		System.out.println("Mapping aaarray variable:"+arrayName+" and got indices length:"+indices.length);
+		
+		for(int i=0; i<indices.length; i++) {
+	
+			System.out.println("I am in the loop now:"+i);
+			System.out.println("Index[i] is "+indices[i]);
+			// (..)
+			if(indices[i].getType() == EssenceGlobals.FULL_BOUNDED_INDEX) {
+				if(indexDomains[i] instanceof BasicDomain)
+					basicIndexDomains[i] = (BasicDomain) indexDomains[i];
+				else throw new NormaliserException("Illegal domain for index of array variable '"+arrayName+
+						"'. Cannot set array domain as index domain:"+indexDomains[i]);
+			}
+			
+			// e1..e2
+			else if(indices[i].getType() == EssenceGlobals.UPPER_LOWER_BOUNDED_INDEX) {
+				
+				translator.expression.Expression lb = mapExpression(((BoundedIndex) indices[i]).getLowerExpressionIndex());
+				translator.expression.Expression ub = mapExpression(((BoundedIndex) indices[i]).getUpperExpressionIndex());
+				
+				if(lb.getType() == translator.expression.Expression.INT && 
+						lb.getType() == translator.expression.Expression.INT) {
+					basicIndexDomains[i] = new BoundedIntRange(((ArithmeticAtomExpression) lb).getConstant(),
+							                                   ((ArithmeticAtomExpression) ub).getConstant());
+				}
+				else basicIndexDomains[i] = new BoundedExpressionRange(lb,ub);
+			}
+			
+			
+			
+			else if(indices[i].getType() == EssenceGlobals.SPARSE_INDEX) {
+				
+				SparseIndex sparseIndex = (SparseIndex) indices[i];
+				boolean sparseElementsAreInteger = true;
+				
+				translator.expression.Expression[] sparseElements = new translator.expression.Expression[sparseIndex.getSparseElements().length];
+				for(int j=0; j<sparseElements.length; j++) {
+					sparseElements[j] = mapExpression(sparseIndex.getSparseElements()[j]);
+					sparseElementsAreInteger = sparseElementsAreInteger && (sparseElements[j].getType() == translator.expression.Expression.INT);
+				}
+				
+				if(sparseElementsAreInteger) {
+					int[] sparseInts = new int[sparseElements.length];
+					for(int j=0; j<sparseInts.length; j++) 
+						sparseInts[j] = ((ArithmeticAtomExpression) sparseElements[j]).getConstant();
+					basicIndexDomains[i] = new SparseIntRange(sparseInts);
+				}
+				else basicIndexDomains[i] = new SparseExpressionRange(sparseElements); 
+			}
+			
+			
+			// e1..
+			else if(indices[i].getType() == EssenceGlobals.LOWER_BOUNDED_INDEX) {
+				
+				translator.expression.Expression lb = mapExpression(((BoundedIndex) indices[i]).getLowerExpressionIndex());
+				
+				if(indexDomains[i] instanceof BoundedIntRange) {
+					int upperBound = ((BoundedIntRange) indexDomains[i]).getRange()[1];
+					if(lb.getType() == translator.expression.Expression.INT) {
+						basicIndexDomains[i] = new BoundedIntRange( ((ArithmeticAtomExpression) lb).getConstant(),
+																	upperBound);
+					}
+					else basicIndexDomains[i] = new BoundedExpressionRange(lb, new ArithmeticAtomExpression(upperBound));
+				}
+				else if(indexDomains[i] instanceof BoundedExpressionRange) {
+					translator.expression.Expression upperBound = ((BoundedExpressionRange) indexDomains[i]).getUpperBound();
+					basicIndexDomains[i] = new BoundedExpressionRange(lb, upperBound);
+				}
+				else throw new NormaliserException("Can only use bounds-range for bound-domain-indexed array variables yet, sorry:");
+			}
+			
+			
+			// ..e2
+			else if(indices[i].getType() == EssenceGlobals.UPPER_BOUNDED_INDEX) {
+				
+				translator.expression.Expression ub = mapExpression(((BoundedIndex) indices[i]).getUpperExpressionIndex());
+				
+				if(indexDomains[i] instanceof BoundedIntRange) {
+					int lowerBound = ((BoundedIntRange) indexDomains[i]).getRange()[0];
+					if(ub.getType() == translator.expression.Expression.INT) {
+						basicIndexDomains[i] = new BoundedIntRange( lowerBound,
+																	((ArithmeticAtomExpression) ub).getConstant());
+					}
+					else basicIndexDomains[i] = new BoundedExpressionRange(new ArithmeticAtomExpression(lowerBound), ub);
+				}
+				else if(indexDomains[i] instanceof BoundedExpressionRange) {
+					translator.expression.Expression lowerBound = ((BoundedExpressionRange) indexDomains[i]).getLowerBound();
+					basicIndexDomains[i] = new BoundedExpressionRange(lowerBound, ub);
+				}
+				else throw new NormaliserException("Can only use bounds-range for bound-domain-indexed array variables yet, sorry:");
+				
+				
+			
+			}
+			else throw new NormaliserException("Sorry, cannot translate variable index '"+indices[i]+
+					" with which you dereferenced the variable '"+arrayName+"' yet.");	
+			
+		}
+		
+		
+		return new IndexedArray(arrayName,
+				                basicIndexDomains,
+				                baseDomain);
+	}
+	
 	
 	/**
 	 * Map a binary expression to the advanced expression representation. The expressions are mapped
@@ -535,6 +704,12 @@ public class ExpressionMapper {
 			// the identifier is a decision variable
 			if(this.decisionVariables.containsKey(oldAtom.getString())) {
 				translator.conjureEssenceSpecification.Domain domain = this.decisionVariables.get(oldAtom.getString());
+				
+				// check if the identifier is an array
+				if(domain.getRestrictionMode() == EssenceGlobals.MATRIX_DOMAIN) {
+					return mapArray(oldAtom.getString(), domain.getMatrixDomain());
+				}
+				
 				translator.expression.SingleVariable decisionVar = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
 				if(decisionVar.getType() == translator.expression.Expression.BOOL_VARIABLE)
@@ -563,6 +738,29 @@ public class ExpressionMapper {
 		}
 	}
 	
+	
+	/**
+	 * The identifier with name 'arrayName' has a matrix domain associated to itself,
+	 * so it is a matrix of a certain dimension. Hence map it to a SimpleArray.
+	 * 
+	 * @param arrayName
+	 * @param matrixDomain
+	 * @return
+	 * @throws NormaliserException
+	 */
+	public SimpleArray mapArray(String arrayName, MatrixDomain matrixDomain) 
+		throws NormaliserException {
+		
+		translator.conjureEssenceSpecification.Domain[] oldIndexDomains = matrixDomain.getIndexDomains();
+		BasicDomain[] indexDomains = new BasicDomain[oldIndexDomains.length];
+		for(int i=0; i<indexDomains.length; i++) {
+			if(oldIndexDomains[i].getRestrictionMode() == EssenceGlobals.MATRIX_DOMAIN) 
+				throw new NormaliserException("Illegal domain type for array dimension of '"+arrayName+"':"+oldIndexDomains[i]);
+			indexDomains[i] = (BasicDomain) mapDomain(oldIndexDomains[i]);
+		}
+		
+		return new SimpleArray(arrayName, indexDomains, mapDomain(matrixDomain.getRangeDomain()));
+	}
 	
 	
 	/**

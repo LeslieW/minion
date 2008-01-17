@@ -12,37 +12,13 @@ public class NonAtomicExpression implements EssenceGlobals {
 	 * | expression "(" { expression }' ")"	
 	 * 
 	 */
-	int restriction_mode;
 	/** 'name' of the matrix-element  */
-	Expression expression;
+	private String arrayName;
 	/** index(indices) of matrix element */
-	Expression[] expressionList;
+	//Expression[] expressionList;
 	
-	public int getRestrictionMode(){
-		return restriction_mode;
-	}
-
-	public Expression getExpression(){
-		return expression;
-	}
-	//protected void setExpression(Expression e){
-	//	expression=e;
-	//}
-	public Expression[] getExpressionList(){
-		return expressionList;
-	}
-//	protected void setExpressionList(Expression[] es){
-//		expressionList=es;
-//	}
+	Index[] indexList;
 	
-
-    public NonAtomicExpression copy() {
-    	int rm = restriction_mode;
-    	Expression[] expressions = new Expression[expressionList.length];
-    	for(int i = 0; i < expressionList.length; i++)
-    		expressions[i] = expressionList[i].copy();
-    	return new NonAtomicExpression(rm, expression.copy(),expressions); 
-    }
 	
 	/**
 	 * 
@@ -52,17 +28,61 @@ public class NonAtomicExpression implements EssenceGlobals {
 	 * @param e
 	 * @param es
 	 */
-	public NonAtomicExpression(int t,Expression e, Expression[] es){
+/*	public NonAtomicExpression(int t,String e, Expression[] es){
 		restriction_mode = t;
-		expression = e;
+		arrayName = e;
 		expressionList = es;
+	}*/
+	
+	
+	public NonAtomicExpression(String arrayName, Index[] indices) {
+		this.arrayName = arrayName;
+		this.indexList = indices;
 	}
 	
+	
+	public int getRestrictionMode(){
+		return EssenceGlobals.NONATOMIC_EXPR_BRACKET;
+	}
+
+	public String getArrayName(){
+		return arrayName;
+	}
+	//protected void setExpression(Expression e){
+	//	expression=e;
+	//}
+	public Index[] getIndexList(){
+		return this.indexList;
+	}
+//	protected void setExpressionList(Expression[] es){
+//		expressionList=es;
+//	}
+	
+
+    public NonAtomicExpression copy() {
+    	Index[] expressions = new Index[this.indexList.length];
+    	for(int i = 0; i < indexList.length; i++)
+    		expressions[i] = indexList[i].copy();
+    	return new NonAtomicExpression(new String(this.arrayName),expressions); 
+    }
+	
+
+	
 	public String toString(){
-		
-		switch(restriction_mode){
-		case NONATOMIC_EXPR_BRACKET : return expression.toString() + "[ "+ getExpressions() + "] ";
-		case NONATOMIC_EXPR_PAREN : return expression.toString() + "( "+ getExpressions() + ") ";
+	
+		String s = arrayName+"[";
+			
+		for(int i=0; i<this.indexList.length; i++) {
+			if(i >0 ) s = s.concat(",");
+				
+			s = s.concat(indexList[i].toString());
+		}
+			
+		return s+"]";
+	}
+/*		switch(restriction_mode){
+		case NONATOMIC_EXPR_BRACKET : return arrayName.toString() + "[ "+ getExpressions() + "] ";
+		case NONATOMIC_EXPR_PAREN : return arrayName.toString() + "( "+ getExpressions() + ") ";
 		}		
 		return "";
 	}
@@ -71,10 +91,10 @@ public class NonAtomicExpression implements EssenceGlobals {
 	String output = "";
 
 	if(expressionList.length > 0) {
-	   /* for(int i = expressionList.length-1; i>= 0; i--)
+	    for(int i = expressionList.length-1; i>= 0; i--)
 	    	if(i!=0)
 	    		output+= expressionList[i].toString()+", ";
-	    	else output += expressionList[i].toString();*/
+	    	else output += expressionList[i].toString();
 		 for(int i = 0; i<expressionList.length; i++)
 		    	if(i!=expressionList.length-1)
 		    		output+= expressionList[i].toString()+", ";
@@ -82,6 +102,6 @@ public class NonAtomicExpression implements EssenceGlobals {
 	}
 	return output;
     }
-    
+    */
 
 }

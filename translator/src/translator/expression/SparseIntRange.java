@@ -74,4 +74,23 @@ public class SparseIntRange implements IntRange {
 	public Domain insertValueForVariable(int value, String variableName) {
 		return this;
 	}
+	
+	public char isSmallerThanSameType(BasicDomain d) {
+		
+		SparseIntRange otherSparse = (SparseIntRange) d;
+		
+		if(this.sparseElements.length == otherSparse.sparseElements.length) {
+			
+			for(int i=0; i<this.sparseElements.length; i++) {	
+				if(this.sparseElements[i] != otherSparse.sparseElements[i]) 
+					return (this.sparseElements[i] < otherSparse.sparseElements[i]) ?
+						Expression.SMALLER : Expression.BIGGER;
+			}
+			return Expression.EQUAL;
+		}
+		else return (this.sparseElements.length < otherSparse.sparseElements.length) ?
+				Expression.SMALLER : Expression.BIGGER;
+	}
+	
+	
 }

@@ -166,10 +166,38 @@ public class MinionTailor {
 		if(constraint instanceof RelationalAtomExpression)
 			return toMinion((RelationalAtomExpression) constraint);
 		
-		return null;
+		
+		if(constraint instanceof AllDifferent) 
+			return toMinion((translator.expression.AllDifferent) constraint);
+		
+		throw new MinionException("Cannot tailor expression to Minion yet:"+constraint);
 	}
 	
 	
+	
+	protected MinionConstraint toMinion(translator.expression.AllDifferent allDiff) 
+		throws MinionException {
+		
+		MinionArray array = toMinionArray((Array) allDiff.getArgument());
+		return new AllDifferent(array);
+	}
+	
+	/**
+	 * Tailor simple array
+	 * 
+	 * @param array
+	 * @return
+	 * @throws MinionException
+	 */
+	protected MinionArray toMinionArray(Array array) 
+		throws MinionException {
+		
+		if(array instanceof SimpleArray) {
+			return new MinionSimpleArray(((SimpleArray) array).getArrayName());			
+		}
+		else throw new MinionException("Sorry, cannot translate array type yet:"+array);
+
+	}
 	
 	
 	/**

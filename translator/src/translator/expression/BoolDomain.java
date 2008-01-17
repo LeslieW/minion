@@ -50,4 +50,9 @@ public class BoolDomain implements ConstantDomain {
 	public Domain insertValueForVariable(int value, String variableName) {
 		return this;
 	}
+	
+	public char isSmallerThanSameType(BasicDomain d) {
+		return Expression.EQUAL;
+	}
+	
 }

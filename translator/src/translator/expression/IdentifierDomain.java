@@ -38,4 +38,16 @@ public class IdentifierDomain implements Domain {
 		return this;
 	}
 	
+	public char isSmallerThanSameType(Domain d) {
+		
+		IdentifierDomain otherDomain = (IdentifierDomain) d;
+		
+		int difference = this.domainName.compareTo(otherDomain.domainName);
+		
+		if(difference == 0) return Expression.EQUAL;
+		else return (difference < 0) ?
+				Expression.SMALLER : Expression.BIGGER;
+		
+	}
+	
 }

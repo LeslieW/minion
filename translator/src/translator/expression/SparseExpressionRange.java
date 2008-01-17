@@ -92,4 +92,30 @@ public class SparseExpressionRange implements ExpressionRange {
 		
 		return this;
 	}
+	
+	
+	public char isSmallerThanSameType(BasicDomain d) {
+		
+		SparseExpressionRange otherSparse = (SparseExpressionRange) d;
+		
+		if(this.sparseElements.length == otherSparse.sparseElements.length) {
+			
+			for(int i=0; i<this.sparseElements.length; i++) {
+				
+				if(this.sparseElements[i].getType() == otherSparse.sparseElements[i].getType()) {
+					char difference = this.sparseElements[i].isSmallerThanSameType(otherSparse.sparseElements[i]);
+					
+					if(difference != Expression.EQUAL)
+						return difference;
+					
+				}
+				else return (this.sparseElements[i].getType() < otherSparse.sparseElements[i].getType()) ?
+						Expression.SMALLER : Expression.BIGGER;
+			}
+			return Expression.EQUAL;
+		}
+		else return (this.sparseElements.length < otherSparse.sparseElements.length) ?
+				Expression.SMALLER : Expression.BIGGER;
+	}
+	
 }

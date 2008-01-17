@@ -143,28 +143,24 @@ public class ExpressionEvaluator  {
 		return e;	
 	    
 	case EssenceGlobals.NONATOMIC_EXPR: // ID [ E1, E2, .. En ]  with n >= 1
-	    Expression[] exps = e.getNonAtomicExpression().getExpressionList();
+	    //Index[] exps = e.getNonAtomicExpression().getIndexList();
 	    
-	    for(int i = 0; i < exps.length; i++)
-		exps[i] = evalExpression(exps[i]);
+	    //for(int i = 0; i < exps.length; i++)
+		//      exps[i] = evalExpression(exps[i]);
 
 	    // check if it is a parameter
-	    if(e.getNonAtomicExpression().getExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
-	    	if(e.getNonAtomicExpression().getExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.IDENTIFIER){
-	    		String arrayName = e.getNonAtomicExpression().getExpression().getAtomicExpression().getString();
-	    		if(parameterArrays.isParameter(arrayName)) {
-	    			return insertParameterArrayElement(new NonAtomicExpression(EssenceGlobals.NONATOMIC_EXPR_BRACKET,
-							  							e.getNonAtomicExpression().getExpression(),
-							  							exps));
-	    		}
-	    	}
-	    		
-	    }
-	    
-	    return new Expression(new NonAtomicExpression(EssenceGlobals.NONATOMIC_EXPR_BRACKET,
-							  e.getNonAtomicExpression().getExpression(),
-							  exps));
 
+	    //String arrayName = e.getNonAtomicExpression().getArrayName();
+	    //if(parameterArrays.isParameter(arrayName)) {
+	    //	return insertParameterArrayElement(new NonAtomicExpression(e.getNonAtomicExpression().getArrayName(),
+	    //			                            exps));
+	    //}
+	 
+	    
+	    //return new Expression(new NonAtomicExpression(e.getNonAtomicExpression().getArrayName(),
+		//					                          exps));
+		return e;
+		
 
 	case EssenceGlobals.UNITOP_EXPR:
 	    return evalUnitOpExpression(e.getUnaryExpression());
@@ -196,11 +192,11 @@ public class ExpressionEvaluator  {
   }
   
     
-    private Expression insertParameterArrayElement (NonAtomicExpression matrixElement) 
+  /*  private Expression insertParameterArrayElement (NonAtomicExpression matrixElement) 
     	throws NormaliserException {
     	
-    	String arrayName = matrixElement.getExpression().getAtomicExpression().getString();
-    	Expression[] indexExpressions = matrixElement.getExpressionList();
+    	String arrayName = matrixElement.getArrayName();
+    	Expression[] indexExpressions = matrixElement.getIndexList();
     	
   	  	for(int i=0; i<indexExpressions.length; i++) {
   	  		if(indexExpressions[i].getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
@@ -251,7 +247,7 @@ public class ExpressionEvaluator  {
   	  	
     	}
     	
-    }
+    }*/
     
     
     /**
@@ -1778,9 +1774,25 @@ public class ExpressionEvaluator  {
 	
 	case EssenceGlobals.NONATOMIC_EXPR :
 	    boolean indices = false;
-	    Expression[] index_exprs = e.getNonAtomicExpression().getExpressionList();
-	    for(int i=0; i< index_exprs.length; i++)
-		indices = appearsInExpression(id, index_exprs[i]) || indices;
+	    Index[] index_exprs = e.getNonAtomicExpression().getIndexList();
+	   
+	    for(int i=0; i< index_exprs.length; i++) {
+	    	if(index_exprs[i] instanceof ExpressionIndex)
+	    		indices = appearsInExpression(id, ((ExpressionIndex) index_exprs[i]).getIndexExpression()) || indices;
+	    	else if(index_exprs[i] instanceof BoundedIndex) {
+	    		Expression l = ((BoundedIndex) index_exprs[i]).getLowerExpressionIndex();
+	    		Expression u = ((BoundedIndex) index_exprs[i]).getUpperExpressionIndex();
+	    		if(l != null) indices = indices || appearsInExpression(id, l);
+	    		if(u != null) indices = indices || appearsInExpression(id,u);
+	    	}
+	    	else if(index_exprs[i] instanceof SparseIndex) {
+	    		Expression[] sparseElems = ((SparseIndex) index_exprs[i]).getSparseElements();
+	    		for(int j=0; j<sparseElems.length; j++) {
+	    			indices = indices || appearsInExpression(id,sparseElems[j]);
+	    		}
+	    	}
+
+	    }
 	    return indices;
 	    
 	case EssenceGlobals.BRACKET_EXPR:

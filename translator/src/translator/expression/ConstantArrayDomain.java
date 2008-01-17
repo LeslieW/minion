@@ -51,6 +51,11 @@ public class ConstantArrayDomain implements ConstantDomain {
 	}
 
 	
+	public char isSmallerThanSameType(BasicDomain d) {
+		int f;
+		return Expression.EQUAL;
+	}
+	
 	// ============= OTHER MEHTODS ============================
 	
 	public ConstantDomain getBaseDomain() {

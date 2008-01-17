@@ -96,4 +96,32 @@ public class MultipleExpressionRange implements ExpressionDomain {
 		
 		return this;
 	}
+	
+	
+	public char isSmallerThanSameType(BasicDomain d) {
+		
+		MultipleExpressionRange otherRange = (MultipleExpressionRange) d;
+		
+		if(this.rangeList.size() == otherRange.rangeList.size()) {
+			
+			for(int i=0; i<this.rangeList.size(); i++) {
+				
+				if(this.rangeList.get(i).getType() == otherRange.rangeList.get(i).getType()) {
+					
+					char  difference = this.rangeList.get(i).isSmallerThanSameType(otherRange.rangeList.get(i));
+					if(difference != Expression.EQUAL) return difference;
+					
+				}
+				else return (this.rangeList.get(i).getType() <otherRange.rangeList.get(i).getType()) ?
+						Expression.SMALLER : Expression.BIGGER;
+			}
+			
+			return Expression.EQUAL;
+		}
+		else return (this.rangeList.size() < otherRange.rangeList.size()) ?
+				Expression.SMALLER : Expression.BIGGER;
+		
+		
+	}
+	
 }
