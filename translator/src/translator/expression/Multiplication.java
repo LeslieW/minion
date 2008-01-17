@@ -49,19 +49,19 @@ public class Multiplication extends NaryArithmeticExpression {
 			int lb_i = this.arguments.get(i).getDomain()[0];
 			int ub_i = this.arguments.get(i).getDomain()[1];
 			
-			//System.out.println("lb:"+lowerBound+" and ub:"+upperBound+", of argument:"+arguments.get(i));
+			//System.out.println("lb"+i+":"+lb_i+" and ub"+i+":"+ub_i+", of argument:"+arguments.get(i)+" with type:"+this.arguments.get(i).getType());
 			
 			if(lb_i == 0) 
 				zeroLowerBound = true;
 				// keep lower bound as it is
 			else {
-				negativeBound = (lb_i < 0);
+				negativeBound = (lb_i < 0) || negativeBound;
 				lowerBound = lowerBound*lb_i;
 			}
 			
 			if(ub_i == 0) zeroUpperBound = true;
 			else {
-				negativeBound = (ub_i < 0);
+				negativeBound = (ub_i < 0) || negativeBound;
 				upperBound = upperBound*ub_i;
 			}
 		}
@@ -88,7 +88,7 @@ public class Multiplication extends NaryArithmeticExpression {
 			}
 		}
 		
-		//System.out.println("lb:"+lowerBound+" and ub:"+upperBound+", after taking care of -,0 etc");
+		//System.out.println("FINISHED ADAPTION> lb:"+lowerBound+" and ub:"+upperBound+", after taking care of -,0 etc");
 		return new int[] {lowerBound, upperBound};
 	}
 

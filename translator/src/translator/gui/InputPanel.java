@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.event.*;
+import javax.swing.text.*;
 
 public class InputPanel extends JPanel {
 
@@ -41,6 +43,9 @@ public class InputPanel extends JPanel {
 	JScrollPane problemScrollPane;
 	JTextArea parameterInput;
 	JScrollPane parameterScrollPane;
+
+	JLabel lineColField;
+	JLabel parameterLineColField;
 	
 	JFileChooser fileChooser;
 
@@ -94,9 +99,31 @@ public class InputPanel extends JPanel {
 	
 	protected void generateProblemInput() {
 		
+		this.lineColField = new JLabel("Line:0  Column:0");
+		this.lineColField.setPreferredSize(new Dimension(this.width, 15));
+		this.lineColField.setVisible(true);
+		//this.lineColField.setEditable(false);
+		
 		// problem text field  initialisation
 		this.problemInput = new JTextArea("ESSENCE' 1.0\n", this.width, this.problemHeight);
 		problemInput.setLineWrap(true);
+		this.problemInput.addCaretListener( new CaretListener()
+		{
+			public void caretUpdate(CaretEvent e)
+			{
+				int column = 0;
+				int caretPosition = problemInput.getCaretPosition();
+				Element root = problemInput.getDocument().getDefaultRootElement();
+				int l = root.getElementIndex( caretPosition );
+				int lineStart = root.getElement( l ).getStartOffset();
+				column =  caretPosition - lineStart + 1;
+				
+				
+				int line =  root.getElementIndex( caretPosition ) + 1;
+			
+				updateLineColPositions(line,column);
+			}
+		});
 		
 		JLabel problemLabel = new JLabel(this.problemFieldLabel);
 		problemLabel.setLabelFor(problemInput);
@@ -105,6 +132,8 @@ public class InputPanel extends JPanel {
 		problemScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		problemScrollPane.setPreferredSize(new Dimension(width, this.problemHeight)); 
+		
+		
 		
 		
 		// problem buttons
@@ -145,6 +174,7 @@ public class InputPanel extends JPanel {
 		// construct the panel
 		this.problemPane = new JPanel(new BorderLayout());
 		problemPane.add(this.problemScrollPane, BorderLayout.NORTH);
+		problemPane.add(this.lineColField, BorderLayout.CENTER);
 		problemPane.add(problemButtonPanel, BorderLayout.SOUTH);
 		problemPane.setBorder(
 				BorderFactory.createCompoundBorder(
@@ -160,9 +190,32 @@ public class InputPanel extends JPanel {
 	
 	protected void generateParameterInput() {
 		
+		this.parameterLineColField = new JLabel("Line:0  Column:0");
+		this.parameterLineColField.setPreferredSize(new Dimension(this.width, 15));
+		this.parameterLineColField.setVisible(true);
+		
+		
 //		 ============================ parameter panel ===============================
 		this.parameterInput = new JTextArea("ESSENCE' 1.0\n",this.width, this.parameterHeight);
 		parameterInput.setLineWrap(true);
+		parameterInput.addCaretListener( new CaretListener()
+		{
+			public void caretUpdate(CaretEvent e)
+			{
+				int column = 0;
+				int caretPosition = parameterInput.getCaretPosition();
+				Element root = parameterInput.getDocument().getDefaultRootElement();
+				int l = root.getElementIndex( caretPosition );
+				int lineStart = root.getElement( l ).getStartOffset();
+				column =  caretPosition - lineStart + 1;
+				
+				
+				int line =  root.getElementIndex( caretPosition ) + 1;
+			
+				updateParameterLineColPositions(line,column);
+			}
+		});
+		
 		this.parameterScrollPane = new JScrollPane(parameterInput);
 		parameterScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -211,6 +264,7 @@ public class InputPanel extends JPanel {
 		
 		this.parameterPane = new JPanel(new BorderLayout());
 		parameterPane.add(parameterScrollPane,BorderLayout.NORTH);
+		parameterPane.add(this.parameterLineColField, BorderLayout.CENTER);
 		parameterPane.add(parameterButtonPanel, BorderLayout.SOUTH);
 		parameterPane.setBorder(
 				BorderFactory.createCompoundBorder(
@@ -371,7 +425,7 @@ public class InputPanel extends JPanel {
 	 * @param outputMessage
 	 */
 	protected void writeOnMessageOutput(String outputMessage) {
-		this.messageOutput.append(" "+outputMessage);
+		this.messageOutput.setText(" "+outputMessage);
 	}
 	
 	
@@ -380,5 +434,12 @@ public class InputPanel extends JPanel {
 		this.problemInput.append(s);
 	}
 	
+	protected void updateLineColPositions(int line, int col) {
+		this.lineColField.setText("Line: "+line+"  Column: "+col);
+	}
+	
+	protected void updateParameterLineColPositions(int line, int col) {
+		this.parameterLineColField.setText("Line: "+line+"  Column: "+col);
+	}
 	
 }

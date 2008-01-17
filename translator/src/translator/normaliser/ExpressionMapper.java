@@ -787,7 +787,7 @@ public class ExpressionMapper {
 				
 				translator.expression.SingleVariable decisionVar = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
-				if(decisionVar.getType() == translator.expression.Expression.BOOL_VARIABLE)
+				if(decisionVar.isBooleanVariable())
 					return new RelationalAtomExpression(decisionVar);
 				else return new ArithmeticAtomExpression(decisionVar);	
 			}
@@ -796,7 +796,7 @@ public class ExpressionMapper {
 				translator.conjureEssenceSpecification.Domain domain = this. parameterDomains.get(oldAtom.getString());
 				translator.expression.SingleVariable parameter = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
-				if(parameter.getType() == translator.expression.Expression.BOOL_VARIABLE)
+				if(parameter.isBooleanVariable())
 					return new RelationalAtomExpression(parameter);
 				else return new ArithmeticAtomExpression(parameter, true);					
 				
@@ -874,7 +874,7 @@ public class ExpressionMapper {
     	for(int i=0; i<decisionVariablesNames.size(); i++) {
     		String variable = decisionVariablesNames.get(i);
     		if(this.decisionVariables.get(variable) != null)
-    			newDecisionVariables.put(variable, mapDomain(this.decisionVariables.get(variable)));
+    			newDecisionVariables.put(variable, mapDomain(this.decisionVariables.get(variable)).evaluate());
     	}
     	
     	return newDecisionVariables;

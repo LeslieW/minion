@@ -298,18 +298,19 @@ public class OutputPanel extends JPanel {
                   while ((line = input.readLine()) != null) {
                 	 s = s+line+"\n";
                   }
-                  //writeOnOutput(this.SOLUTION_TAB_NR, s+"\n\n\n\n"+this.translator.getEssenceSolution(s));
-                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
+                  writeOnOutput(this.SOLUTION_TAB_NR, s+"\n\n\n\n"+this.translator.getEssenceSolution(s));
+                  //writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
                   input.close();
             }
             else {
                 String line;
                 
                 input =new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                
+                String s = "";
                   while ((line = input.readLine()) != null) {
-                	  writeOnMessageOutput(line+"\n");
+                	  s = s+line+"\n";
                   }
+                  writeOnMessageOutput(s);
                   input.close();
             }
 		
@@ -399,7 +400,7 @@ public class OutputPanel extends JPanel {
 	 * @param outputMessage
 	 */
 	protected void writeOnMessageOutput(String outputMessage) {
-		this.messageOutput.append(" "+outputMessage);
+		this.messageOutput.setText(" "+outputMessage);
 	}
 	
 	

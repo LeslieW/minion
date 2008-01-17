@@ -70,7 +70,7 @@ public class RelationalAtomExpression implements
 			return BOOL;
 		
 		else return (variable.getType() == Expression.ARRAY_VARIABLE) ?
-				Expression.BOOL_VARIABLE_ARRAY_ELEM :
+				Expression.BOOL_ARRAY_VAR :
 					Expression.BOOL_VARIABLE;
 	}
 	

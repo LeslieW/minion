@@ -13,7 +13,7 @@ public interface Expression {
 	// RelationalAtomExpression.java
 	public final int BOOL = 0;
 	public final int BOOL_VARIABLE = 5;
-	public final int BOOL_VARIABLE_ARRAY_ELEM = 6;
+	public final int BOOL_ARRAY_VAR = 6;
 		
 	// --------------------------------------------------------
 	

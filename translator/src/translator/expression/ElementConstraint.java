@@ -21,6 +21,12 @@ public class ElementConstraint implements GlobalConstraint {
 		this.value = value;
 	}
 	
+	public  ElementConstraint(Expression variableArray,
+			                  Expression index) {
+		this.variableArray = variableArray;
+		this.index = index;
+	}
+	
 	// ============= INHERITED METHODS ========================
 	
 	public Expression[] getArguments() {
@@ -145,6 +151,12 @@ public class ElementConstraint implements GlobalConstraint {
 		this.value = this.value.insertDomainForVariable(domain, variableName);
 		this.variableArray = this.variableArray.insertDomainForVariable(domain, variableName);
 		return this;
+	}
+	
+	//======================== ADDITIONAL METHODS =============================
+	
+	public void setResultExpression(Expression result) {
+		this.value = result;
 	}
 	
 }

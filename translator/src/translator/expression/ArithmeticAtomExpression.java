@@ -185,4 +185,6 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
 		return this;
 	}
+	
+	
 }

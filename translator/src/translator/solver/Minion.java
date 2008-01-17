@@ -18,8 +18,8 @@ public class Minion extends GeneralTargetSolver {
 	public Minion() {
 		// general stuff
 		this.solverName = "Minion";
-		this.branchingStrategies = new String[] {DEFAULT_BRANCHING, FIRST_FAIL, LARGEST_DOMAIN, RANDOM_DOMAIN, STATIC_NORMAL};
-		this.searchStrategies = new String[] {DEFAULT_SEARCH, DEPTH_FIRST};
+		this.branchingStrategies = new String[] {DEFAULT_BRANCHING};
+		this.searchStrategies = new String[] {DEFAULT_SEARCH};
 		
 		this.searchStrategy = DEPTH_FIRST;
 		this.branchingStrategy = FIRST_FAIL;

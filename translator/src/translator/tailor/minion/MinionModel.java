@@ -275,6 +275,9 @@ public class MinionModel {
 	
 	public String getEssenceSolution(String output) {
 		
+		if(this.objective != null) 
+			return getEssenceSolutionFromOptimisationProblem(output);
+		
 		StringBuilder solverOutputString = new StringBuilder(output);
 		
 		String solutionSpecification = "$ Solving statistics:\n$\n";
@@ -490,6 +493,15 @@ public class MinionModel {
 		return solutionSpecification;
 	
 	}
+	
+	
+	
+	private String getEssenceSolutionFromOptimisationProblem(String output) {
+		
+		
+		return null;
+	}
+	
 	
 	// ========== STATISTICAL DETAILS =================================
 	

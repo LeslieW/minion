@@ -294,6 +294,7 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(ElementConstraint elementConstraint) 
 		throws MinionException {
 		
+		
 		MinionArray indexedArray = toMinionArray((Array) elementConstraint.getArguments()[0]);
 		Expression indexExpression = elementConstraint.getArguments()[1];
 		Expression resultExpression = elementConstraint.getArguments()[2];

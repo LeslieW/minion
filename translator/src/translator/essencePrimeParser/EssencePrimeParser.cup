@@ -155,6 +155,7 @@ precedence left COMMA;
 
 essencemodel ::= HEADER body:b
 		{: RESULT = (EssenceSpecification) b; :}
+		
 ;
 
 
@@ -175,6 +176,9 @@ body ::= 	declarations:d_list
 		 RESULT = new EssenceSpecification(d_array,
 						   (Objective)  obj,
 						   expr_array); :} 
+						   
+		    	
+		    			   
  ;
 
 
@@ -377,7 +381,10 @@ expression_list ::=  	  expression:e
 
 expression ::= 	  LPAREN expression:e RPAREN
 			{: RESULT = new Expression((Expression) e); :}
-
+ 
+	        |    LPAREN expression:e 
+			{: parser.report_fatal_error("Missing right parenthesis",e); :}
+			
 	      	| atomic_expression:ae
 			{: RESULT = new Expression( (AtomicExpression) ae); :}
 

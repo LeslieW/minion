@@ -22,6 +22,7 @@ public class ArrayVariable implements Variable {
 	private boolean isSearchVariable;
 	private boolean isNested = true;
 	private boolean willBeReified = false;
+	private boolean willBeFlattenedToPartwiseElementConstraint = false;
 	
 	// ========== CONSTRUCTORS ==========================
 	
@@ -87,6 +88,8 @@ public class ArrayVariable implements Variable {
 	}
 
 	public Variable evaluate() {
+		this.domain = this.domain.evaluate();
+		
 		if(this.exprIndices != null) {
 			boolean allIndicesAreInteger = true;
 			
@@ -104,10 +107,13 @@ public class ArrayVariable implements Variable {
 						                 this.domain);
 			}
 		}
-		
 		return this;
 	}
 
+	public Domain getBaseDomain() {
+		return this.domain;
+	}
+	
 	public int[] getDomain() {
 		
 		if(this.domain.isConstantDomain())
@@ -299,4 +305,15 @@ public class ArrayVariable implements Variable {
 		return this;
 	}
 	
+	public boolean isIndexedBySomethingNotConstant() {
+		return (this.exprIndices != null);
+	}
+	
+	public boolean isGonnaBeFlattenedToPartwiseElementConstraint() {
+		return this.willBeFlattenedToPartwiseElementConstraint;
+	}
+	
+	public void setWillBeFlattenedToPartwiseElementConstraint(boolean turnOn) {
+		this.willBeFlattenedToPartwiseElementConstraint = turnOn;
+	}
 }

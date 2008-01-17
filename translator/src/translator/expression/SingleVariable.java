@@ -52,9 +52,9 @@ public class SingleVariable implements Variable {
 
 	
 	public int[] getDomain() {
-		
-		if(this.domain.isConstantDomain())
+		if(this.domain instanceof ConstantDomain)
 			return ((ConstantDomain) this.domain).getRange();
+		
 		else return new int [] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
 	}
 
@@ -90,7 +90,9 @@ public class SingleVariable implements Variable {
 	}
 	
 	
-	public Variable evaluate() {	
+	public Variable evaluate() {
+		if(this.domain != null)
+			this.domain = this.domain.evaluate();
 		return this;
 	}
 	
@@ -128,5 +130,9 @@ public class SingleVariable implements Variable {
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
 		return this;
+	}
+	
+	public boolean isBooleanVariable() {
+		return (this.domain.getType() == Domain.BOOL);
 	}
 }

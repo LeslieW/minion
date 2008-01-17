@@ -55,8 +55,8 @@ public class ModellingPanel extends JPanel  {
 		this.textareaWidth = (frameWidth/5)*2;
 		this.outputHeight = (frameHeight/5)*3;
 		this.messagesHeight = (frameHeight/4);
-		this.problemInputHeight = (frameHeight/9)*4;
-		this.parameterInputHeight = (frameHeight/9)*3;
+		this.problemInputHeight = (frameHeight/11)*5; // 9/4
+		this.parameterInputHeight = (frameHeight/11)*3;  // 9/3
 		
 		
 		setLayout(new BorderLayout());
@@ -120,7 +120,7 @@ public class ModellingPanel extends JPanel  {
 	 * @param outputMessage
 	 */
 	protected void writeOnMessageOutput(String outputMessage) {
-		this.messageOutput.append(outputMessage);
+		this.messageOutput.setText(outputMessage);
 	}
 	
 	protected void writeOnProblemInput(String s) {
