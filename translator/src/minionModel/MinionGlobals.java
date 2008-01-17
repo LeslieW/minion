@@ -2,7 +2,7 @@ package minionModel;
 
 public interface MinionGlobals {
 
-    public final boolean DEBUG = false; // print debug-info during translation process
+    public final boolean DEBUG = true; // print debug-info during translation process
     public final boolean PRINT_MESSAGE = true;  // print messages during translation process
 
     public final String MINION_VERSION = "MINION 1";

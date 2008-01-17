@@ -67,7 +67,7 @@ public class MinionReifyConstraint extends MinionConstraint {
     		return result.concat("reify("+((MinionWeightedSumConstraint) constraint).toStringLess()+", "+result_neg+reifiedVariable2.toString()+")\n");
     	}
     	else 
-    		return "reify("+constraint.toString()+", "+result_neg+reifiedVariable.toString()+")\n";
+    		return "reify("+constraint.toString()+", "+result_neg+reifiedVariable.toString()+")";
     }
 
 

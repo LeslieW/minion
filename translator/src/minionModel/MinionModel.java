@@ -1505,7 +1505,7 @@ public class MinionModel implements MinionGlobals {
 	print_debug("before writing reification constraints ");
 	/** reification constraints */
 	for(i = 0; i < reificationConstraints.size(); i++)
-	    result.append( ((MinionReifyConstraint) reificationConstraints.get(i)).toString());
+	    result.append( ((MinionReifyConstraint) reificationConstraints.get(i)).toString()+"\n");
 
 	print_debug("before other, after writing reification constraints ");
 	

@@ -35,8 +35,8 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 	
 	//GlobalConstraintTranslator globalConstraintTranslator;
 	
-	/** translator for binary expressions */
-	SpecialExpressionTranslator expressionTranslator;
+	/** translator for all expressions except universal and existential quantification */
+	QuantifiedMulopExpressionTranslator expressionTranslator;
 	
 	/** translator for quantified expressions */
 	//QuantificationTranslator quantificationTranslator;
@@ -63,7 +63,7 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 
 		//this.globalConstraintTranslator = new GlobalConstraintTranslator(minionVars, minionVecs,minionMatrixz, decisionVarsNames, this.minionModel);
 		
-		this.expressionTranslator = new SpecialExpressionTranslator(this.minionVariables,
+		this.expressionTranslator = new QuantifiedMulopExpressionTranslator(this.minionVariables,
 				                                                    this.minionVectors,
 				                                                    this.minionMatrices, 
 				                                            minionCubes,decisionVarsNames,decisionVariables, 
@@ -178,7 +178,19 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 	    	  
 	      
 	      case EssenceGlobals.QUANTIFIER_EXPR:
-	    	 throw new TranslationUnsupportedException("Cannot translate quantication as objective yet, sorry.");
+	    	  if(e.getQuantification().getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+	    		  //this.quantificationTranslator.translatingObjective(true);
+	    	  // 	translation
+	    		  //this.quantificationTranslator.translate(e.getQuantification());
+	    		  
+	    		  objectiveVariable = this.expressionTranslator.translateMulopQuantification(e.getQuantification());
+	    	  
+	    		  //this.quantificationTranslator.translatingObjective(false);
+	    		  //this.quantificationTranslator.resetObjectiveVariable();
+	    		  break;
+	    	  }
+	    	  else 
+	    		  throw new TranslationUnsupportedException("Cannot translate quantication as objective yet, sorry.");
 	    	  
 
 	    	  

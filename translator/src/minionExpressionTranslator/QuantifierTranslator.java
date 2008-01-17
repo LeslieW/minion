@@ -45,7 +45,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	Parameters parameterArrays;
 	
 	ExpressionEvaluator evaluator;
-	SpecialExpressionTranslator translator;
+	QuantifiedMulopExpressionTranslator translator;
 	
 	MinionVariableCreator variableCreator;	
 	
@@ -67,6 +67,11 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	boolean useWatchedLiterals;
 	boolean useDiscreteVariables;
 	
+	/** indicates if the currently translated expression is the objective */
+	boolean isObjective;
+	
+	/** If we translate an objective, we just have a variable */
+	MinionIdentifier objectiveVariable;
 	
 	public QuantifierTranslator(HashMap<String, MinionIdentifier> minionVars,
 				HashMap<String, MinionIdentifier[]> minionVecs,
@@ -96,7 +101,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		this.evaluator = new ExpressionEvaluator(bindingParameters, parameterArrays);
 		this.noOfReifiedVariables =0;
 		
-		this.translator = new SpecialExpressionTranslator(minionVars, //new HashMap<String, MinionIdentifier>(),
+		this.translator = new QuantifiedMulopExpressionTranslator(minionVars, //new HashMap<String, MinionIdentifier>(),
 				minionVecs, //new HashMap<String, MinionIdentifier[]>(),
 				minionMatrixz, //new ArrayList<String>(),
 				minionCubes, 
@@ -114,11 +119,19 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		this.sumExpression = null;
 		this.useWatchedLiterals = useWatchedLiterals;
 		this.useDiscreteVariables = useDiscreteVariables;
+		this.isObjective = false;
 	}
 	
 	
+
+	
 	public void translate(QuantificationExpression e) 
 	     throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
+		
+		if(e.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+			this.translatorMinionModel.addConstraint(this.translator.translateQuantifiedSum(e, false));
+			return;
+		}
 		
 		// 1. collect info
 		collectQuantificationInfo(e);
@@ -162,6 +175,11 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		switch(e.getRestrictionMode()) {
 		
 		case EssenceGlobals.QUANTIFIER_EXPR:
+			
+			if(e.getQuantification().getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+				return this.translator.translateQuantifiedSum(e.getQuantification(), reifyIt);	
+			}
+			
 			//	1. collect info
 			collectQuantificationInfo(e.getQuantification());
 			
@@ -184,6 +202,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		}	
 		
 	}
+
 	
 	
 	private void removeUnusedBindingVariables() 
@@ -355,52 +374,54 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			//print_debug("range of quantifier at position "+quantifierPosition+" is "+range);
 			//print_debug("PROCESSING bindingVariable "+bindingVariables[j]);
 		}
-			for(int i=0; i<range; i++) {
-				// if this is the inner most quantifier
-				//print_debug("PROCESSING bindingVariable "+bindingVariables[j]+"with current value of range:"+i);
-					if(quantifierPosition == quantifiers.size()-1) {
-						MinionIdentifier id = translateAtomQuantification(quantifierPosition);
-						if(id != null) { // we need reification 
-							identifiers.add(id);
-							print_debug("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW We just added another minionIdentifier to the reifiedVars list !!!!!!!!!");
-						}
-					}
-					else {
-						MinionReifiableConstraint constraint = translateQuantification(quantifierPosition+1);
-						if(constraint==null) print_debug("THE WHOLE SCOPE WAS INFEASIBLE!!!!!!!! of the "+q.toString()+"-quantifier."); // the last whole scope might have not been feasible
-						
-						else {
-							MinionBoolVariable reifiedVar = new MinionBoolVariable(1,"freshVariable"+noOfReifiedVariables++);
-							//translatorMinionModel.add01Variable(reifiedVar);
-							switch(q.getRestrictionMode()) {
-							
-							case EssenceGlobals.EXISTS:
-								print_debug("TRanslating an EXXXXXXXXXXXISTENTIAL quantifier");
-								translatorMinionModel.addReificationConstraint(constraint, reifiedVar);
-								identifiers.add(reifiedVar);
-								break;
-							
-							case EssenceGlobals.FORALL:
-								print_debug("TRanslating a UUUUUUUUUUUUUUUUUNIVERSAL quantifier");
-								if(needsReification(quantifierPosition)) {
-									translatorMinionModel.addReificationConstraint(constraint, reifiedVar);
-									identifiers.add(reifiedVar);
-								}
-								else translatorMinionModel.addConstraint(constraint);
-								break;
-						
-							case EssenceGlobals.SUM:
-								for(int s=quantifierPosition+1; s<quantifiers.size(); s++){
-									if(quantifiers.get(s).getRestrictionMode() != EssenceGlobals.SUM)
-										throw new TranslationUnsupportedException
-										("The sum quantification may not nest universal or existential quantifiers.");
-								}
+		for(int i=0; i<range; i++) {
+			// 	if this is the inner most quantifier
+			//	print_debug("PROCESSING bindingVariable "+bindingVariables[j]+"with current value of range:"+i);
+			if(quantifierPosition == quantifiers.size()-1) {
+				MinionIdentifier id = translateAtomQuantification(quantifierPosition);
+				print_debug("translated Atom quantification... now adding id to list if it's not null");
+				if(id != null) { // we need reification 
+					print_debug("Gonna add the identifier to the list of identifiers.");
+					identifiers.add(id);
+					print_debug("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW We just added another minionIdentifier to the reifiedVars list !!!!!!!!!");
+				}
+			}
+			else { // we have nested quantification
+				MinionReifiableConstraint constraint = translateQuantification(quantifierPosition+1);
+				if(constraint==null) print_debug("THE WHOLE SCOPE WAS INFEASIBLE!!!!!!!! of the "+q.toString()+"-quantifier."); // the last whole scope might have not been feasible
+									
+				else {		
+					MinionBoolVariable reifiedVar = new MinionBoolVariable(1,"freshVariable"+this.translator.noTmpVars++);
+								//translatorMinionModel.add01Variable(reifiedVar);
+					switch(q.getRestrictionMode()) {
 								
-								throw new TranslationUnsupportedException
-								 ("Double nested Sum quantifications are not supported yet, sorry.");
-							}
+					case EssenceGlobals.EXISTS:
+						print_debug("TRanslating an EXXXXXXXXXXXISTENTIAL quantifier");
+						translatorMinionModel.addReificationConstraint(constraint, reifiedVar);
+						identifiers.add(reifiedVar);
+						break;
+								
+					case EssenceGlobals.FORALL:
+						print_debug("TRanslating a UUUUUUUUUUUUUUUUUNIVERSAL quantifier");
+						if(needsReification(quantifierPosition)) {
+							translatorMinionModel.addReificationConstraint(constraint, reifiedVar);
+							identifiers.add(reifiedVar);
 						}
+						else translatorMinionModel.addConstraint(constraint);
+						break;
+						
+					case EssenceGlobals.SUM:
+						for(int s=quantifierPosition+1; s<quantifiers.size(); s++){
+							if(quantifiers.get(s).getRestrictionMode() != EssenceGlobals.SUM)
+								throw new TranslationUnsupportedException
+								("The sum quantification may not nest universal or existential quantifiers.");
+						}
+								
+						//	throw new TranslationUnsupportedException
+						//("Double nested Sum quantifications are not supported yet, sorry.");
 					}
+				}
+			}
 			//}
 		}
 		
@@ -415,9 +436,9 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				return null;
 			Object[] idents = identifiers.toArray();
 			MinionIdentifier[] freshVariables = new MinionIdentifier[idents.length];
-			for(int ii=0; ii<idents.length; ii++) {
+			for(int ii=0; ii<idents.length; ii++) {  //the identifiers have been added to at model during reification
 				freshVariables[ii] = (MinionIdentifier) idents[ii];
-				translatorMinionModel.addIdentifier(freshVariables[ii]);
+				//translatorMinionModel.addIdentifier(freshVariables[ii]);
 			}
 			return new //MinionMaxConstraint(freshVariables,new MinionConstant(1));
 			       MinionSumGeqConstraint(freshVariables, new MinionConstant(1), false);
@@ -436,19 +457,24 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				MinionIdentifier[] freshVars = new MinionIdentifier[identis.length];
 				for(int ii=0; ii<identis.length; ii++) {
 					freshVars[ii] = (MinionIdentifier) identis[ii];
-					translatorMinionModel.addIdentifier(freshVars[ii]);
+					//translatorMinionModel.addIdentifier(freshVars[ii]);
 				}
 				return new //MinionMinConstraint(freshVars,new MinionConstant(1));
 				   MinionSumGeqConstraint(freshVars, new MinionConstant(freshVars.length), false);
 			}
 		case EssenceGlobals.SUM:
+			print_debug("Translating a sum quantification.........................................");
 			if(identifiers.size() ==0) return null; // should not actually happen!
 			else {		
 				Object[] identis = identifiers.toArray();
 				MinionIdentifier[] freshVars = new MinionIdentifier[identis.length];
+				print_debug("FreshVars for SUM::::::::::::::::::::::::");
 				for(int ii=0; ii<identis.length; ii++) {
 					freshVars[ii] = (MinionIdentifier) identis[ii];
+					print_debug(ii+": "+freshVars[ii]);
 				}
+				if(sumExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
+				
 					switch(sumExpression.getBinaryExpression().getOperator().getRestrictionMode()) {
 				
 					case EssenceGlobals.LEQ:
@@ -463,45 +489,51 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 						return new MinionSumConstraint(freshVars,translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), useWatchedLiterals && !reify);
 						
 					case EssenceGlobals.GREATER:
-						MinionBoolVariable freshVar1g = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
-						translatorMinionModel.add01Variable(freshVar1g);
+						//MinionBoolVariable freshVar1g = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+						//translatorMinionModel.add01Variable(freshVar1g);
 						MinionReifiableConstraint c1g = new MinionSumLeqConstraint(freshVars,
 								translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), false);
-						translatorMinionModel.addReificationConstraint(c1g,freshVar1g);
+						//translatorMinionModel.addReificationConstraint(c1g,freshVar1g);
+						MinionBoolVariable freshVar1g = this.translator.reifyConstraint(c1g);
 						
-						MinionBoolVariable freshVar2g = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
-						translatorMinionModel.add01Variable(freshVar2g);
+						//MinionBoolVariable freshVar2g = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+						//translatorMinionModel.add01Variable(freshVar2g);
 						MinionReifiableConstraint c2g = new MinionSumGeqConstraint(freshVars,
 								translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), false);
-						translatorMinionModel.addReificationConstraint(c2g,freshVar2g);
+						//translatorMinionModel.addReificationConstraint(c2g,freshVar2g);
+						MinionBoolVariable freshVar2g = this.translator.reifyConstraint(c2g);
 						return new MinionInEqConstraint(freshVar2g,freshVar1g, new MinionConstant(-1));
 						
 					case EssenceGlobals.LESS:
-						MinionBoolVariable freshVar1l = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
-						translatorMinionModel.add01Variable(freshVar1l);
+						//MinionBoolVariable freshVar1l = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+						//translatorMinionModel.add01Variable(freshVar1l);
 						MinionReifiableConstraint c1l = new MinionSumLeqConstraint(freshVars,
 								translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), false);
-						translatorMinionModel.addReificationConstraint(c1l,freshVar1l);
+						//translatorMinionModel.addReificationConstraint(c1l,freshVar1l);
+						MinionBoolVariable freshVar1l = this.translator.reifyConstraint(c1l);
 						
-						MinionBoolVariable freshVar2l = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
-						translatorMinionModel.add01Variable(freshVar2l);
+						//MinionBoolVariable freshVar2l = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+						//translatorMinionModel.add01Variable(freshVar2l);
 						MinionReifiableConstraint c2l = new MinionSumGeqConstraint(freshVars,
 								translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), false);
-						translatorMinionModel.addReificationConstraint(c2l,freshVar2l);
+						//translatorMinionModel.addReificationConstraint(c2l,freshVar2l);
+						MinionBoolVariable freshVar2l = this.translator.reifyConstraint(c2l);
 						return new MinionInEqConstraint(freshVar1l,freshVar2l, new MinionConstant(-1));
 						
 					case EssenceGlobals.NEQ:
-						MinionBoolVariable freshVar1n = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
-						translatorMinionModel.add01Variable(freshVar1n);
+						//MinionBoolVariable freshVar1n = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+						//translatorMinionModel.add01Variable(freshVar1n);
 						MinionReifiableConstraint c1n = new MinionSumLeqConstraint(freshVars,
 								translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), false);
-						translatorMinionModel.addReificationConstraint(c1n,freshVar1n);
+						//translatorMinionModel.addReificationConstraint(c1n,freshVar1n);
+						MinionBoolVariable freshVar1n = this.translator.reifyConstraint(c1n);
 						
-						MinionBoolVariable freshVar2n = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
-						translatorMinionModel.add01Variable(freshVar2n);
+						//MinionBoolVariable freshVar2n = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+						//translatorMinionModel.add01Variable(freshVar2n);
 						MinionReifiableConstraint c2n = new MinionSumGeqConstraint(freshVars,
 								translator.translateMulopExpression(sumExpression.getBinaryExpression().getRightExpression()), false);
-						translatorMinionModel.addReificationConstraint(c2n,freshVar2n);
+						//translatorMinionModel.addReificationConstraint(c2n,freshVar2n);
+						MinionBoolVariable freshVar2n = this.translator.reifyConstraint(c2n);
 						print_debug("Adding disequality betweens sums and freshVar1:"+freshVar1n.getOriginalName()+" and freshVar2: "+freshVar2n.getOriginalName());
 						return new MinionDisEqConstraint(freshVar1n,freshVar2n);
 					
@@ -509,6 +541,23 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 						throw new TranslationUnsupportedException
 						("Infeasible relation in sum-quantified expression "+sumExpression.toString());
 					}
+				}
+				// else : sumExpression != binary expression
+				else if(this.isObjective) {
+					// TODO: create a better variable with better bounds
+					MinionIdentifier objectiveVar = variableCreator.addFreshVariable
+			   		  (MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND, 
+							   MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND, 
+							   "freshVariable"+this.translator.noTmpVars++,
+							   this.useDiscreteVariables);
+					
+					this.translatorMinionModel.addSumConstraint(freshVars,
+							    objectiveVar,
+								this.useWatchedLiterals);
+					this.objectiveVariable = objectiveVar;
+					return null;
+				}
+				else throw new TranslationUnsupportedException("Infeasible quantified sum expression: "+sumExpression);
 			}
 			
 
@@ -521,7 +570,17 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		
 	}
 	
-	
+	/** 
+	 * Translate a singly "generated" constraint from a quantification. The constraint has been constructed by
+	 * inserting values for all binding variables. 
+	 * 
+	 * @param quantifierPosition
+	 * @return
+	 * @throws TranslationUnsupportedException
+	 * @throws MinionException
+	 * @throws PreprocessorException
+	 * @throws ClassNotFoundException
+	 */
 	private MinionIdentifier translateAtomQuantification(int quantifierPosition) 
 	  throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
 		
@@ -549,7 +608,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			if(needsReification(quantifierPosition)) {
 				reifiable = true;
 				print_debug("The expression quantified by forall has to be REIFIED!!!!!!!!");
-				MinionBoolVariable reifiedVar = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+				//MinionBoolVariable reifiedVar = new MinionBoolVariable(1, "freshVariable"+this.translator.noTmpVars++);
 				MinionReifiableConstraint reifiableConstraint = null;
 				if(hasOtherQuantifications(constraint)) {
 					print_debug("THere are OOOOOOOOOOTHER quantified constraints, but nested... in"+constraint.toString()); 
@@ -558,8 +617,9 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 					reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(constraint, reifiable);
 				}
 				else 
-				 reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint, reifiable); 
-				translatorMinionModel.addReificationConstraint(reifiableConstraint, reifiedVar);
+				 reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint, reifiable);
+				MinionBoolVariable reifiedVar = this.translator.reifyConstraint(reifiableConstraint);
+				//translatorMinionModel.addReificationConstraint(reifiableConstraint, reifiedVar);
 				return reifiedVar;
 			} // we don't need reification
 			else { 	
@@ -592,7 +652,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		
 		case EssenceGlobals.EXISTS:
 			reifiable = true;
-			MinionBoolVariable reifiedVar = new MinionBoolVariable(1, "freshVariable"+noOfReifiedVariables++);
+			//MinionBoolVariable reifiedVar = new MinionBoolVariable(1, "freshVariable"+this.translator.noTmpVars++);
 			MinionReifiableConstraint reifiableConstraint = null;
 			if(hasOtherQuantifications(constraint)) {
 				print_debug("THere are OOOOOOOOOOTHER quantified constraints, but nested... in"+constraint.toString()); 
@@ -601,14 +661,24 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(constraint, reifiable);
 			}
 			else 
-			  reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint, reifiable); 
-			translatorMinionModel.addReificationConstraint(reifiableConstraint, reifiedVar);
+			  reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint, reifiable);
+			
+			MinionBoolVariable reifiedVar = this.translator.reifyConstraint(reifiableConstraint);
+				print_debug("translated reified part of exists constraint");
+				print_debug("The constraint is:"+reifiableConstraint);
+			//translatorMinionModel.addReificationConstraint(reifiableConstraint, reifiedVar);
+			print_debug("Refied the constraint to a variable that we return now.");
+			//if(reifiedVar == null)
+				//print_debug("And the reified variable is null");
 			return reifiedVar;
 			
+			
+			
 		case EssenceGlobals.SUM:
-			// we will take car e about that later
 			if(constraint.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
 			
+				print_debug("translating sum constraint atom:"+constraint);
+				
 				if(constraint.getBinaryExpression().getOperator().getRestrictionMode() == EssenceGlobals.EQ ||
 						constraint.getBinaryExpression().getOperator().getRestrictionMode() == EssenceGlobals.NEQ ||
 						constraint.getBinaryExpression().getOperator().getRestrictionMode() == EssenceGlobals.LEQ ||
@@ -629,6 +699,12 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				else throw new TranslationUnsupportedException
 				("Unfeasible sum expression: "+constraint.toString()+". Needs to contain a relational operator (=,>=,<=,<,>,!=).");
 	
+			}
+			else if(this.isObjective) {
+				this.sumExpression = constraint;
+				MinionIdentifier identifier = translator.translateMulopExpression(constraint);
+				return identifier;
+				
 			}
 			else throw new TranslationUnsupportedException
 			("Unfeasible sum expression: "+constraint.toString()+". Needs to be a binary expression.");
@@ -1877,7 +1953,20 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
     
     */
     
+    protected void resetObjectiveVariable() {
+    	this.objectiveVariable = null;
+    }
     
+	protected void translatingObjective(boolean translatingObjective) {
+		this.isObjective = translatingObjective;
+	}
+    
+    
+	protected MinionIdentifier getObjectiveVariable() {
+		return this.objectiveVariable;
+	}
+	
+	
     /**
      * clears all the variables used for storage during the translation process of 
      * a quantification. 

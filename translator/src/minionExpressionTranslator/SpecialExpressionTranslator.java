@@ -41,7 +41,10 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 	public SpecialExpressionTranslator(HashMap<String, MinionIdentifier> minionVars,
 			HashMap<String, MinionIdentifier[]> minionVecs,
 			HashMap<String, MinionIdentifier[][]> minionMatrixz,
-			HashMap<String, MinionIdentifier[][][]> minionCubes, ArrayList<String> decisionVarsNames, HashMap<String, Domain> decisionVars, MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, Parameters parameterArrays) {	
+			HashMap<String, MinionIdentifier[][][]> minionCubes, 
+			ArrayList<String> decisionVarsNames, HashMap<String, Domain> decisionVars, 
+			MinionModel mm, boolean useWatchedLiterals, boolean useDiscreteVariables, 
+			Parameters parameterArrays) {	
 		super(minionVars, minionVecs, minionMatrixz,decisionVarsNames, decisionVars, mm, useWatchedLiterals, useDiscreteVariables, parameterArrays, minionCubes);
 		
 		scalarsList = new ArrayList<Expression> ();
@@ -61,19 +64,19 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 	 * products and simple binary expressions that consist of at least one atom.
 	 * 
 	 * @param e a Expression being a binary Expression that is translated rather sophisticatedly
-	 * @param reifiable states if the translated expression has to be reifiable
+	 * @param willBeReified states if the translated expression has to be reifiable
 	 * @return TODO
 	 * @throws TranslationUnsupportedException
 	 * @throws MinionException
 	 */
 	
 	
-	protected MinionConstraint translateSpecialExpression(Expression e, boolean reifiable) 
+	protected MinionConstraint translateSpecialExpression(Expression e, boolean willBeReified) 
 		throws TranslationUnsupportedException, MinionException, 
 			ClassNotFoundException, PreprocessorException {
 		
 		//MinionConstraint minionConstraint = null;
-		print_debug("Translatin special expression "+e.toString());
+		print_debug("Translatin special expression "+e.toString()+" that will be reified:"+willBeReified);
 		
 		if(e.getRestrictionMode() == EssenceGlobals.FUNCTIONOP_EXPR) {
 			return translateGlobalConstraint(e);
@@ -85,7 +88,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 		
 		if(e.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR) {
 			if(e.getUnaryExpression().getRestrictionMode() == EssenceGlobals.NOT) {
-				return translateBooleanNegationToConstraint(e.getUnaryExpression(), reifiable);
+				return translateBooleanNegationToConstraint(e.getUnaryExpression(), willBeReified);
 			}
 		}
 		
@@ -99,22 +102,26 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 		int operator = constraint.getOperator().getRestrictionMode();
 		if(operator == EssenceGlobals.AND || operator == EssenceGlobals.OR ||
 			operator == EssenceGlobals.IF || operator == EssenceGlobals.IFF)
-			return translateBooleanRelationExpression(e, reifiable);
+			return translateBooleanRelationExpression(e, willBeReified);
 		
 		print_debug("Checking if '"+e.toString()+" is a arithm. sum.");
-		if(isIteratedArithmeticExpression(e, reifiable)) {
+		if(isIteratedArithmeticExpression(e, willBeReified)) {
 			print_debug("This is an arithemtic iterated expression: "+e.toString());
-			return translateIteratedArithmeticExpression(constraint,reifiable);
+			MinionConstraint c =  translateIteratedArithmeticExpression(constraint,willBeReified);
+			if(c == null) 
+				print_debug("THe returned sum constraint is null!!!!!!!!!!!!!!!!!!!!");
+			else print_debug("The returned sum constraint is:"+c);
+			return c;
 		}
 		print_debug("Checking if '"+e.toString()+" is a arithm. sum : NOOO");
 		
 		// 3. check for simple expressions (where one is an atom and the relation is =)
 		if(isSimpleExpression(constraint)) {
 			print_debug("This is a simple expression:"+e.toString());
-			return translateSimpleExpression(constraint, reifiable);
+			return translateSimpleExpression(constraint, willBeReified);
 		}
 	
-		return translateRelationalExpression(e, reifiable);
+		return translateRelationalExpression(e, willBeReified);
 			
 			
 	}
