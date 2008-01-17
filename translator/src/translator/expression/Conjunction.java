@@ -45,7 +45,7 @@ public class Conjunction extends NaryRelationalExpression {
 	public String toString() {
 		String s = "and("+this.conjointExpressions.get(0);
 		for(int i=1; i<this.conjointExpressions.size(); i++)
-			s = s.concat(","+conjointExpressions.get(i));
+			s = s.concat(",\n\t"+conjointExpressions.get(i));
 		
 		return s.concat(")");
 	}

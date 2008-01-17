@@ -79,7 +79,7 @@ public class ArrayVariable implements Variable {
 			Expression[] copiedIndices = new Expression[this.exprIndices.length];
 			
 			for(int i=0; i<copiedIndices.length; i++) 
-				copiedIndices[i] = this.exprIndices[i];			
+				copiedIndices[i] = this.exprIndices[i].copy();			
 			return new ArrayVariable(copiedArrayName, 
 	                 copiedIndices, 
 	                 copiedDomain);

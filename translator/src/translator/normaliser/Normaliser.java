@@ -155,7 +155,9 @@ public class Normaliser implements NormaliserSpecification {
 
 
 	
-	
+	/**
+	 * @return the expression list will constraints and the parameters inserted
+	 */
 	public ArrayList<translator.conjureEssenceSpecification.Expression> insertParameters(EssenceSpecification problemSpecification,
 			                                                                             EssenceSpecification parameterSpecification)
 			throws NormaliserException {
@@ -173,14 +175,14 @@ public class Normaliser implements NormaliserSpecification {
 			//ExpressionMapper expressionMapper = null;
 			
 			// if there were no parameters specified
-			if(this.parameterSpecification ==null || 
+			/*if(this.parameterSpecification ==null || 
 					this.parameterSpecification.getDeclarations() == null ||
 					  this.parameterSpecification.getDeclarations().length == 0)
 				this.expressionMapper =  new ExpressionMapper(decisionVariables, 
 					                                 	new HashMap<String, Domain> (), 
-					                                 	this.parameterInserter.getParameters());
+					                                 	this.parameterInserter.getParameters());*/
 			// if there have been parameters specified
-			else 
+			//else 
 				this.expressionMapper = new ExpressionMapper(decisionVariables, 
 						this.parameterInserter.getParameterDomainMap(), 
 						this.parameterInserter.getParameters());
@@ -271,19 +273,19 @@ public class Normaliser implements NormaliserSpecification {
 		ArrayList<translator.conjureEssenceSpecification.Expression> oldConstraints = null;
 
 	    // 	if there are no parameters given
-		if(this.parameterSpecification == null || 
+	/*	if(this.parameterSpecification == null || 
 				this.parameterSpecification.getDeclarations() == null ||
 				   this.parameterSpecification.getDeclarations().length == 0) {
 		
 			oldConstraints = new ArrayList<translator.conjureEssenceSpecification.Expression>();
 			for(int i=0; i<this.problemSpecification.getExpressions().length; i++)
 				oldConstraints.add(this.problemSpecification.getExpressions()[i]);
-		}
-		else { // if there are some parameters given, insert them in the expressions
+		}*/
+		//else { // if there are some parameters given, insert them in the expressions
 
-			oldConstraints = insertParameters(this.problemSpecification, 
+		oldConstraints = insertParameters(this.problemSpecification, 
 					                          this.parameterSpecification);
-		}
+		//}
 		
 		ArrayList<translator.expression.Expression> constraintList = mapExpressionList(oldConstraints);
 		return constraintList;

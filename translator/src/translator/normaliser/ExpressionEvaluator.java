@@ -1589,6 +1589,7 @@ public class ExpressionEvaluator  {
 		
 	  	print_debug("domain '"+d.toString()+"' is an identifier domain.");
     	Constant constant = parameters.get(d.getIdentifierDomain().getIdentifier());
+ 
     	
     	if(constant == null) 
     		throw new NormaliserException("Unknown identifier used as domain identifier: "+d.getIdentifierDomain().getIdentifier());

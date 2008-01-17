@@ -38,8 +38,24 @@ public class Flattener {
 	/**
 	 * Flattens the model according to the target solver that has been specified.
 	 * 
+	 * @return the flattened Normalised model that was given in the constructor
 	 */
-	public NormalisedModel flattenModel() {
+	public NormalisedModel flattenModel() throws TailorException  {
+		
+		if(this.targetSolver.supportsNestedExpressions()) {
+			return this.normalisedModel;
+		}
+		
+		ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
+		ArrayList<Expression> flattenedConstraints = new ArrayList<Expression>();
+		
+		for(int i=0; i<constraints.size(); i++) {
+			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
+			for(int j=flatExpression.size()-1; j>=0; j--)
+				flattenedConstraints.add(flatExpression.remove(j)); 
+		}
+		
+		this.normalisedModel.replaceConstraintsWith(flattenedConstraints);
 		
 		return this.normalisedModel;
 	}
@@ -55,12 +71,7 @@ public class Flattener {
 		
 		this.constraintBuffer.clear();
 		
-		if(this.targetSolver.supportsNestedExpressions()) {
-			this.constraintBuffer.add(constraint);
-			return this.constraintBuffer;
-		}
-		
-		// else flatten the constraint
+        // flatten the constraint
 		Expression topExpression = flattenExpression(constraint);
 		ArrayList<Expression> flattenedSubExpressions = this.constraintBuffer;
 		flattenedSubExpressions.add(topExpression);
@@ -111,9 +122,93 @@ public class Flattener {
 		else if(expression instanceof QuantifiedExpression)
 			return flattenQuantifiedExpression((QuantifiedExpression) expression);
 		
+		else if(expression instanceof Conjunction)
+			return flattenConjunction((Conjunction) expression);
+		
+		else if(expression instanceof Disjunction)
+			return flattenDisjunction((Disjunction) expression);
+		
 		else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
 	}
 	
+	
+	/**
+	 * 
+	 * @param disjunction
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenDisjunction(Disjunction disjunction) 
+		throws TailorException {
+
+		// 1. ---- first flatten the arguments ----------------------
+		ArrayList<Expression> arguments = disjunction.getArguments();
+		for(int i=arguments.size()-1; i>=0; i--)
+			arguments.add(i, flattenExpression(arguments.remove(i)));
+		
+		if(this.targetSolver.supportsNaryDisjunction()) {
+			return disjunction;
+		}
+		// the solver does not support n-ary disjunction, we have to flatten it to binary
+		else {
+			// TODO:!
+		}
+		
+		return disjunction;
+	}
+	
+	/**
+	 * Flatten a conjunction: if the target solver supports n-ary conjunction, then just flatten the 
+	 * subexpressions. Otherwise flatten the conjunction to conjunctions with 2 elements.
+	 * @param conjunction
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenConjunction(Conjunction conjunction) 
+		throws TailorException {
+		
+		// 1. ---- first flatten the arguments ----------------------
+		ArrayList<Expression> arguments = conjunction.getArguments();
+		for(int i=arguments.size()-1; i>=0; i--)
+			arguments.add(i, flattenExpression(arguments.remove(i)));
+		
+		// 2. ---- if the conjunction is not nested/will be reified
+		//         then split it into independent constraints
+		if(!conjunction.isGonnaBeReified()) {
+			for(int i=0; i<arguments.size()-1; i++) {
+				this.constraintBuffer.add(arguments.remove(i));
+			}
+			return arguments.remove(0);
+		}
+		
+		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
+		//        is supported by the target solver
+		else if(this.targetSolver.supportsNaryConjunction()) {
+			return conjunction;
+		}
+		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
+		else {
+			// TODO:!
+		}
+		return conjunction;
+	}
+	
+	
+/*	private Expression toBinaryConjunction(ArrayList<Expression> arguments) {
+
+		if(arguments.size() ==2) {
+			return new Conjunction(arguments);
+		}
+		else if(arguments.size() == 1)
+			return arguments.get(0);
+		
+		else {
+			ArrayList<Expression> argsList = new ArrayList<Expression>();
+			argsList.add(arguments.remove(0));
+			argsList.add(toBinaryConjunction(arguments));
+			this.constraintBuffer.add(new Conjunction(argsList));
+		}
+	}*/
 	
 	
 	/**
@@ -249,17 +344,35 @@ public class Flattener {
 		for(int i=0; i<bindingVariables.length; i++)
 			variableList.add(bindingVariables[i]);
 		
+		
+		// 3 ------- create unfolded expressions --------------------------------
 		ArrayList<Expression> unfoldedExpressions = insertVariablesForValues(variableList,
 				                                                             domainElements,
 				                                                             quantification.getQuantifiedExpression());
 		
+		// flatten all the unfolded expressions
+		/*for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
+			unfoldedExpressions.add(flattenExpression(unfoldedExpressions.remove(i)));
+		}*/
 		
-		// insert binding variables' values into the expression
+		// universal quantification 
+		if(quantification.getType() == Expression.FORALL) {
+			Conjunction conjunction = new Conjunction(unfoldedExpressions);
+			conjunction.reduceExpressionTree();
+			
+			return flattenConjunction(conjunction);
+		}
+		// existential quantification
+		else {
+			Disjunction disjunction = new Disjunction(unfoldedExpressions);
+			disjunction.reduceExpressionTree();
+			
+			for(int i=disjunction.getArguments().size()-1; i>=0; i--) 
+				disjunction.getArguments().get(0).willBeReified(true);
+			
+			return flattenDisjunction(disjunction);
+		}
 		
-		// put every variant into the disjunction/conjunction
-		
-		
-		return null;
 	}
 	
 	
@@ -278,11 +391,15 @@ public class Flattener {
 		
 		ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
 		
+		//System.out.println("want to insert values into expression :"+expression);
+		
 		// this is the last variable we have to insert
 		if(variableList.size() == 1) {
 			String variableName = variableList.get(0);
 			for(int i=0; i<values.length; i++) {
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
+				//System.out.println("Inserted '"+values[i]+"' for variable '"+variableName+"' in expression '"+expression+"' and got expression:"+unfoldedExpression);
+				unfoldedExpression = unfoldedExpression.evaluate();
 				unfoldedExpressions.add(unfoldedExpression);
 			}
 			return unfoldedExpressions;
@@ -293,8 +410,10 @@ public class Flattener {
 			for(int i=0; i<values.length; i++) {
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
 				ArrayList<Expression> furtherUnfoldedExpressions = insertVariablesForValues(variableList, values, unfoldedExpression);
-				for(int j=0; j<furtherUnfoldedExpressions.size(); j++)
-					unfoldedExpressions.add(furtherUnfoldedExpressions.remove(i));
+				
+				for(int j=0; j<furtherUnfoldedExpressions.size(); j++) {
+					unfoldedExpressions.add(furtherUnfoldedExpressions.get(j).evaluate());
+				}
 			}
 			
 		}

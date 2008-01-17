@@ -116,10 +116,15 @@ public class ParameterInsertion {
 	    		                                      EssenceSpecification parameterSpecification)
 	    	throws NormaliserException {
 		
+	    	
+	    	
 	    	// collect parameters
-	     	computeParameters(problemSpecification.getDeclarations(), 
-					          parameterSpecification.getDeclarations());
-	     	
+	    	if(parameterSpecification != null)
+	    		computeParameters(problemSpecification.getDeclarations(), 
+					          	parameterSpecification.getDeclarations());
+	    	else computeParameters(problemSpecification.getDeclarations(),
+	    							null);
+		                    
 	     	
 	     	// insert parameters into the constraints	     	
 	     	return preprocessConstraints(problemSpecification.getExpressions());
@@ -298,11 +303,16 @@ public class ParameterInsertion {
 	    private void computeParameters(Declaration[] problemDeclarations, Declaration[] parameterDeclarations) 
 		throws NormaliserException {
 
-	    	Declaration[] declarations = new Declaration[problemDeclarations.length + parameterDeclarations.length];
+	    	int noParamDecl = 0;
+	    	if(parameterDeclarations != null)
+	    		noParamDecl = parameterDeclarations.length;
+	    		
+	    	Declaration[] declarations = new Declaration[problemDeclarations.length + noParamDecl];
 
-	 
-	    	for(int i=0; i< parameterDeclarations.length; i++) 
-	    		declarations[i] = parameterDeclarations[i];
+	    	if(parameterDeclarations != null)
+	    		for(int i=0; i< parameterDeclarations.length; i++) 
+	    			declarations[i] = parameterDeclarations[i];
+	    	
 	       	for(int i=0; i< problemDeclarations.length; i++) 
 	    		declarations[i+parameterDeclarations.length] = problemDeclarations[i];
 		

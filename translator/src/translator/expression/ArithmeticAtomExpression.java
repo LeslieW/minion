@@ -134,9 +134,19 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	
 	public Expression insertValueForVariable(int value, String variableName) {
 		if(this.variable != null) {
-			Expression e = (SingleVariable) this.variable.insertValueForVariable(value,variableName);
-			if(e.getType() == INT)
-				return (ArithmeticAtomExpression) e;
+			// if this is a simple decision variable
+			if(this.variable instanceof SingleVariable) {
+				Expression e = this.variable.insertValueForVariable(value,variableName);
+				if(e.getType() == INT)
+					return (ArithmeticAtomExpression) e;
+				else return this;
+			}
+			// this is an array element
+			else {
+				this.variable = (Variable) this.variable.insertValueForVariable(value,variableName);
+				this.variable.evaluate();
+				return this;
+			}
 		}
 		
 		return this;

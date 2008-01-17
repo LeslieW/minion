@@ -8,6 +8,7 @@ import javax.swing.*;
 import translator.Translator;
 
 import translator.normaliser.NormaliserSpecification;
+import translator.solver.*;
 
 public class ModellingPanel extends JPanel  {
 	
@@ -271,7 +272,7 @@ public class ModellingPanel extends JPanel  {
 			});
 		
 		
-		JButton normaliseButton = new JButton("Full Normalisation >>");
+		JButton normaliseButton = new JButton("Normalise: Full >>");
 		normaliseButton.setPreferredSize(buttonDimension);
 		normaliseButton.setActionCommand(NORMALISE);
 		normaliseButton.addActionListener(new java.awt.event.ActionListener() {
@@ -289,7 +290,7 @@ public class ModellingPanel extends JPanel  {
 		           translate(e.getActionCommand());   
 			  }
 			});
-		flattenButton.setEnabled(false);
+		
 		
 		JButton minionButton = new JButton("To Minion >>");
 		minionButton.setPreferredSize(buttonDimension);
@@ -481,6 +482,30 @@ public class ModellingPanel extends JPanel  {
 		else if(command == NORMALISE) {
 			normalise();
 		}
+		else if(command == FLATTEN) {
+			flatten();
+		}
+	}
+	
+	
+	protected void flatten() {
+		TargetSolver solver = new Minion();
+		
+		if(this.translator.getInitialProblemSpecification() == null)
+			parse();
+		if(!this.translator.hasBeenNormalised())
+			normalise();
+		boolean flattening = this.translator.flatten(solver);
+		
+		if(flattening) {
+			writeOnOutput(this.translator.printAdvancedModel());
+			writeOnMessageOutput("Flattened constraints for target solver "+solver.getSolverName()+"\n");
+		}
+		else {
+			writeOnMessageOutput("Flattening for target solver "+solver.getSolverName()+" failed.\n");
+			writeOnMessageOutput(this.translator.getErrorMessage());			
+		}
+		
 	}
 	
 	

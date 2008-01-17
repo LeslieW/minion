@@ -80,6 +80,11 @@ public class NormalisedModel {
 	}
 	
 	
+	public void replaceConstraintsWith(ArrayList<Expression> newConstraints) {
+		this.constraintList.clear();
+		this.constraintList = newConstraints;
+	}
+	
 	public void addAuxiliaryVariable(Variable variable) {
 		this.auxiliaryVariables.add(variable);
 	}

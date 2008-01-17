@@ -43,7 +43,7 @@ public class Disjunction extends NaryRelationalExpression {
 	public String toString() {
 		String s = "or("+this.disjointExpressions.get(0);
 		for(int i=1; i<this.disjointExpressions.size(); i++)
-			s = s.concat(","+disjointExpressions.get(i));
+			s = s.concat(",\n\t"+disjointExpressions.get(i));
 		
 		return s.concat(")");
 	}

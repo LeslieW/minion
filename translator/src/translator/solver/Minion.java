@@ -26,6 +26,8 @@ public class Minion extends GeneralTargetSolver {
 		this.featureMap = new HashMap<Integer, Boolean>();
 		
 		
+		featureMap.put(new Integer(SEARCH_OVER_AUXILIARY_VARIABLES),new Boolean(false));
+		
 		// ------------ features of the solver -----------------------------
 		// constraints
 		featureMap.put(new Integer(NESTED_EXPRESSIONS),new Boolean(false));

@@ -3,6 +3,8 @@ package translator.tailor;
 //import translator.expression.Expression;
 import translator.normaliser.NormalisedModel;
 import translator.solver.TargetSolver;
+//import java.util.ArrayList;
+
 
 public class Tailor implements TailorSpecification {
 
@@ -28,4 +30,23 @@ public class Tailor implements TailorSpecification {
 	}
 
 
+	/**
+	 * Flatten the problem model that was given in the constructor
+	 * and return its String representation.
+	 * @return the String representation of the flattened model
+	 * 
+	 * @throws TailorException
+	 */
+	public NormalisedModel flattenModel() throws TailorException {
+		
+		Flattener flattener = new Flattener(this.targetSolver,
+										    this.problemModel);
+		
+		this.problemModel =  flattener.flattenModel();
+		return this.problemModel;
+	}
+	
+	
+	
+	
 }

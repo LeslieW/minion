@@ -10,6 +10,9 @@ import translator.essencePrimeParser.EssencePrimeParser;
 
 import translator.normaliser.*;
 import translator.expression.Expression;
+
+import translator.solver.TargetSolver;
+import translator.tailor.*;
 /**
  * The translator provides all the core steps during the translation.
  * These steps are : <br>
@@ -27,14 +30,18 @@ public class Translator {
 		
 	/** Essence' parser */
     EssencePrimeParser parser ;
+	/** normalises the Essence' model */
+    Normaliser normaliser;
+    /** tailors a normalised model to a target solver */
+    Tailor tailor;
+    
     /** Essence' syntax tree of problem file */
     EssenceSpecification problemSpecification;  
     /** Essence' syntax tree of parameter file */
     EssenceSpecification parameterSpecification ; 
-	/** normalises the Essence' model */
-    Normaliser normaliser;
     /** the normalised model. is produced by the normalise() method */
     NormalisedModel normalisedModel;
+    
     
 	String errorMessage;
     String debug;
@@ -145,6 +152,45 @@ public class Translator {
 		
 	}
 	
+	
+	/**
+	 * Given a target solver, flatten the corresponding normalised model. To evoke this method, the
+	 * model MUST have been parsed and normalised (at least basically normalised).
+	 * 
+	 * @param targetSolver
+	 * @return
+	 */
+	public boolean flatten(TargetSolver targetSolver) {
+		
+		if(this.normalisedModel == null) {
+			this.errorMessage = errorMessage.concat("Please normalise problem model before flattening");
+		}
+		
+		try {
+			this.tailor = new Tailor(this.normalisedModel,
+				 				 targetSolver);
+			this.normalisedModel = tailor.flattenModel();
+			
+		} catch(TailorException e) {
+			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+			return false;
+		}
+		return true;
+	}
+	
+	
+	
+	
+	/**
+	 * Method to determine if the problem model has already been normalised.
+	 * @return true if the problem model has been normalised
+	 */
+	public boolean hasBeenNormalised() {
+		return (this.normalisedModel == null) ?
+			false : true;
+	}
+	
+	// ====================== OUTPUT METHODS =====================================================
   
     /**
      * Returns the error message that has been given by the last exception. The error message
