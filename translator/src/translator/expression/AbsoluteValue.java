@@ -103,4 +103,9 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 		this.argument = this.argument.restructure();
 		return this;
 	}
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		this.argument = this.argument.insertDomainForVariable(domain, variableName);
+		return this;
+	}
 }

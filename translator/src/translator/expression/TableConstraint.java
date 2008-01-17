@@ -143,4 +143,8 @@ public class TableConstraint implements RelationalExpression {
 	public Expression restructure() {
 		return this;
 	}
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		return this;
+	}
 }

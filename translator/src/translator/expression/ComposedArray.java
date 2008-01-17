@@ -114,4 +114,9 @@ public class ComposedArray implements Array {
 
 	}
 
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		return this;
+	}
+	
 }

@@ -241,6 +241,12 @@ public class Multiplication extends NaryArithmeticExpression {
 		return this;
 	}
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		for(int i=0; i<this.arguments.size(); i++)
+			this.arguments.add(i,this.arguments.remove(i).insertDomainForVariable(domain, variableName));
+		return this;
+	}
+	
 	
 	// ================== ADDITIONAL METHODS ==============================
 	

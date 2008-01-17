@@ -79,6 +79,31 @@ public class SimpleArray implements SingleArray {
 		// do nothing
 
 	}
+	
+public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		if(this.baseDomain instanceof IdentifierDomain) {
+			String domainName = ((IdentifierDomain) baseDomain).getDomainName();
+			
+			if(domainName.equals(variableName)) 
+				this.baseDomain = domain;	
+		}
+		
+		
+		for(int i=0; i<this.indexDomains.length; i++) {
+			if(this.indexDomains[i] instanceof IdentifierDomain) {
+				String domainName = ((IdentifierDomain) indexDomains[i]).getDomainName();
+				
+				if(domainName.equals(variableName) && domain instanceof BasicDomain) 
+					this.indexDomains[i]= (BasicDomain) domain;
+			}
+		}
+		
+		
+		return this;
+	}
+	
+	
 
 	public Expression reduceExpressionTree() {
 		return this;

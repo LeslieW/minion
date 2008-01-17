@@ -130,5 +130,5 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 		this.willBeReified = reified;
 	}
 	
-	
+
 }

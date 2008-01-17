@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class IdentifierDomain implements Domain {
+public class IdentifierDomain implements BasicDomain {
 
 	private String domainName;
 	
@@ -38,7 +38,7 @@ public class IdentifierDomain implements Domain {
 		return this;
 	}
 	
-	public char isSmallerThanSameType(Domain d) {
+	public char isSmallerThanSameType(BasicDomain d) {
 		
 		IdentifierDomain otherDomain = (IdentifierDomain) d;
 		
@@ -50,4 +50,10 @@ public class IdentifierDomain implements Domain {
 		
 	}
 	
+	
+	// =========== ADDITIONAL METHODS =================
+	
+	public String getDomainName() {
+		return this.domainName;
+	}
 }

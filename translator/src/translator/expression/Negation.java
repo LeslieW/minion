@@ -91,4 +91,9 @@ public class Negation implements UnaryRelationalExpression {
 		return this;
 	}
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		this.argument = this.argument.insertDomainForVariable(domain, variableName);
+		return this;
+	}
+	
 }

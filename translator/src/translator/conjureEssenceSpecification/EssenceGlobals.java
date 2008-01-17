@@ -4,7 +4,7 @@ package translator.conjureEssenceSpecification;
      idea: maybe introduce a value for all nonterminals/terminals
            that should appear in Essence'?
            
-     The highest occupied number is now 142 
+     The highest occupied number is now 144 
 */
 
 public interface EssenceGlobals {
@@ -28,6 +28,7 @@ public interface EssenceGlobals {
     public final int CONSTANT_DOMAIN = 7;
     public final int CONSTANT = 8;
     public final int CONSTANT_NEW_TYPE = 9;
+    public final int CONSTANT_ARRAY = 144;
 
     // BindingExpression.java
     public final int BINDING_IDENTIFIER_DOMAIN_EXPR = 10;
@@ -40,7 +41,8 @@ public interface EssenceGlobals {
     public final int WHERE = 14;
     public final int LETTING = 15;
     public final int FIND = 16;
-
+    public final int PARAM = 143;
+    
     // Domain.java
     public final int BRACKETED_DOMAIN = 17;
     public final int BOOLEAN_DOMAIN = 18;

@@ -17,6 +17,7 @@ public class Declaration implements EssenceGlobals {
 	Expression[] expressions;
 	Constant[] constants;
 	DomainIdentifiers[] variables;
+	Constant[] parameterDefinitions;
 	
 	public int getRestrictionMode(){
 		return restriction_mode;
@@ -42,6 +43,11 @@ public class Declaration implements EssenceGlobals {
 	public void setConstants(Constant[] c){
 		this.constants=c;
 	}
+	
+	public Constant[] getParameterDefinitions() {
+		return this.parameterDefinitions;
+	}
+	
 	public DomainIdentifiers[] getVariables(){
 		return variables;
 	}
@@ -64,6 +70,17 @@ public class Declaration implements EssenceGlobals {
 		this.constants = c;
 	}
 	
+	public Declaration(Constant[] parameterDefs, boolean areParameters) {
+		if(areParameters) {
+			this.parameterDefinitions = parameterDefs;
+			this.restriction_mode = EssenceGlobals.PARAM;
+		}
+		else {
+			this.constants = parameterDefs;
+			this.restriction_mode = EssenceGlobals.LETTING;
+		}
+	}
+	
 	public Declaration(DomainIdentifiers[] v){
 		restriction_mode = FIND;
 		this.variables = v;
@@ -76,16 +93,30 @@ public class Declaration implements EssenceGlobals {
 		case WHERE : return "where " + expressionsToString();
 		case LETTING : return "letting " + constantsToString();
 		case FIND : return "find " + variablesToString();
+		case PARAM: return "param "+parameterDefToString();
 		}		
 		return ""; 
+	}
+	
+	
+	public String parameterDefToString() {
+		
+		String output = "";
+		for(int i = 0;i<this.parameterDefinitions.length;i++){
+			if(i > 0) output = output.concat(",");
+			output += parameterDefinitions[i].toString();
+		}
+		
+		return output;
+		
 	}
 	
 	public String parametersToString(){
 		
 		String output = "";
-		output+=parameters[0].toString();
-		for(int i = 1;i<parameters.length;i++){
-			output += ", " + parameters[i].toString();
+		for(int i = 0;i<parameters.length;i++){
+			if(i > 0) output = output.concat(",");
+			output += parameters[i].toString();
 		}
 		
 		return output;

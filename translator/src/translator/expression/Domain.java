@@ -12,15 +12,18 @@ public interface Domain {
 
 	
 	public final int BOOL = 0;
-	public final int INT_BOUNDS = 1;
-	public final int INT_SPARSE = 2;
-	public final int INT_MIXED = 3;
-	public final int EXPR_BOUNDS = 4;
-	public final int EXPR_SPARSE = 5;
-	public final int EXPR_MIXED = 6;
-	public final int IDENTIFIER = 7;
-	public final int CONSTANT_ARRAY = 9;
-	public final int ARRAY = 10;
+	public final int SINGLE_INT = 1;
+	public final int INT_BOUNDS = 2;
+	public final int INT_SPARSE = 3;
+	public final int INT_MIXED = 4;
+	public final int SINGLE_EXPR = 5;
+	public final int EXPR_BOUNDS = 6;
+	public final int EXPR_SPARSE = 7;
+	public final int EXPR_MIXED = 8;
+	public final int IDENTIFIER = 9;
+	public final int CONSTANT_ARRAY = 10;
+	public final int ARRAY = 11;
+	public final int FULL_RANGE = 12;
 	
 	
 	

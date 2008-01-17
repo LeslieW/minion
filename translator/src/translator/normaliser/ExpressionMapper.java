@@ -2,6 +2,7 @@ package translator.normaliser;
 
 import translator.conjureEssenceSpecification.*;
 import translator.expression.*;
+import translator.expression.Expression;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -32,22 +33,42 @@ public class ExpressionMapper {
 	/** A hashmap containing all decision variables with their corresponding domains  */
 	HashMap<String, translator.conjureEssenceSpecification.Domain> decisionVariables;
 	/** A hashmap containing all parameters with their corresponding domains */
-	HashMap<String, translator.conjureEssenceSpecification.Domain> parameters;
+	HashMap<String, translator.conjureEssenceSpecification.Domain> parameterDomains;
 	
 	/** contains all the parameter arrays with their values */
-	Parameters parameterArrays;
+	HashMap<String, translator.conjureEssenceSpecification.ConstantArray> constantArrays;
 	
     String debug = "";
 	
 	public ExpressionMapper(HashMap<String,translator.conjureEssenceSpecification.Domain> decisionVariables,
-			                HashMap<String, translator.conjureEssenceSpecification.Domain> parameters, 
-			                Parameters parameterArrays) {
+			                HashMap<String, translator.conjureEssenceSpecification.Domain> parameterDomains, 
+			                HashMap<String, translator.conjureEssenceSpecification.ConstantArray> constantArrays) {
 		
 		this.decisionVariables = decisionVariables;
-		this.parameters = parameters;
-		this.parameterArrays = parameterArrays;
+		this.parameterDomains = parameterDomains;
+		this.constantArrays = constantArrays;
 	}
 	
+	
+	
+	// ======================== METHODS =========================================================
+	
+	/**
+	 * Map the old expressions to the new format
+	 */
+	public  ArrayList<Expression> mapExpressions(translator.conjureEssenceSpecification.Expression[] oldConstraints) 
+	throws NormaliserException {
+	
+		ArrayList<translator.expression.Expression> newConstraints = new ArrayList<translator.expression.Expression> ();
+	
+		for(int i=0; i<oldConstraints.length; i++) {
+			translator.expression.Expression newExpression = mapExpression(oldConstraints[i]);
+			newConstraints.add(newExpression);
+		}
+		
+		
+		return newConstraints;
+	}
 	
 	
 	/**
@@ -246,19 +267,19 @@ public class ExpressionMapper {
 		//--------------------- matrix name ----------------------------------------------
 		String arrayName = oldArrayElement.getArrayName();
 		
-		//System.out.println("Mapping the old non-atom:"+oldArrayElement);
+		System.out.println("Mapping the old non-atom:"+oldArrayElement+" and constant arrays list is:"+this.constantArrays);
 		
 		// ------------- matrix domain ----------------------------------------------------
 		// get the domain of the matrixElement
-		translator.conjureEssenceSpecification.Domain domain = this.decisionVariables.get(arrayName);
+		translator.conjureEssenceSpecification.Domain domain = null;
+		if(this.decisionVariables.containsKey(arrayName))
+			domain = this.decisionVariables.get(arrayName);
 		
 		if(domain == null) { // in this case the array element is a parameter
-			if(this.parameterArrays.isParameterVector(arrayName) ||	
-			    this.parameterArrays.isParameterMatrix(arrayName) ||
-					this.parameterArrays.isParameterCube(arrayName) ) {
+			if(this.constantArrays.containsKey(arrayName) ) {
 				
 				BoundedIntRange paramDomain = new BoundedIntRange(translator.expression.Expression.LOWER_BOUND, 
- 		               translator.expression.Expression.UPPER_BOUND);
+ 		                                                          translator.expression.Expression.UPPER_BOUND);
 				
 				// map the expression indices
 				Index[] oldIndices = oldArrayElement.getIndexList();
@@ -397,12 +418,10 @@ public class ExpressionMapper {
 		
 		BasicDomain[] basicIndexDomains = new BasicDomain[indices.length];
 		
-		//System.out.println("Mapping aaarray variable:"+arrayName+" and got indices length:"+indices.length);
+		
 		
 		for(int i=0; i<indices.length; i++) {
-	
-			//System.out.println("I am in the loop now:"+i);
-			//System.out.println("Index[i] is "+indices[i]);
+			
 			// (..)
 			if(indices[i].getType() == EssenceGlobals.FULL_BOUNDED_INDEX) {
 				if(indexDomains[i] instanceof BasicDomain)
@@ -426,7 +445,7 @@ public class ExpressionMapper {
 			}
 			
 			
-			
+			// (e1,e2, .., en)
 			else if(indices[i].getType() == EssenceGlobals.SPARSE_INDEX) {
 				
 				SparseIndex sparseIndex = (SparseIndex) indices[i];
@@ -491,6 +510,22 @@ public class ExpressionMapper {
 				
 			
 			}
+			// identifier
+			else if(indices[i].getType() == EssenceGlobals.EXPRESSION_INDEX) {
+				
+				translator.expression.Expression indexExpression = mapExpression(((ExpressionIndex) indices[i]).getIndexExpression());
+				indexExpression = indexExpression.evaluate();
+				
+				if(indexExpression.getType() == translator.expression.Expression.INT) {
+					basicIndexDomains[i] = new SingleIntRange(((ArithmeticAtomExpression) indexExpression).getConstant());
+				}
+				else {
+					basicIndexDomains[i] = new SingleExpressionRange(indexExpression);
+				}
+				
+				
+			}
+		
 			else throw new NormaliserException("Sorry, cannot translate variable index '"+indices[i]+
 					" with which you dereferenced the variable '"+arrayName+"' yet.");	
 			
@@ -717,8 +752,8 @@ public class ExpressionMapper {
 				else return new ArithmeticAtomExpression(decisionVar);	
 			}
 			// the identifier is a parameter
-			else if(this.parameters.containsKey(oldAtom.getString())) {
-				translator.conjureEssenceSpecification.Domain domain = this. parameters.get(oldAtom.getString());
+			else if(this.parameterDomains.containsKey(oldAtom.getString())) {
+				translator.conjureEssenceSpecification.Domain domain = this. parameterDomains.get(oldAtom.getString());
 				translator.expression.SingleVariable parameter = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
 				if(parameter.getType() == translator.expression.Expression.BOOL_VARIABLE)

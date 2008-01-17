@@ -157,12 +157,12 @@ public class CommutativeBinaryRelationalExpression implements
 			leftConstant = ((RelationalAtomExpression) leftArgument).toArithmeticExpression().getConstant();
 		
 		if(rightArgument.getType() == BOOL)
-			rightConstant = ((RelationalAtomExpression) leftArgument).toArithmeticExpression().getConstant();
+			rightConstant = ((RelationalAtomExpression) rightArgument).toArithmeticExpression().getConstant();
 		
 		else if(leftArgument.getType() == INT && rightArgument.getType() == INT) {
 		
 			leftConstant = ((ArithmeticAtomExpression) leftArgument).getConstant();
-			rightConstant = ((ArithmeticAtomExpression) leftArgument).getConstant();
+			rightConstant = ((ArithmeticAtomExpression) rightArgument).getConstant();
 		}
 		
 		if(leftConstant != -11111 && rightConstant != -11111) {
@@ -273,4 +273,11 @@ public class CommutativeBinaryRelationalExpression implements
 		
 		return this;
 	}
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		this.leftArgument = this.leftArgument.insertDomainForVariable(domain, variableName);
+		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
+		return this;
+	}
+	
 }

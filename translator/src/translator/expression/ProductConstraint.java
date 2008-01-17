@@ -184,6 +184,15 @@ public class ProductConstraint implements GlobalConstraint {
 		return this;
 	}
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		for(int i=0; i<this.arguments.length; i++)
+			this.arguments[i] = this.arguments[i].insertDomainForVariable(domain, variableName);
+		
+		this.result = this.result.insertDomainForVariable(domain, variableName);
+		return this;
+	}
+	
 	// ==================== ADDITIONAL METHODS ============================
 	
 	public Expression[] getProductArguments() {

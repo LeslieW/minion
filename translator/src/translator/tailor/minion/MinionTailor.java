@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import translator.normaliser.NormalisedModel;
 import translator.solver.Minion;
+import translator.tailor.TailorSpecification;
 
 public class MinionTailor {
 
@@ -1070,6 +1071,9 @@ public class MinionTailor {
 	
 	
 	protected boolean hasCommonSubExpression(MinionConstraint constraint) {
+		if(!TailorSpecification.USE_COMMON_SUBEXPRESSIONS)
+			return false;
+		
 		if(this.minionSubExpressions.containsKey(constraint.toString()))
 			return true;
 		else return false;

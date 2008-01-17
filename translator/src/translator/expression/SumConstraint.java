@@ -431,6 +431,16 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		for(int i=0; i<this.positiveArguments.length; i++)
+			this.positiveArguments[i] = this.positiveArguments[i].insertDomainForVariable(domain, variableName);
+		for(int i=0; i<this.negativeArguments.length; i++)
+			this.negativeArguments[i] = this.negativeArguments[i].insertDomainForVariable(domain, variableName);
+		
+		return this;
+	}
+	
+	
 /*	public boolean isResultOnLeftSide() {
 		return this.resultIsOnLeftSide;
 	}*/

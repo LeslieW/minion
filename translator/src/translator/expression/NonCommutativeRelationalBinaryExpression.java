@@ -127,6 +127,8 @@ public class NonCommutativeRelationalBinaryExpression implements
 			}
 			
 		}
+		
+		
 		// all other operators (that are arithmetic)
 		else {
 			
@@ -246,6 +248,13 @@ public class NonCommutativeRelationalBinaryExpression implements
 			System.out.println("After evaluation, ordering etc (all):"+this);
 		}		
 	
+		return this;
+	}
+	
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		this.leftArgument = this.leftArgument.insertDomainForVariable(domain, variableName);
+		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
 		return this;
 	}
 }

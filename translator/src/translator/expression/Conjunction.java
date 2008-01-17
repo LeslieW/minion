@@ -52,6 +52,9 @@ public class Conjunction extends NaryRelationalExpression {
 	}
 	
 	public String toString() {
+		if(this.conjointExpressions.size() ==0)
+			return "and()";
+		
 		String s = "and("+this.conjointExpressions.get(0);
 		for(int i=1; i<this.conjointExpressions.size(); i++)
 			s = s.concat(",\n\t"+conjointExpressions.get(i));
@@ -193,6 +196,12 @@ public class Conjunction extends NaryRelationalExpression {
 		for(int i=0; i<this.conjointExpressions.size(); i++)
 			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).restructure());
 		
+		return this;
+	}
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		for(int i=0; i<this.conjointExpressions.size(); i++)
+			this.conjointExpressions.add(i,this.conjointExpressions.remove(i).insertDomainForVariable(domain, variableName));
 		return this;
 	}
 }

@@ -70,7 +70,7 @@ public class Tailor implements TailorSpecification {
 	 * 
 	 * @throws TailorException
 	 */
-	public NormalisedModel flattenModel() throws TailorException {
+	public NormalisedModel flattenModel() throws TailorException,Exception {
 		
 		Flattener flattener = new Flattener(this.targetSolver,
 										    this.problemModel);

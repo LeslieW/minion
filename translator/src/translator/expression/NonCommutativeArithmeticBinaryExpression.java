@@ -179,6 +179,12 @@ public class NonCommutativeArithmeticBinaryExpression implements
 	}
 	
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		this.leftArgument = this.leftArgument.insertDomainForVariable(domain, variableName);
+		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
+		return this;
+	}
+	
 	//======================== ADDITIONAL METHODS ===============================
 	private int power(int base, int exponent) {
 		
@@ -198,6 +204,8 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return result;
 	}
 	
-
+	public int getOperator() {
+		return this.type;
+	}
 	
 }

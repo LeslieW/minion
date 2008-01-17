@@ -53,10 +53,10 @@ public class ExpressionConstant implements EssenceGlobals{
 	}
 	
 	public String toString1(){
-		return name + "be " + expression.toString();
+		return name + " be " + expression.toString();
 	}
 	
 	public String toString2(){
-		return name + domain.toString() + "be " + expression.toString();
+		return name + domain.toString() + " be " + expression.toString();
 	}
 }

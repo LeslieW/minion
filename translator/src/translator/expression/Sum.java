@@ -401,4 +401,15 @@ public class Sum extends NaryArithmeticExpression {
 		
 		return this;
 	}
+	
+	
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		for(int i=0; i<this.positiveArguments.size(); i++)
+			this.positiveArguments.add(i,this.positiveArguments.remove(i).insertDomainForVariable(domain, variableName));
+		for(int i=0; i<this.negativeArguments.size(); i++)
+			this.negativeArguments.add(i,this.negativeArguments.remove(i).insertDomainForVariable(domain, variableName));
+		
+		return this;
+	}
 }

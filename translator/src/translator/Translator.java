@@ -148,7 +148,7 @@ public class Translator {
 			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
 			this.normalisedModel = this.normaliser.normalise(normaliseType);
 			this.normalisedModelHasBeenFlattened = false;
-		} catch(NormaliserException e) {
+		} catch(Exception e) {
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}
@@ -178,7 +178,7 @@ public class Translator {
 			this.normalisedModel = tailor.flattenModel();
 			this.normalisedModelHasBeenFlattened = true;
 			
-		} catch(TailorException e) {
+		} catch(Exception e) {
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}

@@ -14,7 +14,7 @@ import translator.solver.TargetSolver;
 
 public interface TailorSpecification {
 
-	
+	public final boolean USE_COMMON_SUBEXPRESSIONS = true;
 	
 	/**
 	 * Tailor the given normalised model into a String representation

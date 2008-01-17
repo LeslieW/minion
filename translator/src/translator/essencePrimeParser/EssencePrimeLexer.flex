@@ -69,6 +69,7 @@ Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteS
 <YYINITIAL> "max"                { return getSymbol(sym.MAX); }
 <YYINITIAL> "minimising"         { return getSymbol(sym.MINIMISING); }
 <YYINITIAL> "min"                { return getSymbol(sym.MIN); }
+<YYINITIAL> "param"              { return getSymbol(sym.PARAM); }
 <YYINITIAL> "occurrence"          { return getSymbol(sym.OCCURRENCE); }
 <YYINITIAL> "of"                 { return getSymbol(sym.OF); }
 <YYINITIAL> "such that"          { return getSymbol(sym.SUCH_THAT); }

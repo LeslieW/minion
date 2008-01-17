@@ -9,6 +9,9 @@ import translator.normaliser.NormalisedModel;
 
 public class Flattener {
 
+	
+	public final int CONSTANT_ARRAY_OFFSET_FROM_ZERO = 1;
+	
 	public final String AUXVARIABLE_NAME = "aux";
 	protected int noAuxVariables;
 	
@@ -46,7 +49,7 @@ public class Flattener {
 	 * 
 	 * @return the flattened Normalised model that was given in the constructor
 	 */
-	public NormalisedModel flattenModel() throws TailorException  {
+	public NormalisedModel flattenModel() throws TailorException,Exception  {
 		
 		if(this.targetSolver.supportsNestedExpressions()) {
 			return this.normalisedModel;
@@ -55,7 +58,7 @@ public class Flattener {
 		ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
 		ArrayList<Expression> flattenedConstraints = new ArrayList<Expression>();
 		
-		flattenObjective();
+		this.normalisedModel.setFlattenedObjectiveExpression(flattenObjective());
 		
 		for(int i=0; i<constraints.size(); i++) {
 			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
@@ -88,7 +91,7 @@ public class Flattener {
 	 * @return the list of flattened constraints that represents the parameter constraint
 	 */
 	protected ArrayList<Expression> flattenConstraint(Expression constraint) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		this.constraintBuffer.clear();
 		
@@ -111,7 +114,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	protected Expression flattenExpression(Expression expression) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		if(expression instanceof RelationalExpression)
 			return flattenRelationalExpression((RelationalExpression) expression);
@@ -132,7 +135,7 @@ public class Flattener {
 	 * @return
 	 */
 	private  Expression flattenRelationalExpression(RelationalExpression expression) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		//System.out.println("Flattening expression:"+expression);
 		
@@ -182,7 +185,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenNonCommutativeRelationalBinaryExpression(NonCommutativeRelationalBinaryExpression expression) 
-	throws TailorException {
+	throws TailorException,Exception {
 
 	
 	Expression leftExpression = expression.getLeftArgument();
@@ -367,7 +370,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenCommutativeBinaryRelationalExpression(CommutativeBinaryRelationalExpression expression) 
-		throws TailorException {
+		throws TailorException,Exception {
 	
 		
 		Expression leftExpression = expression.getLeftArgument();
@@ -560,7 +563,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenQuantifiedSum(QuantifiedSum quantifiedSum) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		//System.out.println("Flattening quantified sum:"+quantifiedSum);
 		
@@ -653,7 +656,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenElementConstraint(ElementConstraint elementConstraint) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		// 1. flatten subexpressions
 		boolean noConstraintsAsArguments = !this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT);
@@ -680,7 +683,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenDisjunction(Disjunction disjunction) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = disjunction.getArguments();
@@ -716,7 +719,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenConjunction(Conjunction conjunction) 
-		throws TailorException {
+		throws TailorException,Exception {
 	
 		
 		// 1. ---- first flatten the arguments ----------------------
@@ -817,7 +820,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenUnaryRelationalExpression(UnaryRelationalExpression expression) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		// first flatten the argument
 		Expression argument = flattenExpression(expression.getArgument());
@@ -861,7 +864,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenRelationalAtomExpression(RelationalAtomExpression atom) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		if(atom.getType() == Expression.BOOL_VARIABLE_ARRAY_ELEM) {
 			Variable arrayVariable = atom.getVariable();
@@ -915,7 +918,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenQuantifiedExpression(QuantifiedExpression quantification)
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		
 		if(quantification.getType() == Expression.FORALL && 
@@ -956,11 +959,21 @@ public class Flattener {
 		for(int i=0; i<bindingVariables.length; i++)
 			variableList.add(bindingVariables[i]);
 		
-		
+	
+		System.out.println("GGGGGGGGGGGGGGGGGGGGgg variable list for unfloding of Quantification is:"+variableList);
 		// 3 ------- create unfolded expressions --------------------------------
 		ArrayList<Expression> unfoldedExpressions = insertVariablesForValues(variableList,
 				                                                             domainElements,
 				                                                             quantification.getQuantifiedExpression());
+		
+		// inserting and evaluating the stuff
+		for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
+			Expression unfoldedExpression = unfoldedExpressions.get(i);
+			unfoldedExpression = this.insertConstantArraysInExpression(unfoldedExpression);
+			unfoldedExpression = unfoldedExpression.evaluate();
+			unfoldedExpression = unfoldedExpression.reduceExpressionTree();
+			unfoldedExpressions.add(i,unfoldedExpression);
+		}
 		
 		
 		// universal quantification 
@@ -1014,22 +1027,24 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private ArrayList<Expression> insertVariablesForValues(ArrayList<String> variableList, int[] values, Expression expression)
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
 		
-		//System.out.println("want to insert values into expression :"+expression);
+		System.out.println("WWWWWWWWWWWWWWWWwant to insert values for '"+variableList.get(0)+"' into expression :"+expression);
 		
 		// this is the last variable we have to insert
 		if(variableList.size() == 1) {
 			String variableName = variableList.get(0);
 			for(int i=0; i<values.length; i++) {
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
-				//System.out.println("Generated  expression:"+unfoldedExpression);
-				//System.out.println("Inserted '"+values[i]+"' for variable '"+variableName+"' in expression '"+expression+"' and got expression:"+unfoldedExpression);
+				System.out.println("Generated  expression:"+unfoldedExpression);
+				System.out.println("Inserted '"+values[i]+"' for variable '"+variableName+"' in expression '"+expression+"' and got expression:"+unfoldedExpression);
+				
+				/*unfoldedExpression = this.insertConstantArraysInExpression(unfoldedExpression);
 				unfoldedExpression = unfoldedExpression.evaluate();
 				unfoldedExpression = unfoldedExpression.reduceExpressionTree();
-				//System.out.println("Generated evaluated, reduced expression:"+unfoldedExpression);
+				System.out.println("RRRRRRRRRRRRRRRRRRRr Generated evaluated, reduced expression:"+unfoldedExpression); */
 				unfoldedExpressions.add(unfoldedExpression);
 			}
 			return unfoldedExpressions;
@@ -1047,6 +1062,8 @@ public class Flattener {
 			}
 			
 		}
+		
+		System.out.println("Finished with inserting shit intpo a quantification:"+unfoldedExpressions);
 		
 		return unfoldedExpressions;
 	}
@@ -1101,7 +1118,7 @@ public class Flattener {
 	 * @return
 	 */
 	private Expression flattenArithmeticExpression(ArithmeticExpression expression) 
-		throws TailorException {
+		throws TailorException, Exception {
 		
 		if(expression instanceof QuantifiedSum)
 			return flattenQuantifiedSum((QuantifiedSum) expression);
@@ -1131,7 +1148,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenMultiplication(Multiplication multiplication) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		ArrayList<Expression> arguments= multiplication.getArguments();
 		
@@ -1198,7 +1215,7 @@ public class Flattener {
 	 */
 	private Multiplication flattenToBinaryMultiplication(ArrayList<Expression> arguments, 
 																		   Expression argument) 
-	throws TailorException {
+	throws TailorException,Exception {
 
 		
 		
@@ -1260,7 +1277,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private ProductConstraint flattenToPartWiseProductConstraint(Multiplication multiplication) 
-		throws TailorException  {
+		throws TailorException,Exception  {
 		
 		ArrayList<Expression> arguments = multiplication.getArguments();
 		
@@ -1306,7 +1323,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenSum(Sum sum) 
-		throws TailorException {
+		throws TailorException,Exception {
 	
 		//System.out.println("Flattening a sum:"+sum);
 		
@@ -1360,7 +1377,7 @@ public class Flattener {
 	}
 	
 	private Sum flattenQuantifiedSumArguments(Sum sum) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		for(int i=0; i<sum.getNegativeArguments().size(); i++) {
 			if(sum.getNegativeArguments().get(i) instanceof QuantifiedSum) {
@@ -1393,7 +1410,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private SumConstraint flattenSumPartToSumConstraint(Sum sum) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		
 		
@@ -1543,9 +1560,13 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	protected Expression flattenObjective() 
-	throws TailorException {
+	throws TailorException,Exception {
 	
+		
 	Expression objective = this.normalisedModel.getObjectiveExpression();
+	if(objective == null)
+		return objective;
+	
 	if(this.targetSolver.supportsFeature(TargetSolver.SUPPORTS_OBJECTIVE)) {
 		
 		if(this.targetSolver.supportsFeature(TargetSolver.CONSTRAINT_OBJECTIVE))
@@ -1569,7 +1590,7 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenUnaryArithmeticExpression(UnaryArithmeticExpression expression) 
-		throws TailorException {
+		throws TailorException,Exception {
 		
 		Expression argument = expression.getArgument();
 		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getType()))
@@ -1593,14 +1614,63 @@ public class Flattener {
 	 * @throws TailorException
 	 */
 	private Expression flattenArithmeticAtomExpression(ArithmeticAtomExpression atom) 
-		throws TailorException {
+		throws TailorException, Exception {
 		
-		if(atom.getType() == Expression.BOOL_VARIABLE_ARRAY_ELEM) {
+		if(atom.getType() == Expression.INT_ARRAY_VAR) {
 			Variable arrayVariable = atom.getVariable();
+			
+			System.out.println("Flattening array variable:"+arrayVariable);
+			
 			if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
 				Expression[] indices = ((ArrayVariable) arrayVariable).getExpressionIndices();
 				
-				// if we have an array element indexed by something that is not a single integer
+				
+				//System.out.println("constant arrays: "+this.normalisedModel.constantArrays);
+				//System.out.println("The array element '"+atom+"' is a constant array?? with nameL:"+((ArrayVariable) arrayVariable).getArrayNameOnly());
+				
+				// ---------- if this is a constant variable --------------------------------------------------------
+				if(this.normalisedModel.constantArrays.containsKey( ((ArrayVariable) arrayVariable).getArrayNameOnly() )) {
+				
+					
+					ConstantArray constArray = this.normalisedModel.constantArrays.get(((ArrayVariable) arrayVariable).getArrayNameOnly());
+				
+					if(indices != null) 
+						return atom;
+					
+					int[] intIndices = ((ArrayVariable) arrayVariable).getIntegerIndices();
+					
+					// we have a vector
+					if(intIndices.length == 1) {
+						if(constArray instanceof ConstantVector) {
+							ConstantVector vector = (ConstantVector) constArray;
+							return new ArithmeticAtomExpression(vector.getElementAt(intIndices[0]-this.CONSTANT_ARRAY_OFFSET_FROM_ZERO));
+						}
+						else throw new TailorException("Illegal index dimensions of constant array element '"+atom+
+								"' that dereferences the array '"+constArray+
+								"'.\nPlease make sure you have an index for every dimension of the array.");
+					}
+					// matrix
+					else if(intIndices.length == 2) {
+						if(constArray instanceof ConstantMatrix) {
+							ConstantMatrix matrix = (ConstantMatrix) constArray;
+							return new ArithmeticAtomExpression(matrix.getElementAt(intIndices[0]-this.CONSTANT_ARRAY_OFFSET_FROM_ZERO, 
+									                                                intIndices[1]=this.CONSTANT_ARRAY_OFFSET_FROM_ZERO));
+							
+						}
+						else throw new TailorException("Illegal index dimensions of constant array element '"+atom+
+								"' that dereferences the array '"+constArray+
+								"'.\nPlease make sure you have an index for every dimension of the array.");
+						
+					}
+					// cube
+					//else if(intIndices.length == 3) 
+					else throw new TailorException("Cannot tailor constant elements with more than 2 dimensions yet, sorry:"+atom);
+					
+				}
+				
+				
+				
+				// --------- if we have an array element indexed by something that is not a single integer -----------
 				if(indices != null) {
 					if(this.targetSolver.supportsVariableArrayIndexing()) {
 						for(int i=0; i<indices.length; i++) {
@@ -1642,6 +1712,183 @@ public class Flattener {
 	
 	// ========================= GENERAL HELPER METHODS ===========================
 	
+	/**
+	 * We can only insert certain constant values after unfolding a quantified expression.
+	 * This is why this method has to be called only after unfolding a quantified expression
+	 * otherwise it is useless and changes nothing that cann
+	 * 
+	 */
+	private Expression insertConstantArraysInExpression(Expression expression) 
+		throws TailorException,Exception {
+		
+		
+		if(expression instanceof RelationalAtomExpression) 
+			return expression;
+		
+		else if(expression instanceof UnaryRelationalExpression)  {
+			return insertConstantArraysInExpression( ((UnaryRelationalExpression) expression).getArgument());
+			
+		}
+		
+		else if(expression instanceof NonCommutativeRelationalBinaryExpression) {
+			NonCommutativeRelationalBinaryExpression expr = ((NonCommutativeRelationalBinaryExpression) expression);
+			Expression leftExpression = insertConstantArraysInExpression(expr.getLeftArgument());
+			Expression rightExpression = insertConstantArraysInExpression(expr.getRightArgument());
+			return new NonCommutativeRelationalBinaryExpression(leftExpression,
+																											expr.getOperator(),
+																											rightExpression   );
+		}
+		
+		else if(expression instanceof NonCommutativeArithmeticBinaryExpression) {
+			NonCommutativeArithmeticBinaryExpression expr = ((NonCommutativeArithmeticBinaryExpression) expression);
+			Expression leftExpression = insertConstantArraysInExpression(expr.getLeftArgument());
+			Expression rightExpression = insertConstantArraysInExpression(expr.getRightArgument());
+			return new NonCommutativeArithmeticBinaryExpression(leftExpression,
+																											expr.getOperator(),
+																											rightExpression   );
+		}
+		
+		else if(expression instanceof QuantifiedExpression)
+			return expression;
+		
+		else if(expression instanceof Conjunction) {
+			Conjunction expr = ((Conjunction) expression);
+			ArrayList<Expression> arguments = expr.getArguments();
+			for(int i=0; i<arguments.size(); i++) {
+				arguments.add(i, this.insertConstantArraysInExpression(arguments.remove(i)));
+			}
+			return new Conjunction(arguments);
+		}
+		
+		else if(expression instanceof Disjunction){
+			Disjunction expr = ((Disjunction) expression);
+			ArrayList<Expression> arguments = expr.getArguments();
+			for(int i=0; i<arguments.size(); i++) {
+				arguments.add(i, this.insertConstantArraysInExpression(arguments.remove(i)));
+			}
+			return new Disjunction(arguments);
+		}
+		
+		else if(expression instanceof ElementConstraint) {
+			ElementConstraint expr = (ElementConstraint) expression;
+			Expression[] arguments = expr.getArguments();
+			for(int i=0; i<arguments.length; i++) {
+				arguments[i] = this.insertConstantArraysInExpression(arguments[i]);
+			}
+			return new ElementConstraint(arguments[0],arguments[1], arguments[2]);
+		}	
+			
+		else if(expression instanceof QuantifiedSum)
+			return expression;
+		
+		else if(expression instanceof CommutativeBinaryRelationalExpression) {
+			CommutativeBinaryRelationalExpression expr = ((CommutativeBinaryRelationalExpression) expression);
+			Expression leftExpression = insertConstantArraysInExpression(expr.getLeftArgument());
+			Expression rightExpression = insertConstantArraysInExpression(expr.getRightArgument());
+			return new CommutativeBinaryRelationalExpression(leftExpression,
+																										expr.getOperator(),
+																										rightExpression   );
+		}
+		
+		else if(expression instanceof QuantifiedSum)
+			return  expression;
+			
+		else if(expression instanceof UnaryArithmeticExpression)
+			return insertConstantArraysInExpression( ((UnaryArithmeticExpression) expression).getArgument());
+		
+		else if(expression instanceof Sum){
+			Sum expr = ((Sum) expression);
+			ArrayList<Expression> posArguments = expr.getPositiveArguments();
+			for(int i=0; i<posArguments.size(); i++) {
+				posArguments.add(i, this.insertConstantArraysInExpression(posArguments.remove(i)));
+			}
+			ArrayList<Expression> negArguments = expr.getNegativeArguments();
+			for(int i=0; i<negArguments.size(); i++) {
+				negArguments.add(i, this.insertConstantArraysInExpression(negArguments.remove(i)));
+			}
+			return new Sum(posArguments,negArguments);
+		}
+		
+		else if(expression instanceof Multiplication){
+			Multiplication expr = ((Multiplication) expression);
+			ArrayList<Expression> arguments = expr.getArguments();
+			for(int i=0; i<arguments.size(); i++) {
+				arguments.add(i, this.insertConstantArraysInExpression(arguments.remove(i)));
+			}
+			return new Multiplication(arguments);
+		}
+		
+		
+		// HERE IS THE STUFF THAT IS ACTUALLY HAPPENING: insert constant array value
+		else if(expression instanceof ArithmeticAtomExpression) {
+			
+			ArithmeticAtomExpression  atom = (ArithmeticAtomExpression) expression;
+		
+			if(atom.getType() == Expression.INT_ARRAY_VAR) {
+				Variable arrayVariable = atom.getVariable();
+				
+				System.out.println("Trying to find constant array variable match for :"+arrayVariable);
+				
+				if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
+					
+					ArrayVariable aVar = (ArrayVariable) arrayVariable;
+					Expression[] indices = aVar.getExpressionIndices();
+					
+					// we still have expression indices
+					if(indices!=null)
+						return expression;
+					
+					//System.out.println("constant arrays: "+this.normalisedModel.constantArrays);
+					//System.out.println("The array element '"+atom+"' is a constant array?? with nameL:"+((ArrayVariable) arrayVariable).getArrayNameOnly());
+					
+					// ---------- if this is a constant variable --------------------------------------------------------
+					if(this.normalisedModel.constantArrays.containsKey( ((ArrayVariable) arrayVariable).getArrayNameOnly() )) {
+					
+						
+						ConstantArray constArray = this.normalisedModel.constantArrays.get(((ArrayVariable) arrayVariable).getArrayNameOnly());
+					
+						if(indices != null) 
+							throw new TailorException("Sorry, cannot tailor constant arrays that are indexed by decision variables yet.");
+						
+						int[] intIndices = ((ArrayVariable) arrayVariable).getIntegerIndices();
+						
+						// we have a vector
+						if(intIndices.length == 1) {
+							if(constArray instanceof ConstantVector) {
+								ConstantVector vector = (ConstantVector) constArray;
+								return new ArithmeticAtomExpression(vector.getElementAt(intIndices[0]-this.CONSTANT_ARRAY_OFFSET_FROM_ZERO));
+							}
+							else throw new TailorException("Illegal index dimensions of constant array element '"+atom+
+									"' that dereferences the array '"+constArray+
+									"'.\nPlease make sure you have an index for every dimension of the array.");
+						}
+						// matrix
+						else if(intIndices.length == 2) {
+							if(constArray instanceof ConstantMatrix) {
+								ConstantMatrix matrix = (ConstantMatrix) constArray;
+								return new ArithmeticAtomExpression(matrix.getElementAt(intIndices[0]-this.CONSTANT_ARRAY_OFFSET_FROM_ZERO, 
+										                                                intIndices[1]=this.CONSTANT_ARRAY_OFFSET_FROM_ZERO));
+								
+							}
+							else throw new TailorException("Illegal index dimensions of constant array element '"+atom+
+									"' that dereferences the array '"+constArray+
+									"'.\nPlease make sure you have an index for every dimension of the array.");
+							
+						}
+						// cube
+						//else if(intIndices.length == 3) 
+						else throw new TailorException("Cannot tailor constant elements with more than 2 dimensions yet, sorry:"+atom);
+						
+					}
+				}
+			}
+		}
+		
+		return expression;
+	}
+	
+	
+	
 	
 	private void addToSubExpressions(Expression subExpression, Expression representative) {
 		
@@ -1666,6 +1913,9 @@ public class Flattener {
 				": this is:"+this.subExpressions.containsKey(expression.toString())+" and object: "+this.subExpressions.containsValue(expression.toString()));
 		System.out.println("Expression "+expression+" Is of type: "+expression.getType());
 		*/
+		if(!TailorSpecification.USE_COMMON_SUBEXPRESSIONS)
+			return false;
+		
 		return this.subExpressions.containsKey(expression.toString());
 	}
 	

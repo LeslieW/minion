@@ -23,9 +23,12 @@ public interface Expression {
 	public final int INT_ARRAY_VAR = 22;
 	
 	// Array
-	public final int SIMPLE_ARRAY = 24;
-	public final int INDEXED_ARRAY = 25;
-	public final int COMPOSED_ARRAY = 26;
+	public final int CONSTANT_VECTOR = 24;
+	public final int CONSTANT_MATRIX = 25;
+	public final int SIMPLE_ARRAY = 26;
+	public final int INDEXED_ARRAY = 27;
+	public final int COMPOSED_ARRAY = 28;
+
 	
 	// internal types for Variables
 	/** a decision variable that is indexed by a constant value and has an integer bounds domain */
@@ -37,13 +40,13 @@ public interface Expression {
 	
     //	 --------------------------------------------------------
 	// Unary Relational Expressions
-	public final int NEGATION = 31;
+	public final int NEGATION = 41;
 	public final int ALLDIFFERENT = 220;
 	
 	
 	// unary arithmetic expressions
-	public final int U_MINUS = 30;
-	public final int ABS = 32;
+	public final int U_MINUS = 40;
+	public final int ABS = 42;
 	
 	
    // --------------------------------------------------------
@@ -227,6 +230,17 @@ public interface Expression {
 	public Expression insertValueForVariable(int value, String variableName);
 	
 		
+	
+	
+	
+	/**
+	 * This method os used
+	 * 
+	 * @param domain
+	 * @param variableName
+	 * @return
+	 */
+	public Expression insertDomainForVariable(Domain domain, String variableName);
 	
 	/**
 	 * Gives information if the expression is a subexpression. By default, all

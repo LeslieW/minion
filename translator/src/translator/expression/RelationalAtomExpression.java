@@ -66,8 +66,12 @@ public class RelationalAtomExpression implements
 	}
 
 	public int getType() {
-		return (variable == null) ?
-				BOOL : variable.getType();
+		if(variable == null)
+			return BOOL;
+		
+		else return (variable.getType() == Expression.ARRAY_VARIABLE) ?
+				Expression.BOOL_VARIABLE_ARRAY_ELEM :
+					Expression.BOOL_VARIABLE;
 	}
 	
 	public void orderExpression() {
@@ -154,4 +158,7 @@ public class RelationalAtomExpression implements
 		return this;
 	}
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		return this;
+	}
 }

@@ -43,7 +43,7 @@ parser code {:
 
     public void report_error(String message, Object info)  {
 
-        StringBuffer m = new StringBuffer("Parse error");
+        StringBuffer m = new StringBuffer("Parse error:");
 
 
         if (info instanceof java_cup.runtime.Symbol) {
@@ -85,7 +85,7 @@ terminal	   ALLDIFF, ATLEAST, ATMOST;
 terminal       BE, BE_DOMAIN, BE_NEW_TYPE;
 terminal       ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL;
 terminal 	   GIVEN, HEADER, INT, LETTING, MATRIX_INDEXED_BY;
-terminal	   MAXIMISING, MAX, MINIMISING, MIN;
+terminal	   MAXIMISING, MAX, MINIMISING, MIN, PARAM;
 terminal 	   OCCURRENCE, OF, SUCH_THAT, SUM, TABLE; 
 terminal       TRUE, WHERE;
 
@@ -110,7 +110,7 @@ terminal Integer   INTEGER;
 
 non terminal essencemodel, body;
 non terminal declarations, declaration_list, declaration, objective, constraint_block;
-non terminal given_block, where_block, letting_block, find_block;
+non terminal given_block, where_block, parameter_block, letting_block, find_block;
 non terminal parameter_list, parameter, infinite_parameter_domain, domain_identifiers, identifier_list;
 non terminal domain, domain_list, range_atom_list, range_atom;
 non terminal expression, expression_list;
@@ -119,7 +119,7 @@ non terminal index, index_list;
 non terminal unitop_expression, binaryop_expression, lex_expression,  functionop_expression;
 non terminal quantifierop_expression, quantifier, binding_expression;
 non terminal table_constraint, atom_list, constant_tuple_list, constant_tuple, integer_list;
-non terminal constant_list, constant;
+non terminal constant_list, constant_vector_list, constant, constant_vector, constant_matrix;
 non terminal user_def_type, variable_list;
 
 
@@ -204,6 +204,9 @@ declaration ::=  given_block:d
 	         | where_block:d
 		    {: RESULT = (Declaration)  d; :}
 
+	     | parameter_block:d 
+	        {: RESULT = (Declaration) d;  :}
+
 		 | letting_block:d
 		    {: RESULT = (Declaration) d; :}
 
@@ -212,6 +215,9 @@ declaration ::=  given_block:d
 
 ;
 	
+	
+
+ 
  
 given_block ::= GIVEN parameter_list:p_list 
 	        {:  Object[] tmp = ((LinkedList) p_list).toArray();	
@@ -691,6 +697,16 @@ where_block ::= WHERE expression_list:e_list
 ;
 
 
+parameter_block ::=  PARAM constant_list:c_list
+                {:  Object[] tmp = ((LinkedList) c_list).toArray();	
+	        	    Constant[] c_array = new Constant[tmp.length];
+			    for(int i=0;i<c_array.length;i++)
+ 			   	 c_array[i] = (Constant) tmp[i];
+
+			    RESULT = new Declaration(c_array, true);  :}
+;
+
+
 letting_block ::= LETTING constant_list:c_list 
                	        {:  Object[] tmp = ((LinkedList) c_list).toArray();	
 	        	    Constant[] c_array = new Constant[tmp.length];
@@ -750,8 +766,108 @@ constant ::=	  identifier_list:id_list BE_DOMAIN domain:d
                               constantList.add(new Constant(new NewTypeConstant(id, (Type) t))); 
 			   }   
 			   RESULT = constantList;    :}			      
+			   
+		| identifier_list:id_list BE constant_vector:vector 
+		    {:  
+		        Object[] tmp = ((LinkedList) vector).toArray();
+			    int[] intVector = new int[tmp.length];
+			    for(int j=0; j<intVector.length; j++) {
+			           intVector[j] = (Integer) tmp[j];
+			    }      
+		    //System.out.println("starting to generate eh constant objects");
+    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];    
+                  constantList.add(new Constant(new ConstantVector(new String(id), intVector))); 
+			   }   
+			   
+			   RESULT = constantList;
+		   
+		    :}	   
+		    
+		| identifier_list:id_list BE constant_matrix:matrixE    
+            {:  
+  
+                       Object[] tmp = (Object[]) matrixE;
+                      //System.out.println("Object[] erstellt aus da linked list...");
+                                       
+                     int[] vector0 = (int[]) tmp[0];
+                     //System.out.println("first part hinter mir");
+                     int[][] matrix = new int[tmp.length][vector0.length];
+                   
+                     for(int i=0; i<tmp.length; i++) {
+                     
+                        int[] vector = (int[]) tmp[i];
+                        
+                        if(vector.length != vector0.length) 
+                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
+                        
+                        for(int j=0; j<vector.length; j++)
+                           matrix[i][j] = (Integer) vector[j];
+                     
+                     }
+                     
+                     
+		   
+    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];    
+                  constantList.add(new Constant(new ConstantMatrix(new String(id), matrix))); 
+			   }   
+			   
+			   RESULT = constantList;
+		   
+		    :}	   
+;
 
-;	
+constant_vector ::=  LBRACK  integer_list:i_list  RBRACK
+					{:   
+					   RESULT = i_list;
+					:}
+;
+
+
+constant_vector_list ::=  constant_vector:int_list  
+                          {: 
+                             LinkedList vectorList = new LinkedList();
+                             vectorList.addFirst(int_list);
+                             RESULT = vectorList; :}
+                          
+                          |  constant_vector:vector  COMMA constant_vector_list:list
+                          {:  
+                             LinkedList vectorList = (LinkedList) list;
+                             vectorList.addFirst(vector);
+                             RESULT = vectorList;
+                          :}
+;                          
+
+constant_matrix ::= LBRACK constant_vector_list:list RBRACK
+                    {: Object[] tmp = ((LinkedList) list  ).toArray();	
+               
+                                       
+                     LinkedList vector0 = (LinkedList) tmp[0];
+                     //System.out.println("first part hinter mir");
+                     int[][] matrix = new int[tmp.length][vector0.size()];
+                   
+                     for(int i=0; i<tmp.length; i++) {
+                     
+                        LinkedList vector = (LinkedList) tmp[i];
+                        
+                        if(vector.size() != vector0.size()) 
+                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
+                        
+                        for(int j=0; j<vector.size(); j++)
+                           matrix[i][j] = (Integer) vector.get(j);
+                     
+                     }
+                     
+                      RESULT = matrix;
+                    
+                      :}
+;
+
 	
 /* constant ::=	  IDENTIFIER:id BE_DOMAIN domain:d 
 		 	{: RESULT = new Constant(new DomainConstant(new String(id), (Domain) d)); :}

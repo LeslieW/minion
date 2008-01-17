@@ -120,6 +120,11 @@ public class Reification implements RelationalExpression {
 		return this;
 	}
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		this.reifiedExpression = this.reifiedExpression.insertDomainForVariable(domain, variableName);
+		return this;
+	}
+	
 	// ================= OTHER METHODS =========================================
 	
 	public Expression getReifiedConstraint() {

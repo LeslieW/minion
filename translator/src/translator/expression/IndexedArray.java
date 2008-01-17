@@ -148,6 +148,29 @@ public class IndexedArray implements SingleArray {
 	}
 	
 	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		if(this.baseDomain instanceof IdentifierDomain) {
+			String domainName = ((IdentifierDomain) baseDomain).getDomainName();
+			
+			if(domainName.equals(variableName)) 
+				this.baseDomain = domain;	
+		}
+		
+		
+		for(int i=0; i<this.indexRanges.length; i++) {
+			if(this.indexRanges[i] instanceof IdentifierDomain) {
+				String domainName = ((IdentifierDomain) indexRanges[i]).getDomainName();
+				
+				if(domainName.equals(variableName) && domain instanceof BasicDomain) 
+					this.indexRanges[i]= (BasicDomain) domain;
+			}
+		}
+		
+		
+		return this;
+	}
+	
 	 // =================== ADDITIONAL METHODS ===============================================
 	
 	

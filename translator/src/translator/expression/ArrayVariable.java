@@ -291,4 +291,8 @@ public class ArrayVariable implements Variable {
 	}
 	
 
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		return this;
+	}
+	
 }

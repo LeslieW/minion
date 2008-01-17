@@ -125,4 +125,8 @@ public class SingleVariable implements Variable {
 		return this;
 	}
 	
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		return this;
+	}
 }

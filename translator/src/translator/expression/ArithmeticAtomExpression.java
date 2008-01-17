@@ -46,7 +46,9 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	 */
 	public ArithmeticAtomExpression(Variable variable) {
 		this.variable = variable;
-		this.type = this.variable.getType();
+		this.type = (this.variable.getType() == Expression.ARRAY_VARIABLE) ?
+				Expression.INT_ARRAY_VAR :
+					Expression.INT_VAR;
 		this.isParameter = false;
 	}
 	
@@ -178,5 +180,9 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	
 	public Expression restructure() {
 		return this;	
+	}
+	
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		return this;
 	}
 }

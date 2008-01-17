@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import translator.expression.Domain;
 import translator.expression.Expression;
 import translator.expression.Variable;
+import translator.expression.ConstantArray;
 
 public class NormalisedModel {
 
 	/** parameter values that we might not have inserted yet
 	because they occur in quantifications */
-	Parameters parameterArrays;
+	public HashMap<String, ConstantArray> constantArrays;
 	
 	/** decision variables and their corresponding domain */
 	HashMap<String, Domain> decisionVariables;
@@ -40,18 +41,20 @@ public class NormalisedModel {
 		this.objective = objective;
 		this.auxiliaryVariables = new ArrayList<Variable>();
 		this.usedCommonSubExpressions = 0;
+		this.constantArrays = new HashMap<String, ConstantArray>();
 	}
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
 			               ArrayList<String> decisionVariablesNames,
 			               ArrayList<Expression> constraints,
-			               Parameters parameterArrays,
+			               HashMap<String, ConstantArray> constantArrays,
 			               Objective objective) {
 		
 		this.decisionVariables = decisionVariables;
 		this.decisionVariablesNames = decisionVariablesNames;
 		this.constraintList = constraints;
-		this.parameterArrays = parameterArrays;
+		this.constantArrays = constantArrays;
+		
 		this.objective = objective;
 		this.auxiliaryVariables = new ArrayList<Variable>();
 		this.usedCommonSubExpressions = 0;
@@ -66,6 +69,11 @@ public class NormalisedModel {
 	
 	public void setAmountOfCommonSubExpressionsUsed(int noCommonSubExpressionsUsed) {
 		this.usedCommonSubExpressions = noCommonSubExpressionsUsed;
+	}
+	
+	public void setObjectiveExpression(Expression objExpression) {
+		if(this.objective.objective != null)
+			this.objective.objective = objExpression;
 	}
 	
 	/**

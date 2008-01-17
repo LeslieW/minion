@@ -114,4 +114,29 @@ public class ArrayDomain implements Domain {
 		
 		return offsetsFromZero;
 	}
+	
+	
+	public void setBaseDomain(Domain domain) 
+		throws Exception {
+		
+		if(domain instanceof ArrayDomain)
+			throw new Exception("Cannot have matrix domain as a base domain for matrix domain :"+this);
+		
+		else this.baseDomain = domain;
+		
+	}
+	
+	
+	public void setIndexDomainAt(Domain domain, int index) 
+		throws Exception {
+		
+		if(index < this.indexDomains.length && index >= 0) {
+			if(domain instanceof ArrayDomain)
+				throw new Exception("Cannot have matrix domain as a base domain for matrix domain :"+this);
+			
+			this.indexDomains[index] = domain;
+		}
+		else throw new Exception("Index '"+index+"' for index-domain of array domain '"+this+"' is out of bounds.");
+	}
+	
 }

@@ -131,6 +131,21 @@ public class QuantifiedSum implements ArithmeticExpression {
 		return this;
 	}
 	
+    public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		if(this.domain instanceof IdentifierDomain) {
+			String domainName = ((IdentifierDomain) this.domain).getDomainName();
+			
+			if(domainName.equals(variableName)) 
+				this.domain= domain;	
+		}
+		
+		
+		this.quantifiedExpression = this.quantifiedExpression.insertDomainForVariable(domain, variableName);
+		
+		return this;
+	}
+	
 	// ================ OTHER METHODS ======================================
 	
 	public Domain getQuantifiedDomain() {
@@ -145,4 +160,8 @@ public class QuantifiedSum implements ArithmeticExpression {
 		return this.quantifiedExpression;
 	}
 	
+	
+	public void updateDomain(Domain domain) {
+		this.domain = domain;
+	}
 }

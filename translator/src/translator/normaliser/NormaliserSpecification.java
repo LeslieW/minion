@@ -1,7 +1,7 @@
 package translator.normaliser;
 
-import translator.conjureEssenceSpecification.*;
-import java.util.ArrayList;
+//import translator.conjureEssenceSpecification.*;
+//import java.util.ArrayList;
 
 public interface NormaliserSpecification {
 
@@ -22,7 +22,7 @@ public interface NormaliserSpecification {
 	 * @return a normalised model. 
 	 * @throws NormaliserException
 	 */
-	public NormalisedModel normalise() throws NormaliserException;
+	public NormalisedModel normalise() throws NormaliserException,Exception;
 	
 	/**
 	 * Normalises the problem- and parameter-specification and returns a 
@@ -33,7 +33,7 @@ public interface NormaliserSpecification {
 	 * @return a normalised model. 
 	 * @throws NormaliserException
 	 */
-	public NormalisedModel normalise(char normaliseType) throws NormaliserException;
+	public NormalisedModel normalise(char normaliseType) throws NormaliserException,Exception;
 	
 	/**
 	 * Provides FULL normalisation: basics (parameter insertion), 
@@ -42,7 +42,7 @@ public interface NormaliserSpecification {
 	 * @return the list of ordered, evaluated and reduces constraints
 	 * @throws NormaliserException
 	 */
-	public ArrayList<translator.expression.Expression> normaliseConstraints() throws NormaliserException;
+	//public ArrayList<translator.expression.Expression> normaliseConstraints() throws NormaliserException;
 	
 	
 	/**
@@ -74,9 +74,9 @@ public interface NormaliserSpecification {
 	 * @return
 	 * @throws NormaliserException
 	 */
-	public ArrayList<Expression> insertParameters(EssenceSpecification problemSpecification,
+	/*public ArrayList<Expression> insertParameters(EssenceSpecification problemSpecification,
 			                                      EssenceSpecification parameterSpecification)
-			                                      throws NormaliserException;
+			                                      throws NormaliserException;*/
 	
 	/** maps expressions from the old expression tree (that we get from the parser) to the new expression 
 	 *  representation. 
@@ -95,9 +95,9 @@ public interface NormaliserSpecification {
 	 *  insertion part and because it contains some little type-information (what 
 	 *  type does an identifier have - int or bool?) which cannot be determined during parse time. 
 	 *  */
-	public ArrayList<translator.expression.Expression> mapExpressionList
-	                                                     (ArrayList<translator.conjureEssenceSpecification.Expression> oldExpressionList)
-	     throws NormaliserException;
+	//public ArrayList<translator.expression.Expression> mapExpressionList
+	  //                                                   (ArrayList<translator.conjureEssenceSpecification.Expression> oldExpressionList)
+	   //  throws NormaliserException;
 	
 	
 	/**
