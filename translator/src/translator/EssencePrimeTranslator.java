@@ -185,7 +185,7 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
     		discreteDefault = "(default)";
     	else boundsDefault ="(default)";
     	
-	    print_message("Usage: java EssencePrimeTranslator <spec1> <spec2> [<outfile>] [-watch] [-vartype] \n") ;
+	    print_message("Usage: java translator.EssencePrimeTranslator <spec1> <spec2> [<outfile>] [-watch] [-vartype] \n") ;
 	    print_message("\t spec1:\t\tEssence' problem specification");
 	    print_message("\t spec2:\t\tEssence' parameter specification");
 	  //  print_message("\t solver:\ttarget solver ('0' for Minion)\n");
