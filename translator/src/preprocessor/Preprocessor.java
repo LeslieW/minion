@@ -105,7 +105,7 @@ public class Preprocessor implements PreprocessorGlobals {
     	decisionVariablesNames = new ArrayList<String>();
     	constraints = new ArrayList<Expression>();
 
-       	print_debug("will begin computing parameters.");
+       	print_message("Starting to process parameters...");
        	parameterArrays = new Parameters(this.parameterVectors,
                 this.parameterMatrices,
                 this.parameterCubes,
@@ -122,22 +122,28 @@ public class Preprocessor implements PreprocessorGlobals {
          //       this.parameterCubes,
           //      this.parameterArrayOffsets);
     	
-    	print_debug("computed parameters.");
+    	print_message("Finished processing parameters...");
     	
        	evaluator = new ExpressionEvaluator(parameters, parameterArrays);
        	print_debug("constructed expressionEvaluator.");
     	
-       	
+       	print_message("Starting processing decision variables...");
        	// insert parameters and store them in the HashMap
     	insertDecisionVariablesInHashMap(syntaxTreeProblem.getDeclarations());
+    	//orderDomainsOfDecisionVariables();
+    	print_message("Finished processing decision variables...");
+    	
     	print_debug("inserted decision Variables in HashMap.");
     	
-    	
+       	print_message("Starting processing constraints...");
     	// insert parameters, evaluate constraints and store them in a list
     	preprocessConstraints(syntaxTreeProblem.getExpressions());
-    	
+       	print_message("Finished processing constraints...");
+       	
+       	
+       	print_message("Starting processing objective...");
     	this.objective = preprocessObjective(syntaxTreeProblem.getObjective());
-  
+    	print_message("Finished processing objective...");
     	
     	print_debug("preprocessed constraints.");    	
        
@@ -888,7 +894,9 @@ public class Preprocessor implements PreprocessorGlobals {
 						throw new PreprocessorException("Please access array elements by m[i,j] instead of m[i][j], as in :"+matrixElement.toString());
 					
 					String matrixElementName = matrixElement.getExpression().getAtomicExpression().getString();
-
+					print_debug("Matrix element Name is "+matrixElementName);
+					
+					
 					// get the value we want to assign it to
 					Expression rightExpression = evaluator.evalExpression(expression.getBinaryExpression().getRightExpression());
 					if(rightExpression.getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
@@ -899,6 +907,8 @@ public class Preprocessor implements PreprocessorGlobals {
 					Expression[] indexExpressions = matrixElement.getExpressionList();
 					int[] indices = new int[indexExpressions.length];
 					for(int i=0; i<indices.length; i++) {
+						print_debug("Working on the "+i+"th indexexpression. and indices has length:"+indices.length);
+						print_debug(i+"th indexexpression:"+indexExpressions[i].toString());
 						if(indexExpressions[i].getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
 							throw new PreprocessorException("Cannot assign parameter value to index '"+indexExpressions[i]+
 									 "' in "+expression.toString()+". Expected an integer value.");
@@ -908,13 +918,15 @@ public class Preprocessor implements PreprocessorGlobals {
 						
 						indices[i] = indexExpressions[i].getAtomicExpression().getNumber();
 					}
+					print_debug("We survived the forloop1");
 					
-					print_debug("Gonna insert value :"+rightExpression.getAtomicExpression().getNumber()+" into array: "
-							+matrixElementName+" at index: "+indices[0]+", "+indices[1]);
+					//print_debug("Gonna insert value :"+rightExpression.getAtomicExpression().getNumber()+" into array: "
+					//		+matrixElementName+" at index: "+indices[0]+", "+indices[1]);
 					
 					insertParameterValueIntoArray(rightExpression.getAtomicExpression().getNumber(), 
 							                      matrixElementName, 
 							                      indices);
+					print_debug("We survived the forloop2");
 				} // end if left part is an array
 			} // end if op==EQ
 			
@@ -1055,11 +1067,13 @@ public class Preprocessor implements PreprocessorGlobals {
 		switch(indices.length) {
 		
 		case 1: // vector
+			print_debug("Got a parameter-vector");
 			int[] parameterVector = this.parameterVectors.get(parameterArrayName);
 			if(parameterVector == null)
 				throw new PreprocessorException("Wrong dimensions: Cannot assign "+value+" to '"+parameterArrayName+"' - it is not a vector.");
 			
-			parameterVector[indices[0]] = value;
+			//parameterVector[indices[0]] = value;
+			parameterVector[indices[0]-offsets[0]] = value;
 			break;
 			
 			
@@ -1127,6 +1141,18 @@ public class Preprocessor implements PreprocessorGlobals {
     }
     
     
+    
+    private void orderDomainsOfDecisionVariables() throws PreprocessorException  { 	
+    	for(int i=0; i<this.decisionVariablesNames.size(); i++) {
+    		
+    		Domain domain = this.decisionVariables.get(this.decisionVariablesNames.get(i));
+    		if(domain.getRestrictionMode() == EssenceGlobals.INTEGER_RANGE) {
+    			this.decisionVariables.put(decisionVariablesNames.get(i), 
+    				new Domain(evaluator.orderIntegerDomain(domain.getIntegerDomain())));  	
+    		}
+    	} 	
+    }
+    
     /** 
      *  Print a debug message if the DEBUG flag is set.
      *  @param s the String to be printed
@@ -1143,7 +1169,8 @@ public class Preprocessor implements PreprocessorGlobals {
 
     private void print_message(String s) {
     	if(PRINT_MESSAGE)
-	    System.out.println(s);
+	    System.out.println("[ Preprocessor] "+s);
     }
+    
 
 }

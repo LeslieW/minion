@@ -3,7 +3,7 @@ package preprocessor;
 import conjureEssenceSpecification.*;
 
 import java.util.HashMap;
-
+import java.util.ArrayList;
 
 /**
  * ExpressionEvaluator evaluates Essence' expressions.
@@ -1506,7 +1506,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 
 	    if(d.getIntegerDomain().getRestrictionMode() == EssenceGlobals.INT_DOMAIN_RANGE) {		
 	    	RangeAtom[] rangeList  = d.getIntegerDomain().getRangeList();
-
+	    	
 		for(int i=0; i<rangeList.length; i++) {
 
 		    if(rangeList[i].getRestrictionMode() == EssenceGlobals.RANGE_EXPR_DOTS_EXPR) {
@@ -1747,6 +1747,95 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	}
 	
     }
+    
+    
+    /**
+     * This method is still under construction
+     * 
+     * TODO: think of a smart implementaion of a sorting-algorithm to sort mixtures of 
+     * 
+     * 
+     * @param intDomain
+     * @return
+     * @throws PreprocessorException
+     */
+    public IntegerDomain orderIntegerDomain(IntegerDomain intDomain) throws PreprocessorException {
+    	
+    	RangeAtom[] rangeList = intDomain.getRangeList();
+    	ArrayList<RangeAtom> orderedList = new ArrayList<RangeAtom>();
+    	
+    	
+    	for(int i =0; i<rangeList.length;i++) { 
+    		RangeAtom range = rangeList[i];
+    		
+    		// E
+    		if(range.getRestrictionMode() == EssenceGlobals.RANGE_EXPR) {
+    			Expression expression = evalExpression(range.getLowerBound()); // lb == ub 
+    			if(expression.getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR) {
+    				System.out.println("Warning: Cannot evaluate integer ranges to integers: Cannot order domain of "+intDomain.toString());
+    				return intDomain;
+    			}
+    			else {
+    				if(expression.getAtomicExpression().getRestrictionMode() == EssenceGlobals.IDENTIFIER) {
+    					System.out.println("Warning: Cannot evaluate integer ranges to integers: Cannot order domain of "+intDomain.toString());
+    					return intDomain;
+    				}	
+    				else { // we have an integer as range atom
+    					int lowerBound = expression.getAtomicExpression().getNumber();
+    						if(orderedList.size() == 0) {
+    							orderedList.add(new RangeAtom(EssenceGlobals.RANGE_EXPR, new Expression(new AtomicExpression(lowerBound))));
+    						}
+    						else {
+    							int medium = orderedList.size()/2;
+    							int iterations = 1;
+    							int nextIndex = medium; 
+    							
+    							if(orderedList.size() == 1)
+    								nextIndex = 0;	
+    							
+    								while(nextIndex > 0 || nextIndex < orderedList.size()) {
+    									iterations++;
+    									RangeAtom otherRangeAtom = orderedList.get(nextIndex);
+    									
+    									// the element is the same
+    									if(otherRangeAtom.getLowerBound().getAtomicExpression().getNumber() == lowerBound) {
+    										orderedList.add(nextIndex,
+    												new RangeAtom(EssenceGlobals.RANGE_EXPR, new Expression(new AtomicExpression(lowerBound))));
+    									}
+    									if(nextIndex == 0) {
+    										
+    									}
+
+    									// the element in the list is smaller than the one we want to insert
+    									else if(otherRangeAtom.getLowerBound().getAtomicExpression().getNumber() < lowerBound) {
+    										nextIndex = nextIndex + medium/iterations;
+    									}
+    									// the element in the list is smaller than the one we want to insert
+    									else if(otherRangeAtom.getLowerBound().getAtomicExpression().getNumber() > lowerBound) {
+    										nextIndex = nextIndex + medium/iterations;
+    									}
+    								}
+    							
+    						}
+    						
+    					
+    				}
+    			}
+    		}
+    		
+    		// E1 .. E2
+    		else if(range.getRestrictionMode() == EssenceGlobals.RANGE_EXPR_DOTS_EXPR) {
+    			
+    			
+    		}
+    		
+    	}
+    	
+    		
+    	return null;
+    	
+    }
+    
   /**
    * Prints String s on the standard-output in case the DEBUG flag is set true.
    * @param s the String to print when the DEBUG flag is set true.

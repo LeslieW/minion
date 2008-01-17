@@ -16,27 +16,23 @@ public class IntegerDomain implements EssenceGlobals {
 	public int getRestrictionMode(){
 		return restriction_mode;
 	}
-	public void setRestrictionMode(int rm){
-		restriction_mode = rm;
-	}
+	
 	public RangeAtom[] getRangeList(){
 		return rangelist;
 	}
-	public void setRangeList(RangeAtom[] rl){
-		rangelist = rl;
-	}
+	
 
     public IntegerDomain copy()  {
 	
-	if(rangelist == null) 
-	    return new IntegerDomain();
+	      if(rangelist == null) 
+	         return new IntegerDomain();
 
-	else {
-	    RangeAtom[] ranges = new RangeAtom[rangelist.length];
-	    for(int i = 0; i < rangelist.length; i++)
-		ranges[i] = rangelist[i].copy();
-	    return new IntegerDomain(ranges);
-	}
+	      else {
+	    	  RangeAtom[] ranges = new RangeAtom[rangelist.length];
+	    	  for(int i = 0; i < rangelist.length; i++)
+	    		  ranges[i] = rangelist[i].copy();
+	    	  return new IntegerDomain(ranges);
+	      }
     }
 	
 	public IntegerDomain(){
