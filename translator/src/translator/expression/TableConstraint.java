@@ -8,7 +8,7 @@ package translator.expression;
  *
  */
 
-public class TableConstraint implements Expression {
+public class TableConstraint implements RelationalExpression {
 
 	private Variable[] variableList;
 	private ConstantTuple[] tupleList;
@@ -136,7 +136,7 @@ public class TableConstraint implements Expression {
 		return this.willBeReified;
 	}
 	
-	public void willBeReified(boolean reified) {
+	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
 	}
 	

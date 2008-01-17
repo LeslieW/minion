@@ -123,8 +123,8 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		return this.featureMap.get(new Integer(NARY_WEIGHTED_SUM));
 	}
 
-	public boolean supportsUnnestedNegation() {
-		return this.featureMap.get(new Integer(UNNESTED_NEGATION));
+	public boolean supportsConstraintsNestedInNegation() {
+		return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_NEGATION));
 	}
 	
 	
@@ -161,9 +161,45 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.LEX_GEQ:
 			return this.featureMap.get(new Integer(REIFIED_LEX_GEQ));
 			
+		case Expression.ELEMENT_CONSTRAINT:
+			return this.featureMap.get(new Integer(REIFIED_ELEMENT));
 		}
 		
 		return false;
+	}
+	
+	
+	public boolean supportsConstraintsNestedAsArgumentOf(int operator) {
+		
+		switch(operator) {
+		
+		case Expression.IF:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_IF));
+			
+		case Expression.LEQ:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_LEQ));
+			
+		case Expression.GEQ:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_GEQ));
+			
+		case Expression.LESS:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_LESS));
+			
+		case Expression.GREATER:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_GREATER));
+			
+		case Expression.EQ:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_EQ));
+			
+		case Expression.NEQ:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_NEQ));
+			
+		case Expression.ELEMENT_CONSTRAINT:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_ELEMENT));
+		}
+		
+		return false;
+		
 	}
 	
 	// ============ VARIABLES ========================

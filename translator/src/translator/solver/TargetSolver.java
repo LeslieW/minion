@@ -39,7 +39,21 @@ public interface TargetSolver {
 	public final char NARY_MULTIPLICATION = 74;
 	
 	// nesting stuff
-	public final char UNNESTED_NEGATION = 75;
+	public final int CONSTRAINT_NESTED_IN_NEGATION = 100;
+	public final int CONSTRAINT_NESTED_IN_CONJUNCTION = 101;
+	public final int CONSTRAINT_NESTED_IN_IF = 102;
+	public final int CONSTRAINT_NESTED_IN_LEQ = 103;
+	public final int CONSTRAINT_NESTED_IN_GEQ = 104;
+	public final int CONSTRAINT_NESTED_IN_LESS = 105;
+	public final int CONSTRAINT_NESTED_IN_GREATER = 106;
+	public final int CONSTRAINT_NESTED_IN_EQ = 107;
+	public final int CONSTRAINT_NESTED_IN_NEQ = 108;
+	public final int CONSTRAINT_NESTED_IN_IFF = 109;
+	public final int CONSTRAINT_NESTED_IN_DISJUNCTION = 110;
+	public final int CONSTRAINT_NESTED_IN_ELEMENT = 111;
+
+	
+	// reification
 	public final int REIFIED_ALLDIFFERENT = 76;
 	public final int REIFIED_IF = 77;
 	public final int REIFIED_LEQ = 78;
@@ -48,9 +62,9 @@ public interface TargetSolver {
 	public final int REIFIED_GREATER = 81;
 	public final int REIFIED_LEX_LEQ = 82;
 	public final int REIFIED_LEX_GEQ = 83;
-	
+	public final int REIFIED_ELEMENT = 84;
 	// solving issues
-	public final char SEARCH_OVER_AUXILIARY_VARIABLES = 100;
+	public final char SEARCH_OVER_AUXILIARY_VARIABLES = 200;
 	
 	
 	// solver specific stuff
@@ -93,11 +107,11 @@ public interface TargetSolver {
     public boolean supportsNarySum();
     public boolean supportsNaryMultiplication();
     public boolean supportsWeightedNarySum();
-    public boolean supportsUnnestedNegation();
+    public boolean supportsConstraintsNestedInNegation();
     
     public boolean supportsReifiedAllDifferent();
     public boolean supportsReificationOf(int operation);
-    
+    public boolean supportsConstraintsNestedAsArgumentOf(int operator);
     
     // =============== CONSTRAINTS ==================
     

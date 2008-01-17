@@ -36,7 +36,20 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(NARY_MULTIPLICATION),new Boolean(false));
 		featureMap.put(new Integer(NARY_SUM),new Boolean(true));
 		featureMap.put(new Integer(NARY_WEIGHTED_SUM),new Boolean(true));
-		featureMap.put(new Integer(UNNESTED_NEGATION), new Boolean(false));
+		
+		// nesting of constraints in other constraints
+		// (set to true, if the constraint allows other constraints nested
+		//  as parameter)
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NEGATION), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_DISJUNCTION), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_CONJUNCTION), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_EQ), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NEQ), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_LEQ), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_GEQ ), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_GREATER), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_LESS), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_ELEMENT), new Boolean(false));
 		
 		// are the following constraints reifiable
 		featureMap.put(new Integer(REIFIED_ALLDIFFERENT), new Boolean(false));
@@ -47,6 +60,7 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(REIFIED_GREATER), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_LEX_LEQ), new Boolean(false));
 		featureMap.put(new Integer(REIFIED_LEX_GEQ), new Boolean(false));
+		featureMap.put(new Integer(REIFIED_ELEMENT), new Boolean(false));
 		
 		// variables
 		featureMap.put(new Integer(SPARSE_VARIABLES),new Boolean(true));

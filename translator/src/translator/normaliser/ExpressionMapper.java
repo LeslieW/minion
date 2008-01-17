@@ -179,6 +179,11 @@ public class ExpressionMapper {
 		case EssenceGlobals.ALLDIFF:
 			return new AllDifferent(mapExpression(oldGlobalConstraint.getExpression1()));
 			
+		case EssenceGlobals.ELEMENT:
+			return new ElementConstraint(mapExpression(oldGlobalConstraint.getExpression1()),
+					                     mapExpression(oldGlobalConstraint.getExpression2()),
+					                     mapExpression(oldGlobalConstraint.getExpression3()));
+			
 		default:
 			throw new NormaliserException("Cannot translate Global Constraint yet:"+oldGlobalConstraint);
 		

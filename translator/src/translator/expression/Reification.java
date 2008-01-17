@@ -51,8 +51,26 @@ public class Reification implements RelationalExpression {
 	}
 
 	public char isSmallerThanSameType(Expression e) {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		Reification otherReification = (Reification) e;
+		
+		if(this.reifiedExpression.getType() == otherReification.reifiedExpression.getType()) {
+			
+			char difference = this.reifiedExpression.isSmallerThanSameType(otherReification.reifiedExpression);
+			
+			if(difference == EQUAL) {
+				
+				if(this.reifiedVariable.getType() == otherReification.reifiedVariable.getType()) {
+					return this.reifiedVariable.isSmallerThanSameType(otherReification.reifiedVariable);
+				}
+				else return (this.reifiedVariable.getType() < otherReification.reifiedVariable.getType()) ?
+						SMALLER : BIGGER;
+			}
+			else return difference;
+		}
+		else return (this.reifiedExpression.getType() < otherReification.reifiedExpression.getType()) ?
+				SMALLER : BIGGER;
+		
 	}
 
 	public void orderExpression() {
@@ -70,7 +88,7 @@ public class Reification implements RelationalExpression {
 
 	}
 
-	public void willBeReified(boolean reified) {
+	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
 
 	}

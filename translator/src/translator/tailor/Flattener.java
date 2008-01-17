@@ -129,9 +129,42 @@ public class Flattener {
 		else if(expression instanceof Disjunction)
 			return flattenDisjunction((Disjunction) expression);
 		
+		else if(expression instanceof ElementConstraint) 
+			return flattenElementConstraint((ElementConstraint) expression);
+		
 		else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
 	}
 	
+	
+	
+	/**
+	 * Flatten the element constraint. 
+	 * 
+	 * @param elementConstraint
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenElementConstraint(ElementConstraint elementConstraint) 
+		throws TailorException {
+		
+		
+		// 1. flatten subexpressions
+		boolean noConstraintsAsArguments = !this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT);
+		Expression[] arguments = elementConstraint.getArguments();
+		for(int i=0; i<arguments.length; i++) {
+			if(noConstraintsAsArguments) 
+				arguments[i].willBeFlattenedToVariable(true);
+
+			arguments[i] = flattenExpression(arguments[i]);
+		}
+		
+		// 2. if the constraint has to ne reified	
+		if(elementConstraint.isGonnaBeReified()) {
+			return reifyConstraint(elementConstraint);
+		}
+		else 			
+			return elementConstraint;
+	}
 	
 	/**
 	 * 
@@ -179,7 +212,7 @@ public class Flattener {
 		// 2. ---- if the conjunction is not nested/will be reified
 		//         then split it into independent constraints
 		if(!conjunction.isGonnaBeReified()) {
-			for(int i=0; i<arguments.size()-1; i++) {
+			for(int i=arguments.size()-1; i>0; i--) {
 				this.constraintBuffer.add(arguments.remove(i));
 			}
 			return arguments.remove(0);
@@ -261,7 +294,7 @@ public class Flattener {
 		
 		// then continue to flatten the whole expression
 		if(expression.getType() == Expression.NEGATION) {
-			if(this.targetSolver.supportsUnnestedNegation())
+			if(this.targetSolver.supportsConstraintsNestedInNegation())
 				return new Negation(argument);
 			else {
 			   return reifyConstraint(new Negation(argument));
@@ -293,16 +326,40 @@ public class Flattener {
 	private Expression flattenRelationalAtomExpression(RelationalAtomExpression atom) 
 		throws TailorException {
 		
-		// if the target solver allows stuff like m[x,y+1] where m,x,y are decision variables,
-		// we need not have to flatten it
-		if(this.targetSolver.supportsVariableArrayIndexing())
-			return atom;
-		
 		if(atom.getType() == Expression.BOOL_VARIABLE_ARRAY_ELEM) {
 			Variable arrayVariable = atom.getVariable();
 			if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
 				Expression[] indices = ((ArrayVariable) arrayVariable).getExpressionIndices();
+				
+				// if we have an array element indexed by something that is not a single integer
 				if(indices != null) {
+					if(this.targetSolver.supportsVariableArrayIndexing()) {
+						for(int i=0; i<indices.length; i++) {
+							// if the target solver only allows single variables as array indices (and no expressions)
+							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ARRAY_INDEXING)) {
+								indices[i].willBeFlattenedToVariable(true);
+							}
+							indices[i] = flattenExpression(indices[i]);
+						}
+						return atom;	
+					}
+					// the solver does not support array indexing with something other than an integer
+					else {
+						if(indices.length == 1) {
+							Expression index = indices[0];
+							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+								index.willBeFlattenedToVariable(true);
+							Variable auxVariable = createAuxVariable(0,1);
+							if(atom.isGonnaBeReified()) {
+								return reifyConstraint(new ElementConstraint(arrayVariable,
+															  index,
+															  auxVariable));
+							}
+							else return new ElementConstraint(arrayVariable,
+															  index,
+															  auxVariable);
+						}
+					}
 					// translate to an element constraint if the target solver supports it
 					// find out if the element constraint has to be nested too!!
 				}
@@ -323,9 +380,13 @@ public class Flattener {
 	 */
 	private Expression flattenNonCommutativeRelationalBinaryExpression(NonCommutativeRelationalBinaryExpression expression )
 		throws TailorException {
-		// we need to variables representing left and right argument
-		expression.getLeftArgument().willBeReified(true);
-		expression.getRightArgument().willBeReified(true);
+		
+		// if the target solver's constraint only supports variables as parameters, 
+		//   we need to reify the left and right argument
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
+			expression.getLeftArgument().willBeFlattenedToVariable(true);
+			expression.getRightArgument().willBeFlattenedToVariable(true);
+		}
 		
 		// flatten the subexpressions
 		Expression leftFlattenedArgument = flattenExpression(expression.getLeftArgument());
@@ -391,6 +452,12 @@ public class Flattener {
 		if(quantification.getType() == Expression.FORALL) {
 			Conjunction conjunction = new Conjunction(unfoldedExpressions);
 			conjunction.reduceExpressionTree();
+			if(quantification.isGonnaBeReified()) {
+				conjunction.willBeFlattenedToVariable(true);
+				for(int i=conjunction.getArguments().size()-1; i>=0; i--) 
+					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
+			}
+			
 			
 			return flattenConjunction(conjunction);
 		}
@@ -400,7 +467,7 @@ public class Flattener {
 			disjunction.reduceExpressionTree();
 			
 			for(int i=disjunction.getArguments().size()-1; i>=0; i--) 
-				disjunction.getArguments().get(0).willBeReified(true);
+				disjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			
 			return flattenDisjunction(disjunction);
 		}

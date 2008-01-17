@@ -204,7 +204,7 @@ public class CommutativeBinaryRelationalExpression implements
 		return this.willBeReified;
 	}
 	
-	public void willBeReified(boolean reified) {
+	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
 	}
 }

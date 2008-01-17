@@ -172,7 +172,7 @@ public class Multiplication extends NaryArithmeticExpression {
 		return this.willBeReified;
 	}
 	
-	public void willBeReified(boolean reified) {
+	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
 	}
 	

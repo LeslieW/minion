@@ -1,0 +1,10 @@
+ESSENCE' 1.0
+given n : int
+letting D be domain int(1..10)
+
+find x,y : matrix indexed by [D] of D
+
+such that 
+
+forall i,j : int(1..4) .
+    x[i] <= y[j]

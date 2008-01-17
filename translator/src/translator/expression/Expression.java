@@ -87,7 +87,12 @@ public interface Expression {
 	// Global Constraints
 	//public final int ALLDIFFERENT = 220;  => is defined above
 	public final int TABLE_CONSTRAINT = 221;
+	public final int ELEMENT_CONSTRAINT = 222;
 	public final int REIFICATION = 250;
+	
+	
+	// other implicit operations
+	public final int ARRAY_INDEXING = 300;
 	
 	// --------------------------------------------------------
 	
@@ -218,5 +223,5 @@ public interface Expression {
 	
 	public  boolean isGonnaBeReified();
 	
-	public void willBeReified(boolean reified);
+	public void willBeFlattenedToVariable(boolean reified);
 }

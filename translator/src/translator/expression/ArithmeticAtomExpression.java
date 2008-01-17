@@ -163,7 +163,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		return this.willBeReified;
 	}
 	
-	public void willBeReified(boolean reified) {
+	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeReified = reified;
 	}
 }

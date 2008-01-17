@@ -21,6 +21,13 @@ public interface Domain {
 	public final int IDENTIFIER = 7;
 	public final int ARRAY = 10;
 	
+	
+	// for indexing
+	public final int INT_INDEX = 20;
+	public final int VAR_INDEX = 21;
+	public final int RANGE_INDEX = 22;
+	
+	
 	/**
 	 * Evaluate all the expressions in this domain. This concerns mainly
 	 * evaluation of lower and upper bounds, for instance. If all expressions
