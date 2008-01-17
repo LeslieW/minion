@@ -52,6 +52,37 @@ public class SumConstraint implements GlobalConstraint {
 			this.negativeArguments = new Expression[0];
 	}
 
+	
+	public SumConstraint(Expression[] positiveArguments,
+			             Expression[] negativeArguments) {
+		
+		this.positiveArguments = positiveArguments;
+		this.negativeArguments = negativeArguments;
+		
+		// just make sure we don't get a nullpointer
+		if(this.positiveArguments == null)
+			this.positiveArguments = new Expression[0];
+		if(this.negativeArguments == null)
+			this.negativeArguments = new Expression[0];
+	}
+
+	
+	// =========== ADDITIONAL METHODS ======================
+	
+	public void setResult(Expression result,
+			              int relationalOperator,
+			              boolean resultIsOnLeftSide) {
+		
+		this.relationalOperator = relationalOperator;
+		this.result = result;
+		this.resultIsOnLeftSide = resultIsOnLeftSide;
+	}
+	
+	
+	public boolean hasResult() {
+		return (this.result == null);
+	}
+	
 	// ========== INHERITED METHODS ====================
 	
 	public Expression[] getArguments() {
@@ -310,5 +341,30 @@ public class SumConstraint implements GlobalConstraint {
 	
 	public int getRelationalOperator() {
 		return this.relationalOperator;
+	}
+	
+	public int[] getSumDomain() {
+		
+		int lowerBound = 0;
+		int upperBound = 0;
+		
+		// positive arguments first
+		for(int i=0; i<this.positiveArguments.length; i++) {
+			int[]  iBounds = positiveArguments[i].getDomain();
+			lowerBound = lowerBound + iBounds[0];  // lowerBound = lowerBound + lb(E)
+			upperBound = upperBound + iBounds[iBounds.length-1]; // upperBound = upperBound + ub(E)
+            // we use size because it might be a sparse domain..
+		}
+		
+		
+		// then the negative arguments
+		for(int i=0; i<this.negativeArguments.length; i++) {
+			int[] iBounds = negativeArguments[i].getDomain();
+			lowerBound = lowerBound - iBounds[iBounds.length-1]; // lowerBound = lowerBound - ub(E)
+			upperBound = upperBound - iBounds[0]; // upperBound = upperBound - lb(E) 
+		}
+		
+		
+		return new int[] {lowerBound, upperBound};
 	}
 }

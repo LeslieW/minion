@@ -8,8 +8,10 @@ package translator.tailor.minion;
  *
  */
 
-public interface MinionAtom extends MinionConstraint {
+public interface MinionAtom extends MinionConstraint{
 
 	public String toString();
 	
+	
+	public String getVariableName();
 }

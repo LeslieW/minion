@@ -12,5 +12,8 @@ public class MinionSingleVariable implements MinionAtom {
 	public String toString() {
 		return this.name;
 	}
-	
+
+	public String getVariableName() {
+		return this.name;
+	}
 }

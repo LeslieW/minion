@@ -11,12 +11,30 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 	
 	
 	public int[] getDomain() {
-		// TODO Auto-generated method stub
 		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
 	}
 	
 	
 // ==================== Additional Methods =====================
+	
+	
+	protected Expression[] orderExpressionList(Expression[] list) {
+		
+		ArrayList<Expression> orderedList = new ArrayList<Expression>();
+		
+		for(int i=0; i<list.length; i++) {
+			orderedList = insertIntoOrderedList(list[i], orderedList);
+		}
+
+		Expression[] orderedArray = new Expression[orderedList.size()];
+		for(int i=orderedArray.length-1; i>=0; i--)
+			orderedArray[i] = orderedList.remove(i);
+		
+		return orderedArray;
+		
+		
+		
+	}
 	
 	/**
 	 * Order the list of Expressions according to the Essence' 

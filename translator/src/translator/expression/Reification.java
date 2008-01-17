@@ -3,7 +3,7 @@ package translator.expression;
 public class Reification implements RelationalExpression {
 
 	private Expression reifiedExpression;
-	private Variable reifiedVariable;
+	private RelationalAtomExpression reifiedVariable;
 	
 	boolean isNested = true;
 	boolean willBeReified = false;
@@ -11,7 +11,7 @@ public class Reification implements RelationalExpression {
 	// ============= CONSTRUCTOR =================================
 	
 	public Reification(Expression reifiedExpression,
-			           Variable reifiedVariable) {
+			          RelationalAtomExpression reifiedVariable) {
 		this.reifiedVariable = reifiedVariable;
 		this.reifiedExpression = reifiedExpression;
 	}
@@ -20,11 +20,17 @@ public class Reification implements RelationalExpression {
 	
 	public Expression copy() {
 		return new Reification(this.reifiedExpression.copy(),
-				               (Variable) this.reifiedVariable.copy());
+				               (RelationalAtomExpression) this.reifiedVariable.copy());
 	}
 
 	public Expression evaluate() {
 		this.reifiedExpression = this.reifiedExpression.evaluate();
+		
+		if(this.reifiedVariable.getType() == BOOL) {
+			if(reifiedVariable.getBool())
+				return reifiedExpression;
+			
+		}
 		
 		return this;
 	}
@@ -80,6 +86,13 @@ public class Reification implements RelationalExpression {
 
 	public Expression reduceExpressionTree() {
 		this.reifiedExpression = this.reifiedExpression.reduceExpressionTree();
+		
+		if(this.reifiedVariable.getType() == BOOL) {
+			if(reifiedVariable.getBool())
+				return reifiedExpression;
+			
+		}
+		
 		return this;
 	}
 
@@ -107,7 +120,7 @@ public class Reification implements RelationalExpression {
 		return this.reifiedExpression;
 	}
 	
-	public Variable getReifiedVariable() {
+	public RelationalAtomExpression getReifiedVariable() {
 		return this.reifiedVariable;
 	}
 	

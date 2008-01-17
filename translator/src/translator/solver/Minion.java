@@ -12,6 +12,8 @@ import java.util.HashMap;
 
 public class Minion extends GeneralTargetSolver {
 
+	
+	boolean useWatchedSum;
 
 	public Minion() {
 		// general stuff
@@ -22,6 +24,7 @@ public class Minion extends GeneralTargetSolver {
 		this.searchStrategy = DEPTH_FIRST;
 		this.branchingStrategy = FIRST_FAIL;
 	
+		this.useWatchedSum = true;
 		
 		this.featureMap = new HashMap<Integer, Boolean>();
 		
@@ -44,7 +47,7 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(NARY_SUM),new Boolean(true));
 		featureMap.put(new Integer(NARY_WEIGHTED_SUM),new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_PRODUCT_CONSTRAINT), new Boolean(false));
-		featureMap.put(new Integer(TargetSolver.NARY_SUMEQ_CONSTRAINT), new Boolean(false));  // this is wrong but for testing set to this value
+		featureMap.put(new Integer(TargetSolver.NARY_SUMEQ_CONSTRAINT), new Boolean(true));  // this is wrong but for testing set to this value
 		featureMap.put(new Integer(TargetSolver.NARY_SUMNEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMGEQ_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMLEQ_CONSTRAINT), new Boolean(true));
@@ -122,6 +125,8 @@ public class Minion extends GeneralTargetSolver {
 		
 	}
 	
-	
+	public boolean useWatchedSum() {
+		return this.useWatchedSum;
+	}
 
 }

@@ -128,6 +128,15 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	}
 	
 	
+	public RelationalAtomExpression toRelationalAtomExpression() {
+		if(variable == null) {
+			return (this.constantValue > 0) ?
+			new RelationalAtomExpression(true) :
+				new RelationalAtomExpression(false);
+		}
+		else return new RelationalAtomExpression(this.variable);
+	}
+	
 	public Expression reduceExpressionTree() {
 		return this;
 	}

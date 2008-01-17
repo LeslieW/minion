@@ -13,14 +13,14 @@ import translator.expression.*;
 public class ProductConstraint implements MinionConstraint {
 
 	
-	ArithmeticAtomExpression leftExpression;
-	ArithmeticAtomExpression rightExpression;
-	ArithmeticAtomExpression result;
+	MinionAtom leftExpression;
+	MinionAtom rightExpression;
+	MinionAtom result;
 	
 	
-	public ProductConstraint(ArithmeticAtomExpression leftArgument,
-			                 ArithmeticAtomExpression rightArgument,
-			                 ArithmeticAtomExpression result) {
+	public ProductConstraint(MinionAtom leftArgument,
+			                 MinionAtom rightArgument,
+			                 MinionAtom result) {
 		
 		this.leftExpression = leftArgument;
 		this.rightExpression = rightArgument;

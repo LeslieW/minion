@@ -31,4 +31,8 @@ public class MinionArrayElement implements MinionAtom {
 		}
 		return s+"]";
 	}
+	
+	public String getVariableName() {
+		return this.name;
+	}
 }

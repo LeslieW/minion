@@ -7,7 +7,9 @@ public class Sum extends NaryArithmeticExpression {
 	
 	private ArrayList<Expression> positiveArguments;
 	private ArrayList<Expression> negativeArguments;
+	private boolean convertToSumConstraint = false;
 	
+	// ============== CONSTRUCTOR =========================
 	
 	public Sum(ArrayList<Expression> positiveArguments,
 			   ArrayList<Expression> negativeArguments) {
@@ -21,6 +23,18 @@ public class Sum extends NaryArithmeticExpression {
 			this.negativeArguments = new ArrayList<Expression>();
 	}
 	
+	
+	// ============ ADDITIONAL STUFF =========================
+	
+	public boolean willBeConvertedToASumConstraint() {
+		return this.convertToSumConstraint;
+	}
+	
+	public void setWillBeConvertedToSumConstraint(boolean turnOn) {
+		this.convertToSumConstraint = turnOn;
+	}
+	
+	// ============ INHERITED METHODS ========================
 	
 	public ArrayList<Expression> getPositiveArguments() {
 		return this.positiveArguments;

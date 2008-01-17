@@ -50,6 +50,32 @@ public class MinionModel {
 		return s;
 	}
 	
+	protected void addAuxiliaryVariable(Variable auxVariable) {
+		this.auxVariables.add(auxVariable);
+	}
+	
+	
+	protected boolean variableHasBooleanDomain(String variableName) {
+		
+		if(this.decisionVariables.containsKey(variableName)) {
+			Domain domain = this.decisionVariables.get(variableName);
+			return (domain instanceof BoolDomain);
+		}
+		else {
+			for(int i=0; i<this.auxVariables.size(); i++) {
+				if(this.auxVariables.get(i).getVariableName().equals(variableName)) {
+					int[] bounds = auxVariables.get(i).getDomain();
+					return (bounds[0] == 0 && bounds[1] == 1);
+						
+				}
+			}
+				
+			
+		}
+		
+		return false;
+	}
+	
 	// ========== STATISTICAL DETAILS =================================
 	
 	protected int getAmountOfAuxiliaryVariables() {
