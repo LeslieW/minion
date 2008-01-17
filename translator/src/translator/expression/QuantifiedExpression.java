@@ -138,7 +138,7 @@ public class QuantifiedExpression implements RelationalExpression {
 		for(int i=0; i< orderedList.size(); i++) {
 			String otherString = orderedList.get(i);
 			
-			if(otherString.compareTo(s) <= 0) {
+			if(otherString.compareTo(s) >= 0) {
 				orderedList.add(i, s);
 				return orderedList;
 			}

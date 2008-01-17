@@ -564,9 +564,7 @@ public class Flattener {
 	 */
 	private Expression flattenQuantifiedSum(QuantifiedSum quantifiedSum) 
 		throws TailorException,Exception {
-		
-		//System.out.println("Flattening quantified sum:"+quantifiedSum);
-		
+
 		// if the target solver supports quantified sums - do nothing
 		if(this.targetSolver.supportsConstraint(Expression.Q_SUM)) {
 			return quantifiedSum;
@@ -623,24 +621,10 @@ public class Flattener {
 				                   negativeElements);
 		
 	
-		//System.out.println("Flattened quantified sum to:"+flattenedSum);
-		
 		flattenedSum.orderExpression();
 		Expression reducedSum  = flattenedSum.evaluate();
-		//System.out.println("After evaluating the flattened quantified sum to:"+reducedSum+" amd the expression has type:"+reducedSum.getType());
 		reducedSum = reducedSum.reduceExpressionTree();
-		
-		//System.out.println("After reducing the flattened quantified sum to:"+reducedSum);
-		
-		/*if(quantifiedSum.isGonnaBeFlattenedToVariable()) {
-			if(reducedSum instanceof RelationalAtomExpression ||
-					reducedSum instanceof ArithmeticAtomExpression)
-				return reducedSum;
-			else return reifyConstraint(reducedSum);
-		}
-		
-		return reducedSum;*/
-		
+	
 		if(reducedSum instanceof Sum)
 			return flattenSum((Sum) reducedSum);
 		else return reducedSum;
@@ -960,15 +944,15 @@ public class Flattener {
 			variableList.add(bindingVariables[i]);
 		
 	
-		System.out.println("GGGGGGGGGGGGGGGGGGGGgg variable list for unfloding of Quantification is:"+variableList);
 		// 3 ------- create unfolded expressions --------------------------------
 		ArrayList<Expression> unfoldedExpressions = insertVariablesForValues(variableList,
 				                                                             domainElements,
 				                                                             quantification.getQuantifiedExpression());
 		
-		// inserting and evaluating the stuff
+		
+		// 4 -------- inserting and evaluating the stuff
 		for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
-			Expression unfoldedExpression = unfoldedExpressions.get(i);
+			Expression unfoldedExpression = unfoldedExpressions.remove(i);
 			unfoldedExpression = this.insertConstantArraysInExpression(unfoldedExpression);
 			unfoldedExpression = unfoldedExpression.evaluate();
 			unfoldedExpression = unfoldedExpression.reduceExpressionTree();
@@ -989,10 +973,7 @@ public class Flattener {
 			if(quantification.isGonnaBeFlattenedToVariable())
 				conjunction.willBeFlattenedToVariable(true);
 			
-			Expression e = flattenConjunction(conjunction);
-			//System.out.println("After flattening the resulting conjunction: "+e);
-			
-			return e;//flattenConjunction(conjunction);
+			return flattenConjunction(conjunction);
 			
 		}
 		// existential quantification
@@ -1018,7 +999,7 @@ public class Flattener {
 	
 	/**
 	 * This is a helper function for flattening quantified expressions (the unfolding of the quantification). The variablelist containts all binding 
-	 * variables that should be inserted intp the expression.
+	 * variables that should be inserted intp the expression.ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
 	 * 
 	 * @param variableList
 	 * @param values
@@ -1028,90 +1009,52 @@ public class Flattener {
 	 */
 	private ArrayList<Expression> insertVariablesForValues(ArrayList<String> variableList, int[] values, Expression expression)
 		throws TailorException,Exception {
-		
-		ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
-		
-		System.out.println("WWWWWWWWWWWWWWWWwant to insert values for '"+variableList.get(0)+"' into expression :"+expression);
+	
 		
 		// this is the last variable we have to insert
 		if(variableList.size() == 1) {
 			String variableName = variableList.get(0);
+			ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
 			for(int i=0; i<values.length; i++) {
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
-				System.out.println("Generated  expression:"+unfoldedExpression);
-				System.out.println("Inserted '"+values[i]+"' for variable '"+variableName+"' in expression '"+expression+"' and got expression:"+unfoldedExpression);
-				
-				/*unfoldedExpression = this.insertConstantArraysInExpression(unfoldedExpression);
-				unfoldedExpression = unfoldedExpression.evaluate();
-				unfoldedExpression = unfoldedExpression.reduceExpressionTree();
-				System.out.println("RRRRRRRRRRRRRRRRRRRr Generated evaluated, reduced expression:"+unfoldedExpression); */
+
 				unfoldedExpressions.add(unfoldedExpression);
 			}
+			
 			return unfoldedExpressions;
 		}
 		// we have some more variables to insert into the expression
 		else {
 			String variableName = variableList.remove(0);
+			ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
 			for(int i=0; i<values.length; i++) {
+				
+				// copy the variable list since it is modified on lower level
+				ArrayList<String> copiedVariableList = new ArrayList<String>();
+				for(int j=0; j<variableList.size();j++)
+					copiedVariableList.add(new String(variableList.get(j)));
+				
+				
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
-				ArrayList<Expression> furtherUnfoldedExpressions = insertVariablesForValues(variableList, values, unfoldedExpression);
+				ArrayList<Expression> furtherUnfoldedExpressions = insertVariablesForValues(copiedVariableList, values, unfoldedExpression);
 				
 				for(int j=0; j<furtherUnfoldedExpressions.size(); j++) {
+					
+					
 					unfoldedExpressions.add(furtherUnfoldedExpressions.get(j).evaluate());
-				}
+			    }
 			}
 			
+			return unfoldedExpressions;
 		}
 		
-		System.out.println("Finished with inserting shit intpo a quantification:"+unfoldedExpressions);
+	
 		
-		return unfoldedExpressions;
+		
 	}
 	
 	
-	
-	
-	
-	/**
-	 * 
-	 * 
-	 * @return the int that stands for the n-ary constraint variant of the 
-	 * operation given as parameter
-	 */
-	
-	/*private int getNaryConstraintVariantOf(int relop) 
-		throws TailorException {
-		
-		switch(relop) {
-		
-		case Expression.EQ:
-			return Expression.NARY_SUMEQ_CONSTRAINT;	
-			
-		case Expression.NEQ:
-			return Expression.NARY_SUMNEQ_CONSTRAINT;	
-			
-		case Expression.LEQ:
-			return Expression.NARY_SUMLEQ_CONSTRAINT;	
-			
-		case Expression.GEQ:
-			return Expression.NARY_SUMGEQ_CONSTRAINT;	
-			
-		case Expression.LESS:
-			return Expression.NARY_SUMLESS_CONSTRAINT;	
-			
-		case Expression.GREATER:
-			return Expression.NARY_SUMGREATER_CONSTRAINT;	
-			
-		case Expression.AND:
-			return Expression.AND;
-			
-		}
-		
-		throw new TailorException("Cannot find n-ary constraint version of relational operator:"+relop);
-	}
-	*/
 
-	
 	/**
 	 * 
 	 * @param expression
@@ -1619,7 +1562,7 @@ public class Flattener {
 		if(atom.getType() == Expression.INT_ARRAY_VAR) {
 			Variable arrayVariable = atom.getVariable();
 			
-			System.out.println("Flattening array variable:"+arrayVariable);
+			//System.out.println("Flattening array variable:"+arrayVariable);
 			
 			if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
 				Expression[] indices = ((ArrayVariable) arrayVariable).getExpressionIndices();
@@ -1726,8 +1669,15 @@ public class Flattener {
 			return expression;
 		
 		else if(expression instanceof UnaryRelationalExpression)  {
-			return insertConstantArraysInExpression( ((UnaryRelationalExpression) expression).getArgument());
+			Expression argument = insertConstantArraysInExpression( ((UnaryRelationalExpression) expression).getArgument());
 			
+			if(expression instanceof AllDifferent)
+				return new AllDifferent((Array) argument);
+			
+			else if(expression instanceof Negation)
+				return new Negation(argument);
+			
+			else return expression;
 		}
 		
 		else if(expression instanceof NonCommutativeRelationalBinaryExpression) {
@@ -1827,7 +1777,7 @@ public class Flattener {
 			if(atom.getType() == Expression.INT_ARRAY_VAR) {
 				Variable arrayVariable = atom.getVariable();
 				
-				System.out.println("Trying to find constant array variable match for :"+arrayVariable);
+				//System.out.println("Trying to find constant array variable match for :"+arrayVariable);
 				
 				if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
 					

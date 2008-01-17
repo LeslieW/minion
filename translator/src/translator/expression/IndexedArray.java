@@ -185,5 +185,8 @@ public class IndexedArray implements SingleArray {
 		return indicesAreConstant;
 	}
 	
+	public BasicDomain[] getIndexRanges() {
+		return this.indexRanges;
+	}
 	
 }

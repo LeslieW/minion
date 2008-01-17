@@ -65,7 +65,7 @@ public class BoundedIntRange implements IntRange {
 		
 		BoundedIntRange otherBounded = (BoundedIntRange) d;
 	
-		if(this.lowerBound== this.upperBound) {	
+		if(this.lowerBound== otherBounded.lowerBound) {	
 			if(this.upperBound == otherBounded.upperBound) {
 					return Expression.EQUAL;
 			}
@@ -73,7 +73,7 @@ public class BoundedIntRange implements IntRange {
 					Expression.SMALLER : Expression.BIGGER;
 			
 		}
-		else return (this.lowerBound < this.upperBound) ?
+		else return (this.lowerBound < otherBounded.lowerBound) ?
 				Expression.SMALLER : Expression.BIGGER;
 	}
 	

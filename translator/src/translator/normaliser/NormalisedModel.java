@@ -91,7 +91,9 @@ public class NormalisedModel {
 	 * 	exists no variable with that name it returns null.  
 	 */
 	public Domain getDomainOfVariable(String variableName) {
-		return this.decisionVariables.get(variableName);
+		if(this.decisionVariables.containsKey(variableName))
+			return this.decisionVariables.get(variableName);
+		else return null;
 	}
 	
 	public Expression getObjectiveExpression() {

@@ -267,7 +267,7 @@ public class ExpressionMapper {
 		//--------------------- matrix name ----------------------------------------------
 		String arrayName = oldArrayElement.getArrayName();
 		
-		System.out.println("Mapping the old non-atom:"+oldArrayElement+" and constant arrays list is:"+this.constantArrays);
+
 		
 		// ------------- matrix domain ----------------------------------------------------
 		// get the domain of the matrixElement

@@ -212,8 +212,87 @@ public class MinionTailor {
 		if(array instanceof SimpleArray) {
 			return new MinionSimpleArray(((SimpleArray) array).getArrayName());			
 		}
+		else if(array instanceof IndexedArray) {
+			
+			String arrayName = ((IndexedArray) array).getArrayName();
+			BasicDomain[] indexRanges = ((IndexedArray) array).getIndexRanges();
+			ConstantDomain[] indices = new ConstantDomain[indexRanges.length];
+			boolean[] indexIsWholeDomain = new boolean[indexRanges.length];
+			
+			int[] indexOffsets = null;
+			if(this.offsetsFromZero.containsKey(arrayName))
+				indexOffsets = this.offsetsFromZero.get(arrayName);
+			else throw new MinionException("Internal error: did not find any index-offsets for array:"+arrayName+
+					". Maybe the array is undefined?");
+			
+ 			for(int i=0; i<indexRanges.length; i++) {
+				if(indexRanges[i] instanceof ConstantDomain) {
+					indices[i] = (ConstantDomain) indexRanges[i];
+					indexIsWholeDomain[i] = isFullDomain(arrayName, indices[i], i);
+				}
+				else throw new MinionException("Sorry, cannot translate arrays that are indexed with variables yet:"+array);
+			}
+			
+			return new MinionIndexedArray(arrayName, 
+					                      indices, 
+					                      indexIsWholeDomain,
+					                      indexOffsets);
+			 
+		}
 		else throw new MinionException("Sorry, cannot translate array type yet:"+array);
 
+	}
+	
+	/**
+	 * This method returns true if the array/matrix is indexed by the 
+	 * ConstantDomain d at dimension 'index', then the range given by
+	 * d corresponds exactly to the declared range of the matrix. 
+	 * For example, if i have the matrix 'M' that is defined as 
+	 * 
+	 * M : matrix indexed by [int(1..5),int(1..10)] of bool
+	 * 
+	 * then if I look at expression M[1..5, 3..6], the range the matrix is indexed with with at 
+	 * the first dimension (1..5) corresponds exactly to the range the matrix is declared with(int(1..5)),
+	 * while the second dimension is indexed with (3..6) which does not correspond to int(1..10),
+	 * as defined.  
+	 * 
+	 * @param arrayName
+	 * @param d
+	 * @param index
+	 * @return
+	 * @throws MinionException
+	 */
+	protected boolean isFullDomain(String arrayName, ConstantDomain d, int index) 
+		throws MinionException {
+		
+		Domain domain = this.normalisedModel.getDomainOfVariable(arrayName);
+		
+		if(domain == null)
+			throw new MinionException("Unknown array variable '"+arrayName+", or cannot tailor constant vector to Minion");
+		
+		
+		if(domain instanceof ArrayDomain) {
+			ArrayDomain arrayDomain  = (ArrayDomain) domain;
+			Domain[] indexDomains = arrayDomain.getIndexDomains();
+			if(index < indexDomains.length && index >= 0) {
+				Domain indexDomain = indexDomains[index];
+					
+				if(indexDomain instanceof ConstantDomain) { 
+						if(indexDomain.getType() == d.getType()) {
+						    if(d.isSmallerThanSameType((ConstantDomain) indexDomain) == Expression.EQUAL)
+						    	return true;
+						    
+						}
+				}
+				return false;
+			}
+			else throw new MinionException("Wrong dimensions: the variable '"+arrayName+"' has been declared to be a "+indexDomains.length+
+					"-dimensional array/matrix, so you cannot index it at dimension '"+index+"', sorry.");
+			
+		}
+		else throw new MinionException("Incompatible types: cannot dereference variable that is not an array/matrix variable:"+arrayName);
+		
+		
 	}
 	
 	
