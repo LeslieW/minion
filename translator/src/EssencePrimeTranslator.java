@@ -58,7 +58,7 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
     EssencePrimeTranslator(String problemFileName, String parameterFileName)
 		throws FileNotFoundException, Exception {
     	
-    // 	parsing
+	// 	parsing
     	parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new FileReader(problemFileName)) );
     	problemSpec = (EssenceSpecification) parser.parse().value;
@@ -123,38 +123,40 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
 	try {
 	    if(args.length >= 3) {
 	    	if(args[2].startsWith("-")) {
-	    		parameters = new String[args.length-2];
-	    		for(int i=0; i<parameters.length; i++)
-	    			parameters[i] = args[i+2];
+		    parameters = new String[args.length-2];
+		    for(int i=0; i<parameters.length; i++)
+			parameters[i] = args[i+2];
 	    	}
 	    	else 
-		    	outputFileName = (String) args[2];
+		    outputFileName = (String) args[2];
 	    }
 	    
-	    		
 	    
 	    
-		if(args.length >= 4) {
+	    
+	    if(args.length >= 4) {
 	    	parameters = new String[args.length-3];
 	    	for(int i=0; i<parameters.length; i++)
-	    		parameters[i] = args[3+i];	
+		    parameters[i] = args[3+i];	
 	    }
 	    
 	    // translate to Minion
+	    print_message(WELCOME_MESSAGE);
+
 	    EssencePrimeMinionTranslator translator = new EssencePrimeMinionTranslator(args[0], args[1]) ;
-	   	String minionOutput = translator.translate(parameters) ;
-	   	print_message("Translation Successful") ;
+	    String minionOutput = translator.translate(parameters) ;
+	    print_message("Translation Successful") ;
 	    
-	   	// write output into file
-	   	writeOutputIntoFile(minionOutput);  
-    	print_message("Output written into "+outputFileName) ;		
+	    // write output into file
+	    writeOutputIntoFile(minionOutput);  
+	    print_message("Output written into "+outputFileName) ;		
 	    
 	    
 	}
-	  catch(Exception e) {
-	      System.out.println(e);
-	      System.out.println("Bailing out.");
-	  }
+	catch(Exception e) {
+	    System.out.println(e);
+	    System.out.println("Bailing out.");
+	}
     }
     
     
