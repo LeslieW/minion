@@ -89,6 +89,7 @@ public class MinionModelTranslator implements MinionGlobals {
 		for(int i=0; i< constraints.size(); i++) {
 			print_debug("About to translate "+constraints.get(i));
 			constraintsTranslator.translate(constraints.get(i));
+			print_debug("After translation");
 			print_debug("Translated "+constraints.get(i));
 		}
 		

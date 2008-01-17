@@ -134,7 +134,10 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 		      
 		      case EssenceGlobals.QUANTIFIER_EXPR:
 		    	  //quantificationTranslator.translateQuantification(e);
-		    	  quantificationTranslator.translate(e, false);
+		    	  MinionConstraint c = quantificationTranslator.translate(e, false);
+		    	  if(c!=null)
+		    		  this.minionModel.addConstraint(c);
+		    	  print_debug("Just added (or not) a quantified constraint");
 		    	  break;
 	
 		      case EssenceGlobals.FUNCTIONOP_EXPR:

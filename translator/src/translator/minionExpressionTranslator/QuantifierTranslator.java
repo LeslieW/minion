@@ -224,8 +224,6 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	
 			// translate quantification, starting with quantifier_0
 			
-			MinionConstraint constraint = null;
-			
 			print_debug("Checking if it is a quantified assignment:"+e.toString());
 			// 4a. we have something like v[i] = m[0,i] and create a vector referencing to the elements of m
 			if(isQuantifiedAssignment(e.getQuantification()) && !expressionWillBeReified) {
@@ -233,22 +231,22 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				// 1. generate an empty matrix for the left expression (according to its domain)
 				addEmptyAssignedMatrix(expression); 
 			}
-			else {
-			// 	4b. translate quantification, starting with quantifier_0
-				constraint = translateQuantification(0);
-				//if(constraint != null){
-					//print_debug("Translated quantification to:"+constraint);
-					//translatorMinionModel.addConstraint(constraint);
-				//}
-				print_debug("Have translated the quantified expression.");
-			}	
-			
-			
-			
+		
+            //      4b. translate quantification, starting with quantifier_0
+			MinionConstraint constraint = translateQuantification(0);
+            if(constraint != null){
+                       translatorMinionModel.addConstraint(constraint);
+             }
+                    print_debug("Have translated the quantified expression.");
+            //}
+ 		
 			//MinionReifiableConstraint constraint = translateQuantification(0);
 			clearAll();
+			print_debug("Just making sure..");
+           
 			return constraint;
 		
+			
 		case EssenceGlobals.BINARYOP_EXPR:
 			return translateBinaryQuantifiedExpression(e.getBinaryExpression(), expressionWillBeReified);
 			
@@ -1247,6 +1245,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 					QuantifierTranslator quantifierTranslator = new QuantifierTranslator(minionVariables, minionVectors,
 										minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, subExpressionCollection, useWatchedLiterals, useDiscreteVariables);
 					reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(constraint, reifiable);
+					this.translatorMinionModel.addConstraint(reifiableConstraint); 
 				}
 				else 
 				 reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint,reifiable);

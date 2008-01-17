@@ -1613,22 +1613,26 @@ public class MinionModel implements MinionGlobals {
 		   }
 	   }
 
+	   print_debug("Starting with printing of 2d matrices now.");
 	   if(matrices2d.size() > 0)
 		   result.append("\n#\n# 2-dimensional matrices:");
 	   
 	   for(i=0; i<matrices2d.size(); i++) {
 		   matrix = matrices2d.get(i).getMatrix();
 		   String originalName = matrices2d.get(i).getOriginalName();
+		   print_debug("Original name of matrix element:"+originalName);
 		   int offset[] = matrixOffsets.get(originalName);
 		   for(int j=0; j<matrix.length; j++) {
-			   for(int elemIndex=0; elemIndex < matrix[j].length; elemIndex++)   
+			   for(int elemIndex=0; elemIndex < matrix[j].length; elemIndex++)  {
+				   print_debug("element: \t"+matrix[j][elemIndex].toString());
 				   result.append("\n#\t"+matrix[j][elemIndex].toString()+"\t"+originalName+
 						   "["+(offset[0]+j)+","+(offset[1]+elemIndex)+"]");
+			   }
 		   }
 	   }
 	   
 	   result.append("\n");
-	   
+	   print_debug("Finished printing original names.");
 	   return result.toString();
    }
    
