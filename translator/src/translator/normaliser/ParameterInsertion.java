@@ -819,7 +819,7 @@ public class ParameterInsertion {
 	    	  // insert parameter values 
 	    	  for(int i=0; i<expressions.length; i++) {
 	    		  //expressions[i] = evaluator.evalExpression(insertValueForParameters(expressions[i]));
-	    		  System.out.println("Inserting parameters in expression:"+expressions[i]);
+	    		  //System.out.println("Inserting parameters in expression:"+expressions[i]);
 	    		  expressions[i] = insertValueForParameters(expressions[i]);
 
 	    		  

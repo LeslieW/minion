@@ -132,9 +132,20 @@ public class Flattener {
 		else if(expression instanceof ElementConstraint) 
 			return flattenElementConstraint((ElementConstraint) expression);
 		
-		else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
+		else return expression;
+		//else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
 	}
 	
+	
+	
+	private Expression flattenQuantifiedSum(QuantifiedSum quantifiedSum) 
+		throws TailorException {
+		
+		// if the target solver supports quantified sums...return
+		
+		
+		return quantifiedSum;
+	}
 	
 	
 	/**
@@ -383,6 +394,8 @@ public class Flattener {
 		
 		// if the target solver's constraint only supports variables as parameters, 
 		//   we need to reify the left and right argument
+		System.out.println("flattening non-c.bin.rel.expression:"+expression+" with operator: "+expression.getOperator());
+		
 		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 			expression.getLeftArgument().willBeFlattenedToVariable(true);
 			expression.getRightArgument().willBeFlattenedToVariable(true);
@@ -411,6 +424,14 @@ public class Flattener {
 	 */
 	private Expression flattenQuantifiedExpression(QuantifiedExpression quantification)
 		throws TailorException {
+		
+		if(quantification.getType() == Expression.FORALL && 
+				this.targetSolver.supportsConstraint(Expression.FORALL))
+			return quantification;
+		
+		if(quantification.getType() == Expression.EXISTS && 
+				this.targetSolver.supportsConstraint(Expression.EXISTS))
+			return quantification;
 		
 		// ----- 1. get the domain over which the quantification ranges ------------
 		Domain bindingDomain = quantification.getQuantifiedDomain();

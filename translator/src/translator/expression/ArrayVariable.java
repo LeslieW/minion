@@ -261,6 +261,13 @@ public class ArrayVariable implements Variable {
 	}
 	
 	/**
+	 * Just return the array name without the brackets and indices
+	 * @return the array name (without brackets and indices)
+	 */
+	public String getArrayNameOnly() {
+		return this.arrayName;
+	}
+	/**
 	 * 
 	 * @return the Expression indices of the array element. if the indices are 
 	 * integers then null is returned

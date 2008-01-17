@@ -133,6 +133,36 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		return this.featureMap.get(new Integer(REIFIED_ALLDIFFERENT));
 	}
 	
+	
+	/**
+	 * Given the constraint alias (defined in Expression.java) for 
+	 * operations (e.g. FORALL, ELEMENT_CONSTRAINT, etc), return 
+	 * true, if the constraint is supported 
+	 * 
+	 * @param constraint
+	 * @return
+	 */
+	public boolean supportsConstraint(int constraint) {
+		
+		switch(constraint) {
+		
+		case Expression.Q_SUM:
+			return this.featureMap.get(new Integer(QUANTIFIED_SUM));
+			
+		case Expression.FORALL:
+			return this.featureMap.get(new Integer(UNIVERSAL_QUANTIFICATION));
+		
+		case Expression.EXISTS:
+			return this.featureMap.get(new Integer(EXISTENTIAL_QUANTIFICATION));
+		
+		
+			
+		}
+		
+		
+		return false;
+	}
+	
 	public boolean supportsReificationOf(int operation) {
 		
 		switch(operation) {
@@ -219,6 +249,11 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	// ========= SOLVING PROCESS =====================
 	
 	
+	// ============ SETTING STUFF ============================
+	
+	 public void setFeature(int feature, boolean turnOn) {
+		 this.featureMap.put(new Integer(feature), new Boolean(turnOn));
+	 }
 	
 	
 	// ============= OTHER STUFF ===============================

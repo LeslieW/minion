@@ -2,7 +2,11 @@ package translator.solver;
 
 /**
  * Represents the solver profile of the target solver. Every target solver
- * has to implement this interface.
+ * has to implement this interface. All the methods that are declared here
+ * are defined in the abstract class GeneralTargetSolver.java. So if you want
+ * to add another solver, just extend the abstract class GeneralTargetSolver.java.
+ * (and you get the whole functionality with just setting the features of your 
+ * solver)
  * 
  * @author andrea
  *
@@ -29,16 +33,29 @@ public interface TargetSolver {
 	public final char VARIABLE_ARRAY_INDEXING = 52;
 	
 	
-	// -------------- constraints stuff ----------------
-	// general
+	// ============= constraints stuff =================
+	/** supports nested expressions in ANY constraint */
 	public final char NESTED_EXPRESSIONS = 69;
+	
+	// -------------constraint kinds ------------------
+	/** suppors quantified sums */
+	public final int QUANTIFIED_SUM = 300;
+	/** suppors universal quantification */
+	public final int UNIVERSAL_QUANTIFICATION = 301;
+	/** suppors existential quantification  */
+	public final int EXISTENTIAL_QUANTIFICATION = 302;
+	
+	
+	// n-ary constraints
 	public final char NARY_CONJUNCTION = 70;
 	public final char NARY_DISJUNCTION = 71;
 	public final char NARY_SUM = 72;
 	public final char NARY_WEIGHTED_SUM = 73;
 	public final char NARY_MULTIPLICATION = 74;
 	
-	// nesting stuff
+	
+	
+	//---- nesting of constraints as arguments in other constraints -------
 	public final int CONSTRAINT_NESTED_IN_NEGATION = 100;
 	public final int CONSTRAINT_NESTED_IN_CONJUNCTION = 101;
 	public final int CONSTRAINT_NESTED_IN_IF = 102;
@@ -53,7 +70,7 @@ public interface TargetSolver {
 	public final int CONSTRAINT_NESTED_IN_ELEMENT = 111;
 
 	
-	// reification
+	// ----- reification of constraints ----------------
 	public final int REIFIED_ALLDIFFERENT = 76;
 	public final int REIFIED_IF = 77;
 	public final int REIFIED_LEQ = 78;
@@ -63,7 +80,11 @@ public interface TargetSolver {
 	public final int REIFIED_LEX_LEQ = 82;
 	public final int REIFIED_LEX_GEQ = 83;
 	public final int REIFIED_ELEMENT = 84;
-	// solving issues
+	
+	
+	
+	
+	// ============== solving issues =======================
 	public final char SEARCH_OVER_AUXILIARY_VARIABLES = 200;
 	
 	
@@ -102,6 +123,8 @@ public interface TargetSolver {
 	//========= CONSTRAINTS FEATURES ===============
 	
 	public boolean supportsNestedExpressions();
+	public boolean supportsConstraint(int constraint);
+	
 	public boolean supportsNaryDisjunction();
 	public boolean supportsNaryConjunction();
     public boolean supportsNarySum();
@@ -118,7 +141,23 @@ public interface TargetSolver {
     
     
     
+    //=========	SETTING FEATURES ====================
+    
+    /**
+     * Sets the feature (given by the int value) to the 
+     * boolean parameter turnOn. 
+     * 
+     * @param the int representation for the feature and 
+     * the boolean it should be set to 
+     *  
+     */
+    public void setFeature(int feature, boolean turnOn);
+    
+    
+    
+    
     // ====== OTHER STUFF ===========================
     public String toString();
+    
     
 }

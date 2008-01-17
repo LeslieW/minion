@@ -31,6 +31,13 @@ public class DummySolver extends GeneralTargetSolver {
 		
 		// constraints
 		featureMap.put(new Integer(NESTED_EXPRESSIONS),new Boolean(false));
+		
+		// directly supported constraints (i.e. there is a direct mapping 
+		// from the constraint to the equivalent constraint in the solver
+		featureMap.put(new Integer(EXISTENTIAL_QUANTIFICATION), new Boolean(false));
+		featureMap.put(new Integer(UNIVERSAL_QUANTIFICATION), new Boolean(false));
+		featureMap.put(new Integer(QUANTIFIED_SUM), new Boolean(false));
+		
 		featureMap.put(new Integer(NARY_CONJUNCTION),new Boolean(false));
 		featureMap.put(new Integer(NARY_DISJUNCTION),new Boolean(false));
 		featureMap.put(new Integer(NARY_MULTIPLICATION),new Boolean(true));
