@@ -77,6 +77,10 @@ public class Preprocessor implements PreprocessorGlobals {
     private Objective objective;
 
     private Parameters parameterArrays;
+    
+    private boolean verbose_translation;
+    
+    
     /**
      * Preprocess the specification and generate a list of decision variables 
      * and constraints.
@@ -104,8 +108,9 @@ public class Preprocessor implements PreprocessorGlobals {
     	
     	decisionVariablesNames = new ArrayList<String>();
     	constraints = new ArrayList<Expression>();
+    	verbose_translation = true;
 
-       	print_message("Starting to process parameters...");
+       	print_verbose_message("Starting to process parameters...");
        	parameterArrays = new Parameters(this.parameterVectors,
                 this.parameterMatrices,
                 this.parameterCubes,
@@ -122,32 +127,38 @@ public class Preprocessor implements PreprocessorGlobals {
          //       this.parameterCubes,
           //      this.parameterArrayOffsets);
     	
-    	print_message("Finished processing parameters...");
+    	print_verbose_message("Finished processing parameters...");
     	
        	evaluator = new ExpressionEvaluator(parameters, parameterArrays);
        	print_debug("constructed expressionEvaluator.");
     	
-       	print_message("Starting processing decision variables...");
+       	//print_message("Starting processing decision variables...");
        	// insert parameters and store them in the HashMap
     	insertDecisionVariablesInHashMap(syntaxTreeProblem.getDeclarations());
     	//orderDomainsOfDecisionVariables();
-    	print_message("Finished processing decision variables...");
+    	//print_message("Finished processing decision variables...");
     	
     	print_debug("inserted decision Variables in HashMap.");
     	
-       	print_message("Starting processing constraints...");
+       	//print_message("Starting processing constraints...");
     	// insert parameters, evaluate constraints and store them in a list
     	preprocessConstraints(syntaxTreeProblem.getExpressions());
-       	print_message("Finished processing constraints...");
-       	
-       	
-       	print_message("Starting processing objective...");
-    	this.objective = preprocessObjective(syntaxTreeProblem.getObjective());
-    	print_message("Finished processing objective...");
+       	//print_message("Finished processing constraints...");
     	
-    	print_debug("preprocessed constraints.");    	
-       
-    	print_debug("evaluated constraints:"+constraints.toString()); 
+       	print_debug("Constraint expressions: ");
+       	for(int i=0; i<constraints.size(); i++)
+       		print_debug(i+": "+constraints.get(i));
+    	
+       	
+       	print_verbose_message("Starting processing objective...");
+    	this.objective = preprocessObjective(syntaxTreeProblem.getObjective());
+    	print_verbose_message("Finished processing objective...");
+    	
+ 
+    	// is still under construction
+    	//orderConstraints();
+    		
+    	
     
     }
   
@@ -175,6 +186,24 @@ public class Preprocessor implements PreprocessorGlobals {
     public Parameters getParameterArrays() {
     	return this.parameterArrays;
     }
+    
+    
+    
+    protected void orderConstraints() throws PreprocessorException {
+    	
+    	ConstraintOrdering constraintOrderer = new ConstraintOrdering();
+    	
+    	// order each constraint separately
+    	for(int i=0; i<constraints.size(); i++ ) {
+    		Expression orderedConstraint = constraintOrderer.orderExpression(constraints.remove(i));
+    		constraints.add(i, orderedConstraint);
+    	}
+    	
+    	// order the constraints
+    	constraints = constraintOrderer.orderExpressionList(constraints);
+    	
+    }
+    
     /**
      * Evaluate the expression that is minimised or maximised (if there even is an objective)
      * @param objective
@@ -1178,7 +1207,7 @@ public class Preprocessor implements PreprocessorGlobals {
     
     
     
-    private void orderDomainsOfDecisionVariables() throws PreprocessorException  { 	
+    protected void orderDomainsOfDecisionVariables() throws PreprocessorException  { 	
     	for(int i=0; i<this.decisionVariablesNames.size(); i++) {
     		
     		Domain domain = this.decisionVariables.get(this.decisionVariablesNames.get(i));
@@ -1205,6 +1234,12 @@ public class Preprocessor implements PreprocessorGlobals {
 
     private void print_message(String s) {
     	if(PRINT_MESSAGE)
+	    System.out.println("[ Preprocessor] "+s);
+    }
+    
+    
+    private void print_verbose_message(String s) {
+    	if(this.verbose_translation)
 	    System.out.println("[ Preprocessor] "+s);
     }
     

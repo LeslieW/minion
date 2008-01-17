@@ -125,6 +125,20 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			
 			
 	}
+
+	
+	/*protected MinionIdentifier translateSpecialExpression(Expression expression)  
+		throws TranslationUnsupportedException, MinionException, 
+		ClassNotFoundException, PreprocessorException{
+		
+		
+		
+		
+		
+		return null;
+	}
+	*/
+	
 	
 	/**
 	 * translate a boolean relation Expression e into a MinionConstraint. Detects 

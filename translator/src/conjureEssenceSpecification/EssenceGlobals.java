@@ -10,8 +10,11 @@ package conjureEssenceSpecification;
 public interface EssenceGlobals {
 
     // AtomicExpression.java
-    public final int NUMBER = 0;
-    public final int BOOLEAN = 1;
+	// please keep the same ordering
+	// of the following restriction modes.
+	// offsets from the current value are ok.
+    public final int BOOLEAN = 0;
+    public final int NUMBER = 1;
     public final int IDENTIFIER = 2;
     public final int ATOMIC_SET_DOMAIN = 3;
     public final int ATOMIC_MULTISET_DOMAIN = 4;
@@ -71,6 +74,8 @@ public interface EssenceGlobals {
 
 
     // FunctionExpression.java
+    // watch out with the order here!
+    // at the moment: alldiff < element
     public final int ALLDIFF = 40;
     public final int MIN = 41;
     public final int MAX = 42;
@@ -127,6 +132,8 @@ public interface EssenceGlobals {
     public final int PARAMETER_ENUMERATION = 68;
 
     // Expression.java
+    // please keep the order of the values 
+    // of the following globals
     public final int BRACKET_EXPR = 69;
     public final int ATOMIC_EXPR = 70;
     public final int NONATOMIC_EXPR =71;
@@ -151,9 +158,11 @@ public interface EssenceGlobals {
     public final int PARTITIOND_SIZESET = 83;
 
     // Quantifier.java
-    public final int FORALL = 84;
-    public final int EXISTS = 85;
-    public final int SUM = 86;
+    // please keep the order!!
+    public final int SUM = 84;
+    public final int FORALL = 85;
+    public final int EXISTS = 86;
+    
 
     // RangeAtom.java
     public final int RANGE_EXPR = 87;
@@ -183,8 +192,9 @@ public interface EssenceGlobals {
     
     // UnitOpExpression.java
     public final int NEGATION = 101;
-    public final int ABS = 102;
-    public final int NOT = 103;
+    public final int NOT = 102;
+    public final int ABS = 103;
+   
 
     // Annotations.java
     public final int SYMMETRIE = 104;
@@ -192,21 +202,26 @@ public interface EssenceGlobals {
     public final int QANNOTATION = 106;
 
     // BiOp.java
-    public final int PLUS = 107;
-    public final int MINUS = 108;
-    public final int DIVIDE = 109;
-    public final int MULT = 110;
-    public final int POWER = 111;
-    public final int AND = 112;
-    public final int OR = 113;
-    public final int IF = 114;
-    public final int IFF = 115;
-    public final int EQ = 116;
-    public final int NEQ = 117;
-    public final int LEQ = 118;
-    public final int LESS = 119;
-    public final int GEQ = 120;
-    public final int GREATER = 121;
+    // please do not alter the order 
+    // of the operators' restriction-modes
+    public final int EQ = 107;
+    public final int NEQ = 108;
+    public final int LESS = 109;
+    public final int LEQ = 110;
+    public final int GREATER = 111;
+    public final int GEQ = 112;
+    public final int PLUS = 113;
+    public final int MINUS = 114;
+    public final int DIVIDE = 115;
+    public final int MULT = 116;
+    public final int POWER = 117;
+    public final int IFF = 118;
+    public final int IF = 119;
+    public final int OR = 120;
+    public final int AND = 121;
+ 
+    
+ 
     public final int INTERSEC = 122;
     public final int UNION = 123;
     public final int SUBSET_OP = 124;

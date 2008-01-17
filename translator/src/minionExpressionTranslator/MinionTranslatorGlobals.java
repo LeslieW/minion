@@ -9,8 +9,8 @@ public interface MinionTranslatorGlobals {
 	    
 	    public final String OUTPUT_FILENAME = "outFile.minion";
 
-    public final int INTEGER_DOMAIN_LOWER_BOUND = -999999; // 1073741824; // -2^30
-    public final int INTEGER_DOMAIN_UPPER_BOUND = 999999; //1073741824; // 2^30
+	    public final int INTEGER_DOMAIN_LOWER_BOUND = -999999; // 1073741824; // -2^30
+	    public final int INTEGER_DOMAIN_UPPER_BOUND = 999999; //1073741824; // 2^30
 
 	    public final String FLATTENED_MATRIX_NAME = "flattened_";
 	

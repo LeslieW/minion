@@ -25,15 +25,15 @@ public class NonAtomicExpression implements EssenceGlobals {
 	public Expression getExpression(){
 		return expression;
 	}
-	protected void setExpression(Expression e){
-		expression=e;
-	}
+	//protected void setExpression(Expression e){
+	//	expression=e;
+	//}
 	public Expression[] getExpressionList(){
 		return expressionList;
 	}
-	protected void setExpressionList(Expression[] es){
-		expressionList=es;
-	}
+//	protected void setExpressionList(Expression[] es){
+//		expressionList=es;
+//	}
 	
 
     public NonAtomicExpression copy() {

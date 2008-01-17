@@ -49,6 +49,7 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 								boolean useDiscreteVariables, 
 								Parameters parameterArrays) 
 		throws ClassNotFoundException, MinionException {
+		
 		this.minionVariables = new HashMap<String, MinionIdentifier>();
 		this.minionVectors = new HashMap<String, MinionIdentifier[]>();
 		this.minionMatrices = new HashMap<String, MinionIdentifier[][]>();
@@ -61,14 +62,13 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 		
 		print_debug("ExpressionTranslator: useWatchedLiterals is "+useWatchedLiterals);
 
-		//this.globalConstraintTranslator = new GlobalConstraintTranslator(minionVars, minionVecs,minionMatrixz, decisionVarsNames, this.minionModel);
 		
 		this.expressionTranslator = new QuantifiedMulopExpressionTranslator(this.minionVariables,
 				                                                    this.minionVectors,
 				                                                    this.minionMatrices, 
 				                                            minionCubes,decisionVarsNames,decisionVariables, 
 				                                            this.minionModel, useWatchedLiterals, useDiscreteVariables, parameterArrays);	
-		//this.quantificationTranslator = new QuantificationTranslator(minionVariables, minionVectors, minionMatrixz, decisionVariablesNames, minionModel);
+		
 		this.quantificationTranslator = new QuantifierTranslator(this.minionVariables, this.minionVectors, this.minionMatrices, 
 				                                                 minionCubes, decisionVariablesNames, minionModel, 
 				                                                 decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
@@ -114,9 +114,12 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 		    			  minionModel.addConstraint(constraint);
 		    		  print_debug("finished translating now...");
 			      }	
-		    	  else 
-		    		  //quantificationTranslator.translateQuantification(e);
-		    	  	  quantificationTranslator.translate(e.getQuantification());	
+		    	  else {
+		    	  	  //quantificationTranslator.translate(e.getQuantification());
+		    	     MinionConstraint constraint = quantificationTranslator.translate(e,false);
+		    	     if(constraint != null)
+		    	    	 this.minionModel.addConstraint(constraint);
+		    	  }
 		    	  break;
 		      
 		      case EssenceGlobals.QUANTIFIER_EXPR:
@@ -137,7 +140,7 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 			      ("Cannot translate expression: "+e.toString());		    	  
 		     
 		      }
-		      print_debug("lalalaal");
+		      //print_debug("lalalaal");
 		}
 		
 		

@@ -30,7 +30,7 @@ public class AtomicExpression implements EssenceGlobals {
 	public Domain getDomain(){
 		return domain;
 	}
-	public void setRestrictionMode(int rm){
+	/*public void setRestrictionMode(int rm){
 		restriction_mode = rm;
 	}
 	public void setNumber(int num){
@@ -45,7 +45,7 @@ public class AtomicExpression implements EssenceGlobals {
 	public void setDomain(Domain d){
 		domain = d;
 	}
-
+*/
     public AtomicExpression copy() {
 	if(restriction_mode == EssenceGlobals.NUMBER) {
 	    int i = number;
@@ -82,11 +82,11 @@ public class AtomicExpression implements EssenceGlobals {
      * restriction_mode 5 : # # : domain<br/>&nbsp&nbsp&nbsp
      * @param d
      */
-    public AtomicExpression (int i, Domain d){
+   /* public AtomicExpression (int i, Domain d){
 	restriction_mode = i;
 	domain = d;
     }
-    
+    */
     public String toString(){
 	
     	String output = "";

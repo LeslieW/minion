@@ -11,7 +11,7 @@ import preprocessor.PreprocessorException;
 
 import conjureEssenceSpecification.AtomicExpression;
 import conjureEssenceSpecification.NonAtomicExpression;
-//import conjureEssenceSpecification.BinaryExpression;
+import conjureEssenceSpecification.BinaryExpression;
 //import conjureEssenceSpecification.BinaryOperator;
 import conjureEssenceSpecification.Constant;
 import conjureEssenceSpecification.ExpressionConstant;
@@ -167,17 +167,17 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	
 	
 	
-	public MinionConstraint translate(Expression e, boolean reifyIt) 
+	public MinionConstraint translate(Expression e, boolean expressionWillBeReified) 
 	  throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
 		
-		this.reify = reifyIt;
+		this.reify = expressionWillBeReified;
 		
 		switch(e.getRestrictionMode()) {
 		
 		case EssenceGlobals.QUANTIFIER_EXPR:
 			
 			if(e.getQuantification().getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
-				return this.translator.translateQuantifiedSum(e.getQuantification(), reifyIt);	
+				return this.translator.translateQuantifiedSum(e.getQuantification(), expressionWillBeReified);	
 			}
 			
 			//	1. collect info
@@ -193,16 +193,193 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	
 			// translate quantification, starting with quantifier_0
 			MinionReifiableConstraint constraint = translateQuantification(0);
+			clearAll();
 			return constraint;
 		
+		case EssenceGlobals.BINARYOP_EXPR:
+			return translateBinaryQuantifiedExpression(e.getBinaryExpression(), expressionWillBeReified);
+			
 		default:
 			
-			return translator.translateSpecialExpression(e, reifyIt);
+			return translator.translateSpecialExpression(e, expressionWillBeReified);
 		
 		}	
 		
 	}
 
+	
+	/**
+	 * 
+	 * @param expression
+	 * @param expressionWillBeReified
+	 * @return
+	 * @throws TranslationUnsupportedException
+	 * @throws MinionException
+	 * @throws PreprocessorException
+	 */
+	private MinionConstraint translateBinaryQuantifiedExpression (BinaryExpression expression, boolean expressionWillBeReified)
+	    throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
+		
+		print_debug("Translating binary quantified expression:"+expression);
+		
+		int operator = expression.getOperator().getRestrictionMode();
+		Expression rightExpression = expression.getRightExpression();
+		Expression leftExpression = expression.getLeftExpression();
+		MinionIdentifier rightPart = null;
+		MinionIdentifier leftPart = null;
+		
+		print_debug("starting the translation of a binary quantified expression:*********"+expression);
+		print_debug("rightExpression:"+rightExpression);
+		print_debug("leftExpression: "+leftExpression);
+				
+		
+		//		 translate left part of the binary expression
+	     if(!translator.containsQuantification(leftExpression)){
+			
+			if(this.translator.isRelationalExpression(leftExpression)) {
+				leftPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
+						                                   translator.translateSpecialExpression(leftExpression,true));
+			} else
+				leftPart = translator.translateMulopExpression(leftExpression);
+			
+        // the expression contains quantifications
+		} else { 
+			if(leftExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
+				print_debug("translating binary right expression:"+leftExpression);
+				leftPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
+						                                   translateBinaryQuantifiedExpression(leftExpression.getBinaryExpression(),true));
+			}
+			else if(leftExpression.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
+				print_debug("translating quantified right expression:"+leftExpression);
+				
+				if(this.translator.isRelationalExpression(leftExpression)) {
+					MinionConstraint constraint = this.translate(leftExpression, true); // true: will be reified
+					if(constraint == null)
+						throw new MinionException("Reified translation returned null instead of constraint for expression:"+leftExpression);
+					leftPart = translator.reifyConstraint((MinionReifiableConstraint) constraint);
+				} 
+				else 
+					leftPart = translator.translateMulopQuantification(leftExpression.getQuantification());
+			}// unary expression?
+			else if(leftExpression.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR) 
+				leftPart = translator.translateUnaryExpression(leftExpression.getUnaryExpression());
+			// there is no other possibility (at the moment)
+		}
+		
+	     
+		
+		// translate right part of the binary expression
+	     if(!translator.containsQuantification(rightExpression)){
+			
+			if(this.translator.isRelationalExpression(rightExpression)) {
+				rightPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
+						                                   translator.translateSpecialExpression(rightExpression,true));
+			} else
+				rightPart = translator.translateMulopExpression(rightExpression);
+			
+         // the expression contains quantifications
+		} else { 
+			if(rightExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
+				print_debug("translating binary right expression:"+rightExpression);
+				rightPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
+						                                   translateBinaryQuantifiedExpression(rightExpression.getBinaryExpression(),true));
+			}
+			else if(rightExpression.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
+				print_debug("translating quantified right expression:"+rightExpression);
+				
+				if(this.translator.isRelationalExpression(rightExpression)) {
+					MinionConstraint constraint = this.translate(rightExpression, true); // true: will be reified
+					if(constraint == null)
+						throw new MinionException("Reified translation returned null instead of constraint for expression:"+rightExpression);
+					rightPart = translator.reifyConstraint((MinionReifiableConstraint) constraint);
+				} 
+				else 
+					rightPart = translator.translateMulopQuantification(rightExpression.getQuantification());
+			}// unary expression?
+			else if(rightExpression.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR) 
+				rightPart = translator.translateUnaryExpression(rightExpression.getUnaryExpression());
+			// there is no other possibility (at the moment)
+		}
+	
+		print_debug("translated right expression:"+rightExpression);	
+		
+		
+		if(leftPart == null)
+			throw new TranslationUnsupportedException("Cannot translate nested expression :"+leftExpression);
+		if(rightPart == null)
+			throw new TranslationUnsupportedException("Cannot translate nested expression :"+rightExpression);
+		
+		
+		print_debug("NNNNNNNNNNNNOOOOOWWW starting translating the rest according to the opertars");
+		
+		switch(operator) {
+		
+		case EssenceGlobals.EQ:
+			return new MinionEqConstraint(leftPart,rightPart);
+		
+		case EssenceGlobals.NEQ:
+			if(!expressionWillBeReified)
+				return new MinionDisEqConstraint(leftPart,rightPart);
+			else { // cannot reify diseq yet
+				MinionBoolVariable reifiedVar = translator.reifyConstraint((MinionReifiableConstraint) new MinionEqConstraint(leftPart,rightPart));
+				return new MinionEqConstraint(reifiedVar, new MinionConstant(0));
+			}
+				
+		case EssenceGlobals.LEQ:
+			if(!expressionWillBeReified)
+				return new MinionInEqConstraint(leftPart,rightPart,new MinionConstant(0));
+			else  // watched literals: we will reify it and watched lit sums are not reifiable yet 
+				return new MinionSumLeqConstraint(new MinionIdentifier[] {leftPart}, rightPart, this.useWatchedLiterals && false);
+			
+		case EssenceGlobals.GEQ:
+			if(!expressionWillBeReified)
+				return new MinionInEqConstraint(rightPart,leftPart,new MinionConstant(0));
+			else  // watched literals: we will reify it and watched lit sums are not reifiable yet 
+				return new MinionSumGeqConstraint(new MinionIdentifier[] {leftPart}, rightPart, this.useWatchedLiterals && false);
+			
+		case EssenceGlobals.LESS:
+			if(!expressionWillBeReified)
+				return new MinionInEqConstraint(leftPart,rightPart,new MinionConstant(-1));
+			else  // watched literals: we will reify it and watched lit sums are not reifiable yet
+				  // r < l     =    r+1 <= l
+				return new MinionSumLeqConstraint(new MinionIdentifier[] {leftPart, new MinionConstant(1)}, rightPart, 
+						                                                         this.useWatchedLiterals && false);
+		case EssenceGlobals.GREATER:
+			if(!expressionWillBeReified)
+				return new MinionInEqConstraint(rightPart,leftPart, new MinionConstant(-1));
+			else { // r > l    =   r+1 <= l
+				return new MinionSumGeqConstraint(new MinionIdentifier[] {leftPart, new MinionConstant(1)}, rightPart, 
+                        this.useWatchedLiterals && false);
+			}
+			
+		case EssenceGlobals.AND:
+			if(!expressionWillBeReified) {
+				return new MinionProductConstraint(leftPart,rightPart, new MinionConstant(1));
+			}
+			else { // r /\ l   =   r + l = 2   (both should be booleans)
+				return new MinionSumConstraint(new MinionIdentifier[] {leftPart, rightPart}, new MinionConstant(2),
+						          this.useWatchedLiterals && false);
+			}
+				
+		case EssenceGlobals.OR:
+			return new MinionSumGeqConstraint(new MinionIdentifier[] {leftPart, rightPart}, 
+											  new MinionConstant(1), 
+											  this.useWatchedLiterals && !expressionWillBeReified);	
+			
+		case EssenceGlobals.IF: // r => l     =     r <= l
+			if(!expressionWillBeReified)
+				return new MinionInEqConstraint(leftPart, rightPart, new MinionConstant(0));
+			else return new MinionSumLeqConstraint(new MinionIdentifier[] {leftPart}, rightPart, false);
+			
+		case EssenceGlobals.IFF:
+			return new MinionEqConstraint(leftPart,rightPart);
+		
+		
+		default:
+			throw new TranslationUnsupportedException("Cannot translate constraint '"+expression+"' because of operator :"+expression.getOperator());
+		}
+	}
+	
 	
 	
 	private void removeUnusedBindingVariables() 

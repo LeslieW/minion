@@ -8,6 +8,7 @@ import minionModel.*;
 import conjureEssenceSpecification.Domain;
 import conjureEssenceSpecification.Expression;
 import conjureEssenceSpecification.EssenceGlobals;
+//import conjureEssenceSpecification.BinaryExpression;
 
 import preprocessor.Parameters;
 import preprocessor.PreprocessorException;
@@ -88,6 +89,102 @@ public class RelationalExpressionTranslator extends MulopExpressionTranslator {
 		
 	}
 		
+	/**
+	 * Returns true, if the expression would be translated by a Constraint
+	 * (and cannot be represent by a variable)
+	 * and false, if the constraint would be represented by a variable
+	 * 
+	 * @param expression
+	 * @return
+	 */
+	protected boolean isRelationalExpression(Expression expression) {
+		
+		
+		switch(expression.getRestrictionMode())  {
+	
+		
+		case EssenceGlobals.BINARYOP_EXPR:
+		
+			int operator = expression.getBinaryExpression().getOperator().getRestrictionMode();
+		
+			if(operator == EssenceGlobals.MULT ||
+					operator == EssenceGlobals.PLUS ||
+					operator == EssenceGlobals.MINUS ||
+					operator == EssenceGlobals.DIVIDE ||
+					operator == EssenceGlobals.POWER)
+				return false;
+		
+			else if(operator == EssenceGlobals.EQ ||
+					operator == EssenceGlobals.NEQ ||
+					operator == EssenceGlobals.LEQ ||
+					operator == EssenceGlobals.GEQ ||
+					operator == EssenceGlobals.GREATER ||
+					operator == EssenceGlobals.LESS ||
+					operator == EssenceGlobals.AND ||
+					operator == EssenceGlobals.OR ||
+					operator == EssenceGlobals.IF ||
+					operator == EssenceGlobals.IFF)
+				return true;
+			else return false; //well, what else?
+			
+			
+		case EssenceGlobals.ATOMIC_EXPR:
+			return false;
+			
+		case EssenceGlobals.NONATOMIC_EXPR:
+			return false;
+			
+		case EssenceGlobals.UNITOP_EXPR:
+			return false;
+			
+		case EssenceGlobals.QUANTIFIER_EXPR:
+			//int quantifier = expression.getQuantification().getQuantifier().getRestrictionMode();
+			//if(quantifier == EssenceGlobals.FORALL ||
+			//   quantifier == EssenceGlobals.EXISTS)
+			//	return true;
+			//else {// the quantifier is a sum
+				return isRelationalExpression(expression.getQuantification().getExpression());
+			//}
+		}
+		
+		return false;
+	}
+	
+	
+	/**
+	 * returns true, if the expression e contains a quantified expression
+	 * (on a certain level)
+	 * @param e
+	 * @return
+	 */
+	protected boolean containsQuantification(Expression e) {
+		
+		switch(e.getRestrictionMode()) {
+			
+			
+		case EssenceGlobals.ATOMIC_EXPR:
+			return false;
+		
+		case EssenceGlobals.NONATOMIC_EXPR:
+			return false;
+			
+		case EssenceGlobals.UNITOP_EXPR:
+			return containsQuantification(e.getUnaryExpression().getExpression());
+			
+		case EssenceGlobals.BINARYOP_EXPR:
+			return containsQuantification(e.getBinaryExpression().getRightExpression()) ||
+			       containsQuantification(e.getBinaryExpression().getLeftExpression());
+			
+		case EssenceGlobals.QUANTIFIER_EXPR:
+			return true;
+			
+			
+		default: return false;
+		
+		}
+	
+	}
+	
 	/**
 	 * 
 	 * @param constraint

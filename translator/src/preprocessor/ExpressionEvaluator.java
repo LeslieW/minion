@@ -846,9 +846,13 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
     private Expression evalBinExpressionAdvanced(BinaryExpression e) 
 		throws PreprocessorException {
 	
+    	print_debug("Advanced evaluation of binary expression:"+e);
+    	
 	// ATOM op1 (E1 op2 E2)
 	if((e.getLeftExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) &&
 	   (e.getRightExpression().getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR  )){
+		print_debug("I have a ATOM op1 (E1 op2 E2) expression:"+e);
+		
 	    AtomicExpression ae_left = e.getLeftExpression().getAtomicExpression();
 	    BinaryExpression binExp_r = (evalBinExpressionAdvanced(e.getRightExpression().getBinaryExpression())).getBinaryExpression();
 	    
@@ -860,6 +864,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 		// NUM1 op1 (NUM2 op2 E) 		    
 		if(binExp_r.getLeftExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {		
 		    if(binExp_r.getLeftExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.NUMBER) {
+				print_debug("I have a NUM op1 (NUM2 op2 E2) expression:"+e);
 			
 			switch(op1.getRestrictionMode()) {			    
 			    
@@ -925,7 +930,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 		// NUM1 op1 (E op2 NUM2)
 		else if(binExp_r.getRightExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {		
 		    if(binExp_r.getRightExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.NUMBER) {
-			
+				print_debug("I have a NUM1 op1 (E1 op2 NUM2) expression:"+e);
 			
 			switch(op1.getRestrictionMode()) {
 			    
@@ -1143,11 +1148,19 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	// (E1 op2 E2) op1 ATOM 
 	if((e.getRightExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) &&
 	   (e.getLeftExpression().getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR  )){
+		print_debug("I have a (E1 op2 E2) op1 atom expression:"+e);
+		
 	    AtomicExpression ae_right = e.getRightExpression().getAtomicExpression();
+	    //print_debug("aeright expression :"+ae_right);
 	    BinaryExpression binExp_l = (evalBinExpressionAdvanced(e.getLeftExpression().getBinaryExpression())).getBinaryExpression();
 	
+	    print_debug("aeright expression :"+ae_right);
+	    if(ae_right.getRestrictionMode() != EssenceGlobals.NUMBER)
+	    	print_debug("ae_right does not equal NUMBER, but:"+ae_right.getRestrictionMode());
+	    
 	    // (E1 op2 E2) op1 NUM 
 	    if(ae_right.getRestrictionMode() == EssenceGlobals.NUMBER){
+	    	print_debug("I have a (E1 op2 E2) op1 NUM expression :"+e);
 		BinaryOperator op1 = e.getOperator();
 		BinaryOperator op2 = binExp_l.getOperator();
 		
@@ -1208,7 +1221,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 		if(binExp_l.getRightExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {		
 		    if(binExp_l.getRightExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.NUMBER) {
 			
-			
+			print_debug("I have a (E1 op2 NUM2) op1 Num1 expressions ");
 			switch(op1.getRestrictionMode()) {
 			    
 			    
@@ -1228,6 +1241,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 			    }			
 			    // (E + NUM2) + NUM1 --->  eval(NUM1 + NUM2) + E
 			    else if (op2.getRestrictionMode() == EssenceGlobals.PLUS) {
+			    	
 				Expression expr =  new Expression(new AtomicExpression
 								  (ae_right.getNumber() +
 								   binExp_l.getRightExpression().getAtomicExpression().getNumber() ));
@@ -1246,7 +1260,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 				return new Expression(e);
 			    }
 			    else throw new PreprocessorException
-				     ("Unfeasible operator in binary expression: "+e.toString());
+				     ("Unfeasible operator in binary expression:  "+e.toString());
 			
 			    
 			    

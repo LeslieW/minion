@@ -45,7 +45,7 @@ public class BinaryExpression {
 	
 	public String toString(){
 		//return "(left:"+expleft.toString()+")" + biop.toString() + "(right:"+expright.toString()+")";
-		return expleft.toString() + biop.toString() + expright.toString();
+		return biop.toString() +"("+expleft.toString() +", "+ expright.toString()+")";
 	}
 
 }
