@@ -190,6 +190,8 @@ public class RelationalExpressionTranslator extends MulopExpressionTranslator {
 		case EssenceGlobals.QUANTIFIER_EXPR:
 			return true;
 			
+		case EssenceGlobals.BRACKET_EXPR:
+			return containsQuantification(e.getExpression());
 			
 		default: return false;
 		

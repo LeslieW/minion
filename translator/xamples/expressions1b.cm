@@ -1,0 +1,15 @@
+ESSENCE' 1.0
+
+find a,b,c,d,e,f : int(1..10)
+
+such that 
+  a + b + c + d - e + f = 10,
+  a = 2
+$   a + b * c + d - e + f = 10
+$   a + b - e - d - c + f = 10
+$   a + b * e + d - e * f * a = 10
+ $ = ( - ( + ( + (a,  * (b, e)), d),  * ( * (e, f), a)), 10 ) 
+ $ would give ordered:  = ( - ( + ( + (a,  * (b, e)), d),  * ( a, * (e, f)) ), 10 ) 
+
+ $  a \/ b \/ e /\ d \/ e \/ f /\ a = 10
+ $ ( OR ( OR ( OR ( OR (a, b),  AND (e, d)), e),  AND (f, a)), 10 )

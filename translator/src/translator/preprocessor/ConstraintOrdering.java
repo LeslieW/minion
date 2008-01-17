@@ -32,6 +32,8 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 	/** buffers certain expressions during the ordering of binary expressions */
 	protected ArrayList<Expression> expressionBuffer;
 	
+	
+	
 	//private ArrayList<Expression> constraints;
 	//private Objective objective;
 	//private Parameters parameterArrays;
@@ -115,12 +117,23 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 			ArrayList<Expression> plusList = addRightMinusPart(expression.getRightExpression(), new ArrayList<Expression>());
 			print_debug("Did the right part thing. Have +list:"+plusList+", and -list:"+this.expressionBuffer);
 			
+			// copy the expressionBuffer in case it needs to be reused
+			ArrayList<Expression> minusExpressions = new ArrayList<Expression>();
+			for(int i=0; i<this.expressionBuffer.size(); i++)
+				minusExpressions.add(this.expressionBuffer.remove(i));
+			
+			
 			plusList = addLeftMinusPart(orderExpression(expression.getLeftExpression()), plusList);
+		
 			
 			Expression orderedPlusExpression = buildExpressionFromList(plusList, EssenceGlobals.PLUS);
-			Expression orderedMinusExpression = buildExpressionFromList(orderExpressionList(this.expressionBuffer),
+			Expression orderedMinusExpression = buildExpressionFromList(orderExpressionList(minusExpressions),
 					                                                    EssenceGlobals.MINUS);
 			
+			//this.expressionBuffer.clear();
+			print_debug("ORDER MINUS expression: "+new Expression(new BinaryExpression(orderedPlusExpression,
+					 							       new BinaryOperator(EssenceGlobals.MINUS),
+					                                   orderedMinusExpression)));
 			return new Expression(new BinaryExpression(orderedPlusExpression,
 					 							       new BinaryOperator(EssenceGlobals.MINUS),
 					                                   orderedMinusExpression));
@@ -736,6 +749,7 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 	
 	
 	else {  // LEFT  - RIGHT
+		print_debug("just add the expression to the list:"+leftExpression);
  		expressionList.add(leftExpression);
 	}
 	

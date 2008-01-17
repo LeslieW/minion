@@ -98,11 +98,10 @@ public class MulopExpressionTranslator extends AtomExpressionTranslator {
 		
 		// check if we have already translated this expression
 		ExpressionRepresentation alreadyTranslatedExpression = this.subExpressionCollection.getExpressionRepresentation(e);
-		if(alreadyTranslatedExpression != null){
+		if(alreadyTranslatedExpression != null &&
+			e.getRestrictionMode() != EssenceGlobals.QUANTIFIER_EXPR){
 			return alreadyTranslatedExpression.getVariable();
 		}
-		
-		
 		
 		
 		MinionIdentifier translatedExpression = null;

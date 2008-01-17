@@ -1,0 +1,40 @@
+ESSENCE' 1.0
+
+given r : int(1..1000)  $ upper bound for amount of rings
+given n : int(1..1000)  $ amount of clients
+
+$ we have double entries here because of the symmetric structure!
+given demand : matrix indexed by [int(1..n),int(1..n)] of bool
+given capacity_nodes : matrix indexed by [int(1..r)] of int(1..n)
+
+find rings : matrix indexed by [int(1..r),int(1..n)] of bool
+
+
+minimising sum ring : int(1..r) . 
+           sum client : int(1..n) . 
+              rings[ring,client]
+
+such that
+
+   $ if there is a demand between 2 nodes, then they both have to
+   $ be installed on at least one ring
+
+   forall client1,client2 : int(1..n) .
+      (client1 < client2) => $ we need this to "get rid" of symmetric
+                             $ entries in 'demand'
+      ((demand[client1,client2] = 1) =>
+           exists ring : int(1..r) .
+                 rings[ring,client1] + rings[ring, client2] >= 2) ,
+
+  
+   $ capacity of each ring must not be overdrawn      
+
+   forall ring : int(1..r) .
+        sum client : int(1..n) . 
+              rings[ring, client] <= capacity_nodes[ring] $,
+
+
+   $ the sum over all ADMs has an upper bound
+   sum ring : int(1..r) . 
+        sum client : int(1..n) . 
+              rings[ring,client] <= n*(n-1)

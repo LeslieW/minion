@@ -1,10 +1,11 @@
+ 
 package translator.minionExpressionTranslator;
 
 
 public interface MinionTranslatorGlobals {
 
 
-	    public final boolean DEBUG = true;
+	    public final boolean DEBUG = false;
 	    public final boolean PRINT_MESSAGE = true;
 	    
 	    public final String OUTPUT_FILENAME = "outFile.minion";

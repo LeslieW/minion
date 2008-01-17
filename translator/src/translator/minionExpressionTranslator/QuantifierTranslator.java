@@ -151,6 +151,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	     throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
 		
 		if(e.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+			print_debug("SUMMMMM constraint go to the translator:"+e);
 			this.translatorMinionModel.addConstraint(this.translator.translateQuantifiedSum(e, false));
 			return;
 		}
@@ -250,6 +251,12 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		MinionIdentifier rightPart = null;
 		MinionIdentifier leftPart = null;
 		
+		while(rightExpression.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+			rightExpression = rightExpression.getExpression();
+		
+		while(leftExpression.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+			leftExpression = leftExpression.getExpression();
+		
 		print_debug("starting the translation of a binary quantified expression:*********"+expression);
 		print_debug("rightExpression:"+rightExpression);
 		print_debug("leftExpression: "+leftExpression);
@@ -257,7 +264,8 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		
 		//		 translate left part of the binary expression
 	     if(!translator.containsQuantification(leftExpression)){
-			
+	    	 print_debug("The left expression doesnot contain a quantification");
+	    	 
 			if(this.translator.isRelationalExpression(leftExpression)) {
 				leftPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
 						                                   translator.translateSpecialExpression(leftExpression,true));
@@ -266,6 +274,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			
         // the expression contains quantifications
 		} else { 
+			print_debug("The left expression contains a quantification");
 			if(leftExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
 				print_debug("translating binary right expression:"+leftExpression);
 				leftPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
@@ -292,7 +301,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		
 		// translate right part of the binary expression
 	     if(!translator.containsQuantification(rightExpression)){
-			
+	    	 print_debug("The right expression does not contain a quantification:"+rightExpression);
 			if(this.translator.isRelationalExpression(rightExpression)) {
 				rightPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
 						                                   translator.translateSpecialExpression(rightExpression,true));
@@ -300,7 +309,11 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				rightPart = translator.translateMulopExpression(rightExpression);
 			
          // the expression contains quantifications
-		} else { 
+		} else {
+			print_debug("The right expression contains a quantification:"+rightExpression);
+			
+			
+			
 			if(rightExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
 				print_debug("translating binary right expression:"+rightExpression);
 				rightPart = (MinionIdentifier) translator.reifyConstraint((MinionReifiableConstraint) 
@@ -310,13 +323,16 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				print_debug("translating quantified right expression:"+rightExpression);
 				
 				if(this.translator.isRelationalExpression(rightExpression)) {
+					print_debug("RELATIONAL EXPRESSION, part quantified:"+rightExpression);
 					MinionConstraint constraint = this.translate(rightExpression, true); // true: will be reified
 					if(constraint == null)
 						throw new MinionException("Reified translation returned null instead of constraint for expression:"+rightExpression);
 					rightPart = translator.reifyConstraint((MinionReifiableConstraint) constraint);
 				} 
-				else 
+				else {
+					print_debug("NON_RELATIONAL expression:"+rightExpression);
 					rightPart = translator.translateMulopQuantification(rightExpression.getQuantification());
+				}
 			}// unary expression?
 			else if(rightExpression.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR) 
 				rightPart = translator.translateUnaryExpression(rightExpression.getUnaryExpression());
@@ -898,6 +914,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				//	}
 					return identifier;
 				}
+			
 				else throw new TranslationUnsupportedException
 				("Unfeasible sum expression: "+constraint.toString()+". Needs to contain a relational operator (=,>=,<=,<,>,!=).");
 	

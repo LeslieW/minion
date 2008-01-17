@@ -1,0 +1,132 @@
+$ Peacable Army of queens
+$
+$ 'occurrence' representation 
+$  extended with lines constraints (on rows and cols)
+$  (the lines constraint did not improve the model!)
+
+ESSENCE' 1.0
+
+
+
+$ board width
+given          n : int(1..1000)
+letting        N be domain int(1..n)
+
+$ 0: empty field, 1:white queen, 2: black queen
+find           board : matrix indexed by [N,N] of int(0..2)
+
+$ 0 : there is no white queen on row/col, 
+$ 1 : there is no black queen on row/col
+find           rows,cols : matrix indexed by[N] of bool
+find           amountOfQueens : int(1..(n*n)/2)     
+
+
+maximising     amountOfQueens
+
+
+such that
+   
+   $ we have the same amount of white as black queens
+   sum row : N .
+       sum col : N .
+          (board[row,col] = 1) = amountOfQueens,
+
+   sum row : N .
+       sum col : N . 
+           (board[row,col] = 2) = amountOfQueens,
+
+
+   $ if we have a white queen at position row and column
+   $ there is no field on the same row/column/diagonal
+   $ that holds a black queen
+   forall row,col : N . 
+      (board[row, col] = 1) =>
+            (forall i : N .
+               ((i != row) =>
+                  (board[i,col] < 2))
+               /\
+               ((i!=col) =>
+                  (board[row,i] < 2))
+	       /\ 
+               (((row+i <= n) /\ (col+i <= n)) =>
+                (board[row+i,col+i] < 2)	  
+		)  
+	       /\ 
+               (((row-i > 0) /\ (col-i > 0)) =>
+                (board[row-i,col-i] < 2)	  
+		)  
+	       /\ 
+               (((row+i <= n) /\ (col-i > 0)) =>
+                (board[row+i,col-i] < 2)	  
+		)  
+	       /\ 
+               (((row-i > 0) /\ (col+i <= n)) =>
+                (board[row-i,col+i] < 2)	  
+		)),  
+
+   $ if we have a black queen at position row and column
+   $ there is no field on the same row/column/diagonal
+   $ that holds a white queen
+
+   $ we cannot use != 1 since diseq is not reifiable
+
+   forall row,col : N . 
+      (board[row, col] = 2) =>
+            (forall j : N .
+               ((j != row) =>
+                  ((board[j,col] < 1) \/ (board[j,col] > 1) ))
+               /\
+               ((j!=col) =>
+                  ((board[row,j] < 1) \/ (board[row,j] > 1)))
+	       /\ 
+               (((row+j <= n) /\ (col+j <= n)) =>
+                ((board[row+j,col+j] < 1) \/ (board[row+j,col+j] > 1))	  
+		)  
+	       /\ 
+               (((row-j > 0) /\ (col-j > 0)) =>
+                ((board[row-j,col-j] < 1) \/ (board[row-j,col-j] > 1))	  
+		)  
+	       /\ 
+               (((row+j <= n) /\ (col-j > 0)) =>
+                ((board[row+j,col-j] < 1) \/  (board[row+j,col-j] > 1))	   
+		)  
+	       /\ 
+               (((row-j > 0) /\ (col+j <= n)) =>
+                ((board[row-j,col+j] < 1) \/   (board[row-j,col+j] > 1)) 	  
+		)),  
+
+
+
+
+   $ If the square (i,j) is occupied by a white/black queen, the ith
+   $ row and the jth col is set to white/black 
+
+   $ board: 1: white queen       rows: 1: there is no black queen
+   forall row, col : N . 
+	(board[row, col] = 1) => 
+                  ((rows[row] = 1) /\  
+                   (cols[col] = 1)),
+
+   $ board: 2: black queen       rows: 0: there is no white queen
+   forall row, col : N . 
+	(board[row, col] = 2) => 
+                  ((rows[row] = 0) /\  
+                   (cols[col] = 0))
+
+
+
+
+$   forall row, col : N .
+$      board[row,col] - rows[row] != 1,
+
+$  forall row, col : N .
+$      board[row,col] - cols[col] != 1
+
+
+
+
+
+   $ if a row is white/black there must not be any square on it that
+   $ is black/white 
+
+

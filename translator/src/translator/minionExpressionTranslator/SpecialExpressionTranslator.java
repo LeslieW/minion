@@ -87,6 +87,15 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 		throws TranslationUnsupportedException, MinionException, 
 			ClassNotFoundException, PreprocessorException {
 		
+		// check if we have already translated this expression
+		ExpressionRepresentation alreadyTranslatedExpression = this.subExpressionCollection.getExpressionRepresentation(e);
+		if(alreadyTranslatedExpression != null &&
+			e.getRestrictionMode() != EssenceGlobals.QUANTIFIER_EXPR &&
+			!willBeReified){
+			return null;
+		}
+		
+		
 		//MinionConstraint minionConstraint = null;
 		print_debug("Translatin special expression "+e.toString()+" that will be reified:"+willBeReified);
 		
@@ -804,8 +813,13 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 		
 		print_debug("translated simple expression, now heading for complex expression...");
 		
+		while(complexExpression.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+				complexExpression = complexExpression.getExpression();
+		
+		
+		
 			switch(complexExpression.getRestrictionMode()) {
-			    
+			
 			case EssenceGlobals.BINARYOP_EXPR:
 			    
 			    MinionIdentifier[] ids = new MinionIdentifier[2];
@@ -847,9 +861,13 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 								 						 ids[0].getUpperBound()*ids[1].getLowerBound(),
 								 						 ids[0].getLowerBound()*ids[1].getUpperBound()}
                        );			    		
-			    		MinionBoundsVariable freshVariable = new MinionBoundsVariable(lowerBound,
+			    		/*MinionBoundsVariable freshVariable = new MinionBoundsVariable(lowerBound,
 			    				                                                      upperBound,
-			    				                                                      "freshVariable"+noTmpVars++);
+			    				                                                      "freshVariable"+noTmpVars++);*/
+			    		MinionBoundsVariable freshVariable =  (MinionBoundsVariable) 
+			    											this.variableCreator.addFreshVariable(lowerBound, 
+			    														                          upperBound,
+			    															"freshVariable"+noTmpVars++, false); // no discrete variable
 			    		minionModel.addProductConstraint(ids[0],ids[1],freshVariable);
 			    		return new MinionEqConstraint(freshVariable, id3);
 			    	}
@@ -982,6 +1000,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				//MinionIdentifier simpleIdentifier = translateAtomExpression(simpleExpression);
 				MinionIdentifier complexIdentifier = translateUnaryExpression(complexExpression.getUnaryExpression());
 			    return new MinionEqConstraint(id3,complexIdentifier);
+			    
+			
 
 			default:
 			    throw new TranslationUnsupportedException

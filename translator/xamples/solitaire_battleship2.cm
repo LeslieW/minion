@@ -1,0 +1,380 @@
+$ Solitaire Battleship
+$
+
+ESSENCE' 1.0
+
+letting   noSubmarines   be 4
+letting   noDestroyers   be 3
+letting   noCruisers     be 2
+letting   noBattleships  be 1
+
+letting   GRID_RANGE     be domain int(1..10)
+letting   HINT_STATUS    be domain int(0..7)
+$ hint status:   0:water,  1:circle, 2:middle, 3:top,
+$                4:bottom, 5:right,  6:left, 7:no hint
+letting   SQUARE_STATUS  be domain int(0..4)
+$ square status: 0:water, 1:submarine, 2:destroyer
+$                3: cruiser, 4: battleship                        
+
+
+$ the amount of occupied squares for each column/row
+given   column_tallies: matrix indexed by [GRID_RANGE] of GRID_RANGE
+given   row_tallies:    matrix indexed by [GRID_RANGE] of GRID_RANGE
+given   hint :         matrix indexed by [GRID_RANGE, GRID_RANGE] of HINT_STATUS
+
+find    grid  :         matrix indexed by [GRID_RANGE, GRID_RANGE] of SQUARE_STATUS
+
+such that
+    $ amount of occupied sqares in each row
+    forall row : GRID_RANGE .
+        sum  col: GRID_RANGE .
+            (grid[row,col] >=1)  = row_tallies[row], 
+
+    $ amount of occupied sqares in each column
+    forall col : GRID_RANGE .
+       sum row : GRID_RANGE .
+            (grid[row,col] >= 1) = column_tallies[col],
+
+    $ if we have a water hint, then the square is empty	    
+    forall col,row : GRID_RANGE .
+       (hint[row,col] = 0) =>
+          (grid[row,col] = 0),
+
+    $  W W W 
+    $  W 1 W 
+    $  W W W 
+    $
+    $ if we have a circle hint (i.e. a submarine) then the square
+    $ is occupied an all other square are around are empty
+    forall col,row : GRID_RANGE .
+       (hint[row,col] = 1) =>             $ hint 1:circle
+          (grid[row,col] = 1), 
+ 
+    forall row,col : GRID_RANGE .
+       (hint[row,col] = 1) =>            
+	  $ all square around the submarine are water
+         (   ((col-1 >0) => 
+      	   (grid[row-1,col-1] =   0)) /\
+             (((row-1 >0) /\ (col-1 >0)) => 
+           (grid[row-1,col-1] = 0)) /\
+             (((row+1 <11) /\ (col-1 >0)) => 
+           (grid[row-1,col+1] = 0)) /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   0)) /\
+             ((row-1 >0) => 
+           (grid[row-1,col] =   0)) /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   0)) /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = 0)) /\
+             (((row-1 >0) /\ (col+1 <11)) => 
+           (grid[row-1,col+1] = 0))
+          ),
+
+
+    $  W ? W
+    $  ?>1 ?
+    $  W ? W	
+    $            
+    $ we have a middle-hint (there is still more to deduct from that)
+    forall row,col : GRID_RANGE .
+        (hint[row,col] = 2) =>	           $hint 2:middle
+           ((grid[row,col] >= 2) /\
+	   
+	      $ the diagonal squares are water for sure
+              (((row-1 >0) /\ (col-1 >0)) => 
+             (grid[row-1,col-1] = 0)) /\ 
+               (((row+1 <11) /\ (col-1 >0)) => 
+             (grid[row+1,col-1] = 0)) /\ 
+               (((row+1 <11) /\ (col+1 <11)) => 
+             (grid[row+1,col+1] = 0)) /\ 
+               (((row-1 >0) /\ (col+1 <11)) => 
+             (grid[row-1,col+1] = 0)) /\
+	     
+              $ the battleships is either horizontal or vertical
+             (  (    ((row-1 >0) =>
+                 (grid[row-1,col] >= 2)) /\
+                     ((row+1 <11) => 
+                 (grid[row+1,col] >= 2)))
+             \/ (  ((col+1 <11) => 
+                 (grid[row,col+1] >= 2)) /\
+                   ((col-1 >0) =>
+                 (grid[row,col-1] >= 2)))
+              )
+           ),
+              
+
+    $ W W W    
+    $ W T W 
+    $ W 2 W
+    $ W ? W
+    forall row,col : GRID_RANGE .
+        (hint[row,col] = 3) =>          $hint 3:top
+           ((grid[row,col] >= 2) /\
+              ((row+1<11) =>
+            (grid[row+1,col] >= 2)) /\
+
+             (((col-1 >0) /\ (row+2 <11)) => 
+           (grid[row+2,col-1] = 0)) /\
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = 0)) /\
+             ((col-1 >0) => 
+      	   (grid[row,col-1] =   0)) /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = 0)) /\
+             ((row-1 >0) => 
+           (grid[row-1,col] =   0)) /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = 0)) /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   0)) /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = 0)) /\
+             (((col+1 <11) /\ (row+2 <11)) => 
+           (grid[row+2,col+1] = 0))
+
+            
+           ),
+
+
+    $ W ? W    
+    $ W 2 W 
+    $ W B W
+    $ W W W
+    forall row,col : GRID_RANGE .
+        (hint[row,col] = 4) =>          $hint 4:bottom
+           ((grid[row,col] >=2) /\
+              ((row-1>0) =>
+            (grid[row-1,col] >= 2)) /\
+
+
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = 0)) /\
+             ((col-1 >0) => 
+      	   (grid[row,col-1] =   0)) /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = 0)) /\
+             (((col-1 >0) /\ (row-2 >0)) => 
+           (grid[row-2,col-1] = 0)) /\
+             (((col+1 <11) /\ (row-2 >0)) => 
+           (grid[col+1,row-2] = 0)) /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = 0)) /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   0)) /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = 0)) /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   0))
+            
+           ),
+        
+
+   $ W W W W
+   $ ? x R W
+   $ W W W W
+   $  
+      forall row,col : GRID_RANGE .
+        (hint[row,col] = 5) =>          $hint 5:right
+           ((grid[row,col] >= 2) /\
+              ((col-1>0) =>
+            (grid[row,col-1] >= 2)) /\
+
+
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = 0)) /\
+             (((col-2 >0) /\ (row+1 <11)) => 
+      	   (grid[row+1,col-2] = 0)) /\
+             (((col-2 >0) /\ (row-1 >0)) => 
+      	   (grid[row-1,col-1] = 0)) /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = 0)) /\
+             ((row-1 >0) => 
+           (grid[row-1,col] = 0)) /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = 0)) /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   0)) /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = 0)) /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   0))
+            
+           ),
+
+
+
+
+   $ W W W W
+   $ W L x ?
+   $ W W W W
+   $  
+      forall row,col : GRID_RANGE .
+        (hint[row,col] = 6) =>          $hint 5:left
+           ((grid[row,col] >= 2) /\
+              ((col+1 <11) =>
+            (grid[row,col+1] >= 2)) /\
+
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = 0)) /\
+             ((col-1 >0) => 
+           (grid[row,col-1] = 0)) /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = 0)) /\
+             ((row-1 >0) => 
+           (grid[row-1,col] = 0)) /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = 0)) /\
+             (((col+2 <11) /\ (row+1 <11)) => 
+      	   (grid[row+1,col+2] = 0)) /\
+             (((col+2 <11) /\ (row-1 >0)) => 
+      	   (grid[row-1,col+2] = 0)) /\
+             (((row+1 <11) /\ (col+1 <11)) => 
+           (grid[row+1,col+1] = 0)) /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   0))
+            
+           ),
+
+
+  $       - no ship may be going around the corner (no edges)
+         
+
+  $ amount of submarines/destroyers/cruisers/battleships
+  sum row,col : GRID_RANGE .
+     (grid[row,col] = 1) = noSubmarines,
+
+  sum row,col : GRID_RANGE .
+     (grid[row,col] = 2) = noDestroyers*2,
+
+  sum row,col : GRID_RANGE .
+     (grid[row,col] = 3) = noCruisers*3,
+
+  sum row,col : GRID_RANGE .
+     (grid[row,col] = 4) = noBattleships*4,
+
+
+  $  no ship around the corner, in one straight line..
+
+
+  forall row,col : GRID_RANGE .
+     (grid[row,col] = 2) =>
+        (
+          $  0 0 0        
+          $  0 x 0 
+          $  0 2 0
+          $  0 0 0 
+         (   ((row+1 <11) =>
+         (grid[row+1,col] = 2)) /\
+
+            ((row-1 >0) =>
+         (grid[row-1,col] = 0)) /\
+            (((col+1 <11) /\ (row-1 >0)) =>
+         (grid[row-1,col+1] = 0)) /\
+            ((col+1 <11) =>
+         (grid[row,col+1] = 0)) /\
+            (((row+1 <11) /\ (col+1 <11)) =>
+         (grid[row+1,col+1] = 0)) /\
+            (((row+2 <11) /\ (col+1 <11)) =>
+         (grid[row+2,col+1] = 0)) /\
+            ((row+2 <11) =>
+         (grid[row+2,col] = 0)) /\
+            (((row+2 <11) /\ (col-1 >0)) =>
+         (grid[row+2,col-1] = 0)) /\
+            (((row+1 <11) /\ (col-1 >0)) =>
+         (grid[row+1,col-1] = 0)) /\
+            ((col-1 >0) =>
+         (grid[row,col-1] = 0)) /\
+            (((col-1 >0) /\ (row-1 >0)) =>
+         (grid[row-1,col-1] = 0))
+
+        ) \/
+          $  0 0 0        
+          $  0 2 0 
+          $  0 x 0
+          $  0 0 0 
+         (   ((row-1 >0) =>
+         (grid[row-1,col] = 2)) /\
+
+            ((row-2 >0) =>
+         (grid[row-2,col] = 0)) /\
+            (((col+1 <11) /\ (row-2 >0)) =>
+         (grid[row-2,col+1] = 0)) /\
+            (((col+1 <11) /\ (row-1 >0)) =>
+         (grid[row-1,col+1] = 0)) /\
+            ((col+1 <11) =>
+         (grid[row,col+1] = 0)) /\
+            (((row+1 <11) /\ (col+1 <11)) =>
+         (grid[row+1,col+1] = 0)) /\
+            ((row+1 <11) =>
+         (grid[row+1,col] = 0)) /\
+            (((row+1 <11) /\ (col-1 >0)) =>
+         (grid[row+1,col-1] = 0)) /\
+            ((col-1 >0) =>
+         (grid[row,col-1] = 0)) /\
+            (((col-1 >0) /\ (row-1 >0)) =>
+         (grid[row-1,col-1] = 0)) /\ 
+            (((col-1 >0) /\ (row-2 >0)) =>
+         (grid[row-2,col-1] = 0))
+
+         ) \/
+          $  0 0 0 0       
+          $  0 x 2 0 
+          $  0 0 0 0
+         (   ((col+1 <11) =>
+         (grid[row,col+1] = 2)) /\
+
+            ((row-1 >0) =>
+         (grid[row-1,col] = 0)) /\
+            (((col+1 <11) /\ (row-1 >0)) =>
+         (grid[row-1,col+1] = 0)) /\
+            (((col+2 <11) /\ (row-1 >0)) =>
+         (grid[row-1,col+2] = 0)) /\
+            ((col+2 <11) =>
+         (grid[row,col+2] = 0)) /\
+            (((row+1 <11) /\ (col+2 <11)) =>
+         (grid[row+1,col+2] = 0)) /\
+            (((col+1 <11) /\ (row+1 <11)) =>
+         (grid[row+1,col+1] = 0)) /\
+            ((row+1 <11) =>
+         (grid[row+1,col] = 0)) /\
+            (((row+1 <11) /\ (col-1 >0)) =>
+         (grid[row+1,col-1] = 0)) /\
+            ((col-1 >0) =>
+         (grid[row,col-1] = 0)) /\
+            (((col-1 >0) /\ (row-1 >0)) =>
+         (grid[row-1,col-1] = 0)) 
+         ) \/
+
+          $  0 0 0 0       
+          $  0 2 x 0 
+          $  0 0 0 0
+         (   ((col-1 >0) =>
+         (grid[row,col-1] = 2)) /\
+
+            ((row-1 >0) =>
+         (grid[row-1,col] = 0)) /\
+            (((col+1 <11) /\ (row-1 >0)) =>
+         (grid[row-1,col+1] = 0)) /\
+            ((col+1 <11) =>
+         (grid[row,col+1] = 0)) /\
+            (((row+1 <11) /\ (col+1 <11)) =>
+         (grid[row+1,col+1] = 0)) /\
+            ((row+1 <11) =>
+         (grid[row+1,col] = 0)) /\
+            (((row+1 <11) /\ (col-1 >0)) =>
+         (grid[row+1,col-1] = 0)) /\
+            (((col-2 >0) /\ (row-1 >0)) =>
+         (grid[row-1,col-2] = 0)) /\
+            ((col-2 >0) =>
+         (grid[row,col-2] = 0)) /\
+            (((col-2 >0) /\ (row-1 >0)) =>
+         (grid[row-1,col-2] = 0)) /\
+            (((col-1 >0) /\ (row-1 >0)) =>
+         (grid[row-1,col-1] = 0)) 
+         ) 
+        
+   )
+
+
+

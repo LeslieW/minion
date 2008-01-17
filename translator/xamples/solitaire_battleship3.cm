@@ -1,0 +1,349 @@
+$ Solitaire Battleship
+$
+
+ESSENCE' 1.0
+
+letting   noSubmarines   be 4
+letting   noDestroyers   be 3
+letting   noCruisers     be 2
+letting   noBattleships  be 1
+
+letting   WATER          be 0
+letting   CIRCLE         be 1 
+letting   MIDDLE         be 2 
+letting   TOP            be 3 
+letting   BOTTOM         be 4 
+letting   RIGHT          be 5 
+letting   LEFT           be 6 
+
+letting   GRID_RANGE     be domain int(1..10)
+letting   HINT_STATUS    be domain int(0..7)
+$ hint status:   0:water,  1:circle, 2:middle, 3:top,
+$                4:bottom, 5:right,  6:left, 7:no hint
+letting   SQUARE_STATUS  be domain int(0..6)
+$ square status: 0:water, 1:circle, 2:middle 3:top,
+$                4:bottom, 5:right,  6:left,
+
+
+
+$ the amount of occupied squares for each column/row
+given   column_tallies: matrix indexed by [GRID_RANGE] of GRID_RANGE
+given   row_tallies:    matrix indexed by [GRID_RANGE] of GRID_RANGE
+given   hint :         matrix indexed by [GRID_RANGE, GRID_RANGE] of HINT_STATUS
+
+find    grid  :         matrix indexed by [GRID_RANGE, GRID_RANGE] of SQUARE_STATUS
+
+such that
+    $ amount of occupied sqares in each row
+    $forall row : GRID_RANGE .
+    $    sum  col: GRID_RANGE .
+    $        (grid[row,col] <= 0)  = row_tallies[row], 
+
+    $ amount of occupied sqares in each column
+    $forall col : GRID_RANGE .
+    $   sum row : GRID_RANGE .
+    $        (grid[row,col] <= 0) = column_tallies[col],
+
+    $ if we have a water hint, then the square is empty	    
+    forall col,row : GRID_RANGE .
+       (hint[row,col] = 0) =>
+          (grid[row,col] = 0),
+
+    $  W W W 
+    $  W C W 
+    $  W W W 
+    $
+    $ if we have a circle hint (i.e. a submarine) then the square
+    $ is occupied an all other square are around are empty
+    forall col,row : GRID_RANGE .
+       (hint[row,col] = CIRCLE) =>             $ hint 1:circle
+          (grid[row,col] = CIRCLE), 
+ 
+    forall row,col : GRID_RANGE .
+       (hint[row,col] = CIRCLE) =>            
+	  $ all square around the submarine are water
+         (   ((col-1 >0) => 
+      	   (grid[row-1,col-1] = WATER)) 
+           /\
+             (((row-1 >0) /\ (col-1 >0)) => 
+           (grid[row-1,col-1] = WATER)) 
+           /\
+             (((row+1 <11) /\ (col-1 >0)) => 
+           (grid[row-1,col+1] = WATER)) 
+           /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   WATER)) 
+           /\
+             ((row-1 >0) => 
+           (grid[row-1,col] =   WATER)) 
+           /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   WATER)) 
+           /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = WATER)) 
+           /\
+             (((row-1 >0) /\ (col+1 <11)) => 
+           (grid[row-1,col+1] = WATER))
+          ),
+
+
+    $  W ? W
+    $  ? M ?
+    $  W ? W	
+    $            
+    $ we have a middle-hint (there is still more to deduct from that)
+    forall row,col : GRID_RANGE .
+        (hint[row,col] = MIDDLE) =>	           $hint 2:middle
+           (grid[row,col] = MIDDLE), 
+           
+    forall row,col : GRID_RANGE .
+         (grid[row,col] = MIDDLE) =>	   
+	      $ the diagonal squares are water for sure
+              (((row-1 >0) /\ (col-1 >0)) => 
+             (grid[row-1,col-1] = WATER)) 
+              /\ 
+               (((row+1 <11) /\ (col-1 >0)) => 
+             (grid[row+1,col-1] = WATER)) 
+              /\ 
+               (((row+1 <11) /\ (col+1 <11)) => 
+             (grid[row+1,col+1] = WATER)) 
+              /\ 
+               (((row-1 >0) /\ (col+1 <11)) => 
+             (grid[row-1,col+1] = WATER)) 
+              /\
+	     
+              $ the battleships is either horizontal or vertical
+                  $ vertical
+             (  (    ((row-1 >0) =>
+                 (grid[row-1,col] = MIDDLE))      $ this is either a middle
+                  \/
+                    ((row-1 >0) => 
+                 (grid[row-1,col] =  TOP))        $ or a top piece of a ship 
+                 )
+                /\ 
+                (    ((row+1 <11) => 
+                 (grid[row+1,col] = MIDDLE))      $ either a middle piece
+                  \/
+                     ((row+1 <11) =>	 
+                 (grid[row+1,col] = BOTTOM))      $ or a bottom piece of a ship
+                )
+             )
+             \/  $ horizontal
+             (  ( ((col+1 <11) => 
+                 (grid[row,col+1] = MIDDLE))      $ middle piece 
+                  \/
+                   ((col+1 <11) => 
+                 (grid[row,col+1] = RIGHT))       $ right piece    
+                )
+               /\
+               ( ((col-1 >0) => 
+                 (grid[row,col+1] = MIDDLE))      $ middle piece 
+                  \/
+                   ((col-1 >0) => 
+                 (grid[row,col+1] = LEFT))        $ left piece    
+                )
+             ),
+              
+
+    $ W W W    
+    $ W T W 
+    $ W x W
+    $ W ? W
+    forall row,col : GRID_RANGE .
+        (hint[row,col] = TOP) =>          $hint 3:top
+           ((grid[row,col] = TOP) 
+            /\
+              (  (row+1<11) =>
+                ((grid[row+1,col] = MIDDLE)
+              \/
+                (grid[row+1,col] = BOTTOM))
+               ) 
+            /\
+
+             (((col-1 >0) /\ (row+2 <11)) => 
+           (grid[row+2,col-1] = WATER)) 
+             /\
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = WATER)) 
+             /\
+             ((col-1 >0) => 
+      	   (grid[row,col-1] =   WATER)) 
+              /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = WATER)) 
+              /\
+             ((row-1 >0) => 
+           (grid[row-1,col] =   WATER)) 
+              /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = WATER)) 
+              /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   WATER))
+              /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = WATER)) 
+              /\
+             (((col+1 <11) /\ (row+2 <11)) => 
+           (grid[row+2,col+1] = WATER))
+
+            
+           ),
+
+
+    $ W ? W    
+    $ W 2 W 
+    $ W B W
+    $ W W W
+    forall row,col : GRID_RANGE .
+        (hint[row,col] = BOTTOM) =>          $hint 4:bottom
+         (  (grid[row,col] = BOTTOM) 
+            /\            
+             $ the square above is either middle or top piece of a ship
+              (    (row-1>0) =>
+                ((grid[row-1,col] = MIDDLE)
+               \/
+                 (grid[row-1,col] = TOP)) 
+              ) 
+
+            /\
+                $ and the rest is water
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = WATER)) 
+             /\
+             ((col-1 >0) => 
+      	   (grid[row,col-1] =   WATER)) 
+             /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = WATER)) 
+             /\
+             (((col-1 >0) /\ (row-2 >0)) => 
+           (grid[row-2,col-1] = WATER)) 
+             /\
+             (((col+1 <11) /\ (row-2 >0)) => 
+           (grid[col+1,row-2] = WATER)) 
+             /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = WATER)) 
+             /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   WATER))
+             /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = WATER)) 
+             /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   WATER))
+            
+         ),
+        
+
+   $ W W W W
+   $ ? x R W
+   $ W W W W
+   $  
+      forall row,col : GRID_RANGE .
+        (hint[row,col] = RIGHT) =>          $hint 5:right
+           ((grid[row,col] = RIGHT) 
+           /\
+            (  (col-1>0) =>
+              ((grid[row,col-1] = MIDDLE) 
+               \/ 
+               (grid[row,col-1] = LEFT))
+             )
+           /\
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = WATER)) 
+            /\
+             (((col-2 >0) /\ (row+1 <11)) => 
+      	   (grid[row+1,col-2] = WATER)) 
+            /\
+             (((col-2 >0) /\ (row-1 >0)) => 
+      	   (grid[row-1,col-1] = WATER)) 
+            /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = WATER))
+            /\
+             ((row-1 >0) => 
+           (grid[row-1,col] =   WATER)) 
+            /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = WATER)) 
+            /\
+             ((col+1 <11) => 
+           (grid[row,col+1] =   WATER))
+            /\
+             (((col+1 <11) /\ (row+1 <11)) => 
+           (grid[row+1,col+1] = WATER)) 
+            /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   WATER))
+            
+           ),
+
+
+
+
+   $ W W W W
+   $ W L x ?
+   $ W W W W
+   $  
+      forall row,col : GRID_RANGE .
+        (hint[row,col] = LEFT) =>         
+           ((grid[row,col] = LEFT) 
+         /\
+            (  (col+1 <11) =>
+               ((grid[row,col+1] = MIDDLE) 
+              \/
+               (grid[row,col+1] =  RIGHT))
+            )
+          /\
+             (((col-1 >0) /\ (row+1 <11)) => 
+           (grid[row+1,col-1] = WATER)) 
+          /\
+             ((col-1 >0) => 
+           (grid[row,col-1] =   WATER)) 
+          /\
+             (((col-1 >0) /\ (row-1 >0)) => 
+           (grid[row-1,col-1] = WATER))
+          /\
+             ((row-1 >0) => 
+           (grid[row-1,col] =   WATER)) 
+          /\
+             (((col+1 <11) /\ (row-1 >0)) => 
+           (grid[row-1,col+1] = WATER)) 
+          /\
+             (((col+2 <11) /\ (row+1 <11)) => 
+      	   (grid[row+1,col+2] = WATER)) 
+          /\
+             (((col+2 <11) /\ (row-1 >0)) => 
+      	   (grid[row-1,col+2] = WATER)) 
+          /\
+             (((row+1 <11) /\ (col+1 <11)) => 
+           (grid[row+1,col+1] = WATER)) 
+          /\
+             ((row+1 <11) => 
+           (grid[row+1,col] =   WATER))
+           ) $,
+
+
+  $       - no ship may be going around the corner (no edges)
+         
+
+  $ amount of submarines/destroyers/cruisers/battleships
+$  sum row,col : GRID_RANGE .
+$     (grid[row,col] = 1) = noSubmarines,
+
+$  sum row,col : GRID_RANGE .
+$     (grid[row,col] = 2) = noDestroyers*2,
+
+$  sum row,col : GRID_RANGE .
+$     (grid[row,col] = 3) = noCruisers*3,
+
+$  sum row,col : GRID_RANGE .
+$     (grid[row,col] = 4) = noBattleships*4
+
+
+  $  no ship around the corner, in one straight line..
+
