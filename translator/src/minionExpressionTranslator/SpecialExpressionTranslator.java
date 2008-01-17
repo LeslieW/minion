@@ -89,6 +89,10 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			}
 		}
 		
+		if(e.getRestrictionMode() != EssenceGlobals.BINARYOP_EXPR) 
+			throw new MinionException("Internal error: expected a binary expression for translation instead of: "+e.toString());
+				
+		
 		BinaryExpression constraint = e.getBinaryExpression();
 		print_debug("This is the binary special expression to be translated:"+e.toString());
 
@@ -522,17 +526,23 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 	
 			// we can assume the EQ operator here
 			MinionIdentifier leftIdentifier = translateAtomExpression(e_left);
+			print_debug("Translated left identifier...");
 			if(leftIdentifier == null) { // we can reuse variables!
+				print_debug("The left identifier has been translated to null!");
 				reuseVariableInExpression(e_left,translateAtomExpression(e_right));
 				return null;
 			}
-			else 
+			else {
+				print_debug("Gonna translate right identifier:"+e_right);
 				return new MinionEqConstraint(leftIdentifier,
 		    								  translateAtomExpression(e_right));
+			}
 		}
 		
 		Expression simpleExpression = e_left;
 		Expression complexExpression = e_right;		
+		
+		print_debug("This is the simple expression: "+simpleExpression.toString()+", and complex expression:"+complexExpression);
 		
 		if((e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) ||
 				   (e_right.getRestrictionMode() == EssenceGlobals.NONATOMIC_EXPR &&
@@ -756,6 +766,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 		}
 		else id3 = translateAtomExpression(simpleExpression);	
 		
+		print_debug("translated simple expression, now heading for complex expression...");
+		
 			switch(complexExpression.getRestrictionMode()) {
 			    
 			case EssenceGlobals.BINARYOP_EXPR:
@@ -862,6 +874,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 				if(isIteratedArithmeticExpression(complexExpression, true)) { // true: is reifiable
 				    //print_debug("This is an arithemtic iterated expression: "+e.toString());
 				    MinionConstraint sumConstraint = translateIteratedArithmeticExpression(complexExpression.getBinaryExpression(),true);
+				    print_debug("Translated sum constraint. Now reifying it....");
 				    MinionBoolVariable var = reifyConstraint((MinionReifiableConstraint) sumConstraint);
 				    
 				    
@@ -1054,9 +1067,12 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
     	  else if(be.getRightExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR ||
     			  be.getRightExpression().getRestrictionMode() == EssenceGlobals.NONATOMIC_EXPR) { 		
     		     computeIteratedLists(be.getLeftExpression(), false);
-    		     return translateSum(translateAtomExpression(be.getRightExpression()),
+    		     print_debug("Translating an EQ sum with structure: sum = atom.");
+    		     MinionConstraint c = translateSum(translateAtomExpression(be.getRightExpression()),
     		    		 							be.getOperator(),
-    		    		 							true, willBeReified); //isResultOnRightSide	    
+    		    		 							true, willBeReified); //isResultOnRightSide
+    		     print_debug("Translated the bloody =sum. returning it now.");
+    		     return c;
     	  }
     	  // sum = sum
     	  // // both are scalar product structures, let's translate both 
@@ -1072,6 +1088,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
     			  computeIteratedLists(be.getLeftExpression(), false);
        			  if(be.getOperator().getRestrictionMode() == EssenceGlobals.EQ) {
        	   			  MinionConstraint secondSumConstraint = translateSum(auxVariable,be.getOperator(),true, willBeReified);
+       	   			  print_debug("got a sum constraint of the structure sum = sum");
         			  MinionIdentifier reifiedVariable1 = variableCreator.addFreshVariable(0,1,
     	                            "freshVariable"+noTmpVars++, this.useDiscreteVariables);
         			  MinionIdentifier reifiedVariable2 = variableCreator.addFreshVariable(0,1,
@@ -1178,6 +1195,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
    					  return new MinionSumLeqConstraint(variables, result, this.useWatchedLiterals);
    				  else return new MinionSumGeqConstraint(variables, result, this.useWatchedLiterals);
    			  case EssenceGlobals.EQ:
+   				print_debug("no constants, got a =sum here.");
    				return new MinionSumConstraint(variables, result, this.useWatchedLiterals);
    			  case EssenceGlobals.NEQ:
    				  int lowerBound = MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND;

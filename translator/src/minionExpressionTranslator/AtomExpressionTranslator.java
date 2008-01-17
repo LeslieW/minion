@@ -197,6 +197,8 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 	  if(decisionVariables.containsKey(matrixName)) {
 		   if(!minionVectors.containsKey(matrixName) && !minionMatrices.containsKey(matrixName) && !minionCubes.containsKey(matrixName)) 
 			   variableCreator.addNewVariable(matrixName);
+		   else 
+			   print_debug("The matrix is already known:"+matrixName);
 	  }
 	  else throw new TranslationUnsupportedException("Unknown variable or matrix-element name :"+matrixElement.toString());
 	  
@@ -215,6 +217,10 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 				  throw new TranslationUnsupportedException		  
 				  ("The index '"+matrixIndex+"' assigned to '"+matrixName+"' is out of bounds.");
 		  
+			  if(variableVector[matrixIndex]==null) {
+					 variableCreator.addVectorElement(matrixName, matrixIndex);	
+				  }
+			  
 			  return variableVector[matrixIndex];
 		  }	
 		  // the identifier is a vector 
@@ -257,6 +263,10 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 			  throw new TranslationUnsupportedException		  
 			  ("The element-index '"+(elementIndex+offsets[1])+"' assigned to '"+matrixName+"' is out of bounds.");
 		  
+		  if(variableMatrix[vectorIndex][elementIndex]==null) {
+			 variableCreator.addMatrixElement(matrixName, vectorIndex, elementIndex);	
+		  }
+		  
 		  return variableMatrix[vectorIndex][elementIndex];
 	
 	
@@ -287,6 +297,12 @@ public class AtomExpressionTranslator implements MinionTranslatorGlobals {
 		  if(elemIndex <0 || elemIndex >= variableCube[matrixIndex][vectIndex].length)
 			  throw new TranslationUnsupportedException		  
 			  ("The element-index '"+(elemIndex+cOffsets[2])+"' assigned to '"+matrixName+"' is out of bounds in:"+matrixElement.toString());  
+		  
+		  // TODO: what if the element has not yet been initialised?
+		  
+		  if(variableCube[matrixIndex][vectIndex][elemIndex]==null) {
+				 variableCreator.addCubeElement(matrixName, matrixIndex, vectIndex, elemIndex);	
+			  }
 		  
 		  return variableCube[matrixIndex][vectIndex][elemIndex];
 		  

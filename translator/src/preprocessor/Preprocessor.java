@@ -466,10 +466,46 @@ public class Preprocessor implements PreprocessorGlobals {
     private boolean everyParameterIsAssigned() {
 	
 	for(int i=0; i < parameterNames.size(); i++) {
-	    if(parameters.get(parameterNames.get(i)) == null) {
+		Constant constant = parameters.get(parameterNames.get(i));
+	    if(constant == null) {
 	    	print_debug("the following parameter has no value assigned to it:"+parameterNames.get(i));
 	    	return false;	    
 	    }
+	   /* else {
+	    	// TODO: check if every element of constant arrays are assign values to.
+	    	if(constant.getRestrictionMode() == EssenceGlobals.CONSTANT) {
+	    		Domain constantsDomain = constant.getExpressionConstant().getDomain();
+	    		// if the constant is a matrix, we have to make sure that every element is assigned
+	    		if(constantsDomain.getRestrictionMode() == EssenceGlobals.MATRIX_DOMAIN) {
+	    			MatrixDomain matrixDomain = constantsDomain.getMatrixDomain();
+	    			
+	    			Domain[] indexDomain = matrixDomain.getIndexDomains();
+	    			//Domain rangeDomain = matrixDomain.getRangeDomain();
+	    			
+	    			for(int j=0; i<indexDomain.length; i++) {
+	    				if(indexDomain[j].getRestrictionMode() == EssenceGlobals.INTEGER_RANGE) {
+	    				   IntegerDomain intRange = indexDomain[j].getIntegerDomain();
+	    				   RangeAtom[] ranges = intRange.getRangeList();
+	    				   for(int k =0; k<ranges.length; k++) {
+	    				       Expression lb = ranges[k].getLowerBound();
+	    				       Expression ub = ranges[k].getUpperBound();
+	    				       
+	    				       if(lb.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR && 
+	    				    		  ub.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+	    				    	   if(lb.getAtomicExpression().getRestrictionMode() == EssenceGlobals.NUMBER && 
+	    				    			   ub.getAtomicExpression().getRestrictionMode() == EssenceGlobals.NUMBER) {
+	    				    		   int lowerBound = lb.getAtomicExpression().getNumber();
+	    				    		   int upperBound = ub.getAtomicExpression().getNumber();
+	    				    	   }
+	    				       }
+	    				   }
+	    				}
+	    				
+	    			}
+	    		}
+	    	}
+	    	
+	    }*/
 	}	
 	return true;
     }
@@ -833,14 +869,14 @@ public class Preprocessor implements PreprocessorGlobals {
     	// 2. Now insert values for each parameter 
     	insertValuesForParameterArrays();
     	print_debug("Finished parameter array update, inserted values. ");
-    	for(int k=0; k<this.parameterMatrices.size(); k++) {
+    	/*for(int k=0; k<this.parameterMatrices.size(); k++) {
     		int[][] matrix = parameterMatrices.get(this.parameterArrayNames.get(k));
     		for(int l=0; l<matrix.length; l++) {
     			print_debug("\n");
     			for(int j=0; j<matrix[l].length; j++)
     				print_debug(this.parameterArrayNames.get(k)+"["+l+","+j+"] = "+matrix[l][j]+"\t");
     		}	
-    	}
+    	}*/
     	
     }
     

@@ -192,7 +192,6 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		for(int i=0; i < bindingVariablesNames.size(); i++) {
 				print_debug("These are the bindingVarioablesNBames: "+bindingVariablesNames.toString());
 				print_debug("CHeking if "+bindingVariablesNames.get(i)+" appears in "+quantifiedExpression.toString());
-				
 			// if the binding variable does not appear in the quantified expression
 			if(!evaluator.appearsInExpression(bindingVariablesNames.get(i), quantifiedExpression)) {
 				String unUsedBindingVariable = bindingVariablesNames.get(i);
@@ -535,6 +534,9 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			print_debug("The expression is NOOOOOOT feasible: "+constraint.toString());
 			return null;
 		}
+		else if(equalsBooleanTrue(constraint)) {
+			return null;
+		}
 		
 		constraint = translator.removeAtomicSubExpressions(constraint);
 		boolean reifiable = true;
@@ -662,6 +664,23 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		
 	}
 	
+	
+	/**
+	 * Returns true, if the Expression constraint corresponds to the Boolean "true".
+	 * 
+	 * @param constraint
+	 * @return
+	 */
+	public boolean equalsBooleanTrue(Expression constraint) {
+		
+		if(constraint.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+			if(constraint.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
+				boolean booleanValue = constraint.getAtomicExpression().getBool();
+				return booleanValue;
+			}
+		}
+		return false;
+	}
 	
 	
 	private boolean hasOtherQuantifications(Expression e) {

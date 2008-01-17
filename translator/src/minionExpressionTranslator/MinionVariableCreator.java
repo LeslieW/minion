@@ -67,6 +67,219 @@ public class MinionVariableCreator implements MinionTranslatorGlobals {
     	return variable;
     }
     
+    /**
+     * matrixIndex, vectorIndex and elementIndex have to be adjusted with the offsets, this means that 
+     * they have to range from 0..vectorlength/elemenlength. 
+     * 
+     * @param cubeName
+     * @param matrixIndex
+     * @param vectorIndex
+     * @param elementIndex
+     * @throws MinionException
+     */
+    
+    protected void addCubeElement(String cubeName, int matrixIndex,  int vectorIndex, int elementIndex) 
+	throws MinionException {
+	
+	print_debug("creating cube element for: "+cubeName+"["+matrixIndex+","+vectorIndex+","+elementIndex+"].");
+	
+	Domain domain = decisionVariables.get(cubeName);
+	if(domain.getRestrictionMode() != EssenceGlobals.MATRIX_DOMAIN) {
+		throw new MinionException("Internal error: expected matrix range as domain for variable '"+cubeName+"'.");
+	}
+	
+	Domain rangeDomain = domain.getMatrixDomain().getRangeDomain();
+	
+	MinionIdentifier[][][] cube = minionCubes.get(cubeName);
+	if(cube == null) 
+		throw new MinionException("Unknown matrix '"+cubeName+"'.");
+	
+    switch(rangeDomain.getRestrictionMode()) {
+
+     
+	case EssenceGlobals.BOOLEAN_DOMAIN:
+		MinionBoolVariable boolVariable = new MinionBoolVariable(1, cubeName);
+		myMinionModel.add01Variable(boolVariable);
+		cube[matrixIndex][vectorIndex][elementIndex] = (MinionIdentifier) boolVariable;
+		break;			        
+		
+	case EssenceGlobals.INTEGER_RANGE: /** TODO: we assume that there are no sparse bounds here yet*/
+		// first get the upper and lower bound 
+		print_debug("looking at the INTEGER domain of variable with name :"+cubeName+" with domain: "+rangeDomain.toString());
+		RangeAtom[] rangeList = rangeDomain.getIntegerDomain().getRangeList();
+		int lowerBound = rangeList[0].getLowerBound().getAtomicExpression().getNumber();
+		int upperBound = rangeList[0].getUpperBound().getAtomicExpression().getNumber();
+		
+		if(lowerBound == 0 && upperBound == 1) {
+			MinionBoolVariable booolVariable = new MinionBoolVariable(1, cubeName);
+			myMinionModel.add01Variable(booolVariable);
+			cube[matrixIndex][vectorIndex][elementIndex] = (MinionIdentifier) booolVariable;
+		}
+		else {
+		// then create a Minion Identifier and insert it into the minionModel
+			
+			if(!useDiscreteVariables) {
+				MinionBoundsVariable intDomainVariable = new MinionBoundsVariable(lowerBound,upperBound,cubeName);
+				myMinionModel.addBoundsVariable(intDomainVariable);
+				cube[matrixIndex][vectorIndex][elementIndex] = (MinionIdentifier) intDomainVariable;
+			}
+			else {
+				MinionDiscreteVariable intDomainVariable = new MinionDiscreteVariable(lowerBound,upperBound,cubeName);
+				myMinionModel.addDiscreteVariable(intDomainVariable);
+				cube[matrixIndex][vectorIndex][elementIndex] = (MinionIdentifier) intDomainVariable;
+			}
+		}
+		break;
+     
+    
+    
+	default:
+		throw new MinionException
+		("Cannot translate cube element of '"+cubeName+"' with domain type: "+domain+". Integer or boolean domain required.");
+    }
+}
+    
+    
+    /**
+     * Both vectorIndex and elementIndex have to be adjusted with the offsets, this means that 
+     * they have to range from 0..vectorlength/elemenlength. 
+     * 
+     * @param matrixName
+     * @param vectorIndex
+     * @param elementIndex
+     * @throws MinionException
+     */
+    protected void addMatrixElement(String matrixName, int vectorIndex, int elementIndex) 
+    	throws MinionException {
+    	
+    	print_debug("creating matrix element for: "+matrixName+"["+vectorIndex+","+elementIndex+"].");
+		
+		Domain domain = decisionVariables.get(matrixName);
+		if(domain.getRestrictionMode() != EssenceGlobals.MATRIX_DOMAIN) {
+			throw new MinionException("Internal error: expected matrix range as domain for variable '"+matrixName+"'.");
+		}
+		
+    	Domain rangeDomain = domain.getMatrixDomain().getRangeDomain();
+    	
+    	MinionIdentifier[][] matrix = minionMatrices.get(matrixName);
+    	if(matrix == null) 
+    		throw new MinionException("Unknown matrix '"+matrixName+"'.");
+    	
+        switch(rangeDomain.getRestrictionMode()) {
+	
+         
+		case EssenceGlobals.BOOLEAN_DOMAIN:
+			MinionBoolVariable boolVariable = new MinionBoolVariable(1, matrixName);
+			myMinionModel.add01Variable(boolVariable);
+			matrix[vectorIndex][elementIndex] = (MinionIdentifier) boolVariable;
+			break;			        
+			
+		case EssenceGlobals.INTEGER_RANGE: /** TODO: we assume that there are no sparse bounds here yet*/
+			// first get the upper and lower bound 
+			print_debug("looking at the INTEGER domain of variable with name :"+matrixName+" with domain: "+rangeDomain.toString());
+			RangeAtom[] rangeList = rangeDomain.getIntegerDomain().getRangeList();
+			int lowerBound = rangeList[0].getLowerBound().getAtomicExpression().getNumber();
+			int upperBound = rangeList[0].getUpperBound().getAtomicExpression().getNumber();
+			
+			if(lowerBound == 0 && upperBound == 1) {
+				MinionBoolVariable booolVariable = new MinionBoolVariable(1, matrixName);
+				myMinionModel.add01Variable(booolVariable);
+				matrix[vectorIndex][elementIndex] = (MinionIdentifier) booolVariable;
+			}
+			else {
+			// then create a Minion Identifier and insert it into the minionModel
+				
+				if(!useDiscreteVariables) {
+					MinionBoundsVariable intDomainVariable = new MinionBoundsVariable(lowerBound,upperBound,matrixName);
+					myMinionModel.addBoundsVariable(intDomainVariable);
+					matrix[vectorIndex][elementIndex] = (MinionIdentifier) intDomainVariable;
+				}
+				else {
+					MinionDiscreteVariable intDomainVariable = new MinionDiscreteVariable(lowerBound,upperBound,matrixName);
+					myMinionModel.addDiscreteVariable(intDomainVariable);
+					matrix[vectorIndex][elementIndex] = (MinionIdentifier) intDomainVariable;
+				}
+			}
+			break;
+         
+        
+        
+    	default:
+			throw new MinionException
+			("Cannot translate matrix '"+matrixName+"' with domain type: "+domain+". Integer or boolean domain required.");
+        }
+    }
+    
+    /**
+     * elementIndex has to be adjusted with the offsets, this means that 
+     * it has to range from 0..elemenlength. 
+     * 
+     * @param vectorName
+     * @param elementIndex
+     * @throws MinionException
+     */
+    
+    protected void addVectorElement(String vectorName,  int elementIndex) 
+	throws MinionException {
+	
+	print_debug("creating matrix element for: "+vectorName+"["+elementIndex+"].");
+	
+	Domain domain = decisionVariables.get(vectorName);
+	if(domain.getRestrictionMode() != EssenceGlobals.MATRIX_DOMAIN) {
+		throw new MinionException("Internal error: expected vector range as domain for variable '"+vectorName+"'.");
+	}
+	
+	Domain rangeDomain = domain.getMatrixDomain().getRangeDomain();
+	
+	MinionIdentifier[] vector = minionVectors.get(vectorName);
+	if(vector == null) 
+		throw new MinionException("Unknown vector '"+vectorName+"'.");
+	
+    switch(rangeDomain.getRestrictionMode()) {
+
+     
+	case EssenceGlobals.BOOLEAN_DOMAIN:
+		MinionBoolVariable boolVariable = new MinionBoolVariable(1, vectorName);
+		myMinionModel.add01Variable(boolVariable);
+		vector[elementIndex] = (MinionIdentifier) boolVariable;
+		break;			        
+		
+	case EssenceGlobals.INTEGER_RANGE: /** TODO: we assume that there are no sparse bounds here yet*/
+		// first get the upper and lower bound 
+		print_debug("looking at the INTEGER domain of variable with name :"+vectorName+" with domain: "+rangeDomain.toString());
+		RangeAtom[] rangeList = rangeDomain.getIntegerDomain().getRangeList();
+		int lowerBound = rangeList[0].getLowerBound().getAtomicExpression().getNumber();
+		int upperBound = rangeList[0].getUpperBound().getAtomicExpression().getNumber();
+		
+		if(lowerBound == 0 && upperBound == 1) {
+			MinionBoolVariable booolVariable = new MinionBoolVariable(1, vectorName);
+			myMinionModel.add01Variable(booolVariable);
+			vector[elementIndex] = (MinionIdentifier) booolVariable;
+		}
+		else {
+		// then create a Minion Identifier and insert it into the minionModel
+			
+			if(!useDiscreteVariables) {
+				MinionBoundsVariable intDomainVariable = new MinionBoundsVariable(lowerBound,upperBound,vectorName);
+				myMinionModel.addBoundsVariable(intDomainVariable);
+				vector[elementIndex] = (MinionIdentifier) intDomainVariable;
+			}
+			else {
+				MinionDiscreteVariable intDomainVariable = new MinionDiscreteVariable(lowerBound,upperBound,vectorName);
+				myMinionModel.addDiscreteVariable(intDomainVariable);
+				vector[elementIndex] = (MinionIdentifier) intDomainVariable;
+			}
+		}
+		break;
+     
+    
+    
+	default:
+		throw new MinionException
+		("Cannot translate vector element of '"+vectorName+"' with domain type: "+domain+". Integer or boolean domain required.");
+    }
+}
+
     
     /**
      * Add a new decision variable with name variableName to the MinionModel. This may be a single variable,
@@ -452,7 +665,6 @@ public class MinionVariableCreator implements MinionTranslatorGlobals {
 		switch(domain.getRestrictionMode()) {
 		
 		case EssenceGlobals.MATRIX_DOMAIN:
-			/** TODO: at the moment we only support 1-dim matrices */
 			Domain[] indexDomain = domain.getMatrixDomain().getIndexDomains();
 			Domain rangeDomain = domain.getMatrixDomain().getRangeDomain();
 			
