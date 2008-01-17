@@ -4,6 +4,11 @@ package translator;
 import java.io.*;
 import java.util.HashMap;
 import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
 import translator.conjureEssenceSpecification.*;
 import translator.essencePrimeParser.*;
 import translator.minionModel.*;
@@ -128,7 +133,27 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
 
 	try {
 		if(args[0].endsWith("gui")) {
-			TranslatorFrame guiVersion = new TranslatorFrame();
+			//TextSamplerDemo gui = new TextSamplerDemo();
+			//TranslatorGUI gui = new TranslatorGUI();
+			
+		   
+				  JFrame frame = new JFrame("Reformulator I");
+			       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+			       //Add content to the window.
+			       frame.add(new TranslatorGUI());
+
+			       //Display the window.
+			       frame.pack();
+			       frame.setVisible(true);
+				
+				   print_debug("Did all this...");
+		       
+			
+			
+		   
+			
+			//TranslatorFrame guiVersion = new TranslatorFrame();
 		}
 		else if(args.length == 1)
 			printWrongArgumentsErrorMsg();

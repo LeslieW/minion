@@ -146,6 +146,7 @@ Header  = "ESSENCE' 1.0"
 /* error fallback */
 .|\n                             { print_error_msg("Illegal character \""+yytext()+
                                                               "\" at line "+yyline+", column "+yycolumn); 
-                                                              System.exit(0);}
+                                                              //System.exit(0);
+                                                              }
 
 

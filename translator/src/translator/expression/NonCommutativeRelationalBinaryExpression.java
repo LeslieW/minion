@@ -113,6 +113,14 @@ public class NonCommutativeRelationalBinaryExpression implements
 				boolean rightConstant = ((RelationalAtomExpression) leftArgument).getBool();
 				return new RelationalAtomExpression(!leftConstant || rightConstant);
 			}
+			// T => E  ----> E
+			// F => E  ----> T
+			else if(leftArgument.getType() == BOOL) {
+				boolean guard = ((RelationalAtomExpression) leftArgument).getBool();
+				return (guard) ?
+						this.rightArgument :
+							new RelationalAtomExpression(true);
+			}
 			
 		}
 		// all other operators (that are arithmetic)

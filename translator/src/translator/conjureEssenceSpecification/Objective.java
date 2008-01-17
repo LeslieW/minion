@@ -44,7 +44,7 @@ public class Objective implements EssenceGlobals {
 	public String toString(){
 		
 		switch(restriction_mode){
-		case SOLVE : return "solve ";
+		case SOLVE : return "";
 		case MINIMISING : return "minimising " + exp.toString();
 		case MAXIMISING : return "maximising " + exp.toString();
 		}		

@@ -36,11 +36,12 @@ import java.util.LinkedList;
 
 parser code {:
 
+     public StringBuffer errorMessage = new StringBuffer("");
 
     /* The reason for the error is passed into the method in the
        String 'message'. */
 
-    public void report_error(String message, Object info) {
+    public void report_error(String message, Object info)  {
 
         StringBuffer m = new StringBuffer("Parse error");
 
@@ -54,12 +55,14 @@ parser code {:
             }
         }
         m.append(" : "+message);
+        //throw new Exception(m);
+        errorMessage = m;
         System.err.println(m);
     }
 
-    public void report_fatal_error(String message, Object info) {
+    public void report_fatal_error(String message, Object info)  {
         report_error(message, info);
-        System.exit(1);
+        //System.exit(1);
     }
 
 
@@ -69,6 +72,7 @@ parser code {:
 action code {:
 
         public int errors_found = 0;
+       
 
 :}
 

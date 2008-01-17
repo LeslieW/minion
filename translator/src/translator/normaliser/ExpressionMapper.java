@@ -55,7 +55,6 @@ public class ExpressionMapper {
 	public translator.expression.Expression mapExpression(translator.conjureEssenceSpecification.Expression oldExpression) 
 		throws NormaliserException {
 		
-		
 		switch(oldExpression.getRestrictionMode()) {
 		
 		case EssenceGlobals.BRACKET_EXPR:

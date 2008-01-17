@@ -59,9 +59,9 @@ public class EssenceSpecification {
 		}
 		output += objective.toString()+"\n";
 		if(expressions.length>0){
-			output += "Such that ";
+			output += "such that\n";
 			for(int i =0;i<expressions.length;i++){
-				output += expressions[i].toString()+"\n";
+				output += "\t"+expressions[i].toString()+"\n";
 			}
 		}
 		
