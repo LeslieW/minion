@@ -23,6 +23,8 @@ import translator.conjureEssenceSpecification.IntegerDomain;
 import translator.conjureEssenceSpecification.IdentifierDomain;
 import translator.conjureEssenceSpecification.Index;
 import translator.conjureEssenceSpecification.ExpressionIndex;
+import translator.conjureEssenceSpecification.BoundedIndex;
+import translator.conjureEssenceSpecification.SparseIndex;
 //import translator.minionExpressionTranslator.TranslationUnsupportedException;
 //import translator.minionModel.MinionException;
 
@@ -822,8 +824,9 @@ public class ParameterInsertion {
 	    	  for(int i=0; i<expressions.length; i++) {
 	    		  //expressions[i] = evaluator.evalExpression(insertValueForParameters(expressions[i]));
 	    		  //System.out.println("Inserting parameters in expression:"+expressions[i]);
+	    		  System.out.println("Before inserting parameters:"+expressions[i]);
 	    		  expressions[i] = insertValueForParameters(expressions[i]);
-
+	    		  System.out.println("After inserting parameters:"+expressions[i]);
 	    		  
 	    		  // split independent constraints
 	    		 //constraintList = splitExpressionToConstraints(expressions[i]);
@@ -887,14 +890,36 @@ public class ParameterInsertion {
 	    }
 	 
 	    
-	    
+	   /**
+	    * 
+	    * 
+	    * @param index
+	    * @return
+	    * @throws NormaliserException
+	    */ 
 	    private Index insertValueForParameters(Index index) 
 	    	throws NormaliserException {
 	    	
+	    	if(index instanceof ExpressionIndex) {
+	    		Expression indexExpression = ((ExpressionIndex) index).getIndexExpression();
+	    		indexExpression = insertValueForParameters(indexExpression);
+	    		return new ExpressionIndex(indexExpression);
+	    		
+	    	}
+	    	else if(index instanceof BoundedIndex) {
+	    		
+	    		Expression lb = ((BoundedIndex) index).getLowerExpressionIndex();
+	    		lb = insertValueForParameters(lb);
+	    		Expression ub = ((BoundedIndex) index).getUpperExpressionIndex();
+	    		ub = insertValueForParameters(ub);
+	    		return new BoundedIndex(lb,ub);
+	    		
+	    	}
+	    	else if(index instanceof SparseIndex) {
+	    		
+	    	}
 	    	
-	    	
-	    	
-	    	return null;
+	    	return index;
 	    }
 	    
 	    /** 

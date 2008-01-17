@@ -85,8 +85,8 @@ public class QuantifiedSum implements ArithmeticExpression {
 	}
 
 	public void orderExpression() {
-		if(this.quantifiedExpression.getType() != EQ &&
-				this.quantifiedExpression.getType() != NEQ) 
+		//if(this.quantifiedExpression.getType() != EQ &&
+		//		this.quantifiedExpression.getType() != NEQ) 
 		this.quantifiedExpression.orderExpression();
 
 	}

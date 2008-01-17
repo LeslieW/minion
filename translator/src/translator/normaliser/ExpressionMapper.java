@@ -246,7 +246,7 @@ public class ExpressionMapper {
 		//--------------------- matrix name ----------------------------------------------
 		String arrayName = oldArrayElement.getArrayName();
 		
-		System.out.println("Mapping the old non-atom:"+oldArrayElement);
+		//System.out.println("Mapping the old non-atom:"+oldArrayElement);
 		
 		// ------------- matrix domain ----------------------------------------------------
 		// get the domain of the matrixElement
@@ -302,21 +302,21 @@ public class ExpressionMapper {
 		// or if this is just a single variable
 		boolean isSingleVariable = true;
 		for(int i=0; i<indices.length; i++) {
-			System.out.println("This is the index:"+indices[i]+" of variable "+arrayName);
+			//System.out.println("This is the index:"+indices[i]+" of variable "+arrayName);
 			isSingleVariable = isSingleVariable && (indices[i] instanceof ExpressionIndex); 
-			System.out.println("This is the index:"+indices[i]+" of variable "+arrayName);
+			//System.out.println("This is the index:"+indices[i]+" of variable "+arrayName);
 			
 		}
 		
-		System.out.println("indices length is:"+indices.length);
+		//System.out.println("indices length is:"+indices.length);
 		
 		// ----------- if this is not a single variable, then treat it in the variuable array method ---------------
 		if(!isSingleVariable) {
 			translator.expression.Domain[] indexDomains = new translator.expression.Domain[domain.getMatrixDomain().getIndexDomains().length];
 			for(int i= 0; i<indexDomains.length; i++) {
 				indexDomains[i] = mapDomain(domain.getMatrixDomain().getIndexDomains()[i]);
-				System.out.println("mapped old domain :"+domain.getMatrixDomain().getIndexDomains()[i]);
-				System.out.println("To new domain :"+indexDomains[i]);
+				//System.out.println("mapped old domain :"+domain.getMatrixDomain().getIndexDomains()[i]);
+				//System.out.println("To new domain :"+indexDomains[i]);
 			}
 			
 			return mapVariableArray(arrayName, indices, mappedDomain, indexDomains);
@@ -397,12 +397,12 @@ public class ExpressionMapper {
 		
 		BasicDomain[] basicIndexDomains = new BasicDomain[indices.length];
 		
-		System.out.println("Mapping aaarray variable:"+arrayName+" and got indices length:"+indices.length);
+		//System.out.println("Mapping aaarray variable:"+arrayName+" and got indices length:"+indices.length);
 		
 		for(int i=0; i<indices.length; i++) {
 	
-			System.out.println("I am in the loop now:"+i);
-			System.out.println("Index[i] is "+indices[i]);
+			//System.out.println("I am in the loop now:"+i);
+			//System.out.println("Index[i] is "+indices[i]);
 			// (..)
 			if(indices[i].getType() == EssenceGlobals.FULL_BOUNDED_INDEX) {
 				if(indexDomains[i] instanceof BasicDomain)

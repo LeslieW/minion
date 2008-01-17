@@ -8,7 +8,7 @@ import translator.solver.Minion;
 
 public class MinionTailor {
 
-	public final String MINION_AUXVAR_NAME = "_aux";
+	public final String MINION_AUXVAR_NAME = "aux";
 	int noMinionAuxVars;
 	int usedCommonSubExpressions;
 	
@@ -16,6 +16,7 @@ public class MinionTailor {
 	HashMap<String, int[]> offsetsFromZero;
 	NormalisedModel normalisedModel;
 	Minion solverSettings;
+	HashMap<String, MinionAtom> minionSubExpressions;
 	
 	
 	// ======== CONSTRUCTOR ==================================
@@ -28,6 +29,7 @@ public class MinionTailor {
 		this.solverSettings = solverSettings;
 		this.noMinionAuxVars = this.normalisedModel.getAuxVariables().size();
 		this.usedCommonSubExpressions = this.normalisedModel.getAmountOfCommonSubExpressionsUsed();
+		this.minionSubExpressions = new HashMap<String,MinionAtom>();
 	}
 	
 	// ====== TRANSLATION TO MINION REPRESENTATION ===========
@@ -44,10 +46,14 @@ public class MinionTailor {
 				                           this.solverSettings
 				                           );
 		
+		tailorObjective();
+		
 		// 2. tailor the constraints
 		for(int i=this.normalisedModel.getConstraints().size()-1; i>=0; i--) 
 			minionModel.addConstraint(toMinion(this.normalisedModel.getConstraints().remove(i)));
 		
+		
+		this.minionModel.setAmountOfUsedCommonSubExpressions(this.usedCommonSubExpressions);
 		
 		return minionModel;
 		
@@ -55,6 +61,16 @@ public class MinionTailor {
 		
 	}
 	
+	
+	private void tailorObjective()
+		throws MinionException {
+		
+		Expression objective = this.normalisedModel.getObjectiveExpression();
+		if(objective instanceof RelationalAtomExpression ||
+				objective instanceof ArithmeticAtomExpression) {
+			this.minionModel.setObjective((MinionAtom) toMinion(objective), this.normalisedModel.isObjectiveMaximising());
+		}
+	}
 	
 	/**
 	 * Tailors the normalised model, that was given in the constructor, to 
@@ -167,7 +183,7 @@ public class MinionTailor {
 			return toMinion((RelationalAtomExpression) constraint);
 		
 		
-		if(constraint instanceof AllDifferent) 
+		if(constraint instanceof translator.expression.AllDifferent) 
 			return toMinion((translator.expression.AllDifferent) constraint);
 		
 		throw new MinionException("Cannot tailor expression to Minion yet:"+constraint);
@@ -332,11 +348,23 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(Reification reification) 
 		throws MinionException {
 		
-		MinionConstraint reifiedConstraint = toMinion(reification.getReifiedConstraint());
-		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
+		//System.out.println("Generating reified constraint:"+reification);
 		
-		if(reification.isGonnaBeFlattenedToVariable())
-			return reifyMinionConstraint(new Reify(reifiedConstraint, reifiedVariable));
+		Expression constraint = reification.getReifiedConstraint();
+		constraint.willBeFlattenedToVariable(false); // we don't need to reify this constraint again
+		MinionConstraint reifiedConstraint = toMinion(constraint);
+		
+		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
+		addToSubExpressions(reifiedConstraint, reifiedVariable);
+		
+		///System.out.println("Mapped it now to :"+reifiedConstraint+" with var:"+reifiedVariable);
+		
+		if(reification.isGonnaBeFlattenedToVariable()) {
+			this.minionModel.addConstraint(reifiedConstraint);
+			return reifiedVariable;
+		}
+		//if(reification.isGonnaBeFlattenedToVariable())
+		//	return reifyMinionConstraint(new Reify(reifiedConstraint, reifiedVariable));
 		
 		return new Reify(reifiedConstraint, reifiedVariable);
 	}
@@ -368,6 +396,10 @@ public class MinionTailor {
 	
 	
 	/**
+	 * Tailor a strong inequality (involving <,>,!=) to a Minion sum constraint.
+	 * (Don't worry about commutativity of the operators - in the internal
+	 * representation of the SumConstraint, the result part is always on the
+	 * right side.
 	 * 
 	 * @param sumConstraint
 	 * @return
@@ -384,7 +416,8 @@ public class MinionTailor {
 		
 		int operator = sumConstraint.getRelationalOperator();
 		
-		ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable());
+		ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable(sumConstraint.getSumDomain()[0], 
+																							  sumConstraint.getSumDomain()[1]));
 		
 		SumConstraint firstSum = new SumConstraint(positiveArguments,
 				                                   negativeArguments,
@@ -397,15 +430,13 @@ public class MinionTailor {
 		
 		if(sumConstraint.isGonnaBeFlattenedToVariable()) {
 			if(operator == Expression.LESS) {
-				IneqConstraint constraint =  (sumConstraint.isResultOnLeftSide()) ? 
-						new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) : 
+				IneqConstraint constraint =  
 							new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) ;
 						
 				return reifyMinionConstraint(constraint);		
 			}
 			else if(operator == Expression.GREATER) {
-				IneqConstraint constraint =  (sumConstraint.isResultOnLeftSide()) ? 
-						new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) : 
+				IneqConstraint constraint =  
 							new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) ;
 						
 				return reifyMinionConstraint(constraint);	
@@ -419,14 +450,10 @@ public class MinionTailor {
 		}
 		else {
 			if(operator == Expression.LESS) {
-				return  (sumConstraint.isResultOnLeftSide()) ? 
-						new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) : 
-							new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) ;		
+				return  new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) ;		
 			}
 			else if(operator == Expression.GREATER) {
-				return  (sumConstraint.isResultOnLeftSide()) ? 
-						new IneqConstraint((MinionAtom) toMinion(auxVariable), result, -1) : 
-							new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) ;
+				return new IneqConstraint(result, (MinionAtom) toMinion(auxVariable), -1) ;
 						
 			}
 			else if(operator == Expression.NEQ) {
@@ -696,9 +723,14 @@ public class MinionTailor {
 		
 		int operator = sumConstraint.getRelationalOperator();
 		Expression[] positiveArgs = sumConstraint.getPositiveArguments();
-		boolean areBooleanArguments = true;
+		Expression resultExpression = sumConstraint.getResult();
+	
+		// we need this to determine if we can apply the watched literal constraint
+		boolean areBooleanArguments = true && (resultExpression.getType() == Expression.BOOL ||
+				                                resultExpression.getType() == Expression.INT);
 		
 		MinionAtom[] arguments = new MinionAtom[positiveArgs.length];
+	
 		for(int i=0; i<positiveArgs.length; i++) {
 			positiveArgs[i].willBeFlattenedToVariable(true);
 			arguments[i] = (MinionAtom) toMinion(positiveArgs[i]);
@@ -708,7 +740,7 @@ public class MinionTailor {
 				}
 			}
 		}
-		Expression resultExpression = sumConstraint.getResult();
+		
 		resultExpression.willBeFlattenedToVariable(true);
 		MinionAtom result = (MinionAtom) toMinion(resultExpression);
 		
@@ -883,9 +915,15 @@ public class MinionTailor {
 	 */
 	private MinionAtom reifyMinionConstraint(MinionConstraint constraint)
 		throws MinionException {
+	
+		//System.out.println("REIFIING the constraint:"+constraint);
+	
+		MinionAtom auxVariable = null;
 		
-
-		MinionAtom auxVariable = createMinionAuxiliaryVariable();
+		if(hasCommonSubExpression(constraint)) {
+			return getCommonSubExpression(constraint);
+		}
+		else auxVariable = createMinionAuxiliaryVariable();
 		
 		MinionConstraint reifiedConstraint = new Reify(constraint, auxVariable);
 		this.minionModel.addConstraint(reifiedConstraint);
@@ -920,10 +958,19 @@ public class MinionTailor {
 	 * Is added to the list of aux variables in the minion model.
 	 * 
 	 * @return
-	 */
+	 *//*
 	private Variable createAuxVariable() {
 		
 		SingleVariable variable = new SingleVariable(this.MINION_AUXVAR_NAME+this.noMinionAuxVars++, new BoolDomain());
+		this.minionModel.addAuxiliaryVariable(variable);
+		return variable;
+		
+	}*/
+	
+	
+	private Variable createAuxVariable(int lb, int ub) {
+		
+		SingleVariable variable = new SingleVariable(this.MINION_AUXVAR_NAME+this.noMinionAuxVars++, new BoundedIntRange(lb, ub));
 		this.minionModel.addAuxiliaryVariable(variable);
 		return variable;
 		
@@ -1007,5 +1054,27 @@ public class MinionTailor {
 	
 	
 }
+	
+	
+	protected void addToSubExpressions(MinionConstraint constraint, MinionAtom representative) {
+		this.minionSubExpressions.put(constraint.toString(), representative);
+	}
+	
+	
+	protected MinionAtom getCommonSubExpression(MinionConstraint constraint) {
+		this.usedCommonSubExpressions++;
+		return this.minionSubExpressions.get(constraint.toString());
+		
+	}
+	
+	
+	
+	protected boolean hasCommonSubExpression(MinionConstraint constraint) {
+		if(this.minionSubExpressions.containsKey(constraint.toString()))
+			return true;
+		else return false;
+	}
+	
+	
 	
 }

@@ -103,7 +103,7 @@ public class Disjunction extends NaryRelationalExpression {
 			newConstant = constants.get(i) || newConstant;
 		}
 	
-		print_debug("evaluated atoms to constant:"+newConstant);
+		//print_debug("evaluated atoms to constant:"+newConstant);
 		
 		if(newConstant == true) {
 			return new RelationalAtomExpression(true);

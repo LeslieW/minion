@@ -347,11 +347,11 @@ public class Sum extends NaryArithmeticExpression {
 			}
 		}		
 		
-		//print_debug("Merged negative elements: "+this.negativeArguments);
 		
 		// if there is only one element left, then reduce the sum to the element-expression
-		if(this.positiveArguments.size() == 1 && this.negativeArguments.size() == 0)
+		if(this.positiveArguments.size() == 1 && this.negativeArguments.size() == 0) 
 			return this.positiveArguments.remove(0);
+		
 		else if(this.positiveArguments.size() == 0 && this.negativeArguments.size() == 1)
 			return new UnaryMinus(this.negativeArguments.remove(0));
 		

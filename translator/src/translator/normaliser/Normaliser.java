@@ -298,6 +298,7 @@ public class Normaliser implements NormaliserSpecification {
 					                          this.parameterSpecification);
 		//}
 		
+		
 		ArrayList<translator.expression.Expression> constraintList = mapExpressionList(oldConstraints);
 		return constraintList;
 		

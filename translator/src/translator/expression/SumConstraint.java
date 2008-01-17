@@ -10,6 +10,12 @@ package translator.expression;
  * This representation
  * is only revelant when flattening and for interfacing to certain 
  * solvers.
+ * 
+ * IMPORTANT NOTE: in the sum constraint, the result is always on the
+ * RIGHT side. This means that in constructing the sum, the arguments
+ * are arranged (and the operator adapted) such that the result is on 
+ * the right side.  
+ * 
  * @author andrea
  *
  */
@@ -27,10 +33,7 @@ public class SumConstraint implements GlobalConstraint {
 	/** this flag is set to true if the sum has to be binary (but it does not mean that it
 	 * actually IS binary */
 	private boolean hasToBeBinary = false;
-	
-	/** in case the operator is non-commutative, we need to know
-	 * if the result is on the left or right side*/
-	private boolean resultIsOnLeftSide;
+
 	
 	// ======== CONSTRUCTOR ============================
 	
@@ -41,10 +44,13 @@ public class SumConstraint implements GlobalConstraint {
                          boolean resultIsOnLeftSide) {
 		this.positiveArguments = positiveArguments;
 		this.negativeArguments = negativeArguments;
-		this.relationalOperator = relationalOperator;
-		this.result = result;
-		this.resultIsOnLeftSide = resultIsOnLeftSide;
 		
+		if(resultIsOnLeftSide)
+			this.relationalOperator = switchOperator(relationalOperator);
+		else this.relationalOperator = relationalOperator;
+		
+		this.result = result;
+	
 		// just make sure we don't get a nullpointer
 		if(this.positiveArguments == null)
 			this.positiveArguments = new Expression[0];
@@ -73,14 +79,45 @@ public class SumConstraint implements GlobalConstraint {
 			              int relationalOperator,
 			              boolean resultIsOnLeftSide) {
 		
-		this.relationalOperator = relationalOperator;
+		if(resultIsOnLeftSide)
+			this.relationalOperator = switchOperator(relationalOperator);
+		else this.relationalOperator = relationalOperator;
+		
 		this.result = result;
-		this.resultIsOnLeftSide = resultIsOnLeftSide;
+		//this.resultIsOnLeftSide = resultIsOnLeftSide;
 	}
 	
 	
 	public boolean hasResult() {
 		return (this.result != null);
+	}
+	
+	/**
+	 * This method is used to adapt the operator when we switch
+	 * the result to the right side of the (in)equation. 
+	 * Obviously, EQ and NEQ do not change since they are 
+	 * commutative.
+	 * 
+	 * @param relop
+	 * @return
+	 */
+	private int switchOperator(int relop) {
+		
+		switch(relop) {
+		
+		case Expression.LEQ:
+			return Expression.GEQ;
+		case Expression.GEQ:
+			return Expression.LEQ;	
+		case Expression.GREATER:
+			return Expression.LESS;
+		case Expression.LESS:
+			return Expression.GREATER;
+		
+		default: return relop; // EQ and NEQ are commutative...
+		}
+		
+		
 	}
 	
 	// ========== INHERITED METHODS ====================
@@ -110,7 +147,7 @@ public class SumConstraint implements GlobalConstraint {
 					             copiedNegArguments,
 				                 this.relationalOperator, 
 				                 this.result.copy(), 
-				                 this.resultIsOnLeftSide);
+				                 false);
 	}
 
 	public Expression evaluate() {
@@ -314,9 +351,9 @@ public class SumConstraint implements GlobalConstraint {
 				resultPart+operator+sumPart:
 				sumPart+operator+resultPart;
 				*/
-		return (resultIsOnLeftSide) ? 
-				operator+"("+resultPart+","+sumPart+")" :
-				operator+"("+sumPart+","+resultPart+")";
+		//return (resultIsOnLeftSide) ? 
+				//operator+"("+resultPart+","+sumPart+")" :
+				return operator+"("+sumPart+","+resultPart+")";
 	}
 
 	
@@ -394,7 +431,7 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 	
-	public boolean isResultOnLeftSide() {
+/*	public boolean isResultOnLeftSide() {
 		return this.resultIsOnLeftSide;
-	}
+	}*/
 }

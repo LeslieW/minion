@@ -27,12 +27,9 @@ public class SumLeqConstraint implements MinionConstraint {
 				"watchsumleq([" :
 					"sumleq([";
 		
-		if(this.arguments == null) 
-			System.out.println("Oida, so a schas. die arguments vom leq constraint san nui");
 		
 		for(int i=0; i<this.arguments.length; i++) {
 			if(i >0) s = s.concat(",");
-			System.out.println("Oida, wos is do. die arguments vom leq constraint san bei "+i+" genau "+arguments[i]);
 			s = s.concat(arguments[i].toString());
 		}
 		return s+"], "+this.result+")";

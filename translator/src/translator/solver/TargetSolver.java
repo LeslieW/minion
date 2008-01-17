@@ -37,6 +37,9 @@ public interface TargetSolver {
 	/** supports nested expressions in ANY constraint */
 	public final char NESTED_EXPRESSIONS = 69;
 	
+	public final int SUPPORTS_OBJECTIVE = 400;
+	public final int CONSTRAINT_OBJECTIVE = 401; // otherwise the objective has to be a variable
+	
 	// -------------constraint kinds ------------------
 	/** suppors quantified sums */
 	public final int QUANTIFIED_SUM = 300;
@@ -130,6 +133,8 @@ public interface TargetSolver {
 	public final int REIFIED_SUM = 254;
 	public final int REIFIED_MULTIPLICATION = 255;
 	public final int REIFIED_NEGATION = 256;
+	public final int REIFIED_EQ = 257;
+	public final int REIFIED_NEQ = 258;
 
 	
 	
@@ -206,6 +211,8 @@ public interface TargetSolver {
     
     
     // ====== OTHER STUFF ===========================
+    public boolean supportsFeature(int feature);
+    
     public String toString();
     
     

@@ -92,6 +92,8 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(REIFIED_ALLDIFFERENT), new Boolean(false));
 		featureMap.put(new Integer(REIFIED_IF), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_LEQ), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_EQ), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_NEQ), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_GEQ), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_LESS), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_GREATER), new Boolean(true));

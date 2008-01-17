@@ -137,6 +137,16 @@ public class IndexedArray implements SingleArray {
 
 	}
 
+	public String toString() {
+		
+		String s = this.arrayName+"[";
+		for(int i=0; i<this.indexRanges.length; i++) {
+			if(i >0) s = s.concat(",");
+			s = s.concat(indexRanges[i].toString()); 
+		}
+		return s+"]";
+	}
+	
 	
 	 // =================== ADDITIONAL METHODS ===============================================
 	

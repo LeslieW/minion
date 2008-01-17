@@ -36,8 +36,8 @@ public class Tailor implements TailorSpecification {
 			return minionTailor.tailorToMinion().toString();
 		}
 		
-		// TODO Auto-generated method stub
-		return null;
+		else throw new TailorException("Cannot tailor model to specified solver: '"+this.targetSolver.getSolverName()
+				+"'. no tailor for solver available.");
 	}
 
 	

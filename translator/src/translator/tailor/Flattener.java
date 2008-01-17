@@ -9,7 +9,7 @@ import translator.normaliser.NormalisedModel;
 
 public class Flattener {
 
-	public final String AUXVARIABLE_NAME = "_aux";
+	public final String AUXVARIABLE_NAME = "aux";
 	protected int noAuxVariables;
 	
 	/** the target solver we want to tailor the model to */
@@ -55,10 +55,13 @@ public class Flattener {
 		ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
 		ArrayList<Expression> flattenedConstraints = new ArrayList<Expression>();
 		
+		flattenObjective();
+		
 		for(int i=0; i<constraints.size(); i++) {
 			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
 			for(int j=flatExpression.size()-1; j>=0; j--) {
 				Expression constraint = flatExpression.remove(j);
+				//constraint = constraint.evaluate();
 				// detect and remove pure TRUE statements
 				if(constraint.getType() == Expression.BOOL) {
 					if(!((RelationalAtomExpression) constraint).getBool())
@@ -71,8 +74,12 @@ public class Flattener {
 		this.normalisedModel.setAmountOfCommonSubExpressionsUsed(this.usedCommonSubExpressions);
 		this.normalisedModel.replaceConstraintsWith(flattenedConstraints);
 		
+		
 		return this.normalisedModel;
 	}
+	
+	
+
 	
 	
 	/**
@@ -111,6 +118,9 @@ public class Flattener {
 		
 		else if(expression instanceof ArithmeticExpression)
 			return flattenArithmeticExpression((ArithmeticExpression) expression);
+		
+		else if(expression instanceof Array)
+			return expression;  // TODO: here we will need to flatten in case the target solver does not support arrays
 		
 		else throw new TailorException("Unknown expression type (neither relational nor arithmetic):"+expression);
 	}
@@ -187,17 +197,29 @@ public class Flattener {
 			                                            rightExpression);
 	}
 	
+	
+	
 	// ------- target solver does NOT allow nesting of constraints --------------------------------------
 	
 	if(leftExpression instanceof QuantifiedSum ||
-			leftExpression instanceof QuantifiedExpression)
+			leftExpression instanceof QuantifiedExpression) {
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) 
+			leftExpression.willBeFlattenedToVariable(true);
+		
+		
 		leftExpression = flattenExpression(leftExpression);
-	
+	}
+		
 	if(rightExpression instanceof QuantifiedSum ||
-			rightExpression instanceof QuantifiedExpression)
+			rightExpression instanceof QuantifiedExpression) {
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) 
+			rightExpression.willBeFlattenedToVariable(true);
+		
+		
 		rightExpression = flattenExpression(rightExpression);
+	}
 	
-	//System.out.println("This is the expression before: "+expression+" and these are left:"+leftExpression+" and right:"+rightExpression);
+	
 	
 	// ------- 1. detect sum expressions (we can only have 1 sum expression on one side due to normalisation)-------
 	if(leftExpression instanceof Sum) {
@@ -314,14 +336,20 @@ public class Flattener {
 	//3. just flatten the stuff dependeing on the implementation of the corresponding constraint
 	//    in the target solver
 	
+
 	leftExpression.willBeFlattenedToVariable(true);
 	rightExpression.willBeFlattenedToVariable(true);
+	
 	
 	leftExpression = flattenExpression(leftExpression);
 	rightExpression = flattenExpression(rightExpression);
 	
-	//System.out.println("This is the strange thing: left:"+leftExpression+" op:"+expression.getOperator()+", right:"+rightExpression);
 	
+	if(expression.isGonnaBeFlattenedToVariable()) {
+		return reifyConstraint(new NonCommutativeRelationalBinaryExpression(leftExpression,
+			                                            expression.getOperator(),
+			                                            rightExpression));
+	}
 	return new NonCommutativeRelationalBinaryExpression(leftExpression,
 			                                            expression.getOperator(),
 			                                            rightExpression);
@@ -345,14 +373,23 @@ public class Flattener {
 		Expression leftExpression = expression.getLeftArgument();
 		Expression rightExpression = expression.getRightArgument();
 		
+		//System.out.println("We have an equality between (before qsum detection): "+leftExpression+" == "+rightExpression);
+		
 		if(leftExpression instanceof QuantifiedSum ||
-				leftExpression instanceof QuantifiedExpression)
+				leftExpression instanceof QuantifiedExpression) {
+			if(expression.isGonnaBeFlattenedToVariable()) 
+				leftExpression.willBeFlattenedToVariable(true);
 			leftExpression = flattenExpression(leftExpression);
+		}
 		
 		if(rightExpression instanceof QuantifiedSum ||
-				rightExpression instanceof QuantifiedExpression)
+				rightExpression instanceof QuantifiedExpression) {
+			if(expression.isGonnaBeFlattenedToVariable()) 
+				rightExpression.willBeFlattenedToVariable(true);
 			rightExpression = flattenExpression(rightExpression);
+		}
 		
+		//System.out.println("We have an equality between(after qsum): "+leftExpression+" == "+rightExpression);
 		
 		// 1. detect sum expressions (we can only have 1 sum expression on one side due to normalisation)
 		if(leftExpression instanceof Sum) {
@@ -376,6 +413,7 @@ public class Flattener {
 			else return partWiseSumConstraint;
 		}
 		else if(rightExpression instanceof Sum) {
+			//System.out.println("We have a sum on the right hand side\n: "+rightExpression);
 			rightExpression.reduceExpressionTree();
 			Sum rightSum = (Sum) rightExpression;
 			rightSum.setWillBeConvertedToSumConstraint(true);
@@ -456,25 +494,15 @@ public class Flattener {
 			leftExpression = flattenExpression(leftExpression);
 			
 			if(expression.isGonnaBeFlattenedToVariable())
-				return reifyConstraint(new NonCommutativeRelationalBinaryExpression(leftExpression,
+				return reifyConstraint(new CommutativeBinaryRelationalExpression(leftExpression,
 																					expression.getOperator(),
 						                                                           auxVar));
-			else return new NonCommutativeRelationalBinaryExpression(leftExpression,
+			else return new CommutativeBinaryRelationalExpression(leftExpression,
 																	expression.getOperator(),
 																	auxVar);
 		}
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	
 		
 		// 2. detect product constraints
 		if(leftExpression instanceof Multiplication) {
@@ -509,8 +537,16 @@ public class Flattener {
 		}
 		leftExpression = flattenExpression(leftExpression);
 		rightExpression = flattenExpression(rightExpression);
-			
-		return expression;
+		
+		if(expression.isGonnaBeFlattenedToVariable()) {
+			return reifyConstraint(new CommutativeBinaryRelationalExpression(leftExpression, 
+				                                         expression.getOperator(),
+				                                         rightExpression));
+		}
+		
+		else return new CommutativeBinaryRelationalExpression(leftExpression, 
+				                                         expression.getOperator(),
+				                                         rightExpression);
 		
 	}
 	
@@ -525,6 +561,8 @@ public class Flattener {
 	 */
 	private Expression flattenQuantifiedSum(QuantifiedSum quantifiedSum) 
 		throws TailorException {
+		
+		//System.out.println("Flattening quantified sum:"+quantifiedSum);
 		
 		// if the target solver supports quantified sums - do nothing
 		if(this.targetSolver.supportsConstraint(Expression.Q_SUM)) {
@@ -581,11 +619,29 @@ public class Flattener {
 		Sum flattenedSum = new Sum(positiveElements,
 				                   negativeElements);
 		
-		if(quantifiedSum.isGonnaBeFlattenedToVariable()) {
-			return reifyConstraint(flattenedSum);
+	
+		//System.out.println("Flattened quantified sum to:"+flattenedSum);
+		
+		flattenedSum.orderExpression();
+		Expression reducedSum  = flattenedSum.evaluate();
+		//System.out.println("After evaluating the flattened quantified sum to:"+reducedSum+" amd the expression has type:"+reducedSum.getType());
+		reducedSum = reducedSum.reduceExpressionTree();
+		
+		//System.out.println("After reducing the flattened quantified sum to:"+reducedSum);
+		
+		/*if(quantifiedSum.isGonnaBeFlattenedToVariable()) {
+			if(reducedSum instanceof RelationalAtomExpression ||
+					reducedSum instanceof ArithmeticAtomExpression)
+				return reducedSum;
+			else return reifyConstraint(reducedSum);
 		}
 		
-		return flattenedSum;
+		return reducedSum;*/
+		
+		if(reducedSum instanceof Sum)
+			return flattenSum((Sum) reducedSum);
+		else return reducedSum;
+		
 	}
 	
 	
@@ -638,10 +694,15 @@ public class Flattener {
 		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
 		//        is supported by the target solver
 		if(this.targetSolver.supportsConstraint(Expression.NARY_DISJUNCTION)) {
-			return disjunction;
+			if(disjunction.isGonnaBeFlattenedToVariable())
+				return reifyConstraint(disjunction);
+			else return disjunction;
 		}
 		// 2. --- else the solver does not support n-ary disjunction, we have to flatten it to binary
 		else {
+			if(disjunction.isGonnaBeFlattenedToVariable()) {
+				return reifyConstraint(flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.OR));
+			}
 			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.OR);
 		}
 	
@@ -656,16 +717,23 @@ public class Flattener {
 	 */
 	private Expression flattenConjunction(Conjunction conjunction) 
 		throws TailorException {
+	
 		
-
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
 		for(int i=arguments.size()-1; i>=0; i--) {
 			if(conjunction.isGonnaBeFlattenedToVariable() &&
 				!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.AND))
 				arguments.get(i).willBeFlattenedToVariable(true);
-			arguments.add(i, flattenExpression(arguments.remove(i)));
+			Expression argument = flattenExpression(arguments.remove(i)).evaluate();
+			if(argument.getType() == Expression.BOOL) {
+				if(!((RelationalAtomExpression) argument).getBool())
+					return new RelationalAtomExpression(false);
+			}
+			else arguments.add(i, argument);
 		}
+		
+		
 		// 2. ---- if the conjunction is not nested/will be reified
 		//         then split it into independent constraints
 		if(!conjunction.isGonnaBeFlattenedToVariable()) {
@@ -684,6 +752,7 @@ public class Flattener {
 		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
 			else {
 				return reifyConstraint(flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.AND));
+				
 			}
 
 		}
@@ -848,12 +917,15 @@ public class Flattener {
 	private Expression flattenQuantifiedExpression(QuantifiedExpression quantification)
 		throws TailorException {
 		
+		
 		if(quantification.getType() == Expression.FORALL && 
-				this.targetSolver.supportsConstraint(Expression.FORALL))
+				this.targetSolver.supportsConstraint(Expression.FORALL) &&
+				          !quantification.isGonnaBeFlattenedToVariable())
 			return quantification;
 		
 		if(quantification.getType() == Expression.EXISTS && 
-				this.targetSolver.supportsConstraint(Expression.EXISTS))
+				this.targetSolver.supportsConstraint(Expression.EXISTS) &&
+				          !quantification.isGonnaBeFlattenedToVariable())
 			return quantification;
 		
 		
@@ -895,13 +967,16 @@ public class Flattener {
 		if(quantification.getType() == Expression.FORALL) {
 			Conjunction conjunction = new Conjunction(unfoldedExpressions);
 			conjunction.reduceExpressionTree();
-			if(quantification.isGonnaBeFlattenedToVariable()) {
-				conjunction.willBeFlattenedToVariable(true);
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.AND)
+					&& quantification.isGonnaBeFlattenedToVariable()) {
 				for(int i=conjunction.getArguments().size()-1; i>=0; i--) 
 					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			}
 			
-			Expression e = flattenConjunction(conjunction).evaluate();
+			if(quantification.isGonnaBeFlattenedToVariable())
+				conjunction.willBeFlattenedToVariable(true);
+			
+			Expression e = flattenConjunction(conjunction);
 			//System.out.println("After flattening the resulting conjunction: "+e);
 			
 			return e;//flattenConjunction(conjunction);
@@ -912,10 +987,15 @@ public class Flattener {
 			Disjunction disjunction = new Disjunction(unfoldedExpressions);
 			disjunction.reduceExpressionTree();
 			
-			for(int i=disjunction.getArguments().size()-1; i>=0; i--) 
-				disjunction.getArguments().get(i).willBeFlattenedToVariable(true);
+			if(quantification.isGonnaBeFlattenedToVariable())
+				disjunction.willBeFlattenedToVariable(true);
 			
-			return flattenDisjunction(disjunction).evaluate();
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.OR)
+					&& quantification.isGonnaBeFlattenedToVariable())
+				for(int i=disjunction.getArguments().size()-1; i>=0; i--) 
+					disjunction.getArguments().get(i).willBeFlattenedToVariable(true);
+			
+			return flattenDisjunction(disjunction);
 		}
 		
 	}
@@ -945,8 +1025,11 @@ public class Flattener {
 			String variableName = variableList.get(0);
 			for(int i=0; i<values.length; i++) {
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
+				//System.out.println("Generated  expression:"+unfoldedExpression);
 				//System.out.println("Inserted '"+values[i]+"' for variable '"+variableName+"' in expression '"+expression+"' and got expression:"+unfoldedExpression);
 				unfoldedExpression = unfoldedExpression.evaluate();
+				unfoldedExpression = unfoldedExpression.reduceExpressionTree();
+				//System.out.println("Generated evaluated, reduced expression:"+unfoldedExpression);
 				unfoldedExpressions.add(unfoldedExpression);
 			}
 			return unfoldedExpressions;
@@ -1053,7 +1136,7 @@ public class Flattener {
 		ArrayList<Expression> arguments= multiplication.getArguments();
 		
 		if(multiplication.willBeConvertedToProductConstraint()) {
-			System.out.println("Multiplication will be flattened to a product constraint:"+multiplication);
+			//System.out.println("Multiplication will be flattened to a product constraint:"+multiplication);
 			return flattenToPartWiseProductConstraint(multiplication);
 		}
 		
@@ -1225,6 +1308,8 @@ public class Flattener {
 	private Expression flattenSum(Sum sum) 
 		throws TailorException {
 	
+		//System.out.println("Flattening a sum:"+sum);
+		
 		// if there are any quantified sums as arguments, flatten them immediately
 		sum = flattenQuantifiedSumArguments(sum);
 		sum.reduceExpressionTree();
@@ -1320,9 +1405,9 @@ public class Flattener {
 			
 			
 				for(int i=sum.getPositiveArguments().size()-1; i>=0; i--) {
-					System.out.println("sum arguments of sum that will be part of SumConstraint:"+sum.getPositiveArguments().get(i));
+					//System.out.println("sum arguments of sum that will be part of SumConstraint:"+sum.getPositiveArguments().get(i));
 					positiveArguments[i] = flattenExpression(sum.getPositiveArguments().get(i));
-					System.out.println("sum arguments AFTER flattening of sum that will be part of SumConstraint:"+positiveArguments[i]);
+					//System.out.println("sum arguments AFTER flattening of sum that will be part of SumConstraint:"+positiveArguments[i]);
 				}
 			
 				for(int i=sum.getNegativeArguments().size()-1; i>=0; i--) {
@@ -1451,6 +1536,30 @@ public class Flattener {
 	}
 	
 
+	/**
+	 * Flatten objective 
+	 * 
+	 * @return
+	 * @throws TailorException
+	 */
+	protected Expression flattenObjective() 
+	throws TailorException {
+	
+	Expression objective = this.normalisedModel.getObjectiveExpression();
+	if(this.targetSolver.supportsFeature(TargetSolver.SUPPORTS_OBJECTIVE)) {
+		
+		if(this.targetSolver.supportsFeature(TargetSolver.CONSTRAINT_OBJECTIVE))
+			return flattenExpression(objective);
+		
+		else {
+			objective.willBeFlattenedToVariable(true);
+			return flattenExpression(objective);
+		}
+		
+	}
+	else throw new TailorException("Cannot tailor objective since target solver does not support it.");
+	
+}
 	
 	/**
 	 * Flatten a unary expression
@@ -1536,7 +1645,7 @@ public class Flattener {
 	
 	private void addToSubExpressions(Expression subExpression, Expression representative) {
 		
-		System.out.println("Add subexpression "+subExpression+" of type "+subExpression.getType()+" represented by "+representative);
+		//System.out.println("Add subexpression "+subExpression+" of type "+subExpression.getType()+" represented by "+representative);
 		
 		if(representative instanceof ArithmeticAtomExpression)
 			this.subExpressions.put(subExpression.toString(), (ArithmeticAtomExpression) representative);
@@ -1553,9 +1662,10 @@ public class Flattener {
 	}
 	
 	private boolean hasCommonSubExpression(Expression expression) {
-		//System.out.println("Checking if the expression "+expression+" has a common subexpression in:"+this.subExpressions+
-		//		": this is:"+this.subExpressions.containsKey(expression.toString())+" and object: "+this.subExpressions.containsValue(expression.toString()));
-		//System.out.println("Expression "+expression+" Is of type: "+expression.getType());
+		/*System.out.println("Checking if the expression "+expression+" has a common subexpression in:"+this.subExpressions+
+				": this is:"+this.subExpressions.containsKey(expression.toString())+" and object: "+this.subExpressions.containsValue(expression.toString()));
+		System.out.println("Expression "+expression+" Is of type: "+expression.getType());
+		*/
 		return this.subExpressions.containsKey(expression.toString());
 	}
 	
@@ -1570,7 +1680,7 @@ public class Flattener {
 	private RelationalAtomExpression reifyConstraint(Expression constraint) 
 		throws TailorException {
 		
-		System.out.println("Constraint type of:"+constraint+": "+constraint.getType());
+		if(constraint instanceof RelationalAtomExpression) return (RelationalAtomExpression)  constraint;
 		
 		if(!this.targetSolver.supportsReificationOf(constraint.getType()))
 			throw new TailorException
@@ -1579,8 +1689,8 @@ public class Flattener {
 		ArithmeticAtomExpression auxVariable = null;
 		
 		// if we have a common subexpression, use the corresponding variable
-		if(this.subExpressions.containsKey(constraint))
-			auxVariable = this.subExpressions.get(constraint);
+		if(hasCommonSubExpression(constraint))
+			auxVariable = getCommonSubExpression(constraint);
 		
 		// if we have no common subexpression, create a new auxiliary variable
 		// and add the constraint to the list of subexpressions

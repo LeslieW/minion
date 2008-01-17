@@ -86,6 +86,17 @@ public class NormalisedModel {
 		return this.decisionVariables.get(variableName);
 	}
 	
+	public Expression getObjectiveExpression() {
+		return this.objective.objective;
+	}
+	
+	public boolean isObjectiveMaximising() {
+		return this.objective.maximise;
+	}
+	
+	public void setFlattenedObjectiveExpression(Expression objective) {
+		this.objective.objective = objective;
+	}
 	
 	public ArrayList<String> getDecisionVariablesNames() {
 		return this.decisionVariablesNames;

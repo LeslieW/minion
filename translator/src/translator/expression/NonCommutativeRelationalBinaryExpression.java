@@ -203,7 +203,9 @@ public class NonCommutativeRelationalBinaryExpression implements
 				positiveArgs.add(((UnaryMinus) rightArgument).getArgument());
 				this.rightArgument = new ArithmeticAtomExpression(0);
 			}
-			else { // sum RELOP E     ====>   sum - E RELOP 0
+			else if(!(this.rightArgument instanceof ArithmeticAtomExpression) &&
+					!(this.rightArgument instanceof RelationalAtomExpression) ){ 
+				// sum RELOP E     ====>   sum - E RELOP 0
 				ArrayList<Expression> negativeArgs = leftSum.getNegativeArguments();
 				negativeArgs.add(this.rightArgument.copy());
 				this.rightArgument = new ArithmeticAtomExpression(0);
@@ -223,7 +225,9 @@ public class NonCommutativeRelationalBinaryExpression implements
 				positiveArgs.add(((UnaryMinus) leftArgument).getArgument());
 				this.leftArgument = new ArithmeticAtomExpression(0);
 			}
-			else { // sum RELOP E     ====>   sum - E RELOP 0
+			else if(!(this.leftArgument instanceof ArithmeticAtomExpression) &&
+					!(this.leftArgument instanceof RelationalAtomExpression) ){
+				// sum RELOP E     ====>   sum - E RELOP 0
 				ArrayList<Expression> negativeArgs = rightSum.getNegativeArguments();
 				negativeArgs.add(this.leftArgument.copy());
 				System.out.println("Restructuring right argument (sum) to:"+rightSum);

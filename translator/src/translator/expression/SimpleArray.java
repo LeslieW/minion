@@ -98,4 +98,10 @@ public class SimpleArray implements SingleArray {
 
 	}
 
+	public String toString() {
+		
+		return this.arrayName;
+		
+	}
+	
 }

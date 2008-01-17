@@ -102,6 +102,7 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	}
 	
 	// ======= CONSTRAINT FEATURES ===========
+
 	
 	/**
 	 * Given the constraint alias (defined in Expression.java) for 
@@ -270,6 +271,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.NARY_DISJUNCTION:
 			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_DISJUNCTION));
+			
+		case Expression.EQ:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_EQ));
+			
+		case Expression.NEQ:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NEQ));
 		}
 		
 		return false;
@@ -360,7 +367,13 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.U_MINUS:
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_UNARY_MINUS));
-			
+		
+		case Expression.OR:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_DISJUNCTION));
+		
+		case Expression.AND:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_CONJUNCTION));
+		
 		}
 		
 		return false;
@@ -393,6 +406,16 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	
 	// ============= OTHER STUFF ===============================
 	
+	 public boolean supportsFeature(int feature) {
+		 
+		 if(this.featureMap.containsKey(feature))
+			 return this.featureMap.get(feature);
+		 
+		 else return false;
+		 
+	 }
+	 
+	 
 	public String toString() {
 		return this.solverName;
 	}
