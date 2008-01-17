@@ -113,14 +113,22 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
     public static void main(String[] args) {
 	
     	outputFileName = TranslatorGlobals.outPutFileName;	
-    	String[] parameters = null;   
+    	String[] parameters = null; 
     	
-	if (args.length < 2 || args.length > 5) {
+    	
+    	
+	if (args.length < 1 || args.length > 5) {
 		printWrongArgumentsErrorMsg();
 	    return ;
 	}
-       	
+
+
 	try {
+		if(args[0].endsWith("gui")) {
+			TranslatorFrame guiVersion = new TranslatorFrame();
+		}
+		else {
+		
 	    if(args.length >= 3) {
 	    	if(args[2].startsWith("-")) {
 		    parameters = new String[args.length-2];
@@ -151,7 +159,7 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
 	    writeOutputIntoFile(minionOutput);  
 	    print_message("Output written into "+outputFileName) ;		
 	    
-	    
+		}
 	}
 	catch(Exception e) {
 	    System.out.println(e);
