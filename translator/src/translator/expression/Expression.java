@@ -89,7 +89,11 @@ public interface Expression {
 	public final int TABLE_CONSTRAINT = 221;
 	public final int ELEMENT_CONSTRAINT = 222;
 	public final int REIFICATION = 250;
-	
+    //	 x1 + .. + xn = y (no implementation yet)
+	public final int NARY_SUM_CONSTRAINT = 251; 
+	public final int NARY_PRODUCT_CONSTRAINT = 252;
+	public final int BINARY_SUM_CONSTRAINT = 253;
+	public final int BINARY_PRODUCT_CONSTRAINT = 254;
 	
 	// other implicit operations
 	public final int ARRAY_INDEXING = 300;

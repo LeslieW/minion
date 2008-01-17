@@ -111,6 +111,8 @@ public class Flattener {
 	private  Expression flattenRelationalExpression(RelationalExpression expression) 
 		throws TailorException {
 		
+		//System.out.println("Flattening expression:"+expression);
+		
 		if(expression instanceof RelationalAtomExpression) 
 			return flattenRelationalAtomExpression((RelationalAtomExpression) expression);
 		
@@ -132,19 +134,89 @@ public class Flattener {
 		else if(expression instanceof ElementConstraint) 
 			return flattenElementConstraint((ElementConstraint) expression);
 		
+		else if(expression instanceof QuantifiedSum)
+			return flattenQuantifiedSum((QuantifiedSum) expression);
+		
+		else if(expression instanceof CommutativeBinaryRelationalExpression) 
+			return flattenCommutativeBinaryRelationalExpression(
+					(CommutativeBinaryRelationalExpression) expression);
+		
 		else return expression;
 		//else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
 	}
 	
 	
-	
+	/**
+	 * Flatten a quantified sum into a sum representation by unfolding the
+	 * quantification (if necessary for the solver).
+	 * 
+	 * @param quantifiedSum
+	 * @return
+	 * @throws TailorException
+	 */
 	private Expression flattenQuantifiedSum(QuantifiedSum quantifiedSum) 
 		throws TailorException {
 		
-		// if the target solver supports quantified sums...return
+		// if the target solver supports quantified sums - do nothing
+		if(this.targetSolver.supportsConstraint(Expression.Q_SUM)) {
+			return quantifiedSum;
+		}
+		
+		// 	----- 1. get the domain over which the quantification ranges ------------
+		Domain bindingDomain = quantifiedSum.getQuantifiedDomain();
+		int domainType = bindingDomain.getType();
+		if(domainType != Domain.BOOL &&
+				domainType!= Domain.INT_BOUNDS &&
+				domainType != Domain.INT_SPARSE)
+					throw new TailorException("Cannot unfold quantified expression '"+quantifiedSum
+						+"'. The binding domain is not entirely constant:"+bindingDomain);
+			
+		int[] domainElements = null;
+		if(domainType == Domain.BOOL)
+			domainElements = ((BoolDomain) bindingDomain).getFullDomain();
+			
+		else if(domainType == Domain.INT_BOUNDS) 
+			domainElements = ((BoundedIntRange) bindingDomain).getFullDomain();
+			
+		else domainElements = ((SparseIntRange) bindingDomain).getFullDomain();
+			
+			
+		// 2. ----- get the binding variables ----------------------------------
+		String[] bindingVariables = quantifiedSum.getQuantifiedVariables();
+		ArrayList<String> variableList = new ArrayList<String>();
+		for(int i=0; i<bindingVariables.length; i++)
+			variableList.add(bindingVariables[i]);
+			
+			
+		// 3 ------- create unfolded expressions --------------------------------
+		ArrayList<Expression> unfoldedExpressions = insertVariablesForValues(variableList,
+					                                                             domainElements,
+					                                                             quantifiedSum.getQuantifiedExpression());
 		
 		
-		return quantifiedSum;
+		ArrayList<Expression> positiveElements = new ArrayList<Expression>();
+		ArrayList<Expression> negativeElements = new ArrayList<Expression>();
+		
+		for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
+			Expression expression = unfoldedExpressions.remove(i);
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.SUM)) 
+				expression.willBeFlattenedToVariable(true);
+			
+			expression = flattenExpression(expression);
+				
+			if(expression instanceof UnaryMinus) 
+				negativeElements.add(( (UnaryMinus) expression).getArgument());
+			else positiveElements.add(expression);
+		}
+		
+		Sum flattenedSum = new Sum(positiveElements,
+				                   negativeElements);
+		
+		if(quantifiedSum.isGonnaBeReified()) {
+			return reifyConstraint(flattenedSum);
+		}
+		
+		return flattenedSum;
 	}
 	
 	
@@ -158,7 +230,6 @@ public class Flattener {
 	private Expression flattenElementConstraint(ElementConstraint elementConstraint) 
 		throws TailorException {
 		
-		
 		// 1. flatten subexpressions
 		boolean noConstraintsAsArguments = !this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT);
 		Expression[] arguments = elementConstraint.getArguments();
@@ -169,7 +240,7 @@ public class Flattener {
 			arguments[i] = flattenExpression(arguments[i]);
 		}
 		
-		// 2. if the constraint has to ne reified	
+		// 2. if the constraint has to be reified	
 		if(elementConstraint.isGonnaBeReified()) {
 			return reifyConstraint(elementConstraint);
 		}
@@ -186,11 +257,14 @@ public class Flattener {
 	private Expression flattenDisjunction(Disjunction disjunction) 
 		throws TailorException {
 
+		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = disjunction.getArguments();
-		for(int i=arguments.size()-1; i>=0; i--)
+		for(int i=arguments.size()-1; i>=0; i--) {
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.OR))
+				arguments.get(i).willBeFlattenedToVariable(true);
 			arguments.add(i, flattenExpression(arguments.remove(i)));
-		
+		}
 		
 		
 		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
@@ -217,9 +291,12 @@ public class Flattener {
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
-		for(int i=arguments.size()-1; i>=0; i--)
+		for(int i=arguments.size()-1; i>=0; i--) {
+			if(conjunction.isGonnaBeReified() &&
+				!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.AND))
+				arguments.get(i).willBeFlattenedToVariable(true);
 			arguments.add(i, flattenExpression(arguments.remove(i)));
-		
+		}
 		// 2. ---- if the conjunction is not nested/will be reified
 		//         then split it into independent constraints
 		if(!conjunction.isGonnaBeReified()) {
@@ -394,7 +471,7 @@ public class Flattener {
 		
 		// if the target solver's constraint only supports variables as parameters, 
 		//   we need to reify the left and right argument
-		System.out.println("flattening non-c.bin.rel.expression:"+expression+" with operator: "+expression.getOperator());
+		//System.out.println("flattening non-c.bin.rel.expression:"+expression+" with operator: "+expression.getOperator());
 		
 		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 			expression.getLeftArgument().willBeFlattenedToVariable(true);
@@ -469,6 +546,8 @@ public class Flattener {
 			unfoldedExpressions.add(flattenExpression(unfoldedExpressions.remove(i)));
 		}*/
 		
+		//System.out.println("unfolded quantification to list: "+unfoldedExpressions);
+		
 		// universal quantification 
 		if(quantification.getType() == Expression.FORALL) {
 			Conjunction conjunction = new Conjunction(unfoldedExpressions);
@@ -479,8 +558,11 @@ public class Flattener {
 					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			}
 			
+			Expression e = flattenConjunction(conjunction);
+			//System.out.println("After flattening the resulting conjunction: "+e);
 			
-			return flattenConjunction(conjunction);
+			return e;//flattenConjunction(conjunction);
+			
 		}
 		// existential quantification
 		else {
@@ -494,6 +576,8 @@ public class Flattener {
 		}
 		
 	}
+	
+	
 	
 	
 	/**
@@ -541,6 +625,9 @@ public class Flattener {
 		return unfoldedExpressions;
 	}
 	/**
+	 * Flattens commutative binary relational expressions. Equality is a special case 
+	 * (helps to detect sums and products) 
+	 * 
 	 * 
 	 * @param expression
 	 * @return
@@ -549,8 +636,70 @@ public class Flattener {
 	private Expression flattenCommutativeBinaryRelationalExpression(CommutativeBinaryRelationalExpression expression )
 	throws TailorException {
 	
-	// detect products, sums etc. before flattening the arguments!	
-		return expression;
+		Expression leftExpression = expression.getLeftArgument();
+		Expression rightExpression = expression.getRightArgument();
+		
+		// EQUALITY: we have to detect products and sums
+		if(expression.getOperator() == Expression.EQ) {
+			return flattenEquality(expression);
+		}
+		else {
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
+				leftExpression.willBeFlattenedToVariable(true);
+				rightExpression.willBeFlattenedToVariable(true);
+			}
+			leftExpression = flattenExpression(leftExpression);
+			rightExpression = flattenExpression(rightExpression);
+			
+			
+			Expression flattenedConstraint = new CommutativeBinaryRelationalExpression(leftExpression,
+																					 expression.getOperator(),
+					   																   rightExpression);
+			
+			if(expression.isGonnaBeReified()) {
+				return reifyConstraint(flattenedConstraint);
+			}
+			else return flattenedConstraint;
+		}
+		
+	}
+	
+	/**
+	 * Flatten equality: detect product and sum constraints and flatten them to those, 
+	 * if they are supported by the target solver.
+	 * 
+	 * @param equality
+	 * @return
+	 */
+	private Expression flattenEquality(CommutativeBinaryRelationalExpression equality) 
+		throws TailorException {
+		
+		Expression leftExpression = equality.getLeftArgument();
+		Expression rightExpression = equality.getRightArgument();
+		
+		boolean leftSideIsSum = (leftExpression instanceof Sum);
+		boolean rightSideIsSum = (rightExpression instanceof Sum);
+		
+		
+		if(leftSideIsSum && rightSideIsSum) {
+			// flatten the subconstraints 
+			leftExpression = flattenExpression(leftExpression);
+			rightExpression = flattenExpression(rightExpression);
+			
+			int lowerBound = min(leftExpression.getDomain()[0], rightExpression.getDomain()[0]);
+			int upperBound = max(leftExpression.getDomain()[1], rightExpression.getDomain()[1]);
+			
+			Variable auxVariable = createAuxVariable(lowerBound, upperBound);
+			
+			// create 2 sums -> depending on negative arguments and positive arguments
+			// either weighted or unweighted version with the same auxVariable as 
+			// parameter
+			
+			if(equality.isGonnaBeReified()) ;
+			
+		}
+		
+		return equality;
 	}
 	
 	
@@ -626,5 +775,18 @@ public class Flattener {
 		this.normalisedModel.addAuxiliaryVariable(auxVariable);
 		
 		return auxVariable;
+	}
+	
+	
+	private int max(int value1, int value2) {
+		
+		return (value1 < value2) ?
+				value2 : value1;
+	}
+	
+	private int min(int value1, int value2) {
+		
+		return (value1 < value2) ?
+				value1 : value2;
 	}
 }

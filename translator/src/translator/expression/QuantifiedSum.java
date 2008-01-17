@@ -44,7 +44,7 @@ public class QuantifiedSum implements ArithmeticExpression {
 		
 		return new QuantifiedSum(copiedVariables,
 				                 this.domain.copy(),
-				                 (ArithmeticExpression) this.quantifiedExpression.copy());
+				                 this.quantifiedExpression.copy());
 	}
 
 	public ArithmeticExpression evaluate() {
@@ -129,5 +129,18 @@ public class QuantifiedSum implements ArithmeticExpression {
 		this.willBeReified = reified;
 	}
 	
+	// ================ OTHER METHODS ======================================
+	
+	public Domain getQuantifiedDomain() {
+		return this.domain;
+	}
+	
+	public String[] getQuantifiedVariables() {
+		return this.quantifiedVariables;
+	}
+
+	public Expression getQuantifiedExpression() {
+		return this.quantifiedExpression;
+	}
 	
 }

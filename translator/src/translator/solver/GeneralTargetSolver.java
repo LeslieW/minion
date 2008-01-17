@@ -155,7 +155,17 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.EXISTS:
 			return this.featureMap.get(new Integer(EXISTENTIAL_QUANTIFICATION));
 		
-		
+		case Expression.NARY_PRODUCT_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.NARY_PRODUCT_CONSTRAINT));
+			
+		case Expression.NARY_SUM_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUM_CONSTRAINT));
+			
+		case Expression.BINARY_PRODUCT_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_PRODUCT_CONSTRAINT));
+			
+		case Expression.BINARY_SUM_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUM_CONSTRAINT));
 			
 		}
 		
@@ -193,6 +203,18 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.ELEMENT_CONSTRAINT:
 			return this.featureMap.get(new Integer(REIFIED_ELEMENT));
+			
+		case Expression.NARY_PRODUCT_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_PRODUCT_CONSTRAINT));
+			
+		case Expression.NARY_SUM_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUM_CONSTRAINT));
+			
+		case Expression.BINARY_PRODUCT_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_PRODUCT_CONSTRAINT));
+			
+		case Expression.BINARY_SUM_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUM_CONSTRAINT));
 		}
 		
 		return false;
@@ -226,6 +248,24 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.ELEMENT_CONSTRAINT:
 			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_ELEMENT));
+			
+		case Expression.Q_SUM:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_QUANTIFIED_SUM));
+			
+		case Expression.SUM:
+			return this.featureMap.get(new Integer(CONSTRAINT_NESTED_IN_NARY_SUM));
+			
+		case Expression.NARY_PRODUCT_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT));
+			
+		case Expression.NARY_SUM_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUM_CONSTRAINT));
+			
+		case Expression.BINARY_PRODUCT_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_PRODUCT_CONSTRAINT));
+			
+		case Expression.BINARY_SUM_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUM_CONSTRAINT));
 		}
 		
 		return false;

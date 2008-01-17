@@ -19,7 +19,7 @@ public class DummySolver extends GeneralTargetSolver {
 	
 	public DummySolver() {
 		// general stuff
-		this.solverName = "Dummy Solver";
+		this.solverName = "Dummy Solver 1.0";
 		this.branchingStrategies = new String[] {DEFAULT_BRANCHING, FIRST_FAIL, LARGEST_DOMAIN, RANDOM_DOMAIN};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH, DEPTH_FIRST, BREADTH_FIRST};
 		
@@ -43,6 +43,10 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(NARY_MULTIPLICATION),new Boolean(true));
 		featureMap.put(new Integer(NARY_SUM),new Boolean(true));
 		featureMap.put(new Integer(NARY_WEIGHTED_SUM),new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.NARY_PRODUCT_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.NARY_SUM_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.BINARY_PRODUCT_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.BINARY_SUM_CONSTRAINT), new Boolean(false));
 
 		// nesting of constraints in other constraints
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NEGATION), new Boolean(false));
@@ -54,7 +58,12 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_GEQ ), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_GREATER), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_LESS), new Boolean(false));
-		
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_QUANTIFIED_SUM), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NARY_SUM), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUM_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_PRODUCT_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUM_CONSTRAINT), new Boolean(false));
 		
 		// are the following constraints reifiable
 		featureMap.put(new Integer(REIFIED_ALLDIFFERENT), new Boolean(false));
@@ -65,7 +74,10 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(REIFIED_GREATER), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_LEX_LEQ), new Boolean(false));
 		featureMap.put(new Integer(REIFIED_LEX_GEQ), new Boolean(false));
-		
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUM_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_PRODUCT_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUM_CONSTRAINT), new Boolean(false));
 		
 		
 		// variables

@@ -57,7 +57,7 @@ public class ArrayDomain implements Domain {
 	public String toString() {
 		String s = "matrix indexed by : [ "+this.indexDomains[0];
 		
-		for(int i=0; i<this.indexDomains.length; i++)
+		for(int i=1; i<this.indexDomains.length; i++)
 			s = s.concat(","+indexDomains[i].toString());
 		
 		

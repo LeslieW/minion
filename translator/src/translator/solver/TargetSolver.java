@@ -52,7 +52,10 @@ public interface TargetSolver {
 	public final char NARY_SUM = 72;
 	public final char NARY_WEIGHTED_SUM = 73;
 	public final char NARY_MULTIPLICATION = 74;
-	
+	public final int NARY_SUM_CONSTRAINT = 75;
+	public final int NARY_PRODUCT_CONSTRAINT = 76;
+	public final int BINARY_PRODUCT_CONSTRAINT = 77;
+	public final int BINARY_SUM_CONSTRAINT = 78;
 	
 	
 	//---- nesting of constraints as arguments in other constraints -------
@@ -68,10 +71,14 @@ public interface TargetSolver {
 	public final int CONSTRAINT_NESTED_IN_IFF = 109;
 	public final int CONSTRAINT_NESTED_IN_DISJUNCTION = 110;
 	public final int CONSTRAINT_NESTED_IN_ELEMENT = 111;
-
+	public final int CONSTRAINT_NESTED_IN_QUANTIFIED_SUM = 112;
+	public final int CONSTRAINT_NESTED_IN_NARY_SUM = 113;            // x1 + x2 + .. + xn
+	public final int CONSTRAINT_NESTED_IN_NARY_SUM_CONSTRAINT = 114; // x1 + x2 + .. + xn = s
+	public final int CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT = 115;
+	public final int CONSTRAINT_NESTED_IN_BINARY_PRODUCT_CONSTRAINT = 116;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUM_CONSTRAINT = 117;
 	
 	// ----- reification of constraints ----------------
-	public final int REIFIED_ALLDIFFERENT = 76;
 	public final int REIFIED_IF = 77;
 	public final int REIFIED_LEQ = 78;
 	public final int REIFIED_GEQ = 79;
@@ -80,7 +87,11 @@ public interface TargetSolver {
 	public final int REIFIED_LEX_LEQ = 82;
 	public final int REIFIED_LEX_GEQ = 83;
 	public final int REIFIED_ELEMENT = 84;
-	
+	public final int REIFIED_NARY_SUM_CONSTRAINT = 85;
+	public final int REIFIED_NARY_PRODUCT_CONSTRAINT = 86;
+	public final int REIFIED_ALLDIFFERENT = 87;
+	public final int REIFIED_BINARY_SUM_CONSTRAINT = 88;
+	public final int REIFIED_BINARY_PRODUCT_CONSTRAINT = 89;
 	
 	
 	
