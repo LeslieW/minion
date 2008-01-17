@@ -4,7 +4,7 @@
 # !! Please note, that you will need both jflex and java_cup 
 #    installed on your machine in order to build the parser and lexer
 
-cd src/essencePrimeParser/
+cd translator/essencePrimeParser/
 echo "### Generating EssencePrimeParser"
 ./build_parser.sh
 cd ..
