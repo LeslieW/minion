@@ -44,9 +44,19 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(NARY_SUM),new Boolean(true));
 		featureMap.put(new Integer(NARY_WEIGHTED_SUM),new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_PRODUCT_CONSTRAINT), new Boolean(false));
-		featureMap.put(new Integer(TargetSolver.NARY_SUM_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.NARY_SUMEQ_CONSTRAINT), new Boolean(true));  // this is wrong but for testing set to this value
+		featureMap.put(new Integer(TargetSolver.NARY_SUMNEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.NARY_SUMGEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.NARY_SUMLEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.NARY_SUMGREATER_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.NARY_SUMLESS_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.BINARY_PRODUCT_CONSTRAINT), new Boolean(true));
-		featureMap.put(new Integer(TargetSolver.BINARY_SUM_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.BINARY_SUMEQ_CONSTRAINT), new Boolean(false)); // this is wrong but for testing set to this value
+		featureMap.put(new Integer(TargetSolver.BINARY_SUMNEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.BINARY_SUMLEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.BINARY_SUMGEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.BINARY_SUMGREATER_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.BINARY_SUMLESS_CONSTRAINT), new Boolean(true));
 	
 		// nesting of constraints in other constraints
 		// (set to true, if the constraint allows other constraints nested
@@ -65,9 +75,19 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_QUANTIFIED_SUM), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NARY_SUM), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
-		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUM_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMNEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMGEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMLEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMGREATER_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMLESS_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_PRODUCT_CONSTRAINT), new Boolean(false));
-		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUM_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMNEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMGEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMGREATER_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT), new Boolean(false));
 		
 		// are the following constraints reifiable
 		featureMap.put(new Integer(REIFIED_ALLDIFFERENT), new Boolean(false));
@@ -80,9 +100,19 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(REIFIED_LEX_GEQ), new Boolean(false));
 		featureMap.put(new Integer(REIFIED_ELEMENT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
-		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUM_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUMEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUMNEQ_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUMLEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUMGEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUMGREATER_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NARY_SUMLESS_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_PRODUCT_CONSTRAINT), new Boolean(false));
-		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUM_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMNEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMGEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMLEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMGREATER_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_BINARY_SUMLESS_CONSTRAINT), new Boolean(true));
 
 		
 		// variables

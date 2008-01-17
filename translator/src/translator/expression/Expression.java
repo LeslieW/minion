@@ -90,10 +90,20 @@ public interface Expression {
 	public final int ELEMENT_CONSTRAINT = 222;
 	public final int REIFICATION = 250;
     //	 x1 + .. + xn = y (no implementation yet)
-	public final int NARY_SUM_CONSTRAINT = 251; 
-	public final int NARY_PRODUCT_CONSTRAINT = 252;
-	public final int BINARY_SUM_CONSTRAINT = 253;
-	public final int BINARY_PRODUCT_CONSTRAINT = 254;
+	public final int NARY_SUMEQ_CONSTRAINT = 251; 
+	public final int NARY_SUMLEQ_CONSTRAINT = 254; 
+	public final int NARY_SUMGEQ_CONSTRAINT = 257; 
+	public final int NARY_SUMNEQ_CONSTRAINT = 252; 
+	public final int NARY_SUMLESS_CONSTRAINT = 253; 
+	public final int NARY_SUMGREATER_CONSTRAINT = 255; 
+	public final int NARY_PRODUCT_CONSTRAINT = 290;
+	public final int BINARY_SUMEQ_CONSTRAINT = 270;
+	public final int BINARY_SUMNEQ_CONSTRAINT = 271;
+	public final int BINARY_SUMLESS_CONSTRAINT = 272;
+	public final int BINARY_SUMLEQ_CONSTRAINT = 273;
+	public final int BINARY_SUMGREATER_CONSTRAINT = 274;
+	public final int BINARY_SUMGEQ_CONSTRAINT = 275;
+	public final int BINARY_PRODUCT_CONSTRAINT = 280;
 	
 	// other implicit operations
 	public final int ARRAY_INDEXING = 300;

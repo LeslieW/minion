@@ -143,6 +143,7 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	 * @return
 	 */
 	public boolean supportsConstraint(int constraint) {
+	
 		
 		switch(constraint) {
 		
@@ -158,15 +159,45 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.NARY_PRODUCT_CONSTRAINT:
 			return this.featureMap.get(new Integer(TargetSolver.NARY_PRODUCT_CONSTRAINT));
 			
-		case Expression.NARY_SUM_CONSTRAINT: 
-			return this.featureMap.get(new Integer(TargetSolver.NARY_SUM_CONSTRAINT));
+		case Expression.NARY_SUMEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUMEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMNEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUMNEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMLEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUMGEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMGEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUMLEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMGREATER_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUMGREATER_CONSTRAINT));
+			
+		case Expression.NARY_SUMLESS_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.NARY_SUMLESS_CONSTRAINT));
 			
 		case Expression.BINARY_PRODUCT_CONSTRAINT: 
 			return this.featureMap.get(new Integer(TargetSolver.BINARY_PRODUCT_CONSTRAINT));
 			
-		case Expression.BINARY_SUM_CONSTRAINT: 
-			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUM_CONSTRAINT));
+		case Expression.BINARY_SUMEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMEQ_CONSTRAINT));
 			
+		case Expression.BINARY_SUMNEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMNEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMGEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMGEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMLEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMLEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMGREATER_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMGREATER_CONSTRAINT));
+			
+		case Expression.BINARY_SUMLESS_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.BINARY_SUMLESS_CONSTRAINT));
+	
 		}
 		
 		
@@ -174,6 +205,7 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	}
 	
 	public boolean supportsReificationOf(int operation) {
+		
 		
 		switch(operation) {
 		
@@ -207,14 +239,44 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.NARY_PRODUCT_CONSTRAINT:
 			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_PRODUCT_CONSTRAINT));
 			
-		case Expression.NARY_SUM_CONSTRAINT:
-			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUM_CONSTRAINT));
+		case Expression.NARY_SUMEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUMEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMNEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUMNEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMLEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUMGEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMGEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUMLEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMGREATER_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUMGREATER_CONSTRAINT));
+			
+		case Expression.NARY_SUMLESS_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_SUMLESS_CONSTRAINT));
 			
 		case Expression.BINARY_PRODUCT_CONSTRAINT:
 			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_PRODUCT_CONSTRAINT));
 			
-		case Expression.BINARY_SUM_CONSTRAINT:
-			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUM_CONSTRAINT));
+		case Expression.BINARY_SUMEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMNEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMNEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMLEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMLEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMGEQ_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMGEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMGREATER_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMGREATER_CONSTRAINT));
+			
+		case Expression.BINARY_SUMLESS_CONSTRAINT:
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMLESS_CONSTRAINT));
 		}
 		
 		return false;
@@ -258,14 +320,44 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.NARY_PRODUCT_CONSTRAINT: 
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT));
 			
-		case Expression.NARY_SUM_CONSTRAINT: 
-			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUM_CONSTRAINT));
+		case Expression.NARY_SUMEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMNEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMNEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMLEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMLEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMGEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMGEQ_CONSTRAINT));
+			
+		case Expression.NARY_SUMGREATER_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMGREATER_CONSTRAINT));
+			
+		case Expression.NARY_SUMLESS_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMLESS_CONSTRAINT));
 			
 		case Expression.BINARY_PRODUCT_CONSTRAINT: 
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_PRODUCT_CONSTRAINT));
 			
-		case Expression.BINARY_SUM_CONSTRAINT: 
-			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUM_CONSTRAINT));
+		case Expression.BINARY_SUMEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMNEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMNEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMGEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMGEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMLEQ_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLEQ_CONSTRAINT));
+			
+		case Expression.BINARY_SUMGREATER_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMGREATER_CONSTRAINT));
+			
+		case Expression.BINARY_SUMLESS_CONSTRAINT: 
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT));
 		}
 		
 		return false;

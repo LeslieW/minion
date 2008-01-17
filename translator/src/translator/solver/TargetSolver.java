@@ -52,11 +52,20 @@ public interface TargetSolver {
 	public final char NARY_SUM = 72;
 	public final char NARY_WEIGHTED_SUM = 73;
 	public final char NARY_MULTIPLICATION = 74;
-	public final int NARY_SUM_CONSTRAINT = 75;
+	public final int NARY_SUMEQ_CONSTRAINT = 75;
 	public final int NARY_PRODUCT_CONSTRAINT = 76;
 	public final int BINARY_PRODUCT_CONSTRAINT = 77;
-	public final int BINARY_SUM_CONSTRAINT = 78;
-	
+	public final int BINARY_SUMEQ_CONSTRAINT = 78;
+	public final int BINARY_SUMLEQ_CONSTRAINT = 79;
+	public final int NARY_SUMLEQ_CONSTRAINT = 80;
+	public final int BINARY_SUMGEQ_CONSTRAINT = 81;
+	public final int NARY_SUMGEQ_CONSTRAINT = 82;
+	public final int BINARY_SUMNEQ_CONSTRAINT = 83;
+	public final int NARY_SUMNEQ_CONSTRAINT = 84;
+	public final int BINARY_SUMGREATER_CONSTRAINT = 85;
+	public final int NARY_SUMGREATER_CONSTRAINT = 86;
+	public final int BINARY_SUMLESS_CONSTRAINT = 87;
+	public final int NARY_SUMLESS_CONSTRAINT = 88;
 	
 	//---- nesting of constraints as arguments in other constraints -------
 	public final int CONSTRAINT_NESTED_IN_NEGATION = 100;
@@ -72,26 +81,46 @@ public interface TargetSolver {
 	public final int CONSTRAINT_NESTED_IN_DISJUNCTION = 110;
 	public final int CONSTRAINT_NESTED_IN_ELEMENT = 111;
 	public final int CONSTRAINT_NESTED_IN_QUANTIFIED_SUM = 112;
-	public final int CONSTRAINT_NESTED_IN_NARY_SUM = 113;            // x1 + x2 + .. + xn
-	public final int CONSTRAINT_NESTED_IN_NARY_SUM_CONSTRAINT = 114; // x1 + x2 + .. + xn = s
+	public final int CONSTRAINT_NESTED_IN_NARY_SUM = 113;            // x1 + x2 + .. + xn 
+	public final int CONSTRAINT_NESTED_IN_NARY_SUMEQ_CONSTRAINT = 114;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUMEQ_CONSTRAINT = 117;
 	public final int CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT = 115;
 	public final int CONSTRAINT_NESTED_IN_BINARY_PRODUCT_CONSTRAINT = 116;
-	public final int CONSTRAINT_NESTED_IN_BINARY_SUM_CONSTRAINT = 117;
+	public final int CONSTRAINT_NESTED_IN_NARY_SUMLEQ_CONSTRAINT = 114;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUMLEQ_CONSTRAINT = 118;
+	public final int CONSTRAINT_NESTED_IN_NARY_SUMGEQ_CONSTRAINT = 119;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUMGEQ_CONSTRAINT = 120;
+	public final int CONSTRAINT_NESTED_IN_NARY_SUMNEQ_CONSTRAINT = 121;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUMNEQ_CONSTRAINT = 122;
+	public final int CONSTRAINT_NESTED_IN_NARY_SUMLESS_CONSTRAINT = 123;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT = 124;
+	public final int CONSTRAINT_NESTED_IN_NARY_SUMGREATER_CONSTRAINT = 125;
+	public final int CONSTRAINT_NESTED_IN_BINARY_SUMGREATER_CONSTRAINT = 126;
 	
 	// ----- reification of constraints ----------------
-	public final int REIFIED_IF = 77;
-	public final int REIFIED_LEQ = 78;
-	public final int REIFIED_GEQ = 79;
-	public final int REIFIED_LESS = 80;
-	public final int REIFIED_GREATER = 81;
-	public final int REIFIED_LEX_LEQ = 82;
-	public final int REIFIED_LEX_GEQ = 83;
-	public final int REIFIED_ELEMENT = 84;
-	public final int REIFIED_NARY_SUM_CONSTRAINT = 85;
-	public final int REIFIED_NARY_PRODUCT_CONSTRAINT = 86;
-	public final int REIFIED_ALLDIFFERENT = 87;
-	public final int REIFIED_BINARY_SUM_CONSTRAINT = 88;
-	public final int REIFIED_BINARY_PRODUCT_CONSTRAINT = 89;
+	public final int REIFIED_IF = 277;
+	public final int REIFIED_LEQ = 278;
+	public final int REIFIED_GEQ = 279;
+	public final int REIFIED_LESS = 280;
+	public final int REIFIED_GREATER = 281;
+	public final int REIFIED_LEX_LEQ = 282;
+	public final int REIFIED_LEX_GEQ = 283;
+	public final int REIFIED_ELEMENT = 284;
+	public final int REIFIED_NARY_SUMEQ_CONSTRAINT = 285;
+	public final int REIFIED_BINARY_SUMEQ_CONSTRAINT = 288;
+	public final int REIFIED_NARY_PRODUCT_CONSTRAINT = 286;
+	public final int REIFIED_ALLDIFFERENT = 287;
+	public final int REIFIED_BINARY_PRODUCT_CONSTRAINT = 289;
+	public final int REIFIED_NARY_SUMGEQ_CONSTRAINT = 290;
+	public final int REIFIED_BINARY_SUMGEQ_CONSTRAINT = 291;
+	public final int REIFIED_NARY_SUMLEQ_CONSTRAINT = 292;
+	public final int REIFIED_BINARY_SUMLEQ_CONSTRAINT = 293;
+	public final int REIFIED_NARY_SUMNEQ_CONSTRAINT = 294;
+	public final int REIFIED_BINARY_SUMNEQ_CONSTRAINT = 295;
+	public final int REIFIED_NARY_SUMGREATER_CONSTRAINT = 296;
+	public final int REIFIED_BINARY_SUMGREATER_CONSTRAINT = 297;
+	public final int REIFIED_NARY_SUMLESS_CONSTRAINT = 298;
+	public final int REIFIED_BINARY_SUMLESS_CONSTRAINT = 299;
 	
 	
 	
@@ -146,9 +175,6 @@ public interface TargetSolver {
     public boolean supportsReifiedAllDifferent();
     public boolean supportsReificationOf(int operation);
     public boolean supportsConstraintsNestedAsArgumentOf(int operator);
-    
-    // =============== CONSTRAINTS ==================
-    
     
     
     

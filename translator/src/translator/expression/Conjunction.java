@@ -15,6 +15,15 @@ public class Conjunction extends NaryRelationalExpression {
 		this.conjointExpressions = conjointExpressions;
 	}
 	
+	public Conjunction(Expression[] arguments) {
+		
+		this.conjointExpressions = new ArrayList<Expression>();
+		
+		for(int i=0; i<arguments.length; i++) {
+			conjointExpressions.add(arguments[i]);
+		}
+	}
+	
 //	============== Interfaced Methods ==================
 	
 	public ArrayList<Expression> getArguments() {
