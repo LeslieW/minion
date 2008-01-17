@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public class QuantifiedExpression implements RelationalExpression {
 
 	
-	
 	private boolean isUniversal;
 	private String[] quantifiedVariables;
 	
@@ -61,9 +60,8 @@ public class QuantifiedExpression implements RelationalExpression {
 	
 	
 	public int getType() {
-		if(isUniversal)
-			return FORALL;
-		else return EXISTS;
+		return (isUniversal) ?
+				FORALL : EXISTS;
 	}
 
 	
@@ -107,9 +105,6 @@ public class QuantifiedExpression implements RelationalExpression {
 		return this.quantifiedVariables;
 	}
 	
-	public boolean isUniversal() {
-		return this.isUniversal;
-	}
 	
 	protected String[] lexOrderStringList(String[] stringList){
 		
@@ -156,4 +151,21 @@ public class QuantifiedExpression implements RelationalExpression {
 		return this;
 	}
 
+
+	public String toString() {
+		
+		String s = (isUniversal) ? 
+				"forall " : "exists ";
+		
+		s = s.concat(quantifiedVariables[0]);
+	
+		for(int i=1; i<this.quantifiedVariables.length; i++)
+			s = s.concat(","+quantifiedVariables[i]);
+	
+		s = s.concat(": "+this.domain+"\n");
+		s = s.concat("\t"+this.quantifiedExpression);
+	
+	
+		return s;
+	}
 }

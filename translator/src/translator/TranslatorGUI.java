@@ -151,7 +151,7 @@ public class TranslatorGUI extends JPanel  {
 		
 		// parameter button panel
 		JButton loadParameterButton = new JButton("Load parameter");
-		loadParameterButton.setActionCommand(LOAD_PROBLEM);
+		loadParameterButton.setActionCommand(LOAD_PARAMETER);
 		loadParameterButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           load(e.getActionCommand());   

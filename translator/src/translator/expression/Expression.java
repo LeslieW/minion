@@ -7,6 +7,9 @@ public interface Expression {
 
 	public final boolean DEBUG = true;
 	
+	public final int UPPER_BOUND = 100000;
+	public final int LOWER_BOUND = -100000;
+	
 	// RelationalAtomExpression.java
 	public final int BOOL = 0;
 	public final int BOOL_VARIABLE = 5;
@@ -77,8 +80,9 @@ public interface Expression {
 	// Quantifications
 	
 	public final int SUM = 200;
-	public final int FORALL = 201;
-	public final int EXISTS = 202;
+	public final int Q_SUM = 201;
+	public final int FORALL = 202;
+	public final int EXISTS = 203;
 	
 	// --------------------------------------------------------
 	

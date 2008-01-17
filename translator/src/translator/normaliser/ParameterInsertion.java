@@ -20,6 +20,7 @@ import translator.conjureEssenceSpecification.QuantificationExpression;
 import translator.conjureEssenceSpecification.RangeAtom;
 import translator.conjureEssenceSpecification.UnaryExpression;
 import translator.conjureEssenceSpecification.IntegerDomain;
+import translator.conjureEssenceSpecification.IdentifierDomain;
 import translator.minionExpressionTranslator.TranslationUnsupportedException;
 import translator.minionModel.MinionException;
 import translator.preprocessor.PreprocessorException;
@@ -119,12 +120,13 @@ public class ParameterInsertion {
 	     	computeParameters(problemSpecification.getDeclarations(), 
 					          parameterSpecification.getDeclarations());
 	     	
-	     	// insert parameters into the constraints
+	     	
+	     	// insert parameters into the constraints	     	
 	     	return preprocessConstraints(problemSpecification.getExpressions());
-	  
 	    }
 	    
 	    
+	   
 	    
 	    /**
 	     * Returns the hashmap of decision variables with their corresponding domains
@@ -792,54 +794,47 @@ public class ParameterInsertion {
 	      	}
 
 	    
-	      
-	      /** 
-	  	* Try to split constraint into sub-constraints, like 
-	  	* (x != y ) /\ (y + 3 >= 0) /\ (x - 4 > 0) into the 3 constraints
-	  	* (x != y ) (y + 3 >= 0) (x - 4 > 0)  
-	  	* in order  to reduce the amount of reification and fresh variables
-	  	* 
-	  	* @param Expression constraint the constraint will be split up into 
-	  	* subconstraints (if possible)
-	  	* @return ArrayList[] the list of Expressions, that constraint could 
-	  	* be split into 
-	  	* @throws PreprocessorException
-	      */
-	      
-	    /*  private ArrayList<Expression> splitExpressionToConstraints(Expression constraint) 
-	  	throws NormaliserException {
-	  	
-	  	ArrayList<Expression> constraintList = new ArrayList<Expression>();
-
-	  	// we can only split constraints, if we have and AND on top of the syntax tree
-	  	if(constraint.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
-	  	    if(constraint.getBinaryExpression().getOperator().getRestrictionMode() == EssenceGlobals.AND) {
+	    private Domain insertValueForParameters(Domain domain) 
+	    	throws NormaliserException {
+	    	
+	    	switch(domain.getRestrictionMode()) {
+	    	
+	    	case EssenceGlobals.IDENTIFIER_DOMAIN:
+	    		IdentifierDomain identifierDomain = domain.getIdentifierDomain();
+	    		
+	    		for(int i=0; i<this.parameterNames.size(); i++) {
+	    			
+	    			String parameterName = parameterNames.get(i);
+	    			
+	    			if(identifierDomain.getIdentifier().equals(parameterName)) {
+	    				Constant parameter = this.parameters.get(parameterName);
+	    				if(parameter == null)
+	    					throw new NormaliserException("Internal error. Cannot find parameter in parameter hashmap"+
+	    							", but parameter name is in parameter names list:"+parameterName);
+	    				
+	    				if(parameter.getRestrictionMode() != EssenceGlobals.CONSTANT_DOMAIN)
+	    					throw new NormaliserException("Parameter '"+parameterName+"' does not represent a domain type.");
+	    				
+	    				return  parameter.getDomainConstant().getDomain();
 	  		
-	  		Expression left = constraint.getBinaryExpression().getLeftExpression();	     
-
-	  		if(left.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) {
-	  		    constraintList = splitExpressionToConstraints(left);
-	  		    constraintList.add(constraint.getBinaryExpression().getRightExpression());
-	  		    return constraintList;
-	  		}	    
-	  		else {
-	  		    constraintList.add(constraint.getBinaryExpression().getLeftExpression());
-	  		    constraintList.add(constraint.getBinaryExpression().getRightExpression());
-	  		    return constraintList;
-	  		}
-	  		
-	  	    }
-	  	}
-	  	
-	  	// we cannot split the constraint since there is no AND at top-level of the constraint
-	  	constraintList.add(constraint) ;
-	  	
-
-	  	return constraintList;
-	      }
-
-	      */
-	    
+	    			}
+	    		}
+	    		
+	    	case EssenceGlobals.BOOLEAN_DOMAIN:
+	    		return domain;
+	    		
+	    	case EssenceGlobals.INTEGER_RANGE:
+	    		RangeAtom[] rangeList = domain.getIntegerDomain().getRangeList();
+	    		for(int i=0; i<rangeList.length; i++) {
+	    			rangeList[i].setLowerBound(insertValueForParameters(rangeList[i].getLowerBound()));
+	    			rangeList[i].setUpperBound(insertValueForParameters(rangeList[i].getUpperBound()));	
+	    		}
+	    		return domain;
+	    	}
+	    	
+	    	return domain;  
+	    }
+	 
 	    
 	    /** 
 		* iterate through the expression, and whenever finding an identifier,
@@ -889,7 +884,11 @@ public class ParameterInsertion {
 		    return new Expression(new UnaryExpression(expression.getUnaryExpression().getRestrictionMode(),
 							       insertValueForParameters(expression.getUnaryExpression().getExpression())));
 
-		case EssenceGlobals.QUANTIFIER_EXPR:
+		case EssenceGlobals.QUANTIFIER_EXPR: 
+			Domain bindingDomain = expression.getQuantification().getBindingExpression().getDomainIdentifiers().getDomain();
+			bindingDomain = insertValueForParameters(bindingDomain);
+			expression.getQuantification().getBindingExpression().getDomainIdentifiers().setDomain(bindingDomain);
+			
 			return new Expression(new QuantificationExpression(expression.getQuantification().getQuantifier(),
 					                                           expression.getQuantification().getBindingExpression(),
 					                                           insertValueForParameters(expression.getQuantification().getExpression())));
@@ -898,12 +897,17 @@ public class ParameterInsertion {
 			if(expression.getNonAtomicExpression().getExpression().getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
 				throw new NormaliserException("Please access array elements by m[i,j] instead of m[i][j], thank you.");
 			
+			// insert parameters in the indices of the array element
+			Expression[] indexExpressions = expression.getNonAtomicExpression().getExpressionList();
+			for(int i=0; i<indexExpressions.length; i++)
+				indexExpressions[i] = insertValueForParameters(indexExpressions[i]);
+			
 			String matrixName = expression.getNonAtomicExpression().getExpression().getAtomicExpression().getString();
 			if(!this.parameterArrayNames.contains(matrixName))
 				return expression; // then this might be a decision variable
 			
 			// get the indices
-			Expression[] indexExpressions = expression.getNonAtomicExpression().getExpressionList();
+			//Expression[] indexExpressions = expression.getNonAtomicExpression().getExpressionList();
 			int[] indices = new int[indexExpressions.length];
 			for(int j=0;j<indexExpressions.length; j++) {
 				if(indexExpressions[j].getRestrictionMode() != EssenceGlobals.ATOMIC_EXPR)
@@ -1248,7 +1252,9 @@ public class ParameterInsertion {
 	    	
 	    }
 	    
-	    
+	  
+	 
+	     
 		  /** 
 	     * do that using a trick: add id to the list of parameters with 
 	     * value "value". Then evaluate the expression, which will insert
@@ -1312,5 +1318,6 @@ public class ParameterInsertion {
 	     */
 	    protected void print_debug(String m) {
 	    	this.debug = debug.concat(" [ DEBUG ] parameter insertion: "+m+"\n");
+	    	//System.out.println(" [ DEBUG ] parameter insertion: "+m+"\n");
 	    }
 }

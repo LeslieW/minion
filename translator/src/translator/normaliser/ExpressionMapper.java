@@ -93,14 +93,18 @@ public class ExpressionMapper {
 	protected translator.expression.Expression mapQuantification(QuantificationExpression oldQExpression) 
 		throws NormaliserException {
 		
-		// if it is a sum, we can express it as a n-ary sum
-		if(oldQExpression.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM)
-			throw new NormaliserException("Cannot map sum quantifications yet :"+oldQExpression.toString());
-		
 		translator.expression.Domain quantifiedDomain = mapDomain(oldQExpression.getBindingExpression().getDomainIdentifiers().getDomain());
 		String[] quantifiedVariables = oldQExpression.getBindingExpression().getDomainIdentifiers().getIdentifiers();
 		translator.expression.Expression quantifiedExpression = mapExpression(oldQExpression.getExpression());
 		
+		
+		if(oldQExpression.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+			
+			return new QuantifiedSum(quantifiedVariables,
+	                                 quantifiedDomain,
+	                                 quantifiedExpression);
+		}
+			
 		return (oldQExpression.getQuantifier().getRestrictionMode() == EssenceGlobals.FORALL) ? 
 				new QuantifiedExpression(true, // is universal quantification == true
 						                 quantifiedVariables,
@@ -406,8 +410,13 @@ public class ExpressionMapper {
 					return new RelationalAtomExpression(parameter);
 				else return new ArithmeticAtomExpression(parameter, true);					
 				
+			} // this might be the binding variable of a quantification
+			  // we might want to watch this identifier
+			else {
+				return new ArithmeticAtomExpression(new SingleVariable(oldAtom.getString(),
+						                                               new BoundedIntRange(translator.expression.Expression.LOWER_BOUND, 
+						                                            		               translator.expression.Expression.UPPER_BOUND)));
 			}
-			else throw new NormaliserException("Unknown identifier: "+oldAtom.getString());
 		
 			
 		default: throw new NormaliserException("Unknown atomic type:"+oldAtom.toString()); 	

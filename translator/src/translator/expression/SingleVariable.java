@@ -84,7 +84,7 @@ public class SingleVariable implements Variable {
 	}
 	
 	
-	public Expression evaluate() {	
+	public Variable evaluate() {	
 		return this;
 	}
 	

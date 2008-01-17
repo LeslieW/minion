@@ -82,7 +82,7 @@ public class ArrayVariable implements Variable {
 		}
 	}
 
-	public Expression evaluate() {
+	public Variable evaluate() {
 		if(this.exprIndices != null) {
 			boolean allIndicesAreInteger = true;
 			

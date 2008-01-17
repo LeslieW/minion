@@ -49,7 +49,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	
   //	============== Interfaced methods  ==================
 	
-	public Expression copy() {
+	public ArithmeticAtomExpression copy() {
 		
 		return (this.variable == null) ?
 			new ArithmeticAtomExpression(this.constantValue) :
@@ -103,8 +103,9 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	}
 	
 	
-	public Expression evaluate() {
-		this.variable = (Variable) this.variable.evaluate();
+	public ArithmeticAtomExpression evaluate() {
+		if(this.variable != null)
+			this.variable = (Variable) this.variable.evaluate();
 		return this;
 	}
 	

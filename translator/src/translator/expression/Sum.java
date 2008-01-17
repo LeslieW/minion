@@ -198,13 +198,14 @@ public class Sum extends NaryArithmeticExpression {
 		ArrayList<Integer> positiveConstants = new ArrayList<Integer>();
 		ArrayList<Integer> negativeConstants = new ArrayList<Integer>();
 		
+	
 		/** 1. first evaluate every argument (positive and negative) */
 		for(int i=0; i<this.positiveArguments.size(); i++) 
 			positiveArguments.add(i, positiveArguments.remove(i).evaluate());
 		for(int i=0; i<this.negativeArguments.size(); i++) 
 			negativeArguments.add(i, negativeArguments.remove(i).evaluate());
-		
-		
+	
+			
 		/** 2. then look for constants in the arguments and collect them
 		// (start loop from the tail of the list, because we are removing elements) */
 		for(int i=this.positiveArguments.size()-1;i>=0; i--) {
@@ -240,7 +241,8 @@ public class Sum extends NaryArithmeticExpression {
 		
 		/** 4. merge the resulting new constant with the rest of the sum  */
 		
-        
+     
+		
 		if(this.positiveArguments.size() == 0 && this.negativeArguments.size() == 0)
 			return new ArithmeticAtomExpression(newConstant);
 		
@@ -255,7 +257,8 @@ public class Sum extends NaryArithmeticExpression {
 			return this;
 		}
 		else { // if newConstant < 0
-			this.negativeArguments.add(0,new ArithmeticAtomExpression(newConstant));
+			// we add the positive value to the negative list, since it will be displayed with a minus anyway
+			this.negativeArguments.add(0,new ArithmeticAtomExpression(newConstant-2*newConstant));
 			return this;			
 		}
 		

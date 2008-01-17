@@ -77,6 +77,8 @@ public class Normaliser implements NormaliserSpecification {
 	
 	public ArrayList<Expression> evaluateConstraints(ArrayList<Expression> constraints) throws NormaliserException {
 		
+		reduceExpressions(constraints);
+		
 		for(int i=0; i<constraints.size(); i++) {
 			constraints.add(i, constraints.remove(i).evaluate());
 		}
@@ -182,12 +184,12 @@ public class Normaliser implements NormaliserSpecification {
 				this.parameterSpecification.getDeclarations() == null ||
 				   this.parameterSpecification.getDeclarations().length == 0) {
 		
-			print_debug("Empty parameter spec.");
 			oldConstraints = new ArrayList<translator.conjureEssenceSpecification.Expression>();
 			for(int i=0; i<this.problemSpecification.getExpressions().length; i++)
 				oldConstraints.add(this.problemSpecification.getExpressions()[i]);
 		}
 		else { // if there are some parameters given, insert them in the expressions
+
 			oldConstraints = insertParameters(this.problemSpecification, 
 					                          this.parameterSpecification);
 		}

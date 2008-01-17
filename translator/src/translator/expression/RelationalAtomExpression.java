@@ -100,7 +100,8 @@ public class RelationalAtomExpression implements
 
 	
 	public RelationalAtomExpression evaluate() {
-		this.variable = (Variable) this.variable.evaluate();
+		if(this.variable != null)
+			this.variable = (Variable) this.variable.evaluate();
 		return this;
 	}
 	
