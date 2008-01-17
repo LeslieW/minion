@@ -96,6 +96,8 @@ public interface TargetSolver {
 	public final int CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT = 124;
 	public final int CONSTRAINT_NESTED_IN_NARY_SUMGREATER_CONSTRAINT = 125;
 	public final int CONSTRAINT_NESTED_IN_BINARY_SUMGREATER_CONSTRAINT = 126;
+	public final int CONSTRAINT_NESTED_IN_UNARY_MINUS = 127;
+	public final int CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE = 128;
 	
 	// ----- reification of constraints ----------------
 	public final int REIFIED_IF = 277;
@@ -121,6 +123,8 @@ public interface TargetSolver {
 	public final int REIFIED_BINARY_SUMGREATER_CONSTRAINT = 297;
 	public final int REIFIED_NARY_SUMLESS_CONSTRAINT = 298;
 	public final int REIFIED_BINARY_SUMLESS_CONSTRAINT = 299;
+	public final int REIFIED_UNARY_MINUS = 250;
+	public final int REIFIED_ABSOLUTE_VALUE = 251;
 	
 	
 	

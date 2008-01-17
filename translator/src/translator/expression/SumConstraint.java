@@ -276,9 +276,13 @@ public class SumConstraint implements GlobalConstraint {
 		
 		String resultPart = this.result.toString();
 		
-		return (resultIsOnLeftSide) ?
+	/*	return (resultIsOnLeftSide) ?
 				resultPart+operator+sumPart:
 				sumPart+operator+resultPart;
+				*/
+		return (resultIsOnLeftSide) ? 
+				operator+"("+resultPart+","+sumPart+")" :
+				operator+"("+sumPart+","+resultPart+")";
 	}
 
 	

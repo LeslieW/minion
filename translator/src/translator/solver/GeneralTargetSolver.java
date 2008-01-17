@@ -252,6 +252,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.BINARY_SUMLESS_CONSTRAINT:
 			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMLESS_CONSTRAINT));
+			
+		case Expression.ABS:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE));
+			
+		case Expression.U_MINUS:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_UNARY_MINUS));
 		}
 		
 		return false;
@@ -336,6 +342,13 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.BINARY_SUMLESS_CONSTRAINT: 
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT));
+			
+		case Expression.ABS:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE));
+			
+		case Expression.U_MINUS:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_UNARY_MINUS));
+			
 		}
 		
 		return false;

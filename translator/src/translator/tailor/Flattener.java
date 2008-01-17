@@ -274,7 +274,7 @@ public class Flattener {
 		}
 		// 2. --- else the solver does not support n-ary disjunction, we have to flatten it to binary
 		else {
-			return flattenNaryToBinaryExpressions(arguments,null,Expression.OR);
+			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.OR);
 		}
 	
 	}
@@ -313,9 +313,41 @@ public class Flattener {
 		}
 		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
 		else {
-			return flattenNaryToBinaryExpressions(arguments,null,Expression.AND);
+			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments,null,Expression.AND);
 		}
 
+	}
+	
+	
+	private Expression flattenArithmeticNaryToBinaryExpression(ArrayList<Expression> arguments, 
+																Expression auxVariable, 
+																int operator) 
+		throws TailorException {
+		
+		// if the disjunction/conjunction only has 1 element, it has to hold
+		if(arguments.size() == 1 && auxVariable == null)
+			return arguments.remove(0);
+		
+		// get the 2 expressions we are building the conjunction from
+		Expression rightExpression = arguments.remove(0);
+		Expression leftExpression = null;
+		if(auxVariable != null)
+			leftExpression = auxVariable;
+		else leftExpression = arguments.remove(0);
+		
+		// the last 2 elements, just return a conjunction of them
+		if(arguments.size() == 0) {
+			return new CommutativeBinaryRelationalExpression(rightExpression, operator, leftExpression);
+		}
+		else {// check if this is OK TODO!!
+			CommutativeBinaryRelationalExpression binConjunction = new CommutativeBinaryRelationalExpression(leftExpression,
+																										operator,
+																										rightExpression);
+			RelationalAtomExpression auxVariable2 = reifyConstraint(binConjunction);
+			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments, auxVariable2, operator);
+		}
+		
+		
 	}
 	
 	/**
@@ -337,7 +369,7 @@ public class Flattener {
 	 * @return
 	 * @throws TailorException
 	 */
-	private Expression flattenNaryToBinaryExpressions(ArrayList<Expression> arguments, Expression reifiedVariable, int operator) 
+	private Expression flattenRelationalNaryToBinaryCommutativeExpressions(ArrayList<Expression> arguments, Expression reifiedVariable, int operator) 
 	throws TailorException {
 		
 		// if the disjunction/conjunction only has 1 element, it has to hold
@@ -345,22 +377,22 @@ public class Flattener {
 			return arguments.remove(0);
 		
 		// get the 2 expressions we are building the conjunction from
-		Expression leftExpression = arguments.remove(0);
-		Expression rightExpression = null;
+		Expression rightExpression = arguments.remove(0);
+		Expression leftExpression = null;
 		if(reifiedVariable != null)
-			rightExpression = reifiedVariable;
-		else rightExpression = arguments.remove(0);
+			leftExpression = reifiedVariable;
+		else leftExpression = arguments.remove(0);
 		
 		// the last 2 elements, just return a conjunction of them
 		if(arguments.size() == 0) {
-			return new CommutativeBinaryRelationalExpression(leftExpression, operator, rightExpression);
+			return new CommutativeBinaryRelationalExpression(rightExpression, operator, leftExpression);
 		}
 		else {
 			CommutativeBinaryRelationalExpression binConjunction = new CommutativeBinaryRelationalExpression(leftExpression,
 																										operator,
 																										rightExpression);
 			RelationalAtomExpression auxVariable = reifyConstraint(binConjunction);
-			return flattenNaryToBinaryExpressions(arguments, auxVariable, operator);
+			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments, auxVariable, operator);
 		}
 	}
 	
@@ -648,19 +680,88 @@ public class Flattener {
 				leftExpression.willBeFlattenedToVariable(true);
 				rightExpression.willBeFlattenedToVariable(true);
 			}
-			leftExpression = flattenExpression(leftExpression);
-			rightExpression = flattenExpression(rightExpression);
 			
-			
-			Expression flattenedConstraint = new CommutativeBinaryRelationalExpression(leftExpression,
-																					 expression.getOperator(),
-					   																   rightExpression);
-			
-			if(expression.isGonnaBeReified()) {
-				return reifyConstraint(flattenedConstraint);
-			}
-			else return flattenedConstraint;
+			return flattenInequality(expression);
 		}
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param inequality
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenInequality(CommutativeBinaryRelationalExpression inequality) 
+		throws TailorException {
+		
+		Expression leftExpression = inequality.getLeftArgument();
+		Expression rightExpression = inequality.getRightArgument();
+		
+		// ----- 1. check if the equality represents a sum ------------
+		if(leftExpression instanceof QuantifiedSum)
+			leftExpression = flattenQuantifiedSum((QuantifiedSum) leftExpression);
+		if(rightExpression instanceof QuantifiedSum)
+			rightExpression = flattenQuantifiedSum((QuantifiedSum) rightExpression);
+		
+		boolean leftSideIsSum = (leftExpression instanceof Sum);
+		boolean rightSideIsSum = (rightExpression instanceof Sum);
+		
+		// 1. CASE: both sides represent sums
+		if(leftSideIsSum && rightSideIsSum) 
+			return flattenEqualityOfTwoSums((Sum) leftExpression, 
+					                         inequality.getOperator(),
+					                         (Sum) rightExpression, 
+					                         inequality.isGonnaBeReified());
+		else if(leftSideIsSum || rightSideIsSum) {
+			Expression resultExpression = (leftSideIsSum) ? rightExpression : leftExpression;
+			Expression sumExpression = (leftSideIsSum) ? leftExpression : rightExpression;
+			
+			if(this.targetSolver.supportsConstraint(getNaryConstraintVariantOf(inequality.getOperator()))) {
+				SumConstraint  sumConstraint = createSumConstraint((Sum) sumExpression,
+					                                          inequality.getOperator(), 
+					                                          resultExpression, 
+					                                          rightSideIsSum); // leftSideIsResult
+				
+				if(inequality.isGonnaBeReified()) {
+					return reifyConstraint(sumConstraint);
+				}
+				else return sumConstraint;
+			}
+			else if(this.targetSolver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT)) {
+				int[] bounds = ((Sum) sumExpression).getDomain();
+				Variable auxVariable = createAuxVariable(bounds[0],bounds[1]);
+				SumConstraint  sumConstraint = createSumConstraint((Sum) sumExpression,
+																	Expression.EQ, 
+																	new ArithmeticAtomExpression(auxVariable), 
+																	rightSideIsSum); // leftSideIsResult
+				this.constraintBuffer.add(sumConstraint);
+				
+				Expression finalConstraint = (leftSideIsSum) ? 
+						new CommutativeBinaryRelationalExpression(new ArithmeticAtomExpression(auxVariable),
+						                                                               inequality.getOperator(),
+						                                                               resultExpression)
+				:
+					new CommutativeBinaryRelationalExpression(resultExpression,
+															inequality.getOperator(),
+															new ArithmeticAtomExpression(auxVariable));
+			    if(inequality.isGonnaBeReified())
+			    	return reifyConstraint(finalConstraint);
+			    else return finalConstraint;
+			}
+		}
+				
+		
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(inequality.getOperator())) {
+			leftExpression.isGonnaBeReified();
+			rightExpression.isGonnaBeReified();
+		}
+		leftExpression = flattenExpression(leftExpression);
+		rightExpression = flattenExpression(rightExpression);
+				
+		return new CommutativeBinaryRelationalExpression(leftExpression, 
+																inequality.getOperator(),
+						                                         rightExpression);
 	}
 	
 	/**
@@ -728,7 +829,7 @@ public class Flattener {
 	/**
 	 * Flatten the expression when we have a sum that is equal to another sum
 	 * 
-	 * a + b + c = x + y + z
+	 * a + b + c RELOP x + y + z
 	 * 
 	 * Depending on if one (or both) of the sums is already represented by a common
 	 * subexpression, flatten the expression.
@@ -789,7 +890,9 @@ public class Flattener {
 							 new Expression[0];
 			
 			// flatten the arguments 
-			boolean needsToBeFlattenedToVariable = this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NARY_SUMEQ_CONSTRAINT);	
+			boolean needsToBeFlattenedToVariable =this.targetSolver.supportsConstraintsNestedAsArgumentOf(getNaryConstraintVariantOf(relationalOperator));	
+			
+			
 			for(int i=0; i<positiveArguments.length; i++){
 				if(needsToBeFlattenedToVariable)
 					positiveArguments[i].willBeFlattenedToVariable(true);
@@ -808,7 +911,7 @@ public class Flattener {
 					                                        new ArithmeticAtomExpression(sumVariable), 
 					                                        hasCommonSubExpression(leftSum)); // is the result on the left side?
 			
-			if(!this.targetSolver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT)) {
+			if(!this.targetSolver.supportsConstraint(getNaryConstraintVariantOf(relationalOperator))) {
 				sumConstraint.setHasToBeBinary(true);
 			}
 			
@@ -827,6 +930,7 @@ public class Flattener {
 			Variable sumResult = createAuxVariable(lowerBound, upperBound);
 	
 			// ------------ create first sum -------------------------------------
+			// auxVariable = rightSum
 			SumConstraint sumConstraint1 = createSumConstraint(rightSum, 
 					                                           Expression.EQ, 
 					                                           new ArithmeticAtomExpression(sumResult), 
@@ -840,31 +944,95 @@ public class Flattener {
 	
 			
 			//------------ create second sum -------------------------------------
-			SumConstraint sumConstraint2 = createSumConstraint(leftSum, 
+			// case EQ:       leftSum = auxVariable
+			// other RELOP:   leftSum = auxVariable2
+			//                auxVariable2 RELOP auxVariable
+			
+			
+			if(relationalOperator == Expression.EQ) {
+				SumConstraint sumConstraint2 = createSumConstraint(leftSum, 
 															   Expression.EQ,
 					                                           new ArithmeticAtomExpression(sumResult), 
 					                                           false);
 			
-			if(!this.targetSolver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT)) {
-				sumConstraint2.setHasToBeBinary(true);
-			}
+				if(!this.targetSolver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT)) {
+					sumConstraint2.setHasToBeBinary(true);
+				}
 			// flatten the sum constraint (necessary to make it binary)
-			Expression finalSumConstraint2 = flattenExpression(sumConstraint2);
+				Expression finalSumConstraint2 = flattenExpression(sumConstraint2);
 			
 			
-			if(hasToBeFlattenedToVariable) {
-				RelationalAtomExpression reifiedRightSum = reifyConstraint(finalSumConstraint1);
-				RelationalAtomExpression reifiedLeftSum = reifyConstraint(finalSumConstraint2);
+			
+				if(hasToBeFlattenedToVariable) {
+					RelationalAtomExpression reifiedRightSum = reifyConstraint(finalSumConstraint1);
+					RelationalAtomExpression reifiedLeftSum = reifyConstraint(finalSumConstraint2);
 				
-				Conjunction reifiedSum = new Conjunction(new Expression[] {reifiedRightSum, reifiedLeftSum});
-				return reifyConstraint(reifiedSum);
+					Conjunction reifiedSum = new Conjunction(new Expression[] {reifiedRightSum, reifiedLeftSum});
+					return reifyConstraint(reifiedSum);
+				}
+				else {
+					this.constraintBuffer.add(finalSumConstraint1);
+					return finalSumConstraint2;
+				}
 			}
+			// other RELOPS:
 			else {
-				this.constraintBuffer.add(finalSumConstraint1);
-				return finalSumConstraint2;
+				Variable sumResult2 = createAuxVariable(lowerBound, upperBound);
+				SumConstraint sumConstraint2 = createSumConstraint(leftSum, 
+											   Expression.EQ,
+											   new ArithmeticAtomExpression(sumResult2), 
+											   false); // resultIsOnLeftSide
+				if(!this.targetSolver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT)) {
+					sumConstraint2.setHasToBeBinary(true);
+				}
+			// flatten the sum constraint (necessary to make it binary)
+				Expression finalSumConstraint2 = flattenExpression(sumConstraint2);
+				this.constraintBuffer.add(finalSumConstraint2);
+				
+				Expression finalExpression = new CommutativeBinaryRelationalExpression(new RelationalAtomExpression(sumResult),
+																						relationalOperator,
+																						new RelationalAtomExpression(sumResult2));
+				if(hasToBeFlattenedToVariable) {
+					return reifyConstraint(finalExpression);
+				}
+				else {
+					return finalExpression;
+				}
+				
 			}
 		}
 		
+	}
+	
+	private int getNaryConstraintVariantOf(int relop) 
+		throws TailorException {
+		
+		switch(relop) {
+		
+		case Expression.EQ:
+			return Expression.NARY_SUMEQ_CONSTRAINT;	
+			
+		case Expression.NEQ:
+			return Expression.NARY_SUMNEQ_CONSTRAINT;	
+			
+		case Expression.LEQ:
+			return Expression.NARY_SUMLEQ_CONSTRAINT;	
+			
+		case Expression.GEQ:
+			return Expression.NARY_SUMGEQ_CONSTRAINT;	
+			
+		case Expression.LESS:
+			return Expression.NARY_SUMLESS_CONSTRAINT;	
+			
+		case Expression.GREATER:
+			return Expression.NARY_SUMGREATER_CONSTRAINT;	
+			
+		case Expression.AND:
+			return Expression.AND;
+			
+		}
+		
+		throw new TailorException("Cannot find n-ary constraint version of relational operator:"+relop);
 	}
 	
 	/**
@@ -902,7 +1070,7 @@ public class Flattener {
 		}				
 		
 		// flatten the arguments 
-		boolean needsToBeFlattenedToVariable = this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NARY_SUMEQ_CONSTRAINT);	
+		boolean needsToBeFlattenedToVariable = this.targetSolver.supportsConstraintsNestedAsArgumentOf(relationalOperator);	
 		for(int i=0; i<positiveArguments.length; i++){
 			if(needsToBeFlattenedToVariable)
 				positiveArguments[i].willBeFlattenedToVariable(true);
@@ -932,12 +1100,134 @@ public class Flattener {
 	 * @param expression
 	 * @return
 	 */
-	private Expression flattenArithmeticExpression(ArithmeticExpression expression) {
+	private Expression flattenArithmeticExpression(ArithmeticExpression expression) 
+		throws TailorException {
+		
+		if(expression instanceof QuantifiedSum)
+			return flattenQuantifiedSum((QuantifiedSum) expression);
+		
+		if(expression instanceof ArithmeticAtomExpression)
+			return flattenArithmeticAtomExpression((ArithmeticAtomExpression) expression);
+			
+		if(expression instanceof UnaryArithmeticExpression)
+			return flattenUnaryArithmeticExpression((UnaryArithmeticExpression) expression);
+		
+		if(expression instanceof Sum)
+			return flattenSum((Sum) expression);
 		
 		return expression;
 	}
 	
 	
+	private Expression flattenSum(Sum sum) 
+		throws TailorException {
+		
+		if(this.targetSolver.supportsConstraint(Expression.NARY_SUMEQ_CONSTRAINT)) {
+			ArrayList<Expression> negativeArguments = sum.getNegativeArguments();
+			for(int i=0;i<negativeArguments.size(); i++)
+				negativeArguments.add(i, flattenExpression(negativeArguments.remove(i)));
+				
+			ArrayList<Expression> positiveArguments = sum.getPositiveArguments();
+			for(int i=0;i<positiveArguments.size(); i++)
+				positiveArguments.add(i, flattenExpression(positiveArguments.remove(i)));
+			
+			if(sum.isGonnaBeReified()) 
+				return reifyConstraint(sum);
+			else return sum;
+		}
+		else {
+			Expression plusConstraint = flattenRelationalNaryToBinaryCommutativeExpressions(sum.getPositiveArguments(),
+																		null,
+																		Expression.PLUS);
+			Expression finalConstraint = flattenRelationalNaryToBinaryCommutativeExpressions(sum.getNegativeArguments(),
+					 													plusConstraint,
+					 													Expression.MINUS);
+			
+		}
+		
+		return sum;
+	}
+	
+	
+	
+	/**
+	 * Flatten a unary expression
+	 * 
+	 * @param expression
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenUnaryArithmeticExpression(UnaryArithmeticExpression expression) 
+		throws TailorException {
+		
+		Expression argument = expression.getArgument();
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getType()))
+			argument.willBeFlattenedToVariable(true);
+		
+		argument = flattenExpression(argument);
+		
+		if(expression.isGonnaBeReified())
+			return reifyConstraint(expression);
+		
+		else return expression;
+	}
+	
+	/**
+	 * If the expression is indexed by a variable, and variable indexing is 
+	 * not supported in the target solver, then transform it into an element
+	 * constraint
+	 * 
+	 * @param atom
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenArithmeticAtomExpression(ArithmeticAtomExpression atom) 
+		throws TailorException {
+		
+		if(atom.getType() == Expression.BOOL_VARIABLE_ARRAY_ELEM) {
+			Variable arrayVariable = atom.getVariable();
+			if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
+				Expression[] indices = ((ArrayVariable) arrayVariable).getExpressionIndices();
+				
+				// if we have an array element indexed by something that is not a single integer
+				if(indices != null) {
+					if(this.targetSolver.supportsVariableArrayIndexing()) {
+						for(int i=0; i<indices.length; i++) {
+							// if the target solver only allows single variables as array indices (and no expressions)
+							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ARRAY_INDEXING)) {
+								indices[i].willBeFlattenedToVariable(true);
+							}
+							indices[i] = flattenExpression(indices[i]);
+						}
+						return atom;	
+					}
+					// the solver does not support array indexing with something other than an integer
+					else {
+						if(indices.length == 1) {
+							Expression index = indices[0];
+							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+								index.willBeFlattenedToVariable(true);
+							Variable auxVariable = createAuxVariable(0,1);
+							if(atom.isGonnaBeReified()) {
+								return reifyConstraint(new ElementConstraint(arrayVariable,
+															  index,
+															  auxVariable));
+							}
+							else return new ElementConstraint(arrayVariable,
+															  index,
+															  auxVariable);
+						}
+					}
+					// translate to an element constraint if the target solver supports it
+					// find out if the element constraint has to be nested too!!
+				}
+			}
+			else throw new TailorException("Cannot dereference variable that is not of type array:"+atom);
+		}
+		
+		
+		return atom;
+	}
 	
 	// ========================= GENERAL HELPER METHODS ===========================
 	
