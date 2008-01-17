@@ -1391,9 +1391,10 @@ public class MinionModel implements MinionGlobals {
 	
 	/*  in this case the last vector (1-dim matrix) is the vector of 
 	 *   decision variables we want to print */
-	if(originalVariables.size() > 0) 
+	if(this.matrices2d.size() > 0)
+		result.append("print m"+(matrices2d.size()-1)+"\n");
+	else if(originalVariables.size() > 0) 
 		result.append("print v"+(matrices1d.size()-1)+"\n");
-	
 	else 
 		result.append("print none\n") ;
 	
