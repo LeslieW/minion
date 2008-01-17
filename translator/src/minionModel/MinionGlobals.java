@@ -17,6 +17,6 @@ public interface MinionGlobals {
     						"# Input file for Minion built for Version "+MINION_VERSION_NUMBER+
     						"\n#    http://sourceforge.net/projects/minion\n#" ;
     
-    public final boolean USE_WATCHED_LITERALS = true;
-    public final boolean USE_DISCRETE_VARIABLES = false;
+    public final boolean USE_WATCHED_LITERALS = false;
+    public final boolean USE_DISCRETE_VARIABLES = true;
 }

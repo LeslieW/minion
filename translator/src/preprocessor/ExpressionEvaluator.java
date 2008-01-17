@@ -598,14 +598,17 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 
 
 	case EssenceGlobals.AND:
+		print_debug("We are evaluating the binary conjunction: "+e);
 	    if((e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) &&
-	       (e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) )
-		if((e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) &&
-		   (e_right.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN)) 
-		    return new Expression(new AtomicExpression
-					  (e_left.getAtomicExpression().getBool() && e_right.getAtomicExpression().getBool()));	    
+	       (e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) ) {
+	    	if((e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) &&
+	    		(e_right.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN)) 
+		           return new Expression(new AtomicExpression
+					    (e_left.getAtomicExpression().getBool() && e_right.getAtomicExpression().getBool()));
+	    }
+	    
 	    //BOOL and E
-		else if(e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+		if(e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
 		    if(e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
 			return (e_left.getAtomicExpression().getBool()) ?
 			    e_right :
@@ -613,7 +616,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 		    } 
 		}
 	    //E and BOOL
-		else if(e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+		if(e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
 		    if(e_right.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
 			return (e_right.getAtomicExpression().getBool()) ?
 			    e_left  :
@@ -654,7 +657,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	    
 	case EssenceGlobals.IF:  // e1 => e2  (implies)
 	    if((e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) &&
-	       (e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) )
+	       (e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) ) {
 		if((e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) &&
 		   (e_right.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN)) {
 		    boolean left_bool = e_left.getAtomicExpression().getBool();
@@ -663,6 +666,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 			new Expression(new AtomicExpression(false)) :	    			
 			new Expression(new AtomicExpression(true));	    			
 		}
+	    }
 	    if(e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
 		if(e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
 		    if(e_left.getAtomicExpression().getBool()) // true IF Expr  ---->  Expr
@@ -819,6 +823,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	}
 
     print_debug("tried it all. now evaluating the binary expression more advanced.");
+    
 	return evalBinExpressionAdvanced(new BinaryExpression(e_left,e.getOperator(),e_right) );
 
 	//	return new Expression(new BinaryOpExpression(e_left,e.getbiop(),e_right));
@@ -1533,7 +1538,7 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
     	if(constant == null) 
     		throw new PreprocessorException("Unknown identifier used as domain identifier: "+d.getIdentifierDomain().getIdentifier());
     	
-    	else if(constant.getRestrictionMode() == EssenceGlobals.IDENTIFIER_DOMAIN)
+    	else if(constant.getRestrictionMode() != EssenceGlobals.CONSTANT_DOMAIN)
     		throw new PreprocessorException("Constant identifier used as domain identifier: "+d.getIdentifierDomain().getIdentifier());	
     	
     	Domain newDomain = evalExpressionInDomain(constant.getDomainConstant().getDomain());

@@ -753,7 +753,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			print_debug("lower bound binding Variable "+bindingVariablesNames.get(i)+"= "+bindingVariablesBounds.get(bindingVariablesNames.get(i))[0]);
 		}*/
 		
-		print_debug("AAAAAAAAAAAAAAYYYYYYYYYY next generated Expression is:"+generatedExpression.toString());
+		print_debug("AAAAAAAAAAAAAAYYYYYYYYYY next generated Expression is:"+this.evaluator.evalExpression(generatedExpression).toString());
 		return generatedExpression;
 	}
 	

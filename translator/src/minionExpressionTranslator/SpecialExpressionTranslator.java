@@ -771,7 +771,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    	minionModel.add01Variable(reifiedOrVar);
 					minionVariables.put("freshVariable"+(noTmpVars++), reifiedOrVar);
 				
-			    	MinionMaxConstraint or_constraint = new MinionMaxConstraint(ids, new MinionConstant(1));			
+			    	MinionSumGeqConstraint or_constraint = new MinionSumGeqConstraint(ids, new MinionConstant(1), this.useWatchedLiterals && !reifiable);			
 			    	minionModel.addReificationConstraint(or_constraint, reifiedOrVar);
 				
 			    	return new MinionEqConstraint(id3, reifiedOrVar);
@@ -782,7 +782,8 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			    	minionModel.add01Variable(reifiedAndVar);
 					minionVariables.put("freshVariable"+(noTmpVars++), reifiedAndVar);
 				
-			    	MinionMinConstraint and_constraint = new MinionMinConstraint(ids, new MinionConstant(1));
+			    	MinionSumGeqConstraint and_constraint = new MinionSumGeqConstraint(ids, new MinionConstant(2), 
+			    				this.useWatchedLiterals && !reifiable);
 			    	minionModel.addReificationConstraint(and_constraint, reifiedAndVar);
 				
 			    	return new MinionEqConstraint(id3,reifiedAndVar);
@@ -1022,7 +1023,7 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
         			  minionModel.addConstraint(new MinionReifyConstraint((MinionReifiableConstraint) secondSumConstraint, reifiedVariable2));
         			  return new MinionSumConstraint(new MinionIdentifier[] {reifiedVariable1, reifiedVariable2}, 
         					                        new MinionConstant(2),
-        					                        this.useWatchedLiterals);         
+        					                        false); // we can only apply watched literals on booleans         
        			  }
        			  else {
 					  MinionIdentifier auxVariable2 = variableCreator.addFreshVariable(MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND, 
