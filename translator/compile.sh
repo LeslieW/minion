@@ -1,5 +1,5 @@
 # building Translator without rebuiliding the Parser
-cd translator
+cd src
 echo "### Compiling conjureEssenceSpecification, parser and translation-part"
-javac -classpath essencePrimeParser/java-cup-11a.jar:. -d ../bin/ essencePrimeParser/*.java minionModel/*.java preprocessor/*.java minionExpressionTranslator/*.java *.java
+javac -classpath translator/essencePrimeParser/java-cup-11a.jar:. -d ../bin/ translator/essencePrimeParser/*.java translator/minionModel/*.java translator/preprocessor/*.java translator/minionExpressionTranslator/*.java translator/*.java
 cd ..

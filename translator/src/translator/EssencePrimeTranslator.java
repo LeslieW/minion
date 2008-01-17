@@ -177,11 +177,11 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
     	String watchedDefault = "";
     	String discreteDefault = "";
     	String boundsDefault = "";
-    	if(minionModel.MinionGlobals.USE_WATCHED_LITERALS) 
+    	if(translator.minionModel.MinionGlobals.USE_WATCHED_LITERALS) 
     		watchedDefault = "(default)";
     	else unwatchedDefault = "(default)";
     		
-    	if(minionModel.MinionGlobals.USE_DISCRETE_VARIABLES)
+    	if(translator.minionModel.MinionGlobals.USE_DISCRETE_VARIABLES)
     		discreteDefault = "(default)";
     	else boundsDefault ="(default)";
     	

@@ -8,7 +8,7 @@ import translator.preprocessor.PreprocessorException;
 
 
 
-public class EssencePrimeMinionTranslator extends EssencePrimeTranslator implements minionModel.MinionGlobals {
+public class EssencePrimeMinionTranslator extends EssencePrimeTranslator implements translator.minionModel.MinionGlobals {
 
     MinionModel minionModel;
     MinionModelTranslator translator;
@@ -27,8 +27,8 @@ public class EssencePrimeMinionTranslator extends EssencePrimeTranslator impleme
 	super(problemFile, parametersFile);
 		       
 	translator = new MinionModelTranslator(decisionVariables, decisionVariablesNames, constraints, objective, parameterArrays);
-	useWatchedLiterals = USE_WATCHED_LITERALS;
-	useDiscreteVariables = USE_DISCRETE_VARIABLES;
+	useWatchedLiterals = minionModel.USE_WATCHED_LITERALS;
+	useDiscreteVariables = minionModel.USE_DISCRETE_VARIABLES;
     }
 
     

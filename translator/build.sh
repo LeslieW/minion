@@ -4,10 +4,11 @@
 # !! Please note, that you will need both jflex and java_cup 
 #    installed on your machine in order to build the parser and lexer
 
-cd translator/essencePrimeParser/
+cd src/translator/essencePrimeParser/
 echo "### Generating EssencePrimeParser"
 ./build_parser.sh
 cd ..
+cd ..
 echo "### Compiling conjureEssenceSpecification, parser and Minion-part"
-javac -classpath essencePrimeParser/java-cup-11a.jar:. -d ../bin/ conjureEssenceSpecification/*.java essencePrimeParser/*.java preprocessor/*.java minionModel/*.java minionExpressionTranslator/*.java  *.java
+javac -classpath translator/essencePrimeParser/java-cup-11a.jar:. -d ../bin/ translator/essencePrimeParser/*.java translator/minionModel/*.java translator/preprocessor/*.java translator/minionExpressionTranslator/*.java translator/*.java
 cd ..
