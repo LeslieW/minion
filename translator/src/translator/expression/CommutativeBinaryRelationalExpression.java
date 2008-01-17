@@ -233,6 +233,13 @@ public class CommutativeBinaryRelationalExpression implements
 				this.leftArgument = this.leftArgument.restructure();
 				this.leftArgument.orderExpression();
 				this.leftArgument = this.leftArgument.evaluate();
+				
+				if(leftArgument instanceof Sum) {
+					ArrayList<Expression> negArgs = ((Sum) leftArgument).getNegativeArguments();
+					if(negArgs.size() > 0 && negArgs.get(0).getType() == INT){
+						rightArgument = negArgs.remove(0);
+					}
+				}
 			}
 			else if(this.rightArgument instanceof Sum) {
 				Sum rightSum = (Sum) this.rightArgument;
@@ -253,6 +260,14 @@ public class CommutativeBinaryRelationalExpression implements
 				this.rightArgument = this.rightArgument.restructure();
 				this.rightArgument.orderExpression();
 				this.rightArgument = this.rightArgument.evaluate();
+				
+				
+				if(rightArgument instanceof Sum) {
+					ArrayList<Expression> negArgs = ((Sum) rightArgument).getNegativeArguments();
+					if(negArgs.size() > 0 && negArgs.get(0).getType() == INT){
+						leftArgument = negArgs.remove(0);
+					}
+				}
 			}
 		} // else: not EQ
 		

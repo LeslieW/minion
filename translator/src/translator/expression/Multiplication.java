@@ -48,6 +48,9 @@ public class Multiplication extends NaryArithmeticExpression {
 		for(int i=0; i<this.arguments.size(); i++) {
 			int lb_i = this.arguments.get(i).getDomain()[0];
 			int ub_i = this.arguments.get(i).getDomain()[1];
+			
+			System.out.println("lb:"+lowerBound+" and ub:"+upperBound+", of argument:"+arguments.get(i));
+			
 			if(lb_i == 0) 
 				zeroLowerBound = true;
 				// keep lower bound as it is

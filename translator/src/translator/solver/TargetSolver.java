@@ -129,6 +129,8 @@ public interface TargetSolver {
 	public final int REIFIED_NARY_DISJUNCTION = 253;
 	public final int REIFIED_SUM = 254;
 	public final int REIFIED_MULTIPLICATION = 255;
+	public final int REIFIED_NEGATION = 256;
+
 	
 	
 	// ============== solving issues =======================

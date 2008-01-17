@@ -132,10 +132,10 @@ public class TranslationPanel extends JPanel {
 		
 		this.normaliseButton = new JButton("Normalise >>");
 		normaliseButton.setPreferredSize(new Dimension(100,30));
-		normaliseButton.setActionCommand((String) this.normaliseComboBox.getSelectedItem());
+		//normaliseButton.setActionCommand((String) this.normaliseComboBox.getSelectedItem());
 		normaliseButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
-		           translate(e.getActionCommand());   
+		           translate((String) normaliseComboBox.getSelectedItem());   
 			  }
 			});
 		normalisePanel.add(normaliseComboBox, BorderLayout.NORTH);

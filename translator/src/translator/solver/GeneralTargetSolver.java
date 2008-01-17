@@ -254,10 +254,10 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			return this.featureMap.get(new Integer(TargetSolver.REIFIED_BINARY_SUMLESS_CONSTRAINT));
 			
 		case Expression.ABS:
-			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE));
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_ABSOLUTE_VALUE));
 			
 		case Expression.U_MINUS:
-			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_UNARY_MINUS));
+			return this.featureMap.get(new Integer(TargetSolver.REIFIED_UNARY_MINUS));
 
 		case Expression.NARY_CONJUNCTION:
 			return this.featureMap.get(new Integer(TargetSolver.REIFIED_NARY_CONJUNCTION));

@@ -226,14 +226,20 @@ public class NonCommutativeRelationalBinaryExpression implements
 			else { // sum RELOP E     ====>   sum - E RELOP 0
 				ArrayList<Expression> negativeArgs = rightSum.getNegativeArguments();
 				negativeArgs.add(this.leftArgument.copy());
+				System.out.println("Restructuring right argument (sum) to:"+rightSum);
 				this.leftArgument = new ArithmeticAtomExpression(0);
+				System.out.println("Restructured everything to expression:"+this);
 				
 			}
 			// then flatten the sum
 			this.rightArgument = this.rightArgument.reduceExpressionTree();
+			System.out.println("After reducing rght expr:"+this);
 			this.rightArgument = this.rightArgument.restructure();
+			System.out.println("After restructuring right expr:"+this);
 			this.rightArgument.orderExpression();
+			System.out.println("After oreding right expr:"+this);
 			this.rightArgument = this.rightArgument.evaluate();
+			System.out.println("After evaluation, ordering etc (all):"+this);
 		}		
 	
 		return this;

@@ -122,6 +122,11 @@ public class ArrayVariable implements Variable {
 		
 		ArrayVariable otherVariable = (ArrayVariable) e;
 		
+		if(this.arrayName.compareTo(otherVariable.arrayName) != 0) {
+			return (this.arrayName.compareTo(otherVariable.arrayName) < 0) ?
+					SMALLER : BIGGER;
+		}
+		
 		// this variable is indexed by integers
 		if(this.intIndices != null) {
 			
@@ -156,14 +161,19 @@ public class ArrayVariable implements Variable {
 			// the other variable is also indexed by expressions
 			else if(otherVariable.exprIndices.length == this.exprIndices.length) {
 				for(int i=0; i<exprIndices.length; i++) {
-					char diff = this.exprIndices[i].isSmallerThanSameType(otherVariable.exprIndices[i]);
-					if(diff != EQUAL) return diff;
+					if(this.exprIndices[i].getType() == otherVariable.exprIndices[i].getType()) {
+						char diff = this.exprIndices[i].isSmallerThanSameType(otherVariable.exprIndices[i]);
+						if(diff != EQUAL) return diff;
+					}
+					else return (this.exprIndices[i].getType() < otherVariable.exprIndices[i].getType()) ?
+							SMALLER : BIGGER;
 				}
 				return EQUAL;
 			}
 			else return (otherVariable.exprIndices.length > this.exprIndices.length) ?
 				SMALLER : BIGGER;
 		}
+		
 		
 		
 	}

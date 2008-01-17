@@ -353,7 +353,7 @@ public class Sum extends NaryArithmeticExpression {
 		if(this.positiveArguments.size() == 1 && this.negativeArguments.size() == 0)
 			return this.positiveArguments.remove(0);
 		else if(this.positiveArguments.size() == 0 && this.negativeArguments.size() == 1)
-			return new Negation(this.negativeArguments.remove(0));
+			return new UnaryMinus(this.negativeArguments.remove(0));
 		
 		return this;
 	}
@@ -389,6 +389,7 @@ public class Sum extends NaryArithmeticExpression {
 				Expression negArgument = this.negativeArguments.get(j);
 				if(negArgument.getType() == argument.getType()) {
 					if(negArgument.isSmallerThanSameType(argument) == Expression.EQUAL) {
+						System.out.println("The two arguments are the same:"+positiveArguments.get(i)+" and "+negativeArguments.remove(j));
 						positiveArguments.remove(i);
 						negativeArguments.remove(j);
 					}

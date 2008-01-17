@@ -25,6 +25,8 @@ public class NormalisedModel {
 	/** auxiliary variables */
 	ArrayList<Variable> auxiliaryVariables;
 	
+	int usedCommonSubExpressions;
+	
 	//=============== CONSTRUCTORS ==================================
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
@@ -37,7 +39,7 @@ public class NormalisedModel {
 		this.constraintList = constraints;
 		this.objective = objective;
 		this.auxiliaryVariables = new ArrayList<Variable>();
-
+		this.usedCommonSubExpressions = 0;
 	}
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
@@ -52,10 +54,20 @@ public class NormalisedModel {
 		this.parameterArrays = parameterArrays;
 		this.objective = objective;
 		this.auxiliaryVariables = new ArrayList<Variable>();
+		this.usedCommonSubExpressions = 0;
 	}
 	 
 	// =============== METHODS =======================================
 
+	public int getAmountOfCommonSubExpressionsUsed() {
+		return this.usedCommonSubExpressions;
+	}
+	
+	
+	public void setAmountOfCommonSubExpressionsUsed(int noCommonSubExpressionsUsed) {
+		this.usedCommonSubExpressions = noCommonSubExpressionsUsed;
+	}
+	
 	/**
 	 * Returns true, if there exists a decision variable with 
 	 * the name variableName
@@ -102,9 +114,7 @@ public class NormalisedModel {
 		// header
 		String s = "ESSENCE' 1.0\n\n";
 		
-		
-		
-		
+	
 		// decision variables
 		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
 			String variableName = decisionVariablesNames.get(i);
@@ -116,8 +126,11 @@ public class NormalisedModel {
 		// auxiliary variables
 		for(int i=0; i<this.auxiliaryVariables.size(); i++) {
 			Variable auxVar = auxiliaryVariables.get(i);
-			s = s.concat("$  "+auxVar+" : {"+auxVar.getDomain()[0]+", "+auxVar.getDomain()[1]+"} \n");
+			if(i%5 ==0) s = s.concat("\n$");
+			s = s.concat("  "+auxVar+" : {"+auxVar.getDomain()[0]+", "+auxVar.getDomain()[1]+"}  ");
 		}
+		s = s.concat("$\n"+printStatistics());
+		
 		
 		// objective
 		s = s.concat("\n"+this.objective.toString()+"\n\n");
@@ -131,6 +144,14 @@ public class NormalisedModel {
 		for(int i=0; i<this.constraintList.size()-1; i++)
 			s = s.concat("\t"+constraintList.get(i)+",\n\n");
 		s= s.concat("\t"+constraintList.get(constraintList.size()-1)+"\n");
+		
+		return s;
+	}
+	
+	
+	private String printStatistics() {
+		String s = "\n$ Statistical data about translation\n";
+		s = s.concat("$ amount of subexpressions used: "+this.usedCommonSubExpressions+"\n");
 		
 		return s;
 	}

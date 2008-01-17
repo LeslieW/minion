@@ -297,7 +297,10 @@ public class SumConstraint implements GlobalConstraint {
 		
 		}
 		
-		String sumPart = ""+this.positiveArguments[0];
+		String sumPart = "";
+		
+		if(this.positiveArguments.length > 0)
+			sumPart = ""+this.positiveArguments[0];
 		
 		for(int i=1; i<this.positiveArguments.length; i++)
 			sumPart = sumPart.concat(" + "+positiveArguments[i]);

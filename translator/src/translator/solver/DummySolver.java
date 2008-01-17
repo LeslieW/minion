@@ -70,6 +70,8 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_LESS), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_QUANTIFIED_SUM), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NARY_SUM), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_UNARY_MINUS), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMNEQ_CONSTRAINT), new Boolean(false));

@@ -10,6 +10,7 @@ public class MinionTailor {
 
 	public final String MINION_AUXVAR_NAME = "_aux";
 	int noMinionAuxVars;
+	int usedCommonSubExpressions;
 	
 	MinionModel minionModel;
 	HashMap<String, int[]> offsetsFromZero;
@@ -26,6 +27,7 @@ public class MinionTailor {
 		this.normalisedModel = normalisedModel;
 		this.solverSettings = solverSettings;
 		this.noMinionAuxVars = this.normalisedModel.getAuxVariables().size();
+		this.usedCommonSubExpressions = this.normalisedModel.getAmountOfCommonSubExpressionsUsed();
 	}
 	
 	// ====== TRANSLATION TO MINION REPRESENTATION ===========

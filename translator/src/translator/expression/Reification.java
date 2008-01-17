@@ -49,7 +49,7 @@ public class Reification implements RelationalExpression {
 	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
-		return this.isGonnaBeFlattenedToVariable();
+		return this.willBeReified;
 	}
 
 	public boolean isNested() {
