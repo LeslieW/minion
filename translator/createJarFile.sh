@@ -1,1 +1,1 @@
-jar -cfvm translator.jar manifest translator/ java_cup/
+jar -cfvm tailor.jar manifest translator/ java_cup/

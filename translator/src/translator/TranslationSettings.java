@@ -19,6 +19,8 @@ public class TranslationSettings {
 	TargetSolver targetSolver;
 	boolean useCommonSubExpressions;
 	boolean applyStrictCopyPropagation;
+	boolean useExplicitCommonSubExpressions;
+	boolean giveTranslationTimeInfo;
 	String pathToMinion;
 	// the variables whose solutions have been printed by the target solver
 	String[] printedVariables;
@@ -29,7 +31,9 @@ public class TranslationSettings {
 		this.settingsFileName = "settings";
 		this.targetSolver = new Minion();
 		this.useCommonSubExpressions = true;
+		this.useExplicitCommonSubExpressions = true;
 		this.applyStrictCopyPropagation = false;
+		this.giveTranslationTimeInfo = true;
 		this.pathToMinion = readPathToMinion();
 	}
 	
@@ -43,7 +47,7 @@ public class TranslationSettings {
 			 if(file.createNewFile()) {
 				 String minionDirectory = System.getProperty("user.dir");
 				 // currentDirectory - translator =>  minion directory
-				 //minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
+				 minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
 				 this.pathToMinion = minionDirectory+"bin/minion";;
 			 }
 			 else {
@@ -52,7 +56,7 @@ public class TranslationSettings {
 				 if(loadedString == null || loadedString.equals("")) {
 					 String minionDirectory = System.getProperty("user.dir");
 					 // currentDirectory - translator =>  minion directory
-					 //minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
+					 minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
 					 this.pathToMinion = minionDirectory+"bin/minion";
 				 }
 				 else this.pathToMinion = loadedString;
@@ -107,12 +111,28 @@ public class TranslationSettings {
 		return this.useCommonSubExpressions;
 	}
 	
+	public boolean useExplicitCommonSubExpressions() {
+		return this.useExplicitCommonSubExpressions;
+	}
+	
+	public boolean giveTranslationTimeInfo() {
+		return this.giveTranslationTimeInfo;
+	}
+	
 	public void setTargetSolver(TargetSolver solver) {
 		this.targetSolver = solver;
 	}
 	
 	public void setUseCommonSubExpressions(boolean turnOn) {
 		this.useCommonSubExpressions = turnOn;
+	}
+	
+	public void setUseExplicitCommonSubExpressions(boolean turnOn) {
+		this.useExplicitCommonSubExpressions = turnOn;
+	}
+	
+	public void setGiveTranslationTimeInfo(boolean turnOn) {
+		this.giveTranslationTimeInfo = turnOn;
 	}
 	
 	public String getPathToMinion() {
