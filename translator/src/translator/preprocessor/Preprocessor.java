@@ -156,10 +156,10 @@ public class Preprocessor implements PreprocessorGlobals {
     	
  
     	// is still under construction
-    	orderConstraints();
-    	print_debug("ORDERED Constraint expressions: ");
-       	for(int i=0; i<constraints.size(); i++)
-       		print_debug(i+": "+constraints.get(i));
+    	//orderConstraints();
+    	//print_debug("ORDERED Constraint expressions: ");
+       	//for(int i=0; i<constraints.size(); i++)
+       	//	print_debug(i+": "+constraints.get(i));
     		
     }
   

@@ -30,7 +30,7 @@ java translator.EssencePrimeTranslator <Essence'-specification-file>   <Essence'
 The last parameter is optional. If the output-filename is omitted, 
 the Essence' Translator will generate the file "outFile". There are 
 also a set of flags for the translation. For further information call
-"java EssencePrimeTranslator" without arguments.
+"java translator.EssencePrimeTranslator" without arguments.
 
 
 
@@ -45,7 +45,8 @@ and the translator API.
 4. Essence' examples
 --------------------
 4.1 Problem Samples
-Several problem samples can be found in the /problems directory. 
+Several problem samples can be found in the /problems directory. All problem
+samples are documented.
 
 4.2 Test Instances
 A large amount of test instances can be found in the /test directory. It also

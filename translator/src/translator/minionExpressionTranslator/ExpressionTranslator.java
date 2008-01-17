@@ -110,7 +110,6 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 		      
 		      case EssenceGlobals.BINARYOP_EXPR:
 		    	  if(doesNotContainQuantifications(e)) {
-		    		  print_debug("RRRRRRRRRRRRRRRRRRRRRRRAAAAAAAAAAAAAAAAAAAAAAAA beginning to translate constraint:"+e.toString());
 		    		  MinionConstraint constraint = expressionTranslator.translateSpecialExpression(e, false);
 		    		  if(constraint!= null)
 		    			  print_debug("translated expression  to :"+constraint.toString());
@@ -126,14 +125,16 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 		    	  	  //quantificationTranslator.translate(e.getQuantification());
 		    		  print_debug("We have a binary expression that has a quantification nested:"+e);
 		    	     MinionConstraint constraint = quantificationTranslator.translate(e,false);
-		    	     if(constraint != null)
+		    	     if(constraint != null) {
 		    	    	 this.minionModel.addConstraint(constraint);
+		    	    	 print_debug("Added constraint to model");
+		    	     }
 		    	  }
 		    	  break;
 		      
 		      case EssenceGlobals.QUANTIFIER_EXPR:
 		    	  //quantificationTranslator.translateQuantification(e);
-		    	  quantificationTranslator.translate(e.getQuantification());
+		    	  quantificationTranslator.translate(e, false);
 		    	  break;
 	
 		      case EssenceGlobals.FUNCTIONOP_EXPR:

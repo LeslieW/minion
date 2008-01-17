@@ -12,7 +12,7 @@ import translator.preprocessor.PreprocessorException;
 import translator.conjureEssenceSpecification.AtomicExpression;
 import translator.conjureEssenceSpecification.NonAtomicExpression;
 import translator.conjureEssenceSpecification.BinaryExpression;
-//import translator.conjureEssenceSpecification.BinaryOperator;
+import translator.conjureEssenceSpecification.BinaryOperator;
 import translator.conjureEssenceSpecification.Constant;
 import translator.conjureEssenceSpecification.ExpressionConstant;
 import translator.conjureEssenceSpecification.Expression;
@@ -147,12 +147,13 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	
 
 	
-	public void translate(QuantificationExpression e) 
+	/**private void translate(QuantificationExpression e) 
 	     throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
 		
 		if(e.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
 			print_debug("SUMMMMM constraint go to the translator:"+e);
 			this.translatorMinionModel.addConstraint(this.translator.translateQuantifiedSum(e, false));
+			print_debug("SUMMMMM constraint comes to the translator:"+e);
 			return;
 		}
 		
@@ -186,7 +187,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			print_debug("Have translated the quantified expression.");
 		//}	
 		clearAll();
-	}
+	}**/
 	
 	
 	
@@ -199,12 +200,19 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		
 		case EssenceGlobals.QUANTIFIER_EXPR:
 			
-			if(e.getQuantification().getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
-				return this.translator.translateQuantifiedSum(e.getQuantification(), expressionWillBeReified);	
+			QuantificationExpression expression = e.getQuantification();
+			
+			// FUCK this won't work - cannot return a constraint unless we know the result!
+			if(expression.getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+				MinionConstraint c = this.translator.translateQuantifiedSum(e.getQuantification(), expressionWillBeReified);
+				//MinionIdentifier[] scalars = this.translator.translateMulopSum(e.getQuantification()); 
+				print_debug("bloody asshole constraint:"+c);
+				return c;
+				//return this.translator.translateQuantifiedSum(e.getQuantification(), expressionWillBeReified);	
 			}
 			
 			//	1. collect info
-			collectQuantificationInfo(e.getQuantification());
+			collectQuantificationInfo(expression);
 			
 			// 2. check if all binding variables occur in expressions (and quantifiers may become redundant)
 			removeUnusedBindingVariables();
@@ -215,12 +223,37 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				bindingVariablesValues[i] = bindingVariablesBounds.get(bindingVariablesNames.get(i))[0];
 	
 			// translate quantification, starting with quantifier_0
-			MinionReifiableConstraint constraint = translateQuantification(0);
+			
+			MinionConstraint constraint = null;
+			
+			print_debug("Checking if it is a quantified assignment:"+e.toString());
+			// 4a. we have something like v[i] = m[0,i] and create a vector referencing to the elements of m
+			if(isQuantifiedAssignment(e.getQuantification()) && !expressionWillBeReified) {
+				print_debug("is a quantified assignment: "+e.toString());
+				// 1. generate an empty matrix for the left expression (according to its domain)
+				addEmptyAssignedMatrix(expression); 
+			}
+			else {
+			// 	4b. translate quantification, starting with quantifier_0
+				constraint = translateQuantification(0);
+				//if(constraint != null){
+					//print_debug("Translated quantification to:"+constraint);
+					//translatorMinionModel.addConstraint(constraint);
+				//}
+				print_debug("Have translated the quantified expression.");
+			}	
+			
+			
+			
+			//MinionReifiableConstraint constraint = translateQuantification(0);
 			clearAll();
 			return constraint;
 		
 		case EssenceGlobals.BINARYOP_EXPR:
 			return translateBinaryQuantifiedExpression(e.getBinaryExpression(), expressionWillBeReified);
+			
+		case EssenceGlobals.BRACKET_EXPR:
+			return translate(e.getExpression(),false);
 			
 		default:
 			
@@ -251,6 +284,10 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		MinionIdentifier rightPart = null;
 		MinionIdentifier leftPart = null;
 		
+		MinionIdentifier[] scalarVariablesRight = null;
+		MinionIdentifier[] scalarVariablesLeft = null;
+		
+		
 		while(rightExpression.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
 			rightExpression = rightExpression.getExpression();
 		
@@ -271,6 +308,8 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 						                                   translator.translateSpecialExpression(leftExpression,true));
 			} else
 				leftPart = translator.translateMulopExpression(leftExpression);
+		
+			
 			
         // the expression contains quantifications
 		} else { 
@@ -281,9 +320,21 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 						                                   translateBinaryQuantifiedExpression(leftExpression.getBinaryExpression(),true));
 			}
 			else if(leftExpression.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
-				print_debug("translating quantified right expression:"+leftExpression);
+				print_debug("translating quantified left expression:"+leftExpression);
+			
 				
-				if(this.translator.isRelationalExpression(leftExpression)) {
+				if(leftExpression.getQuantification().getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+					// translate the left part as sum quantification with relational part if the 
+					// operator of the binary expression is a relop
+					print_debug("We are definetly translating a sum with the NNNNNNNNEEEEEEEEWWWW algo");
+					scalarVariablesLeft = this.translator.translateMulopSum(leftExpression.getQuantification());
+					print_debug("Done with NNNNNNNNEEEEEEEEWWWW algo");
+					// then translate right part
+					// and bring them together as a sum
+					// and return it
+				}
+				
+				else if(this.translator.isRelationalExpression(leftExpression)) {
 					MinionConstraint constraint = this.translate(leftExpression, true); // true: will be reified
 					if(constraint == null)
 						throw new MinionException("Reified translation returned null instead of constraint for expression:"+leftExpression);
@@ -322,7 +373,17 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			else if(rightExpression.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
 				print_debug("translating quantified right expression:"+rightExpression);
 				
-				if(this.translator.isRelationalExpression(rightExpression)) {
+				if(rightExpression.getQuantification().getQuantifier().getRestrictionMode() == EssenceGlobals.SUM) {
+					// translate the left part as sum quantification with relational part if the 
+					// operator of the binary expression is a relop
+					scalarVariablesLeft = this.translator.translateMulopSum(rightExpression.getQuantification());
+ 					
+					// then translate right part
+					// and bring them together as a sum
+					// and return it
+				}
+				
+				else if(this.translator.isRelationalExpression(rightExpression)) {
 					print_debug("RELATIONAL EXPRESSION, part quantified:"+rightExpression);
 					MinionConstraint constraint = this.translate(rightExpression, true); // true: will be reified
 					if(constraint == null)
@@ -341,6 +402,47 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	
 		print_debug("translated right expression:"+rightExpression);	
 		
+		
+		
+		
+		
+		
+		// if we had a sum in the binary expression!
+		if(scalarVariablesLeft != null) {
+			if(scalarVariablesRight !=null) {  //sum E_left = sum E_right
+				
+				return this.translateTwoSidedScalarSum(scalarVariablesLeft, 
+						                               scalarVariablesRight, 
+						                               operator, 
+						                               expressionWillBeReified);	
+			}
+			else { 
+				// sum E_left = rightPart
+				if(rightPart != null) {
+					return this.translateOneSideScalarSum(scalarVariablesLeft, 
+							                              rightPart, 
+							                              operator, 
+							                              true, //isResultOnRightSide,
+							                              expressionWillBeReified);
+				}
+				else throw new TranslationUnsupportedException("Cannot translate nested expression :"+rightExpression);	
+			}
+		}
+		
+		else if(scalarVariablesRight != null) {
+			if(leftPart != null) { // leftPart = sum
+				return this.translateOneSideScalarSum(scalarVariablesRight, 
+						                              leftPart, 
+						                              operator, 
+						                              false, //isResultOnRightSide, 
+						                              expressionWillBeReified);
+			}
+			else throw new TranslationUnsupportedException("Cannot translate nested expression :"+leftExpression);
+		}
+		
+		
+		
+		// we did not have a sum in the binary expression
 		
 		if(leftPart == null)
 			throw new TranslationUnsupportedException("Cannot translate nested expression :"+leftExpression);
@@ -419,6 +521,321 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 	}
 	
 	
+	
+	
+	/**
+	 * Translate an expression of the form SUM relop ID where the SUM is
+	 * represented by an array of MinionIdentifiers that are summed up
+	 * and ID stands for MinionIdentifier result. Depending on if the 
+	 * result is on the right hand side (SUM relop ID) or on the left
+	 * hand side (ID relop SUM) - which is given by isResultOnRighSide -
+	 * the method will return a constraint representing the sum (that
+	 * will also be considered if the constraint will be reified)
+	 * 
+	 * 
+	 * 
+	 * @param variables
+	 * @param result
+	 * @param operator
+	 * @param isResultOnRightSide
+	 * @param willBeReified
+	 * @return MinionConstraint
+	 * @throws TranslationUnsupportedException
+	 * @throws MinionException
+	 * @throws PreprocessorException
+	 * @throws ClassNotFoundException
+	 */
+	protected MinionConstraint translateOneSideScalarSum(MinionIdentifier[] variables, 
+				                                         MinionIdentifier result, 
+				                                         int operator, 
+				                                         boolean isResultOnRightSide,
+				                                         boolean willBeReified)
+	throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException{
+		
+		
+		  switch(operator) {
+			  
+			  case EssenceGlobals.GEQ:
+				  if(isResultOnRightSide)
+					  return new MinionSumGeqConstraint(variables, result, this.useWatchedLiterals);
+				  else return new MinionSumLeqConstraint(variables, result, this.useWatchedLiterals);
+			  case EssenceGlobals.LEQ:
+				  if(isResultOnRightSide)
+					  return new MinionSumLeqConstraint(variables, result, this.useWatchedLiterals);
+				  else return new MinionSumGeqConstraint(variables, result, this.useWatchedLiterals);
+			  case EssenceGlobals.EQ:
+				print_debug("no constants, got a =sum here.");
+				return new MinionSumConstraint(variables, result, this.useWatchedLiterals);
+			  case EssenceGlobals.NEQ:
+				  int lowerBound = MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND;
+				  int upperBound = MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND;
+				  MinionIdentifier auxVariable = variableCreator.addFreshVariable(lowerBound, upperBound,
+						                                              "freshVariable"+noOfReifiedVariables++, this.useDiscreteVariables);
+				  MinionSumConstraint sumConstraint = new MinionSumConstraint(variables,auxVariable, this.useWatchedLiterals);
+				  translatorMinionModel.addConstraint(sumConstraint);
+				  return new MinionDisEqConstraint(auxVariable, result);
+			  case EssenceGlobals.GREATER:
+				  int lowerB = MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND;
+				  int upperB = MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND;
+				  MinionIdentifier auxVar = variableCreator.addFreshVariable(lowerB, upperB,
+						                                              "freshVariable"+this.noOfReifiedVariables++, this.useDiscreteVariables);
+				  MinionSumConstraint greaterConstraint = new MinionSumConstraint(variables,auxVar, this.useWatchedLiterals);	  
+				  
+				  if(!willBeReified) {
+					translatorMinionModel.addConstraint(greaterConstraint);
+					  if(isResultOnRightSide) // result <= ausVar -1
+						  return new MinionInEqConstraint(result, auxVar, new MinionConstant(-1));
+					  else return new MinionInEqConstraint(auxVar, result, new MinionConstant(-1));
+				  }
+				  else {
+					  MinionIdentifier reifiedVariable1 = variableCreator.addFreshVariable(0,1,
+							                            "freshVariable"+noOfReifiedVariables++, this.useDiscreteVariables);
+					  MinionReifyConstraint reifiedSum = new MinionReifyConstraint(greaterConstraint,reifiedVariable1);
+					  MinionInEqConstraint ineqConstraint = null;
+					  if(isResultOnRightSide) // result <= ausVar -1
+						   ineqConstraint = new MinionInEqConstraint(result, auxVar, new MinionConstant(-1));
+					  else ineqConstraint = new MinionInEqConstraint(auxVar, result, new MinionConstant(-1));
+					  
+					  MinionIdentifier reifiedVariable2 = variableCreator.addFreshVariable(0,1,
+                            "freshVariable"+noOfReifiedVariables++, this.useDiscreteVariables);
+					  MinionReifyConstraint reifiedInEq = new MinionReifyConstraint(ineqConstraint, reifiedVariable2);
+					  
+					  this.translatorMinionModel.addConstraint(reifiedSum);
+					  this.translatorMinionModel.addConstraint(reifiedInEq);
+					  return new MinionSumConstraint(new MinionIdentifier[] {reifiedVariable1, reifiedVariable2}, 
+							                         new MinionConstant(2),
+							                         this.useWatchedLiterals);
+				  }
+			  case EssenceGlobals.LESS:
+				  int lbLess = MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND;
+				  int ubLess = MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND;
+				  MinionIdentifier auxVariableLess = variableCreator.addFreshVariable(lbLess, ubLess,
+						                                              "freshVariable"+noOfReifiedVariables++, this.useDiscreteVariables);
+				  MinionSumConstraint lessSumConstraint = new MinionSumConstraint(variables,auxVariableLess, this.useWatchedLiterals);
+				  
+				  if(!willBeReified) {
+ 					translatorMinionModel.addConstraint(lessSumConstraint);
+ 					  if(isResultOnRightSide) // auxVar <= result -1
+ 						  return new MinionInEqConstraint(auxVariableLess,result, new MinionConstant(-1));
+ 					  else return new MinionInEqConstraint(result, auxVariableLess, new MinionConstant(-1));
+ 				  }
+ 				  else {
+ 					  MinionIdentifier reifiedVariable1 = variableCreator.addFreshVariable(0,1,
+ 							                            "freshVariable"+noOfReifiedVariables++, this.useDiscreteVariables);
+ 					  MinionReifyConstraint reifiedSum = new MinionReifyConstraint(lessSumConstraint,reifiedVariable1);
+ 					  MinionInEqConstraint ineqConstraint = null;
+					  if(isResultOnRightSide) // result <= ausVar -1
+ 						   ineqConstraint = new MinionInEqConstraint(auxVariableLess,result, new MinionConstant(-1));
+ 					  else ineqConstraint = new MinionInEqConstraint(result, auxVariableLess, new MinionConstant(-1));
+					  
+					  MinionIdentifier reifiedVariable2 = variableCreator.addFreshVariable(0,1,
+	                            "freshVariable"+noOfReifiedVariables++, this.useDiscreteVariables);
+					  MinionReifyConstraint reifiedInEq = new MinionReifyConstraint(ineqConstraint, reifiedVariable2);
+					  
+					  this.translatorMinionModel.addConstraint(reifiedSum);
+					  this.translatorMinionModel.addConstraint(reifiedInEq);
+					  return new MinionSumConstraint(new MinionIdentifier[] {reifiedVariable1, reifiedVariable2}, 
+							                         new MinionConstant(2),
+							                         this.useWatchedLiterals);
+ 				  }
+			  
+			default:
+					throw new TranslationUnsupportedException
+					("Illegal operator '"+new BinaryOperator(operator)+"' on arithmetic expressions in on :"+result.getOriginalName()
+							   +". Expected a relational operator (=,>,<,>=,<=,!=).");
+			  }
+		
+	}
+	
+	
+	
+	
+	/**
+	 * Translate an expression of the form SUM  relop SUM where each sum is 
+	 * represented by a list of MinionIdentifiers that are summed up:
+	 * scalarVariablesLeft and scalarVariablesRight.
+	 * Depending on if the resulting constraint will be reified, a constraint 
+	 * representing the expression SUM_left relop SUM_right will be returned
+	 * 
+	 * @param scalarVariablesLeft
+	 * @param scalarVariablesRight
+	 * @param operator
+	 * @param willBeReified
+	 * @return MinionConstraint
+	 * @throws TranslationUnsupportedException
+	 * @throws MinionException
+	 * @throws PreprocessorException
+	 * @throws ClassNotFoundException
+	 */
+	protected MinionConstraint translateTwoSidedScalarSum(MinionIdentifier[] scalarVariablesLeft, 
+				                                          MinionIdentifier[] scalarVariablesRight, 
+				                                          int operator, 
+				                                          boolean willBeReified) 
+	throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
+		
+		
+		
+		if(!willBeReified) {
+			MinionBoundsVariable freshVariable = (MinionBoundsVariable) this.variableCreator.addFreshVariable(INTEGER_DOMAIN_LOWER_BOUND, 
+				    INTEGER_DOMAIN_UPPER_BOUND, 
+				    "freshVariable"+this.noOfReifiedVariables++, 
+				    this.useDiscreteVariables);
+			
+			if(operator == EssenceGlobals.EQ) {
+				MinionSumConstraint sumConstraintLeft = new MinionSumConstraint(scalarVariablesLeft, freshVariable, this.useWatchedLiterals);
+				MinionSumConstraint sumConstraintRight = new MinionSumConstraint(scalarVariablesRight, freshVariable, this.useWatchedLiterals);
+				this.translatorMinionModel.addConstraint(sumConstraintLeft);
+				this.translatorMinionModel.addConstraint(sumConstraintRight);
+				return null;  // we can't return 2 constraints and they don't need to be reified anyway
+			}
+			else {
+				
+				MinionConstraint sumConstraintLeft = this.translateOneSideScalarSum(scalarVariablesLeft,
+						                                                        freshVariable, 
+						                                                        operator, 
+						                                                        true, //isResultOnRightSide, 
+						                                                        willBeReified);
+				MinionConstraint sumConstraintRight = this.translateOneSideScalarSum(scalarVariablesRight,
+                        															 freshVariable, 
+                        															 operator, 
+                        															 false, //isResultOnRightSide, 
+                        															 willBeReified);
+				this.translatorMinionModel.addConstraint(sumConstraintLeft);
+				this.translatorMinionModel.addConstraint(sumConstraintRight);
+				return null;
+				
+			}
+		}
+		
+		
+		else { // the expression will be reified 
+			
+			
+			if(operator == EssenceGlobals.EQ) {
+				
+				MinionBoundsVariable sharedSumVariable = (MinionBoundsVariable) this.variableCreator.addFreshVariable(INTEGER_DOMAIN_LOWER_BOUND, 
+					    INTEGER_DOMAIN_UPPER_BOUND, 
+					    "freshVariable"+this.noOfReifiedVariables++, 
+					    this.useDiscreteVariables);
+				MinionBoolVariable reifiedVariable1 = (MinionBoolVariable) this.variableCreator.addFreshVariable(0, 1, 
+					    "freshVariable"+this.noOfReifiedVariables++, 
+					    this.useDiscreteVariables);
+				MinionBoolVariable reifiedVariable2 = (MinionBoolVariable) this.variableCreator.addFreshVariable(0,1, 
+					    "freshVariable"+this.noOfReifiedVariables++, 
+					    this.useDiscreteVariables);
+				MinionBoolVariable reifiedVariable = (MinionBoolVariable) this.variableCreator.addFreshVariable(0,1, 
+					    "freshVariable"+this.noOfReifiedVariables++, 
+					    this.useDiscreteVariables);
+				
+
+				this.translatorMinionModel.addConstraint(new MinionReifyConstraint(
+								new MinionSumConstraint(scalarVariablesLeft, 
+										                 sharedSumVariable, 
+										                 this.useWatchedLiterals),
+					            reifiedVariable1));
+				this.translatorMinionModel.addConstraint(new MinionReifyConstraint( 
+							    new MinionSumConstraint(scalarVariablesRight,
+							    		                sharedSumVariable, 
+							    		                this.useWatchedLiterals),
+							    reifiedVariable2));
+				//this.translatorMinionModel.addConstraint(sumConstraintLeft);
+				//this.translatorMinionModel.addConstraint(sumConstraintRight);
+				return new MinionProductConstraint(reifiedVariable1, reifiedVariable2, reifiedVariable);
+				
+			}
+			else { // sum RELOP sum
+				
+				MinionBoundsVariable sumVariable1 = (MinionBoundsVariable) this.variableCreator.addFreshVariable(INTEGER_DOMAIN_LOWER_BOUND, 
+					    INTEGER_DOMAIN_UPPER_BOUND, 
+					    "freshVariable"+this.noOfReifiedVariables++, 
+					    this.useDiscreteVariables);
+				MinionBoundsVariable sumVariable2 = (MinionBoundsVariable) this.variableCreator.addFreshVariable(INTEGER_DOMAIN_LOWER_BOUND, 
+					    INTEGER_DOMAIN_UPPER_BOUND, 
+					    "freshVariable"+this.noOfReifiedVariables++, 
+					    this.useDiscreteVariables);
+				
+				MinionConstraint firstSum = this.translator.createSumFromTranslation(scalarVariablesLeft, 
+						                                                             sumVariable1, 
+						                                                             EssenceGlobals.EQ, 
+						                                                             false); // no reification at this point
+				MinionConstraint secondSum = this.translator.createSumFromTranslation(scalarVariablesRight, 
+                                                                                      sumVariable2, 
+                                                                                      EssenceGlobals.EQ, 
+                                                                                      false);
+				
+				this.translatorMinionModel.addConstraint(firstSum);
+				this.translatorMinionModel.addConstraint(secondSum);
+				
+				switch(operator) {
+   				case EssenceGlobals.GEQ:
+   					return new MinionInEqConstraint(sumVariable2,sumVariable1,new MinionConstant(0));
+   				case EssenceGlobals.LEQ:
+   					return new MinionInEqConstraint(sumVariable1,sumVariable2,new MinionConstant(0));
+   				case EssenceGlobals.GREATER:
+   					return new MinionInEqConstraint(sumVariable2,sumVariable1,new MinionConstant(-1));
+   				case EssenceGlobals.LESS:
+   					return new MinionInEqConstraint(sumVariable1,sumVariable2,new MinionConstant(-1));
+   				case EssenceGlobals.NEQ:
+   					return new MinionDisEqConstraint(sumVariable1,sumVariable2);
+   				default: throw new TranslationUnsupportedException
+			  	("Cannot apply operator "+operator+
+			  			" on to arithmetic expressions. Expected a relational operator (=,!=, >,>=,<,<=). "); 
+   				}
+				
+			}		
+
+		
+		}
+		
+	}
+	
+	
+	
+	/**
+	 * Return the operator type which is the opposite to the
+	 * given operator (restriction mode). For commutative
+	 * operators the result is the same
+	 * 
+	 * @param operator
+	 * @return
+	 */
+	public int getOppositeOperator(int operator) 
+		throws MinionException {
+		
+		
+		switch(operator) {
+		
+		case EssenceGlobals.LESS:
+			return EssenceGlobals.GREATER;
+			
+		case EssenceGlobals.GREATER:
+			return EssenceGlobals.LESS;
+			
+		case EssenceGlobals.LEQ:
+			return EssenceGlobals.GEQ;
+			
+		case EssenceGlobals.GEQ:
+			return EssenceGlobals.LEQ;
+			
+		case EssenceGlobals.EQ:
+			return operator;
+			
+		case EssenceGlobals.NEQ:
+			return operator;
+			
+		default:
+			throw new MinionException("Unknown operator or unknown opposite of operator:"+new BinaryOperator(operator));
+		
+		}
+		
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @throws PreprocessorException
+	 */
 	
 	private void removeUnusedBindingVariables() 
 		throws PreprocessorException 	{

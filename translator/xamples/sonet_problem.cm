@@ -31,7 +31,7 @@ such that
 
    forall ring : int(1..r) .
         sum client : int(1..n) . 
-              rings[ring, client] <= capacity_nodes[ring] $,
+              rings[ring, client] <= capacity_nodes[ring],
 
 
    $ the sum over all ADMs has an upper bound

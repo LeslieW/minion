@@ -1792,6 +1792,10 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	case EssenceGlobals.LEX_EXPR:
 		return (appearsInExpression(id, e.getLexExpression().getLeftExpression()) || appearsInExpression(id, e.getLexExpression().getRightExpression()) );
 	    
+		
+	case EssenceGlobals.QUANTIFIER_EXPR:
+		return(appearsInExpression(id,e.getQuantification().getExpression()));
+		
 	default: return false;
 	    
 	}

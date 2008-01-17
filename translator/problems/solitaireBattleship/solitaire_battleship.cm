@@ -1,5 +1,13 @@
 $ Solitaire Battleship
 $
+$ Popular 2-players game reduced to 1 player:
+$ Find the battleship, the 2 cruisers, 3 destroyers
+$ and 4 submarines on an 10x10 grid, given some hints
+$ for their locations.
+$
+$ (This model is a slightly simplified version of the problem,
+$ since it does not specify the amount of each shiptype.)
+
 
 ESSENCE' 1.0
 
@@ -20,13 +28,13 @@ find    grid  :         matrix indexed by [GRID_RANGE, GRID_RANGE] of bool
 such that
     $ amount of occupied sqares in each row
     forall row : GRID_RANGE .
-        sum  col: GRID_RANGE .
-            grid[row,col] = row_tallies[row], 
+        (sum  col: GRID_RANGE .
+            grid[row,col]) = row_tallies[row], 
 
     $ amount of occupied sqares in each column
     forall col : GRID_RANGE .
-       sum row : GRID_RANGE .
-            grid[row,col] = column_tallies[col],
+       (sum row : GRID_RANGE .
+            grid[row,col]) = column_tallies[col],
 
     $ if we have a water hint, then the square is empty	    
     forall col,row : GRID_RANGE .
@@ -50,7 +58,7 @@ such that
       	   (grid[row-1,col-1] =   0)) /\
              (((row-1 >0) /\ (col-1 >0)) => 
            (grid[row-1,col-1] = 0)) /\
-             (((row+1 <11) /\ (col-1 >0)) => 
+             (((row-1 >0) /\ (col+1 <11)) => 
            (grid[row-1,col+1] = 0)) /\
              ((row+1 <11) => 
            (grid[row+1,col] =   0)) /\
@@ -227,9 +235,27 @@ such that
              ((row+1 <11) => 
            (grid[row+1,col] =   0))
             
-           )
+           )$,
+
 
 
   $ TODO: - amount of cruisers, submarines, etc
   $       - no ship may be going around the corner (no edges)
          
+
+  $ amount of types of battleships
+
+  $ amount of destroyers
+ $ sum row, col : int(2..9) .
+  $   ((grid[row,col] = 1) /\ 
+  $       (((grid[row+1,col] = 1) /\
+  $         (grid[row+2,col] = 0)
+  $       )
+  $         \/
+  $        (grid[row-1,col] = 1) \/
+  $        (grid[row,col+1] = 1) \/
+   $        (grid[row,col-1] = 1)
+  $       )
+     
+  $   )
+

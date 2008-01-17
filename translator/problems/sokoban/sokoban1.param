@@ -1,0 +1,40 @@
+$  # - Wall
+$  @ - Target Position
+$  $ - Porter
+$  & - Crate
+$  * - Empty Cell
+$
+$  ###
+$  $&@
+$  ### 
+
+
+ESSENCE' 1.0
+
+letting n be 9
+letting w be 3
+letting noWalls be 6
+letting noInvalidMoves be 3
+letting noCrates be 1
+letting noGoals be 1
+
+letting pInit be 3
+
+letting stps be 2
+
+where
+
+walls[0] = 0,
+walls[1] = 1,
+walls[2] = 2,
+walls[3] = 6,
+walls[4] = 7,
+walls[5] = 8,
+
+invalidMoves[0] = 2,
+invalidMoves[1] = 0,
+invalidMoves[2] = -2,
+
+crates[0] = 4,
+
+goals[0] = 5

@@ -1,5 +1,13 @@
 $ Solitaire Battleship
 $
+$ Popular 2-players game reduced to 1 player:
+$ Find the battleship, the 2 cruisers, 3 destroyers
+$ and 4 submarines on an 10x10 grid, given some hints
+$ for their locations.
+$
+$ (This model is a slightly simplified version of the problem,
+$ since it does not specify the amount of each shiptype.)
+
 
 ESSENCE' 1.0
 

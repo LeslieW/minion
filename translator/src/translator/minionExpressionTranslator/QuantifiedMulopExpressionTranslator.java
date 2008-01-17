@@ -30,6 +30,10 @@ import translator.conjureEssenceSpecification.EssenceGlobals;
 import translator.conjureEssenceSpecification.RangeAtom;
 //import translator.conjureEssenceSpecification.BinaryExpression;
 
+/**
+ * Translates (quantified) sums
+ * 
+ */
 public class QuantifiedMulopExpressionTranslator extends
 		SpecialExpressionTranslator {
 
@@ -149,8 +153,54 @@ public class QuantifiedMulopExpressionTranslator extends
 			bindingVariablesValues[i] = this.bindingVariablesBounds.get(bindingVariablesNames.get(i))[0];
 		
 		// 4. 
-		MinionIdentifier identifier = translateMulopQuantification(0);
-		if(identifier == null)
+		MinionIdentifier[] identifiers = this.translateQuantifiedSum(0); //translateMulopSum(0);
+		MinionIdentifier sumVariable = variableCreator.addFreshVariable
+ 		  (MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND, 
+				   MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND, 
+				   "freshVariable"+this.noTmpVars++,
+				   this.useDiscreteVariables);
+		
+		// 5. reset everything
+		this.minionModel.addSumConstraint(identifiers,
+			    sumVariable,
+				this.useWatchedLiterals);
+		clearAll();
+		return sumVariable;
+	}
+	
+	
+	/**
+	 * Translate a sum expression and return the list of variables that represent
+	 * the sum (the sum corresponds to the sum of all the variables that are returned)
+	 * 
+	 * @param expression
+	 * @return
+	 * @throws TranslationUnsupportedException
+	 * @throws PreprocessorException
+	 * @throws MinionException
+	 */
+	public MinionIdentifier[] translateMulopSum(QuantificationExpression expression) 
+		throws TranslationUnsupportedException, PreprocessorException, MinionException, PreprocessorException, ClassNotFoundException   {
+		
+		if(expression.getQuantifier().getRestrictionMode() != EssenceGlobals.SUM) 
+			throw new TranslationUnsupportedException
+			("Cannot translate a quantification that is not a sum to a non-relational expression:"+expression);
+		
+		
+		// 1. collect all info we need prior translation
+		collectQuantificationInfo(expression);
+		
+		// 2. remove unused binding variables 
+		removeUnusedBindingVariables();
+		
+		// 3. creating binding variables
+		this.bindingVariablesValues = new int[this.bindingVariablesNames.size()];
+		for(int i=0; i<bindingVariablesValues.length; i++) 
+			bindingVariablesValues[i] = this.bindingVariablesBounds.get(bindingVariablesNames.get(i))[0];
+		
+		// 4. 
+		MinionIdentifier[] identifiers = translateQuantifiedSum(0);
+		if(identifiers == null)
 			// throw exception? Or can this actually happen????
 			throw new TranslationUnsupportedException
 			("Internal error: Expected expression '"+this.quantifiedExpression+
@@ -159,8 +209,11 @@ public class QuantifiedMulopExpressionTranslator extends
 		// 5. reset everything
 		clearAll();
 		
-		return identifier;
+		return identifiers;
 	}
+	
+	
+	
 	
 	/**
 	 * Translate a sum of structure sum ( relational expression)
@@ -192,8 +245,13 @@ public class QuantifiedMulopExpressionTranslator extends
 			bindingVariablesValues[i] = this.bindingVariablesBounds.get(bindingVariablesNames.get(i))[0];
 		
 		Expression expression = sumExpression.getExpression();
+		if(expression.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+			expression = expression.getExpression();
+		
 		while(expression.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
 			expression = expression.getQuantification().getExpression();
+			if(expression.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+				expression = expression.getExpression();
 		}
 		if(expression.getRestrictionMode() != EssenceGlobals.BINARYOP_EXPR)
 			throw new TranslationUnsupportedException("Illegal sum quantification:"+this.quantifiedExpression+". Expected relation with sum.");
@@ -202,8 +260,15 @@ public class QuantifiedMulopExpressionTranslator extends
 		this.sumExpression = expression.getBinaryExpression().getLeftExpression();
 		this.relationalSumOperator = expression.getBinaryExpression().getOperator().getRestrictionMode();
 		
-		// 4. translate the all the stuff
-		MinionConstraint constraint = translateSumQuantification(0, willBeReified);
+		
+		
+		// 4. translate all the stuff
+		MinionIdentifier[] scalarVariables = translateSumQuantification(0, willBeReified);
+		print_debug("Did the first new part. Now what is sumResult??"+this.sumResult);
+		MinionConstraint constraint = createSumFromTranslation(scalarVariables, translateMulopExpression(this.sumResult),this.relationalSumOperator, willBeReified);
+
+		
+		print_debug("translated the bloody constraint");
 		if(constraint == null)
 			// throw exception? Or can this actually happen????
 			throw new TranslationUnsupportedException
@@ -213,10 +278,12 @@ public class QuantifiedMulopExpressionTranslator extends
 		// 5. reset everything
 		clearAll();
 		
-		
+		print_debug("Returning constraint:"+constraint);
 		return constraint;
 	}
 	
+
+
 	/**
 	 * Translate the Expression quantifierExpression (class member) according to the 
 	 * quantifier at depth quantifierPosition. The outmost quantifier has position 0.
@@ -224,7 +291,7 @@ public class QuantifiedMulopExpressionTranslator extends
 	 * @param quantifierPosition
 	 * @return
 	 */
-	private MinionIdentifier translateMulopQuantification(int quantifierPosition) 
+	private MinionIdentifier translateMulopSum(int quantifierPosition) 
 		throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException  {
 		
         //we are going to translate all expressions concerning quantifier q for var at bindingVarIndex
@@ -256,7 +323,7 @@ public class QuantifiedMulopExpressionTranslator extends
 				}
 			}
 			else { // we have nested quantification
-				MinionIdentifier identifier = translateMulopQuantification(quantifierPosition+1);
+				MinionIdentifier identifier = translateMulopSum(quantifierPosition+1);
 				if(identifier==null) 
 					print_debug("Translation of MULOP-expr returned zero....."); // the last whole scope might have not been feasible
 									
@@ -303,6 +370,92 @@ public class QuantifiedMulopExpressionTranslator extends
 		else return null;
 	}
 	
+	
+	/**
+	 * Translate the Expression quantifierExpression (class member) according to the 
+	 * quantifier at depth quantifierPosition. The outmost quantifier has position 0.
+	 * 
+	 * @param quantifierPosition
+	 * @return
+	 */
+	protected MinionIdentifier[] translateQuantifiedSum(int quantifierPosition) 
+		throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException  {
+		
+        //we are going to translate all expressions concerning quantifier q for var at bindingVarIndex
+		if(quantifiers.get(quantifierPosition).getRestrictionMode() != EssenceGlobals.SUM) 
+			throw new TranslationUnsupportedException("Cannot translate a universal or existential quantifier inside a sum, sorry.");
+		
+		String[] bindingVariables = quantifierVariables.get(quantifierPosition); 
+		
+		//ArrayList<MinionIdentifier> identifiers = new ArrayList<MinionIdentifier>();
+		
+		int range = 1;
+       // 1. translate each expression according to the range(s) of its binding variable(s)
+		for(int j=0; j<bindingVariables.length; j++) {
+			int[] bindingBounds = bindingVariablesBounds.get(bindingVariables[j]);
+			range = range*(bindingBounds[1] - bindingBounds[0] + 1);
+		}
+		
+		
+		// 2. translate the (nested) quantification according to the ranges of the binding variables
+		for(int i=0; i<range; i++) {
+			
+			// 	if this is the inner most quantifier
+			if(quantifierPosition == quantifiers.size()-1) {
+				MinionIdentifier identifier = translateAtomQuantification(quantifierPosition);
+				print_debug("translated Atom quantification... now adding id to list if it's not null");
+				if(identifier != null) {
+					identifiers.add(identifier);
+					print_debug("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW We just added another minionIdentifier to the reifiedVars list !!!!!!!!!");
+				}
+			}
+			else { // we have nested quantification
+				MinionIdentifier identifier = translateMulopSum(quantifierPosition+1);
+				if(identifier==null) 
+					print_debug("Translation of MULOP-expr returned zero....."); // the last whole scope might have not been feasible
+									
+				else {		
+					for(int s=quantifierPosition+1; s<quantifiers.size(); s++){
+						if(quantifiers.get(s).getRestrictionMode() != EssenceGlobals.SUM)
+							throw new TranslationUnsupportedException
+							("The sum quantification may not nest universal or existential quantifiers.");
+						
+					}
+					identifiers.add(identifier);
+				}
+			}
+			
+		} // end for(range)
+		
+		//	we have translated the outmost (least nested) quantifier
+		if(quantifierPosition == 0) {
+		// 	2. we finished translating all the nested stuff, so lets get our MinionIdentifiers
+			print_debug("Finished the whole translation process. Let's start constructing the sum...");
+			Object[] identis = identifiers.toArray();
+			MinionIdentifier[] freshVars = new MinionIdentifier[identis.length];
+			print_debug("FreshVars for SUM::::::::::::::::::::::::");
+			print_debug("Length of the identis:"+identis.length);
+			for(int ii=0; ii<identis.length; ii++) {
+				freshVars[ii] = (MinionIdentifier) identis[ii];
+				print_debug(ii+": "+freshVars[ii]);
+			}
+			return freshVars;
+		
+		// 3. create the sum out of all the MinionIdentifiers
+		//TODO: create a better variable with better bounds
+		//MinionIdentifier sumVariable = variableCreator.addFreshVariable
+   		 // (MinionTranslatorGlobals.INTEGER_DOMAIN_LOWER_BOUND, 
+		//		   MinionTranslatorGlobals.INTEGER_DOMAIN_UPPER_BOUND, 
+		//		   "freshVariable"+this.noTmpVars++,
+		//		   this.useDiscreteVariables);
+		
+		
+		}
+		
+		else return null;
+	}
+	
+	
 	/**
 	 * 
 	 * @param quantifierPosition
@@ -313,7 +466,7 @@ public class QuantifiedMulopExpressionTranslator extends
 	 * @throws PreprocessorException
 	 * @throws ClassNotFoundException
 	 */
-	private MinionConstraint translateSumQuantification(int quantifierPosition, boolean willBeReified) 
+	private MinionIdentifier[] translateSumQuantification(int quantifierPosition, boolean willBeReified) 
 	throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException  {
 	
     //we are going to translate all expressions concerning quantifier q for var at bindingVarIndex
@@ -343,14 +496,15 @@ public class QuantifiedMulopExpressionTranslator extends
 			}
 		}
 		else { // we have nested quantification
-			MinionIdentifier identifier = translateMulopQuantification(quantifierPosition+1);
+			MinionIdentifier identifier = translateMulopSum(quantifierPosition+1);
 			if(identifier==null) 
 				print_debug("translation of mulop-expr returned null."); // the last whole scope might have not been feasible
 								
 			else {		
 				for(int s=quantifierPosition+1; s<quantifiers.size(); s++){
 					if(quantifiers.get(s).getRestrictionMode() != EssenceGlobals.SUM)
-						throw new TranslationUnsupportedException
+						throw new TranslationUnsupportedException   
+						
 						("The sum quantification may not nest universal or existential quantifiers.");
 					
 				}
@@ -362,64 +516,71 @@ public class QuantifiedMulopExpressionTranslator extends
 	// if we finished the whole translation process
 	if(quantifierPosition == 0) {
 	// 2. we finished translating all the nested stuff, so lets get our MinionIdentifiers
-	Object[] identis = identifiers.toArray();
-	MinionIdentifier[] freshVars = new MinionIdentifier[identis.length];
-	print_debug("FreshVars for SUM::::::::::::::::::::::::");
-	for(int ii=0; ii<identis.length; ii++) {
-		freshVars[ii] = (MinionIdentifier) identis[ii];
-		print_debug(ii+": "+freshVars[ii]);
+		Object[] identis = identifiers.toArray();
+		MinionIdentifier[] freshVars = new MinionIdentifier[identis.length];
+		print_debug("FreshVars for SUM::::::::::::::::::::::::");
+		for(int ii=0; ii<identis.length; ii++) {
+			freshVars[ii] = (MinionIdentifier) identis[ii];
+			print_debug(ii+": "+freshVars[ii].getOriginalName());
+		}
+		return freshVars;
 	}
 	
+	else return null;
+	}
 	
+
+
+
+	protected MinionConstraint createSumFromTranslation(MinionIdentifier[] freshVars, MinionIdentifier sumResult, int relationalSumOperator, boolean willBeReified) 
+		throws TranslationUnsupportedException, MinionException, PreprocessorException, ClassNotFoundException {
 	// 3. create the sum out of all the MinionIdentifiers
 	//Expression sumExpression = this.quantifiedExpression.getExpression()
-	if(this.sumResult == null)	
+	if(sumResult == null)	
 		throw new TranslationUnsupportedException("Infeasible sum expression:"+this.quantifiedExpression+".");
 	
 		switch(this.relationalSumOperator) {
 	
 		case EssenceGlobals.LEQ:
 			return new MinionSumLeqConstraint(freshVars, 
-                      translateMulopExpression(this.sumResult), useWatchedLiterals && !willBeReified);
+                      sumResult, useWatchedLiterals && !willBeReified);
 		
 		case EssenceGlobals.GEQ:
 			return new MinionSumGeqConstraint(freshVars, 
-					  translateMulopExpression(this.sumResult), useWatchedLiterals && !willBeReified);
+					  sumResult, useWatchedLiterals && !willBeReified);
 	
 		case EssenceGlobals.EQ:
-			return new MinionSumConstraint(freshVars,translateMulopExpression(this.sumResult), 
+			print_debug("Gonna return a sum-constraint:"+sumResult);
+			return new MinionSumConstraint(freshVars,sumResult, 
 					useWatchedLiterals && !willBeReified);
 			
 		case EssenceGlobals.GREATER:			
 			MinionReifiableConstraint c1g = new MinionSumLeqConstraint(freshVars,
-			translateMulopExpression(this.sumResult), false);
+			sumResult, false);
 			MinionBoolVariable freshVar1g = this.reifyConstraint(c1g);
 			
 			
 			MinionReifiableConstraint c2g = new MinionSumGeqConstraint(freshVars,
-			translateMulopExpression(this.sumResult), false);
-			MinionBoolVariable freshVar2g = this.reifyConstraint(c2g);
+					sumResult, false);
+				MinionBoolVariable freshVar2g = this.reifyConstraint(c2g);
 			
 			return new MinionInEqConstraint(freshVar2g,freshVar1g, new MinionConstant(-1));
 			
 		case EssenceGlobals.LESS:
 			MinionReifiableConstraint c1l = new MinionSumLeqConstraint(freshVars,
-			translateMulopExpression(this.sumResult), false);
+			sumResult, false);
 			MinionBoolVariable freshVar1l = this.reifyConstraint(c1l);
 			
-			MinionReifiableConstraint c2l = new MinionSumGeqConstraint(freshVars,
-			translateMulopExpression(this.sumResult), false);			
+			MinionReifiableConstraint c2l = new MinionSumGeqConstraint(freshVars,sumResult, false);			
 			MinionBoolVariable freshVar2l = this.reifyConstraint(c2l);
 			
 			return new MinionInEqConstraint(freshVar1l,freshVar2l, new MinionConstant(-1));
 			
 		case EssenceGlobals.NEQ:
-			MinionReifiableConstraint c1n = new MinionSumLeqConstraint(freshVars,
-			translateMulopExpression(this.sumResult), false);
+			MinionReifiableConstraint c1n = new MinionSumLeqConstraint(freshVars, sumResult, false);
 			MinionBoolVariable freshVar1n = this.reifyConstraint(c1n);
 			
-			MinionReifiableConstraint c2n = new MinionSumGeqConstraint(freshVars,
-			translateMulopExpression(this.sumResult), false);
+			MinionReifiableConstraint c2n = new MinionSumGeqConstraint(freshVars,sumResult, false);
 			MinionBoolVariable freshVar2n = this.reifyConstraint(c2n);
 			
 			print_debug("Adding disequality betweens sums and freshVar1:"+freshVar1n.getOriginalName()+" and freshVar2: "+freshVar2n.getOriginalName());
@@ -427,14 +588,15 @@ public class QuantifiedMulopExpressionTranslator extends
 		
 		default:
 			throw new TranslationUnsupportedException
-			("Infeasible relation in sum-quantified expression "+this.quantifiedExpression.toString());
+			("Infeasible relation in sum-quantified expression involving:"+sumResult);
 		}
 	
 	
-	} // else if we are not at quantificationPosition 0
-	else return null;
+
+	} 
 	
-}
+	
+
 	
 	/** 
 	 * Translate a singly "generated" constraint from a quantification. The constraint has been constructed by
@@ -453,7 +615,10 @@ public class QuantifiedMulopExpressionTranslator extends
 		Expression constraint = readNextConstraint();
 		if(constraint == null)
 			return null;
-		else if(this.isRelationalSumTranslation ) {
+		else if(constraint.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+			constraint = constraint.getExpression();
+		
+		if(this.isRelationalSumTranslation ) {			
 			if(constraint.getRestrictionMode() != EssenceGlobals.BINARYOP_EXPR)
 				throw new MinionException("Internal error: expected relational sum expression instead of:"+constraint);
 			
@@ -646,9 +811,20 @@ public class QuantifiedMulopExpressionTranslator extends
 			else throw new TranslationUnsupportedException
 				("Cannot translate non-integer bounds '"+bindingBounds[0].toString()+"' yet, sorry.");
 			print_debug("Inserted bounds in HashMap with bindingVariables as key. Starting to collect further info..");
-			// 4. continue recursively if we have nested quantification
+			
+			// 4. continue recursively if we have nested quantification				
 			if(e.getExpression().getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR)
 				collectQuantificationInfo(e.getExpression().getQuantification());
+			
+			else if(e.getExpression().getRestrictionMode() == EssenceGlobals.BRACKET_EXPR) {
+				Expression expr = e.getExpression();
+				while(expr.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR) 
+					expr = expr.getExpression();
+				if(expr.getRestrictionMode() == EssenceGlobals.QUANTIFIER_EXPR) {
+					collectQuantificationInfo(expr.getQuantification());
+				}
+				else this.quantifiedExpression = expr;
+			}
 			else this.quantifiedExpression = e.getExpression();
 
 			print_debug("Binding variables names: "+bindingVariablesNames.toString());

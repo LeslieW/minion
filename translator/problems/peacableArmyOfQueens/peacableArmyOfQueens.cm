@@ -14,13 +14,11 @@ ESSENCE' 1.0
 
 $ board width
 given        n : int(1..1000)
-
 letting      N be domain int(1..n)
-$letting      amountOfQueens be 2
+
 
 $ 0: empty field, 1:white queen, 2: black queen
 find         board : matrix indexed by [N,N] of int(0..2)
-
 find        amountOfQueens : int(1..(n*n)/2)     
 
 

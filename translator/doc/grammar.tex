@@ -20,7 +20,7 @@
 
 \title{The Syntax of {\sc Essence}$'$} %Grammar, translated by the {\sc Essence'} $\rightarrow${\sc Minion} translator}
 
-\author{Alan M. Frisch, Chris Jefferson, Bernadette  Mart\'{\i}nez Hern{\'a}ndez,\\ Ian Miguel, Andrea Rendl} %Andy too?
+%\author{Alan M. Frisch, Chris Jefferson, Bernadette  Mart\'{\i}nez Hern{\'a}ndez,\\ Ian Miguel, Andrea Rendl} %Andy too?
 
 
 \date{\today}
@@ -31,7 +31,9 @@
 
 This document describes the syntax of  {\sc Essence}$'$ version 0.1, a solver-independent constraint modelling language,
 % with a layer of abstraction that is supported by most constraint solvers.
-which is a subset of {\sc Essence}~\cite{essence}. The development of {\sc Essence} is incremental, 
+which is a subset of {\sc Essence}~\cite{essence}. This version of
+ {\sc Essence}$'$ is fully supported by the {\sc Essence}$'$ translator~\cite{translator}.
+ The development of {\sc Essence} is incremental, 
 so features are added to both {\sc Essence} and {\sc Essence}$'$, as we go along. 
 
 \section{{\sc Essence'} grammar}
@@ -134,13 +136,13 @@ Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar
                               &     & \texttt{element} ``(``
                               \textit{expression},
                                \textit{atomExpression},
-                              \textit{atomExpression} ``)''  $\mid$\\  
-                                &     & \texttt{min} ``(``
-                              \textit{expression},
-                            ``)'' $\mid$ \\  
-                                 &     & \texttt{max} ``(``
-                              \textit{expression},
-                            ``)'' \\  
+                              \textit{atomExpression} ``)''\\ %  $\mid$\\  
+                           %     &     & \texttt{min} ``(``
+                           %   \textit{expression},
+                           % ``)'' $\mid$ \\  
+                           %      &     & \texttt{max} ``(``
+                           %   \textit{expression},
+                           % ``)'' \\  
 
 %      &     & \texttt{min} ``(`` \textit{expression} ``)'' $\mid$  \texttt{max} ``(`` \textit{expression} ``)'' $\mid$ \\
 %      &     &  \texttt{atleast}''(``  \texttt{expression}, \texttt{expression},  \texttt{expression} ``)'' $\mid$ \\ 
@@ -157,7 +159,8 @@ Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar
 %\clearpage
 \section{Operator Precedence}
 
-Table \ref{tab:precedence} describes the precedence of the operators that 
+Table 1 %\ref{tab:precedence} 
+describes the precedence of the operators that 
 are arranged by decreasing order of precedence (the operators on top have highest precedence)
 
 
@@ -213,12 +216,12 @@ are arranged by decreasing order of precedence (the operators on top have highes
 
 \end{table}
 
-\section{{\sc Essence}$'$ $\rightarrow$ {\sc Minion} Translator}
+\section{{\sc Essence}$'$  Translator}
 
-A subset of {\sc Essence}$'$ can be tailored to a {\sc Minion}~\cite{minion} 
-problem instance by the {\sc Essence}$'$ $\rightarrow$ {\sc Minion} translator.
+{\sc Essence}$'$ can be tailored to a {\sc Minion}~\cite{minion} 
+problem instance with the {\sc Essence}$'$  translator~\cite{translator}.
 The translator is still under development, so the
-following grammar parts are currently {\bf not supported}.
+following grammar parts are currently {\bf not supported} for translation.
 
 \begin{itemize}
   \item arrays of decision variables with 3 or more dimensions 
@@ -226,7 +229,7 @@ following grammar parts are currently {\bf not supported}.
   \item absolute value
   \item modulo
   \item power with a decision variable as exponent
-  \item boolean negation
+%  \item boolean negation
   \item element constraint on 2-dimensional arrays 
   \item sparse domains
 \end{itemize} 
@@ -240,10 +243,21 @@ A.M. Frisch, M.~Grum, C.~Jefferson, B.~Mart\'{\i}nez~Hern{\'a}ndez, and
   combinatorial problems.
 \newblock In {\em IJCAI}, pp 80--87, 2007.
 
+
+
+\bibitem{translator}
+I.P. Gent, I. Miguel and A. Rendl.
+\newblock Tailoring Solver-independet Constraint Models: A Case Study with Essence$'$ and Minion
+\newblock In {\em SARA}, 2007.
+
+
 \bibitem{minion}
 I.P. Gent, C.~Jefferson, and I.~Miguel.
 \newblock Minion: A fast scalable constraint solver.
 \newblock In {\em ECAI}, pp 98--102, 2006.
+
+
+
 \end{thebibliography}
 
 \end{document}
