@@ -58,13 +58,22 @@ public class MinionReifyConstraint extends MinionConstraint {
     	
        	String result_neg = (resultPolarity) ? "" : "n";
     	
-    	if(constraint.getClass().toString().endsWith("translator.minionModel;MinionSumConstraint")) {
+    	if(constraint.getClass().toString().endsWith("translator.minionModel.MinionSumConstraint")) {
     		String result = "reify("+((MinionSumConstraint) constraint).toStringGreater()+", "+result_neg+reifiedVariable.toString()+")\n";
     		return result.concat("reify("+((MinionSumConstraint) constraint).toStringLess()+", "+result_neg+reifiedVariable2.toString()+")\n");
     	}
-    	else if(constraint.getClass().toString().endsWith("translator.minionModel;MinionWeightedSumConstraint")) {
+    	else if(constraint.getClass().toString().endsWith("translator.minionModel.MinionWeightedSumConstraint")) {
     		String result = "reify("+((MinionWeightedSumConstraint) constraint).toStringGreater()+", "+result_neg+reifiedVariable.toString()+")\n";
     		return result.concat("reify("+((MinionWeightedSumConstraint) constraint).toStringLess()+", "+result_neg+reifiedVariable2.toString()+")\n");
+    	}
+    	else if(constraint.getClass().toString().endsWith("translator.minionModel.MinionDisEqConstraint")) {
+    		if(resultPolarity) // the polarity is positive
+    			result_neg = "n"; // then make it negative
+    		else result_neg = "";
+    		
+    		String constraintString = constraint.toString();
+    		constraintString = constraintString.substring(3, constraintString.length());
+    		return "reify("+constraintString+", "+result_neg+reifiedVariable+")";
     	}
     	else 
     		return "reify("+constraint.toString()+", "+result_neg+reifiedVariable.toString()+")";

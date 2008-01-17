@@ -10,5 +10,5 @@ echo "### Generating EssencePrimeParser"
 cd ..
 cd ..
 echo "### Compiling conjureEssenceSpecification, parser and Minion-part"
-javac -classpath translator/essencePrimeParser/java-cup-11a.jar:. -d ../bin/ translator/essencePrimeParser/*.java translator/minionModel/*.java translator/preprocessor/*.java translator/minionExpressionTranslator/*.java translator/*.java
+javac -classpath translator/essencePrimeParser/java-cup-11a.jar:. -d ../ translator/essencePrimeParser/*.java translator/minionModel/*.java translator/preprocessor/*.java translator/minionExpressionTranslator/*.java translator/*.java
 cd ..

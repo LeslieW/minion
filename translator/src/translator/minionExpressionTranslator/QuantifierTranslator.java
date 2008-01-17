@@ -794,7 +794,8 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 					reifiableConstraint = (MinionReifiableConstraint) quantifierTranslator.translate(constraint, reifiable);
 				}
 				else 
-				 reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint, reifiable);
+				 reifiableConstraint = (MinionReifiableConstraint) translator.translateSpecialExpression(constraint,reifiable);
+						 															//this.evaluator.evalExpression(constraint), reifiable);
 				MinionBoolVariable reifiedVar = this.translator.reifyConstraint(reifiableConstraint);
 				//translatorMinionModel.addReificationConstraint(reifiableConstraint, reifiedVar);
 				return reifiedVar;
@@ -808,6 +809,7 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				QuantifierTranslator quantifierTranslator = new QuantifierTranslator(minionVariables, minionVectors,
 									minionMatrices, minionCubes,decisionVariablesNames, translatorMinionModel, decisionVariables, parameterArrays, useWatchedLiterals, useDiscreteVariables);
 				minionConstraint = quantifierTranslator.translate(constraint, reifiable);
+						//this.evaluator.evalExpression(constraint), reifiable);
 				if(minionConstraint != null)
 					translatorMinionModel.addConstraint(minionConstraint);
 			  }
@@ -816,7 +818,8 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 				  ArrayList<Expression> exprs = splitExpressionToConstraints(constraint);
 				  print_debug("split constraint :"+constraint.toString()+" to expressions:"+exprs.toString());
 				  for(int index=0; index<exprs.size(); index++) {
-					  minionConstraint = translator.translateSpecialExpression(exprs.get(index), reifiable);
+					  minionConstraint = translator.translateSpecialExpression((exprs.get(index)), reifiable);
+					  //this.evaluator.evalExpression(exprs.get(index)), reifiable);
 					  if(minionConstraint != null)
 						  translatorMinionModel.addConstraint(minionConstraint);
 				  }
@@ -948,6 +951,9 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 		else if(e.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR)
 			return hasOtherQuantifications(e.getUnaryExpression().getExpression());
 		
+		else if(e.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR)
+			return hasOtherQuantifications(e.getExpression());
+		
 		return false;
 	}
 	
@@ -1025,8 +1031,9 @@ public class QuantifierTranslator implements MinionTranslatorGlobals {
 			print_debug("lower bound binding Variable "+bindingVariablesNames.get(i)+"= "+bindingVariablesBounds.get(bindingVariablesNames.get(i))[0]);
 		}*/
 		
-		print_debug("AAAAAAAAAAAAAAYYYYYYYYYY next generated Expression is:"+this.evaluator.evalExpression(generatedExpression).toString());
-		return generatedExpression;
+		Expression e = this.evaluator.evalExpression(generatedExpression);
+		print_debug("AAAAAAAAAAAAAAYYYYYYYYYY next generated Expression is:"+e);
+		return e;//generatedExpression;
 	}
 	
 	  /** 

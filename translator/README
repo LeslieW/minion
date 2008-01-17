@@ -5,7 +5,10 @@ support: andrea@cs.st-andrews.ac.uk (Andrea Rendl)
 
 
 This translator converts models expressed in Essence'[1] to the Minion
-input format.
+input format. The parser of the Essence' language has been constructed
+using the LALR parser generator Java Cup[2] in combination with the 
+Scanner generator jflex[3], both released under GPL[4]. 
+
 
 
 1. Compiling the Essence' Translator
@@ -17,11 +20,12 @@ additionally want to rebuild the Essence'-parser (for which you will
 need jflex[2] and Java-Cup[3] installed).
 
 
+
 2. Running the Essence' Translator
 ----------------------------------
-Change to the /bin directory and call EssencePrimeTranslator with Java:
+Call the EssencePrimeTranslator in the translator-package with Java:
 
-java EssencePrimeTranslator <Essence'-specification-file>   <Essence'-parameter-file>   [<output-file>]
+java translator.EssencePrimeTranslator <Essence'-specification-file>   <Essence'-parameter-file>   [<output-file>]
  
 The last parameter is optional. If the output-filename is omitted, 
 the Essence' Translator will generate the file "outFile". There are 
@@ -29,11 +33,13 @@ also a set of flags for the translation. For further information call
 "java EssencePrimeTranslator" without arguments.
 
 
+
 3. Documentation
 ----------------
 Documentation can be found at /doc/index.html, that contains links to several 
 Essence' examples, the Essence' grammar specification, the Minion manual 
 and the translator API.
+
 
 
 4. Essence' examples
@@ -44,6 +50,7 @@ Several problem samples can be found in the /problems directory.
 4.2 Test Instances
 A large amount of test instances can be found in the /test directory. It also
 contains a directory of generated Minion files. 
+
 
 
 5. Limitations and Known Bugs
@@ -61,5 +68,6 @@ Please report bugs to andrea@cs.st-andrews.ac.uk
 
 
 [1] http://www.cs.york.ac.uk/aig/constraints/AutoModel/
-[2] jflex (Scanner Generator for Java) : http://www.jflex.de/
-[3] Java-Cup (LALR Parser Generator) http://www2.cs.tum.edu/projects/cup/
+[2] Java-Cup (LALR Parser Generator) http://www2.cs.tum.edu/projects/cup/
+[3] jflex (Scanner Generator for Java) : http://www.jflex.de/
+[4] http://www.fsf.org/licensing/licenses/gpl.html

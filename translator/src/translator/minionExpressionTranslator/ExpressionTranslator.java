@@ -116,6 +116,7 @@ public class ExpressionTranslator implements MinionTranslatorGlobals {
 			      }	
 		    	  else {
 		    	  	  //quantificationTranslator.translate(e.getQuantification());
+		    		  print_debug("We have a binary expression that has a quantification nested:"+e);
 		    	     MinionConstraint constraint = quantificationTranslator.translate(e,false);
 		    	     if(constraint != null)
 		    	    	 this.minionModel.addConstraint(constraint);

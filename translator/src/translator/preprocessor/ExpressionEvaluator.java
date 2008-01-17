@@ -106,14 +106,20 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	    
 	    
 	case EssenceGlobals.BRACKET_EXPR:// (E)
-	    return new Expression((evalExpression(e.getExpression())));
+		Expression expr = evalExpression(e.getExpression());
+		print_debug("Evaluated '"+e+"' to:"+expr);
+		
+		if(expr.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR)
+			return new Expression(expr.getAtomicExpression());
+		
+	    return new Expression(expr);
 	    
 	    
 	case EssenceGlobals.ATOMIC_EXPR:
 	    // 	if we found an identifier, check if it is a parameter
 		if(e.getAtomicExpression().getRestrictionMode() == EssenceGlobals.IDENTIFIER) {
 			
-			print_debug("evaluating identifier in an expression:"+e.getAtomicExpression().getString());
+			//print_debug("evaluating identifier in an expression:"+e.getAtomicExpression().getString());
 			
 			if(parameters.containsKey(e.getAtomicExpression().getString())) {
 				AtomicExpression atomicExpression = e.getAtomicExpression();	
@@ -624,6 +630,27 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 		    } 
 		    
 		}
+		if(e_right.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR) {
+			if(e_right.getExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+				if(e_right.getExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
+					if(e_right.getExpression().getAtomicExpression().getBool()) {  // true AND E ---> E
+						return e_left;
+					}
+					else return new Expression(new AtomicExpression(false));  // false AND E ---> false
+				}
+			}
+		
+		}
+		if(e_left.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR) {
+			if(e_left.getExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+				if(e_left.getExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
+					if(e_left.getExpression().getAtomicExpression().getBool()) {  // E AND true ---> E
+						return e_right;
+					}
+					else return new Expression(new AtomicExpression(false));  // E AND false ---> false
+				}
+			}
+		}
 	    break;
 	    
 	    
@@ -656,26 +683,35 @@ public class ExpressionEvaluator implements PreprocessorGlobals {
 	    
 	    
 	case EssenceGlobals.IF:  // e1 => e2  (implies)
-	    if((e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) &&
-	       (e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) ) {
-		if((e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) &&
-		   (e_right.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN)) {
-		    boolean left_bool = e_left.getAtomicExpression().getBool();
-		    boolean right_bool =  e_right.getAtomicExpression().getBool();
-		    return (left_bool == true && right_bool == false) ?
-			new Expression(new AtomicExpression(false)) :	    			
-			new Expression(new AtomicExpression(true));	    			
+		if((e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) &&
+				(e_right.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) ) {
+			if((e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) &&
+					(e_right.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN)) {
+				boolean left_bool = e_left.getAtomicExpression().getBool();
+				boolean right_bool =  e_right.getAtomicExpression().getBool();
+				return (left_bool == true && right_bool == false) ?
+						new Expression(new AtomicExpression(false)) :	    			
+							new Expression(new AtomicExpression(true));	    			
+			}
 		}
+		if(e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+			if(e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
+				if(e_left.getAtomicExpression().getBool()) // true IF Expr  ---->  Expr
+					return e_right;
+				else return new Expression(new AtomicExpression(true));  // false IF Expr  ---> true
+			}
+			
 	    }
-	    if(e_left.getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
-		if(e_left.getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN) {
-		    if(e_left.getAtomicExpression().getBool()) // true IF Expr  ---->  Expr
-			return e_right;
-		    else return new Expression(new AtomicExpression(false));  // false IF Expr  ---> false
+		if(e_left.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR){
+			if(e_left.getExpression().getRestrictionMode() == EssenceGlobals.ATOMIC_EXPR) {
+				if(e_left.getExpression().getAtomicExpression().getRestrictionMode() == EssenceGlobals.BOOLEAN)  {
+					if(e_left.getExpression().getAtomicExpression().getBool()) // true IF Expr  ---->  Expr
+						return e_right;
+					else return new Expression(new AtomicExpression(true));  // false IF Expr  ---> true
+				}
+			}
 		}
-
-	    }
-
+			
 	    break;
 
 	    

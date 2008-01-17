@@ -82,17 +82,20 @@ public class SpecialExpressionTranslator extends RelationalExpressionTranslator 
 			return translateGlobalConstraint(e);
 		}
 		
-		if(e.getRestrictionMode() == EssenceGlobals.LEX_EXPR) {
+		else if(e.getRestrictionMode() == EssenceGlobals.LEX_EXPR) {
 			return translateLexConstraint(e);
 		}
 		
-		if(e.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR) {
+		else if(e.getRestrictionMode() == EssenceGlobals.UNITOP_EXPR) {
 			if(e.getUnaryExpression().getRestrictionMode() == EssenceGlobals.NOT) {
 				return translateBooleanNegationToConstraint(e.getUnaryExpression(), willBeReified);
 			}
 		}
-		
-		if(e.getRestrictionMode() != EssenceGlobals.BINARYOP_EXPR) 
+		else if(e.getRestrictionMode() == EssenceGlobals.BRACKET_EXPR) 
+		    return translateSpecialExpression(e.getExpression(), willBeReified);
+
+
+		else if(e.getRestrictionMode() != EssenceGlobals.BINARYOP_EXPR) 
 			throw new MinionException("Internal error: expected a binary expression for translation instead of: "+e.toString());
 				
 		
