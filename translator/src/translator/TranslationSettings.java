@@ -43,7 +43,7 @@ public class TranslationSettings {
 			 if(file.createNewFile()) {
 				 String minionDirectory = System.getProperty("user.dir");
 				 // currentDirectory - translator =>  minion directory
-				 minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
+				 //minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
 				 this.pathToMinion = minionDirectory+"bin/minion";;
 			 }
 			 else {
@@ -52,7 +52,7 @@ public class TranslationSettings {
 				 if(loadedString == null || loadedString.equals("")) {
 					 String minionDirectory = System.getProperty("user.dir");
 					 // currentDirectory - translator =>  minion directory
-					 minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
+					 //minionDirectory = minionDirectory.substring(0, minionDirectory.length()-10);
 					 this.pathToMinion = minionDirectory+"bin/minion";
 				 }
 				 else this.pathToMinion = loadedString;
