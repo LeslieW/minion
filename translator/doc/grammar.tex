@@ -29,18 +29,16 @@
 %%\begin{center}
 
 
-We develop {\sc Essence}$'$, a solver-independent constraint modelling language,
+This document describes the syntax of  {\sc Essence}$'$ version 0.1, a solver-independent constraint modelling language,
 % with a layer of abstraction that is supported by most constraint solvers.
 which is a subset of {\sc Essence}~\cite{essence}. The development of {\sc Essence} is incremental, 
-so features are added to both {\sc Essence} and {\sc Essence}$'$, as we go along. This document describes the syntax of 
-{\sc Essence}$'$ version 0.1. 
-
+so features are added to both {\sc Essence} and {\sc Essence}$'$, as we go along. 
 
 \section{{\sc Essence'} grammar}
 
 An {\sc Essence}$'$ problem model 
-consists of a problem specification, defining decision variables, domains and constraints, 
-and a parameter specification, giving parameter values to specify the problem instance. 
+consists of a problem specification defining decision variables, domains and constraints, 
+and a parameter specification giving parameter values to specify the problem instance. 
 Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar. 
 
 \subsection{Notation}
@@ -62,6 +60,8 @@ Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar
 \subsection{CF Grammar}
 
 \subsubsection{Model}
+
+
 \begin{tabular}{rcl}
 
 \textit{model} & ::= & \textit{header}\\
@@ -134,7 +134,14 @@ Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar
                               &     & \texttt{element} ``(``
                               \textit{expression},
                                \textit{atomExpression},
-                              \textit{atomExpression} ``)'' \\  
+                              \textit{atomExpression} ``)''  $\mid$\\  
+                                &     & \texttt{min} ``(``
+                              \textit{expression},
+                            ``)'' $\mid$ \\  
+                                 &     & \texttt{max} ``(``
+                              \textit{expression},
+                            ``)'' \\  
+
 %      &     & \texttt{min} ``(`` \textit{expression} ``)'' $\mid$  \texttt{max} ``(`` \textit{expression} ``)'' $\mid$ \\
 %      &     &  \texttt{atleast}''(``  \texttt{expression}, \texttt{expression},  \texttt{expression} ``)'' $\mid$ \\ 
 %&     &  \texttt{atmost}''(``  \texttt{expression}, \texttt{expression},  \texttt{expression} ``)'' \\
@@ -150,12 +157,15 @@ Comments are preceded by {\tt \$}, which can be placed everywhere in the grammar
 %\clearpage
 \section{Operator Precedence}
 
-Table \ref{precedence} describes the precedence of the operators that 
-are arranged by decreasing order of precedence (the operators on top have highest precedence).
+Table \ref{tab:precedence} describes the precedence of the operators that 
+are arranged by decreasing order of precedence (the operators on top have highest precedence)
+
 
 \begin{table}
-     \centering
-%\begin{center}
+
+
+    
+    \begin{center}
     \begin{tabular}{|l|lc|}
  
       \hline
@@ -196,11 +206,12 @@ are arranged by decreasing order of precedence (the operators on top have highes
         . & dot & Right \\ 
 	\hline
 
-      \end{tabular}
-%\end{center}
+      \end{tabular}\label{tab:precedence}
+\end{center}
     \caption{Operator precedence in {\sc Essence}$'$}
-\label{precedence}
-  \end{table}
+
+
+\end{table}
 
 \section{{\sc Essence}$'$ $\rightarrow$ {\sc Minion} Translator}
 
