@@ -37,7 +37,7 @@
 <li><a href="../problems">Essence' Examples</a>
 </li>
 
-<li><a href="javadoc/index.html">Translator API</a>
+<li><a href="html/index.html">Translator API</a>
 </li>
 
 </ol>
@@ -74,31 +74,13 @@ installed in order to do that).
 
 
 <h3 id="running">Running the Translator</h3>
-Change to the root directory of the translator and call the EssencePrimeTranslator with:<br>
+Change to the root directory of the translator and call the Essence' Translator with:<br>
 <br>
 <center>
-<code>java translator.EssencePrimeTranslator problem-file.cm parameter-file.param  output-filename flags</code><br>
+<code>java translator.Translate</code><br>
  </center>
 <br>
-If <code>output-filename</code> is omitted, the Essence' Translator will generate the file
-<code>outFile</code>. The output-file will be stored in the current
-directory (<code> /bin </code>), if no other path has been specified. 
-There are also some optional flags:
-<ul>
-	<li><code>-unwatched</code>: applies only unwatched MINION constraints 
-	</li>	
-	<li><code>-watched</code>: applies watched-literal based
-	MINION constraints (if possible) 
-	</li>		
-	<li><code>-discrete</code>: use discrete domain variables 
-	</li>	
-	<li><code>-bounds</code>: use bound domain variables 
-	</li>	
-</ul>
-The translator can either always apply discrete or bound domain
-variables. The default is set to discrete variables and to apply
-watched literal based constraints (this can be changed by setting 
-the globals in the file MinionGlobals.java before compilation). 
+which will start the graphical user interface of the translator.
 
 <h3 id="modelling">Modelling with Essence'</h3>
 Essence' is a declarative modelling language to specify constraint

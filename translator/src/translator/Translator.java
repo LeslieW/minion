@@ -1,6 +1,5 @@
 package translator;
 
-//import java.io.FileReader;
 import java.io.StringReader;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -14,8 +13,8 @@ import translator.expression.Expression;
 /**
  * The translator provides all the core steps during the translation.
  * These steps are : <br>
- * 1. parsing<br>
- * 2. normalising<br>
+ * 1. parsing (target solver independent)<br>
+ * 2. normalising (target solver independent)<br>
  * 3. flattening<br>
  * 4. tailoring<br>
  * 
@@ -24,6 +23,15 @@ import translator.expression.Expression;
  */
 
 public class Translator {
+	
+	
+	// different types of normalisation
+	public static final char NORMALISE_BASIC = 0;
+	public static final char NORMALISE_EVAL = 1;
+	public static final char NORMALISE_ORDER = 2;
+	public static final char NORMALISE_CANCELLATION =3;
+	public static final char NORMALISE_FULL = 4;
+	
 	
 	/** Essence' parser */
     EssencePrimeParser parser ;
@@ -83,72 +91,6 @@ public class Translator {
 	}
 	
 	
-	public boolean parseAndBasicNormalisation(String problemString, String parameterString) {
-		
-		try {
-			// clear the old parameters
-			//this.normaliser.clearParameters();
-			
-			this.parser = new EssencePrimeParser(new EssencePrimeLexer
-					(new StringReader(problemString)) );
-			this.problemSpecification = (EssenceSpecification) parser.parse().value;
-			//print_debug(problemSpec.toString());
-    	
-			this.parser = new EssencePrimeParser(new EssencePrimeLexer
-					(new StringReader(parameterString)) );
-			this.parameterSpecification = (EssenceSpecification) parser.parse().value;
-			//print_debug(parameterSpec.toString());
-			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.constraintList = this.normaliser.normaliseBasic();
-		}
-		catch(Exception e) {
-			this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
-			return false;
-		}
-    	return true;
-		
-	}
-	
-	
-	
-	public String printEssenceSpecification() {
-		return this.problemSpecification.toString();
-	}
-	
-	public String printParameterSpecification() {
-		return this.parameterSpecification.toString();
-	}
-	
-	public String printAdvancedModel() {
-		
-		return this.normaliser.printModel(this.constraintList);
-	}
-	
-	/*public boolean parse(String problemFileName, String parameterFileName) 
-	throws FileNotFoundException {
-	
-	try {
-		
-		this.parser = new EssencePrimeParser(new EssencePrimeLexer
-				(new FileReader(problemFileName)) );
-		this.problemSpecification = (EssenceSpecification) parser.parse().value;
-		//print_debug(problemSpec.toString());
-	
-		this.parser = new EssencePrimeParser(new EssencePrimeLexer
-				(new FileReader(parameterFileName)) );
-		this.parameterSpecification = (EssenceSpecification) parser.parse().value;
-		//print_debug(parameterSpec.toString());
-	}
-	catch(Exception e) {
-		this.errorMessage = e.getMessage();
-		return false;
-	}
-	return true;
-	
-} */
-	
-	
-	
 	/**
 	 * Returns true if the problem file (specified by the filename) can be 
 	 * parsed. If there is a parse error, the error message is stored 
@@ -181,95 +123,80 @@ public class Translator {
 	
 	
 	/**
-	 * Normalises the parsed list of expressions. This method provides FULL normalisation,
-	 * which includes parameter insertion, ordering but also general model-enhancing reformulations 
-	 * such as evaluation, and reduction of the expression tree.
+	 * Normalise the current problem specification according to the normalise type.
+	 * The normalise type can be either NORMALISE_BASIC NORMALISE_EVAL NORMALISE_ORDER
+	 * NORMALISE_CANCELLATION or NORMALISE_FULL. If no valid normalisation type is given,
+	 * the translator does nothing at all. If an exception is thrown or an error occurred,
+	 * the method returns false and the error message can be obtained by calling the 
+	 * getErrorMessage() method. 
 	 * 
-	 * @return true if the normalisation process worked out and the constraint list has been
-	 * stored in the member constraintList, otherwise the errorMessage can be found in the field errorMessage
+	 * @param normaliseType
+	 * @return true if translation was successful and false if an error occurred (which 
+	 * can be obtained by calling getErrorMessage() )
 	 */
-    public boolean normalise() {
+	public boolean normalise(char normaliseType) {
 		
-		try { // it does not matter if parameterSpec is null!
-			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.constraintList = this.normaliser.normalise();
-			
-		} catch(NormaliserException e) {
-			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+		if(this.problemSpecification == null) {
+			this.errorMessage = errorMessage.concat("Please parse problem file before normalisation.");
 			return false;
 		}
+			
 		
-		return true;
-	}
-	
-    /**
-	 * Normalises the parsed list of expressions. This method provides BASIC normalisation,
-	 * which includes ONLY parameter insertion and no model-enhancing reformulations.
-	 * 
-	 * @return true if the normalisation process worked out and the constraint list has been
-	 * stored in the member constraintList, otherwise the errorMessage can be found in the field errorMessage
-	 */
-    public boolean normaliseBasic() {
+		// ====== first do the basic stuff ============
 		try { 
 			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.constraintList = this.normaliser.normaliseBasic();
-			
+			this.constraintList = this.normaliser.normaliseBasic();	
 		} catch(NormaliserException e) {
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}
+		if(normaliseType == NORMALISE_BASIC) return true;
 		
-		return true;    	
-    }
-    
+		
+		switch(normaliseType) {
+		
+		case NORMALISE_EVAL:
+			try {
+				this.constraintList = this.normaliser.evaluateConstraints(constraintList);	
+			} catch(NormaliserException e) {
+				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+				return false;
+			}
+			return true;
+		
+		case NORMALISE_ORDER:
+			try { 
+				this.constraintList = this.normaliser.orderConstraints(constraintList);
+			
+			} catch(NormaliserException e) {
+				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+				return false;
+			}
+		
+		case NORMALISE_FULL:
+			try {
+				this.constraintList = this.normaliser.evaluateConstraints(constraintList);	
+				this.constraintList = this.normaliser.orderConstraints(constraintList);
+			} catch(NormaliserException e) {
+				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+				return false;
+			}
+			return true;			
+		
+			
+			
+		default: return true;   
+		}
+	
+	}
+	
+  
     /**
-     * Provide basic normalisation which includes evaluation and 
-	 *  parameter insertion but no ordering or reduction of expression trees.
-	 * 
+     * Returns the error message that has been given by the last exception. The error message
+     * is no longer stored after returning it.
      * 
-     * @return
+     * @return the error messages that has been collected after throwing the last exception
      */
-    public boolean normaliseEvaluate() {
-    	
-    	try { 
-			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.constraintList = this.normaliser.normaliseBasic();
-			this.constraintList = this.normaliser.evaluateConstraints(constraintList);
-			
-		} catch(NormaliserException e) {
-			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
-			return false;
-		}
-		
-		return true;    
-    	
-    }
-    
-    
-    /**
-     * Provide basic normalisation which includes evaluation and 
-	 *  parameter insertion but no ordering or reduction of expression trees.
-	 * 
-     * 
-     * @return
-     */
-    public boolean normaliseOrder() {
-    	
-    	try { 
-			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.constraintList = this.normaliser.normaliseBasic();
-			this.constraintList = this.normaliser.reduceExpressions(constraintList);
-			this.constraintList = this.normaliser.orderConstraints(constraintList);
-			
-		} catch(NormaliserException e) {
-			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
-			return false;
-		}
-		
-		return true;    
-    	
-    }
-
     public String getErrorMessage() {
     	String error = this.errorMessage;
     	this.errorMessage = "";
@@ -282,4 +209,16 @@ public class Translator {
 		this.debug = debug.concat(" [ DEBUG translator ] "+message+"\n");
 	}
 	
+	
+	public String printInitialProblemSpecification() {
+		return this.problemSpecification.toString();
+	}
+	
+	public String printIntialParameterSpecification() {
+		return this.parameterSpecification.toString();
+	}
+	
+	public String printAdvancedModel() {
+		return this.normaliser.printModel(this.constraintList);
+	}
 }

@@ -39,7 +39,7 @@ public class Normaliser implements NormaliserSpecification {
 
 	}
 	
-	
+	  
 	
 	///=========================== INTERFACED METHODS ===============================================================
 	

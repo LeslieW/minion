@@ -343,7 +343,11 @@ public class TranslatorGUI extends JPanel  {
 	}
 	
 	
-	
+	/**
+	 * Load a problem, parameter or output file, depending on the 
+	 * command passed. 	
+	 * @param command
+	 */
 	protected void load(String command) {
 		
 			
@@ -398,7 +402,12 @@ public class TranslatorGUI extends JPanel  {
 	}
 	
 	
-	
+	/**
+	 * Save a problem, parameter or output file, depending on the 
+	 * command passed. 
+	 * 
+	 * @param command
+	 */
 	protected void save(String command) {
 	
 		int returnVal = this.fileChooser.showSaveDialog(this);
@@ -476,7 +485,7 @@ public class TranslatorGUI extends JPanel  {
 		
 		if(this.translator.problemSpecification == null)
 			parse();
-		if(this.translator.normalise()) {
+		if(this.translator.normalise(Translator.NORMALISE_FULL)) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) successful.\n");
 		}
@@ -491,7 +500,7 @@ public class TranslatorGUI extends JPanel  {
 		
 		if(this.translator.problemSpecification == null)
 			parse();
-		if(this.translator.normaliseOrder()) {
+		if(this.translator.normalise(Translator.NORMALISE_ORDER)) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Basic Normalisation with Ordering successful.\n");
 		}
@@ -509,7 +518,7 @@ public class TranslatorGUI extends JPanel  {
 		
 		if(this.translator.problemSpecification == null)
 			parse();
-		if(this.translator.normaliseEvaluate()) {
+		if(this.translator.normalise(Translator.NORMALISE_EVAL)) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Basic Normalisation with Evaluation successful.\n");
 		}
@@ -526,7 +535,7 @@ public class TranslatorGUI extends JPanel  {
 	protected void insertParameters() {
 		
 		parse();
-		if(this.translator.normaliseBasic()) {
+		if(this.translator.normalise(Translator.NORMALISE_BASIC)) {
 			writeOnOutput(this.translator.printAdvancedModel());
 			writeOnMessageOutput("Basic Normalisation successful.\n");
 			printDebugMessages();
@@ -565,7 +574,7 @@ public class TranslatorGUI extends JPanel  {
 		else parsingSuccessfull = translator.parse(problemSpec, parameterSpec);
 		
 		if(parsingSuccessfull) {
-			writeOnOutput(this.translator.printEssenceSpecification());
+			writeOnOutput(this.translator.printInitialProblemSpecification());
 			writeOnMessageOutput("Parsing OK.\n");
 		}
 		else {

@@ -1,4 +1,4 @@
-package translator.normaliser;
+ package translator.normaliser;
 
 import translator.conjureEssenceSpecification.*;
 import translator.expression.*;
@@ -75,9 +75,48 @@ public class ExpressionMapper {
 		case EssenceGlobals.QUANTIFIER_EXPR:
 			return mapQuantification(oldExpression.getQuantification());
 			
+		case EssenceGlobals.FUNCTIONOP_EXPR:
+			return mapGlobalConstraint(oldExpression.getFunctionExpression());
+			
+		case EssenceGlobals.LEX_EXPR:
+			return mapLexConstraint(oldExpression.getLexExpression());
+			
 		default: 
 			throw new NormaliserException("Cannot map expression yet or unknown expression type:\n"+oldExpression);
 				
+		}
+	}
+	
+	
+	protected translator.expression.Expression mapLexConstraint(LexExpression oldLexConstraint) 
+		throws NormaliserException {
+		
+		return new NonCommutativeRelationalBinaryExpression(mapExpression(oldLexConstraint.getLeftExpression()),
+				                                      mapOperator(oldLexConstraint.getLexOperator().getRestrictionMode()),
+				                                      mapExpression(oldLexConstraint.getRightExpression()));
+		
+		
+	}
+	
+	/**
+	 * Maps global constraints to their corresponding new representation
+	 * 
+	 * @param oldGlobalConstraint
+	 * @return the corresponding translator.expression.Expression for the global constraint
+	 * @throws NormaliserException
+	 */
+	protected translator.expression.Expression mapGlobalConstraint(FunctionExpression oldGlobalConstraint) 
+		throws NormaliserException {
+		
+		switch(oldGlobalConstraint.getRestrictionMode()) {
+		
+		case EssenceGlobals.ALLDIFF:
+			return new AllDifferent(mapExpression(oldGlobalConstraint.getExpression1()));
+			
+		default:
+			throw new NormaliserException("Cannot translate Global Constraint yet:"+oldGlobalConstraint);
+		
+		
 		}
 	}
 	
@@ -335,7 +374,15 @@ public class ExpressionMapper {
 			return translator.expression.Expression.U_MINUS;
 		case EssenceGlobals.NOT:
 			return translator.expression.Expression.NEGATION;
-	
+		case EssenceGlobals.LEX_GEQ:
+			return translator.expression.Expression.LEX_GEQ;
+		case EssenceGlobals.LEX_LEQ:
+			return translator.expression.Expression.LEX_LEQ;
+		case EssenceGlobals.LEX_GREATER:
+			return translator.expression.Expression.LEX_GREATER;
+		case EssenceGlobals.LEX_LESS:
+			return translator.expression.Expression.LEX_LESS;			
+			
 		default: return oldOperator;
 		
 		}

@@ -23,14 +23,10 @@ need jflex[2] and Java-Cup[3] installed).
 
 2. Running the Essence' Translator
 ----------------------------------
-Call the EssencePrimeTranslator in the translator-package with Java:
+To start the graphical translator version, change to the root
+directory of the translator and type the command:
 
-java translator.EssencePrimeTranslator <Essence'-specification-file>   <Essence'-parameter-file>   [<output-file>]
- 
-The last parameter is optional. If the output-filename is omitted, 
-the Essence' Translator will generate the file "outFile". There are 
-also a set of flags for the translation. For further information call
-"java translator.EssencePrimeTranslator" without arguments.
+java translator.Translate
 
 
 
