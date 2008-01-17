@@ -275,10 +275,10 @@ public class TranslationPanel extends JPanel {
 			this.outputPanel.writeOnMessageOutput("Tailored model to target solver "+solver.getSolverName()+"\n");
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("===================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Tailoring to target solver "+solver.getSolverName()+" failed.\n");
-			this.outputPanel.writeOnMessageOutput(this.translator.getErrorMessage()+"\n");
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("===================== ERROR ======================\n"+
+					"Tailoring to target solver "+solver.getSolverName()+" failed.\n"+
+					this.translator.getErrorMessage()+"\n"+
+					"===============================================\n");
 			return false;
 		}
 		return true;
@@ -298,10 +298,10 @@ public class TranslationPanel extends JPanel {
 			this.outputPanel.writeOnMessageOutput("Flattened constraints for target solver "+solver.getSolverName()+"\n");
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Flattening for target solver "+solver.getSolverName()+" failed.\n");
-			this.outputPanel.writeOnMessageOutput(this.translator.getErrorMessage()+"\n");
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n"+
+					"Flattening for target solver "+solver.getSolverName()+" failed.\n"+
+					this.translator.getErrorMessage()+"\n"+
+				"===============================================\n");
 			return false;
 		}
 		return true;
@@ -316,10 +316,10 @@ public class TranslationPanel extends JPanel {
 			this.outputPanel.writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) successful.\n");
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Full Normalisation (ordering, evaluation, restructuring) failed.\n");
-			this.outputPanel.writeOnMessageOutput(this.translator.getErrorMessage()+"\n");
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n"+
+				"Full Normalisation (ordering, evaluation, restructuring) failed.\n"+
+				this.translator.getErrorMessage()+"\n"+
+				"===============================================\n");
 			return false;
 		}
 		
@@ -336,10 +336,10 @@ public class TranslationPanel extends JPanel {
 			this.outputPanel.writeOnMessageOutput("Basic Normalisation with Ordering successful.\n");
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Basic Normalisation with Ordering failed.\n");
-			this.outputPanel.writeOnMessageOutput(this.translator.getErrorMessage()+"\n");
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n"+
+				"Basic Normalisation with Ordering failed.\n"+
+				this.translator.getErrorMessage()+"\n"+
+				"===============================================\n");
 			return false;
 		}
 		return true;
@@ -358,10 +358,10 @@ public class TranslationPanel extends JPanel {
 			this.outputPanel.writeOnMessageOutput("Basic Normalisation with Evaluation successful.\n");
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Basic Normalisation with Evaluation failed.\n");
-			this.outputPanel.writeOnMessageOutput(this.translator.getErrorMessage()+"\n");
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n"+
+				"Basic Normalisation with Evaluation failed.\n"+
+			     this.translator.getErrorMessage()+"\n"+
+				"===============================================\n");
 			return false;
 		}
 		return true;
@@ -381,11 +381,9 @@ public class TranslationPanel extends JPanel {
 			printDebugMessages();
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Basic Normalisation failed.\n");
-			this.outputPanel.writeOnMessageOutput(this.translator.getErrorMessage()+"\n");
-			printDebugMessages();
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("================== ERROR ======================\n"+"Basic Normalisation failed.\n"
+			     +this.translator.getErrorMessage()+"\n"+
+			"===============================================\n");
 			return false;
 
 		}
@@ -421,9 +419,9 @@ public class TranslationPanel extends JPanel {
 			this.outputPanel.writeOnMessageOutput("Parsing OK.\n");
 		}
 		else {
-			this.outputPanel.writeOnMessageOutput("===================== ERROR ======================\n");
-			this.outputPanel.writeOnMessageOutput("Parse Error.\n"+this.translator.getErrorMessage()+"\n");
-			this.outputPanel.writeOnMessageOutput("===============================================\n");
+			this.outputPanel.writeOnMessageOutput("===================== ERROR ======================\n"+
+			"Parse Error.\n"+this.translator.getErrorMessage()+"\n"+
+			"===============================================\n");
 			return false;
 		}
 		return true;

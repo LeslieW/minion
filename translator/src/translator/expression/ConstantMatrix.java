@@ -50,6 +50,10 @@ public class ConstantMatrix implements ConstantArray {
 	public Expression insertValueForVariable(int value, String variableName) {
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;

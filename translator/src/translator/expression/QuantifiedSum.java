@@ -67,6 +67,13 @@ public class QuantifiedSum implements ArithmeticExpression {
 		return this;
 	}
 
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		//this.domain = this.domain.insertValueForVariable(value, variableName);
+		this.quantifiedExpression = this.quantifiedExpression.insertValueForVariable(value, variableName);
+		return this;
+	}
+
+	
 	public char isSmallerThanSameType(Expression e) {
 	
 		QuantifiedSum otherSum = (QuantifiedSum) e;

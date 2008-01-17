@@ -235,8 +235,16 @@ public interface Expression {
 	public Expression insertValueForVariable(int value, String variableName);
 	
 		
-	
-	
+	/**
+	 * Insert the boolean value for the variable/parameter/identifier 
+	 * given by the variablenName.
+	 * 
+	 * @param value
+	 * @param variableName
+	 * @return the expression with all occurrences of variableName replaced with
+	 * boolean value
+	 */
+	public Expression insertValueForVariable(boolean value, String variableName);
 	
 	/**
 	 * This method os used

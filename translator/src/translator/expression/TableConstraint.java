@@ -57,6 +57,13 @@ public class TableConstraint implements RelationalExpression {
 		
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.variableList.length; i++)
+			this.variableList[i] = (Variable) this.variableList[i].insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 	public boolean isNested() {
 		return this.isNested;

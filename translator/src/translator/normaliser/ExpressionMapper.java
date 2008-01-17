@@ -767,6 +767,7 @@ public class ExpressionMapper {
 		throws NormaliserException {
 		
 		
+		
 		switch(oldAtom.getRestrictionMode()) {
 		
 		case EssenceGlobals.NUMBER:
@@ -793,9 +794,11 @@ public class ExpressionMapper {
 			}
 			// the identifier is a parameter
 			else if(this.parameterDomains.containsKey(oldAtom.getString())) {
+		
 				translator.conjureEssenceSpecification.Domain domain = this. parameterDomains.get(oldAtom.getString());
 				translator.expression.SingleVariable parameter = createVariableFromDomain(oldAtom.getString(),
 						                                        domain);
+				
 				if(parameter.isBooleanVariable())
 					return new RelationalAtomExpression(parameter);
 				else return new ArithmeticAtomExpression(parameter, true);					
@@ -949,6 +952,12 @@ public class ExpressionMapper {
 	protected translator.expression.Domain mapIntegerDomain(IntegerDomain intDomain) 
 		throws NormaliserException {
 		
+		
+		//empty domain -> must be a constant
+		if(intDomain.getRangeList() == null) {
+			return new BoundedIntRange(translator.expression.Expression.LOWER_BOUND, 
+					                   translator.expression.Expression.UPPER_BOUND);
+		}
 		
 		// we have a bounds domain or a single element domain
 		if(intDomain.getRangeList().length == 1) {

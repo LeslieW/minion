@@ -59,6 +59,15 @@ public class ComposedArray implements Array {
 		
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.arrayList.length; i++)
+			this.arrayList[i] = (SingleArray) this.arrayList[i].insertValueForVariable(value, variableName);
+		
+		//this.baseDomain = this.baseDomain.insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;

@@ -156,6 +156,14 @@ public class QuantifiedExpression implements RelationalExpression {
 		
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		
+		//this.domain.insertValueForVariable(value, variableName);
+		this.quantifiedExpression.insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 
 	public String toString() {

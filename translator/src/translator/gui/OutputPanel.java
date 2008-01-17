@@ -298,8 +298,8 @@ public class OutputPanel extends JPanel {
                   while ((line = input.readLine()) != null) {
                 	 s = s+line+"\n";
                   }
-                  writeOnOutput(this.SOLUTION_TAB_NR, s+"\n\n\n\n"+this.translator.getEssenceSolution(s));
-                  //writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
+                  //writeOnOutput(this.SOLUTION_TAB_NR, s+"\n\n\n\n"+this.translator.getEssenceSolution(s));
+                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
                   input.close();
             }
             else {

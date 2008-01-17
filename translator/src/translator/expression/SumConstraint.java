@@ -205,6 +205,15 @@ public class SumConstraint implements GlobalConstraint {
 		this.result = this.result.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.positiveArguments.length; i++)
+			this.positiveArguments[i] = this.positiveArguments[i].insertValueForVariable(value, variableName);
+		for(int i=0; i<this.negativeArguments.length; i++)
+			this.negativeArguments[i] = this.negativeArguments[i].insertValueForVariable(value, variableName);
+		this.result = this.result.insertValueForVariable(value, variableName);
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;

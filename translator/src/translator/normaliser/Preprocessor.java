@@ -85,7 +85,7 @@ public class Preprocessor {
 		readDecisionVariables(problemSpecification);
 		readConstants(problemSpecification);
 		this.expressionMapper = new ExpressionMapper(this.oldDecisionVariables,
-				                                      this.constantDomains,
+				                                      this.parameters,//this.constantDomains,
 				                                      this.constantArrays);
  		HashMap<String,translator.expression.Domain> decisionVariables = this.expressionMapper.getNewDecisionVariables(decisionVariablesNames);
  		
@@ -182,6 +182,35 @@ public class Preprocessor {
 					
 					if(model.objective.objective != null)
 						model.objective.objective = model.objective.objective.insertValueForVariable(value, constantName);
+				}
+				else if(constant.getType() == translator.expression.Expression.BOOL) {
+					boolean value = ((RelationalAtomExpression) constant).getBool();
+					
+					//System.out.println("inserting constant "+constant+" for constant "+constantName);
+					
+					for(int j=0; j<constraintList.size(); j++) {
+						constraintList.get(j).insertValueForVariable(value, constantName);
+					}
+					for(int j=0; j<this.decisionVariablesNames.size(); j++) {
+						translator.expression.Domain domain = decisionVariables.get(decisionVariablesNames.get(j));
+						//domain = domain.insertValueForVariable(value, constantName);
+						decisionVariables.put(this.decisionVariablesNames.get(j), domain);
+					}
+					
+					for(int j=0; j<constantHeap.size(); j++) {
+						translator.expression.Expression constExpr = constantHeapMap.get(constantHeap.get(j)); 
+						constExpr = constExpr.insertValueForVariable(value, constantName);
+						constantHeapMap.put(constantHeap.get(j),constExpr);
+					}
+					for(int j=0; j<domainHeap.size(); j++) {
+						translator.expression.Domain constDomain = domainHeapMap.get(domainHeap.get(j));
+						//constDomain = constDomain.insertValueForVariable(value, constantName);
+						domainHeapMap.put(domainHeap.get(j), constDomain);
+					}
+					
+					if(model.objective.objective != null)
+						model.objective.objective = model.objective.objective.insertValueForVariable(value, constantName);
+							
 				}
 				// otherwise put it on the stack
 				else {
@@ -292,6 +321,34 @@ public class Preprocessor {
 				if(model.objective.objective != null)
 					model.objective.objective = model.objective.objective.insertValueForVariable(value, constantName);
 			}
+			else if(constant.getType() == translator.expression.Expression.BOOL) {
+				boolean value = ((RelationalAtomExpression) constant).getBool();
+				
+				for(int j=0; j<constraintList.size(); j++) {
+					constraintList.get(j).insertValueForVariable(value, constantName);
+				}
+				for(int j=0; j<this.decisionVariablesNames.size(); j++) {
+					translator.expression.Domain domain = decisionVariables.get(decisionVariablesNames.get(j));
+					//domain = domain.insertValueForVariable(value, constantName);
+					decisionVariables.put(this.decisionVariablesNames.get(j), domain);
+				}
+				
+				for(int j=0; j<constantHeap.size(); j++) {
+					translator.expression.Expression constExpr = constantHeapMap.get(constantHeap.get(j)); 
+					constExpr = constExpr.insertValueForVariable(value, constantName);
+					constantHeapMap.put(constantHeap.get(j),constExpr);
+				}
+				for(int j=0; j<domainHeap.size(); j++) {
+					translator.expression.Domain constDomain = domainHeapMap.get(domainHeap.get(j));
+					//constDomain = constDomain.insertValueForVariable(value, constantName);
+					domainHeapMap.put(domainHeap.get(j), constDomain);
+				}
+				
+				if(model.objective.objective != null)
+					model.objective.objective = model.objective.objective.insertValueForVariable(value, constantName);
+						
+			}
+			
 			else throw new NormaliserException
 			   ("An undeclared constant/parameter value or decision variable is in the definition of constant/parameter '"+constantName+
 					   "' which is defined as:"+constant);
@@ -765,6 +822,7 @@ public class Preprocessor {
 					throw new NormaliserException("Constant and parameter have the same name: "+parameterName);
 				
 				this.constantExpressions.put(parameterName, this.expressionParameters.remove(parameterName));
+				
 				
 			}
 			else if(this.domainParameters.containsKey(parameterName)) {

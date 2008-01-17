@@ -80,6 +80,12 @@ public class Atmost implements GlobalConstraint {
 		
 		return this;		
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		this.array = (Array) this.array.insertValueForVariable(value, variableName);
+		
+		return this;		
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;

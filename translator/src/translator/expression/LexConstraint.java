@@ -51,6 +51,13 @@ public class LexConstraint implements RelationalExpression {
 		
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		this.leftArray = (Array) this.leftArray.insertValueForVariable(value, variableName);
+		this.rightArray = (Array) this.rightArray.insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;

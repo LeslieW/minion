@@ -39,7 +39,7 @@ Comment     = "$" {InputCharacter}* {LineTerminator}
 Integer = 0 | [1-9][0-9]*
 Identifier = [:jletter:][:jletterdigit:]*
 
-Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteSpace}"1.2" 
+Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteSpace}"1.b.a" 
 
 
 

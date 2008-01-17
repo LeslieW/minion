@@ -62,6 +62,14 @@ public class ElementConstraint implements GlobalConstraint {
 		
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		this.variableArray = this.variableArray.insertValueForVariable(value, variableName);
+		this.index = this.index.insertValueForVariable(value, variableName);
+		this.value = this.value.insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;

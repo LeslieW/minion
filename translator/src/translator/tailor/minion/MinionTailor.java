@@ -12,6 +12,8 @@ import translator.solver.TargetSolver;
 public class MinionTailor {
 
 	public final String MINION_AUXVAR_NAME = "aux";
+	public final String FLATTENED_TO_VECTOR_SUFFIX = "_flattened2Vector";
+	
 	int noMinionAuxVars;
 	int usedCommonSubExpressions;
 	boolean useCommonSubexpressions;
@@ -378,6 +380,103 @@ public class MinionTailor {
 		throws MinionException {
 		
 		if(array instanceof SimpleArray) {
+			
+			if(((SimpleArray) array).willBeFlattenedToVector()) {
+				
+				SimpleArray simpleArray = (SimpleArray) array;
+				String arrayName = simpleArray.getArrayName();
+				String alias = "ALIAS "+arrayName+this.FLATTENED_TO_VECTOR_SUFFIX;
+				
+				BasicDomain[] indexDomains = simpleArray.getIndexDomains();
+				
+				// case: 1-dimensional array -> is already a vector
+				if(indexDomains.length == 1)
+					return new MinionSimpleArray(((SimpleArray) array).getArrayName());
+				
+				
+				// case: 2-dimensional array
+				if(indexDomains.length == 2) {
+					int noRows = 0;
+					int noCols = 0;
+					
+					if(indexDomains[0] instanceof ConstantDomain) {
+						ConstantDomain rowDomain = (ConstantDomain) indexDomains[0];	
+						noRows = rowDomain.getRange()[1] - rowDomain.getRange()[0] + 1;
+					}
+					else throw new MinionException("Cannot tailor to Minion if index-domain '"+indexDomains[0]+"' of "+arrayName+
+							" cannot be evaluated to a constant.");
+					
+					if(indexDomains[1] instanceof ConstantDomain) {
+						ConstantDomain colDomain = (ConstantDomain) indexDomains[1];						
+						noCols = colDomain.getRange()[1] - colDomain.getRange()[0] + 1;
+					}
+					else throw new MinionException("Cannot tailor to Minion if index-domain '"+indexDomains[1]+"' of "+arrayName+
+							" cannot be evaluated to a constant.");
+					
+					String elements = "";
+					for(int row=0; row < noRows; row++){
+						for(int col=0; col<noCols; col++) {
+							elements = elements+arrayName+"["+row+","+col+"]";
+							if(row != noRows-1 || col != noCols-1) elements = elements+",";
+							if(col == noCols-1) elements = elements+"\n\t\t";	
+						}
+					}
+					
+					alias = alias+"["+(noRows*noCols)+"] = ["+elements+"]\n";
+				}
+				
+				// case : 3-dimensional array
+				else if(indexDomains.length ==3) {
+					int noPlanes = 0;
+					int noRows = 0;
+					int noCols = 0;
+					
+					
+					// get the amount of rows, cols and planes
+					if(indexDomains[0] instanceof ConstantDomain) {
+						ConstantDomain rowDomain = (ConstantDomain) indexDomains[0];	
+						noRows = rowDomain.getRange()[1] - rowDomain.getRange()[0] + 1;
+					}
+					else throw new MinionException("Cannot tailor to Minion if index-domain '"+indexDomains[0]+"' of "+arrayName+
+							" cannot be evaluated to a constant.");
+					
+					if(indexDomains[1] instanceof ConstantDomain) {
+						ConstantDomain colDomain = (ConstantDomain) indexDomains[1];						
+						noCols = colDomain.getRange()[1] - colDomain.getRange()[0] + 1;
+					}
+					else throw new MinionException("Cannot tailor to Minion if index-domain '"+indexDomains[1]+"' of "+arrayName+
+							" cannot be evaluated to a constant.");
+					
+					if(indexDomains[2] instanceof ConstantDomain) {
+						ConstantDomain planesDomain = (ConstantDomain) indexDomains[2];						
+						noPlanes = planesDomain.getRange()[2] - planesDomain.getRange()[0] + 1;
+					}
+					else throw new MinionException("Cannot tailor to Minion if index-domain '"+indexDomains[2]+"' of "+arrayName+
+							" cannot be evaluated to a constant.");
+					
+					// put together the flattened vector
+					String elements = "";
+					for(int plane=0; plane < noPlanes; plane++) {
+						for(int row=0; row < noRows; row++){
+							for(int col=0; col<noCols; col++) {
+								
+								elements = elements+arrayName+"["+plane+","+row+","+col+"]";
+								if(plane != noPlanes-1) elements = elements+",";
+								if(col == noCols-1) elements = elements+"\n\t\t";
+							
+							}
+						}
+					}
+					alias = alias+"["+(noPlanes*noRows*noCols)+"] = ["+elements+"]\n";
+				}
+				else throw new MinionException("Sorry, cannot flatten arrays with more than 3 dimensions:"+array);
+				
+				
+				this.minionModel.addAlias(alias);
+				return new MinionSimpleArray(arrayName+this.FLATTENED_TO_VECTOR_SUFFIX);
+			
+ 			}
+			
 			return new MinionSimpleArray(((SimpleArray) array).getArrayName());			
 		}
 		else if(array instanceof IndexedArray) {

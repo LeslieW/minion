@@ -107,6 +107,14 @@ public class SingleVariable implements Variable {
 		}
 		else return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		
+		if(this.variableName.equals(variableName)) {
+			return new RelationalAtomExpression(value);
+		}
+		else return this;
+	}
 
 	public boolean isNested() {
 		return isNested;

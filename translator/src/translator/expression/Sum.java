@@ -386,6 +386,16 @@ public class Sum extends NaryArithmeticExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.positiveArguments.size(); i++) {
+			this.positiveArguments.add(i, this.positiveArguments.remove(i).insertValueForVariable(value, variableName));
+		}
+		for(int i=0; i<this.negativeArguments.size(); i++) {
+			this.negativeArguments.add(i, this.negativeArguments.remove(i).insertValueForVariable(value, variableName));
+		}
+		return this;
+	}
+	
 	
 	public Expression restructure() {
 	

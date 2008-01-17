@@ -179,6 +179,13 @@ public class NonCommutativeRelationalBinaryExpression implements
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		System.out.println("Gonna insert "+value+" for "+variableName+" in left expression:"+leftArgument+" with type: "+leftArgument.getType());
+		this.leftArgument = this.leftArgument.insertValueForVariable(value, variableName);
+		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

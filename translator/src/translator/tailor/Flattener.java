@@ -2263,10 +2263,56 @@ public class Flattener {
 									+"the domain of variable "+arrayVariable+" is not constant.");
 						}
 						
+						// ----------- 3.case: matrix[rowExpr:E, colExpr:E]  ----> element(flatM, rowExpr*noRows + colExpr, aux)
+						else {
+							Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
+							domain = domain.evaluate();
+							
+							if(domain instanceof ConstantArrayDomain) {
+							    
+								if(domain instanceof ConstantArrayDomain) {
+									
+									SimpleArray flatArray = new SimpleArray(arrayVariable.getArrayNameOnly(),
+																			((ConstantArrayDomain) domain).getIndexDomains(),
+																			((ConstantArrayDomain) domain).getBaseDomain());
+									
+								    int noRows = ((ConstantArrayDomain) domain).getIndexDomains()[0].getRange()[1] - 
+								    	         ((ConstantArrayDomain) domain).getIndexDomains()[0].getRange()[0] + 1;
+								    
+								    // index = noRows*rowExpr + colExpr
+								    Sum indexExpression = new Sum(new Expression[] { new Multiplication(
+								    		                                             new Expression[] {new ArithmeticAtomExpression(noRows),
+								    		                                            		           rowIndexExpression}
+								    		                                             ),
+								    		                                        colIndexExpression},
+								    		                                        new Expression[0]);
+									// prepare  index expression
+									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+										indexExpression.willBeFlattenedToVariable(true);
+									Expression index = flattenExpression(indexExpression);
+									
+									flatArray.setWillBeFlattenedToVector(true);
+									
+									// return element constraint
+									return new ElementConstraint(flatArray,
+											                      index);
+									
+								}
+								else throw new TailorException("Cannot flatten expression '"+atom+"' to element constraint: "
+										+"the domain of variable "+arrayVariable+" is not constant.");
+								
+							}
+							else throw new TailorException("Cannot flatten expression '"+atom+"' to element constraint: "
+									+"the domain of variable "+arrayVariable+" is not constant.");
+						}
+						
 						
 						
 					}
-				}
+					else if(indices.length == 3)
+						throw new TailorException("Sorry, cannot translate dynamic array indexing for 3-dimensional arrays yet:"+atom);
+				}	
+			
 				// translate to an element constraint if the target solver supports it
 				// find out if the element constraint has to be nested too!!
 			}

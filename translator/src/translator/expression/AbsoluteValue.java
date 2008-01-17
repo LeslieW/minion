@@ -83,6 +83,11 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		this.argument = this.argument.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

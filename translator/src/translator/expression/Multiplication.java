@@ -221,6 +221,13 @@ public class Multiplication extends NaryArithmeticExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.arguments.size(); i++) {
+			this.arguments.add(i, this.arguments.remove(i).insertValueForVariable(value, variableName));
+		}
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

@@ -253,6 +253,32 @@ public class ArrayVariable implements Variable {
 		return this;
 	}
 	
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		
+		if(this.exprIndices != null) {
+			boolean allIndicesAreInteger = true;
+			for(int i=0; i< this.exprIndices.length; i++) {
+				this.exprIndices[i] = this.exprIndices[i].insertValueForVariable(value, variableName);
+				if(exprIndices[i].getType() != INT)
+					allIndicesAreInteger = false;
+			}
+		
+			if(allIndicesAreInteger) {
+				int[] newIntIndices = new int[this.exprIndices.length];
+				for(int i=0; i<this.exprIndices.length;i++)
+					newIntIndices[i] = ((ArithmeticAtomExpression) exprIndices[i]).getConstant();
+				return new ArrayVariable(this.arrayName,
+						newIntIndices,
+						this.domain);
+			}
+		}
+		
+		return this;
+	}
+	
+	
+	
 	public boolean isNested() {
 		return isNested;
 	}

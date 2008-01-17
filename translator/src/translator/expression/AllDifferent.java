@@ -66,6 +66,11 @@ public class AllDifferent implements UnaryRelationalExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		this.argument = (Array) this.argument.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

@@ -95,6 +95,13 @@ public class ProductConstraint implements GlobalConstraint {
 		this.result = this.result.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.arguments.length; i++)
+			this.arguments[i] = this.arguments[i].insertValueForVariable(value, variableName);
+		this.result = this.result.insertValueForVariable(value, variableName);
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;

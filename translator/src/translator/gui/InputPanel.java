@@ -34,6 +34,8 @@ public class InputPanel extends JPanel {
 	final String CLEAR_PROBLEM = "clear problem";
 	final String CLEAR_PARAMETER = "clear parameter";
 	
+	final String ESSENCE_PRIME_HEADER ="language ESSENCE' 1.b.a";
+	
 	// panels
 	JPanel problemPane;
 	JPanel parameterPane;
@@ -83,7 +85,6 @@ public class InputPanel extends JPanel {
                   parameterPane);
 	      splitPane.setOneTouchExpandable(true);
 	      splitPane.setResizeWeight(0.5);
-	      
 	      this.add(splitPane);
 	}
 	
@@ -105,7 +106,7 @@ public class InputPanel extends JPanel {
 		//this.lineColField.setEditable(false);
 		
 		// problem text field  initialisation
-		this.problemInput = new JTextArea("ESSENCE' 1.0\n", this.width, this.problemHeight);
+		this.problemInput = new JTextArea(this.ESSENCE_PRIME_HEADER+"\n", this.width, this.problemHeight);
 		problemInput.setLineWrap(true);
 		this.problemInput.addCaretListener( new CaretListener()
 		{
@@ -196,7 +197,7 @@ public class InputPanel extends JPanel {
 		
 		
 //		 ============================ parameter panel ===============================
-		this.parameterInput = new JTextArea("ESSENCE' 1.0\n",this.width, this.parameterHeight);
+		this.parameterInput = new JTextArea(this.ESSENCE_PRIME_HEADER+"\n",this.width, this.parameterHeight);
 		parameterInput.setLineWrap(true);
 		parameterInput.addCaretListener( new CaretListener()
 		{

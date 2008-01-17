@@ -176,6 +176,13 @@ public class Conjunction extends NaryRelationalExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.conjointExpressions.size(); i++) {
+			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).insertValueForVariable(value, variableName));
+		}
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

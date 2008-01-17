@@ -155,6 +155,12 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		this.leftArgument = this.leftArgument.insertValueForVariable(value, variableName);
+		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

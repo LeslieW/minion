@@ -163,6 +163,17 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		if(this.variable != null) {
+			if(variable instanceof SingleVariable)
+				return this;
+			this.variable = (Variable) this.variable.insertValueForVariable(value, variableName);
+		}
+		
+		return this;
+	}
+	
+	
 	public boolean isNested() {
 		return isNested;
 	}

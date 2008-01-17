@@ -138,6 +138,28 @@ public class RelationalAtomExpression implements
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		
+		if(this.variable != null) {
+			System.out.println("Inserting "+value+" for constant "+variableName+" in "+this);	
+			if(this.variable instanceof SingleVariable) {
+				System.out.println("Inserting "+value+" for constant "+variableName+" in "+this);	
+				Expression e = this.variable.insertValueForVariable(value,variableName);
+				if(e.getType() == BOOL)
+					return (RelationalAtomExpression) e;
+				else return this;
+			}
+			// this is an array element
+			else {
+				this.variable = (Variable) this.variable.insertValueForVariable(value,variableName);
+				this.variable.evaluate();
+				return this;
+			}
+			
+		}
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

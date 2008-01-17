@@ -157,6 +157,13 @@ public class Disjunction extends NaryRelationalExpression {
 		return this;
 	}
 	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		for(int i=0; i<this.disjointExpressions.size(); i++) {
+			this.disjointExpressions.add(i, this.disjointExpressions.remove(i).insertValueForVariable(value, variableName));
+		}
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

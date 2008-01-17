@@ -8,6 +8,8 @@ public class SimpleArray implements SingleArray {
 	
 	private boolean willBeFlattenedToVariable = false;
 	private boolean isNested = true;
+	/** this flag indicates if the array should be later (in the tailor for the solver) flattened  to a vector*/
+	private boolean willBeFlattenedToVector = false;
 	
 	// =========== CONSTRUCOR ===============================
 	
@@ -47,6 +49,10 @@ public class SimpleArray implements SingleArray {
 	public Expression evaluate() {
 		this.baseDomain = this.baseDomain.evaluate();
 		
+		for(int i=0; i<this.indexDomains.length; i++) {
+			this.indexDomains[i] = (BasicDomain) indexDomains[i].evaluate();
+		}
+		
 		return this;
 	}
 
@@ -62,6 +68,11 @@ public class SimpleArray implements SingleArray {
 
 	public Expression insertValueForVariable(int value, String variableName) {
 		this.baseDomain = this.baseDomain.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
+	public Expression insertValueForVariable(boolean value, String variableName) {
+		//this.baseDomain = this.baseDomain.insertValueForVariable(value, variableName);
 		return this;
 	}
 
@@ -87,7 +98,7 @@ public class SimpleArray implements SingleArray {
 
 	}
 	
-public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) {
 		
 		if(this.baseDomain instanceof IdentifierDomain) {
 			String domainName = ((IdentifierDomain) baseDomain).getDomainName();
@@ -135,5 +146,16 @@ public Expression insertDomainForVariable(Domain domain, String variableName) {
 		return this.arrayName;
 		
 	}
+	
+	// ================= ADDITIONAL METHODS =============================
+	
+	public boolean willBeFlattenedToVector() {
+		return this.willBeFlattenedToVector;
+	}
+	
+	public void setWillBeFlattenedToVector(boolean turnOn) {
+		this.willBeFlattenedToVector = turnOn;
+	}
+	
 	
 }
