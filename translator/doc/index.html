@@ -161,7 +161,30 @@ change to the root directory of the translator and execute the Essence' Translat
 <code>java -jar translator.jar</code><br>
  </center>
 <br>
-which will start the graphical user interface of the translator.
+which will start the graphical user interface of the translator. If you want to use 
+the command-line version, then type<br>
+<br>
+<center>
+	<code>java -jar translator.jar problemFile.eprime</code>
+</center>
+<br>
+to translate a problem file (without parameter values) to Minion input. The resulting
+Minion input file will be stored in the same directory as the problem file and is named 
+after the problem file with an additional .minion extension. <br>
+If you have an additional parameter file for the 
+problem class, type<br>
+<br>
+<center>
+	<code>java -jar translator.jar problemFile.eprime parameterFile.param</code>
+</center>
+<br>
+which will generate a Minion input file (stored in the same directory as the parameter file)  
+that is named after the parameter file with an additional .minion extension. For more
+information type<br>
+<br>
+<center>
+	<code>java -jar translator.jar -help</code>
+</center>
 
 
 <hr>

@@ -252,7 +252,11 @@ public class Translator {
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 				(new StringReader(problemString)) );
 			this.problemSpecification = (EssenceSpecification) parser.parse().value;
-			
+		    
+                        this.parser = new EssencePrimeParser(new EssencePrimeLexer
+					 					(new StringReader(parameterString)) );
+			this.parameterSpecification = (EssenceSpecification) parser.parse().value;
+
 			// ---- 2. then normalise the essence' problem model
 			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
 			this.normalisedModel = this.normaliser.normalise(NormaliserSpecification.NORMALISE_FULL);

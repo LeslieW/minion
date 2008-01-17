@@ -26,12 +26,16 @@ public class Translate {
 	 */
 	public static void main(String[] args) {
 	
-		if(args.length == 0)
+		if(args.length == 0) {
+			printHelpMessage();
 			startGuiVersion();
-		
-		else if(args.length == 1)
-			translate(args[0]);
-		
+		}
+
+		else if(args.length == 1) {
+	                if(args[0].endsWith("help"))
+			     printHelpMessage();
+			else translate(args[0]);
+		}
 		else if(args.length == 2)
 			translate(args[0], args[1]);
 		
@@ -75,7 +79,7 @@ public class Translate {
 	    			                new Minion()); 
 			String minionString = translator.getTargetSolverInstance();
 			File outputFile = writeStringIntoFile(filename+".minion", minionString);
-			System.out.println("Translated '"+filename+"' to Minion and written output into '"+outputFile.getName()+"'.\n");
+			System.out.println("Translated '"+filename+"' to Minion and written output into '"+outputFile.getAbsolutePath()+"'.\n");
 	    	
 		} catch(Exception e) {
 			e.printStackTrace(System.out);
@@ -97,9 +101,9 @@ public class Translate {
 	    			                new Minion()); 
 			String minionString = translator.getTargetSolverInstance();
 			
-			File outputFile = writeStringIntoFile(problemFileName+".minion", minionString);
+			File outputFile = writeStringIntoFile(parameterFileName+".minion", minionString);
 			System.out.println("Translated '"+problemFileName+"' and '"+parameterFileName+
-					"' to Minion and written output into '"+outputFile.getName()+"'.\n");
+					"' to Minion and written output into '"+outputFile.getAbsolutePath()+"'.\n");
 	    	
 		} catch(Exception e) {
 			e.printStackTrace(System.out);
@@ -114,6 +118,8 @@ public class Translate {
 		System.out.println("Usage: java -jar translator.jar [options]");
 		System.out.println("If no options are given, the graphical translator version is started.\n");
 		System.out.println("Available options are:");
+		System.out.println("help or -help");
+		System.out.println("\tprints this help message");
 		System.out.println("filename.eprime");
 		System.out.println("\tEssence' problem specification: Translates 'filename.eprime' to Minion input format");
 		System.out.println("filename.eprime filename.param\n\tEssence' problem and parameter specification:");
