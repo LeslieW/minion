@@ -11,26 +11,16 @@ Scanner generator jflex[3], both released under GPL[4].
 
 
 
-1. Compiling the Essence' Translator
-------------------------------------
-The Translator is written in Java, so you will need a current version
-of Java (1.5) for compilation.
-Run the script compile.sh on the root directory. Use build.sh if you
-additionally want to rebuild the Essence'-parser (for which you will
-need jflex[2] and Java-Cup[3] installed).
-
-
-
-2. Running the Essence' Translator
+1. Running the Essence' Translator
 ----------------------------------
 To start the graphical translator version, change to the root
 directory of the translator and type the command:
 
-java translator.Translate
+java -jar translator.jar
 
 
 
-3. Documentation
+2. Documentation
 ----------------
 Documentation can be found at /doc/index.html, that contains links to several 
 Essence' examples, the Essence' grammar specification, the Minion manual 
@@ -38,19 +28,19 @@ and the translator API.
 
 
 
-4. Essence' examples
+3. Essence' examples
 --------------------
-4.1 Problem Samples
+3.1 Problem Samples
 Several problem samples can be found in the /problems directory. All problem
 samples are documented.
 
-4.2 Test Instances
+3.2 Test Instances
 A large amount of test instances can be found in the /test directory. It also
 contains a directory of generated Minion files. 
 
 
 
-5. Limitations and Known Bugs
+4. Limitations and Known Bugs
 -----------------------------
 The translator is still under development, so there are some limitations. 
 The following is not supported yet:
@@ -59,7 +49,6 @@ The following is not supported yet:
 - absolute value
 - power with decision variable as exponent
 - element constraint on 2-dimensional arrays
-- sparse domains
 
 Please report bugs to andrea@cs.st-andrews.ac.uk
 
