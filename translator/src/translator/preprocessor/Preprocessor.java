@@ -8,6 +8,7 @@ import translator.minionModel.MinionException;
 
 import translator.conjureEssenceSpecification.*;
 
+import translator.normaliser.*;
 
 /** 
  *  The Preprocessor preprocesses relevant (solver-independent) information from the 
@@ -90,7 +91,7 @@ public class Preprocessor implements PreprocessorGlobals {
      * @throws PreprocessorException
      */
     public Preprocessor (EssenceSpecification syntaxTreeProblem, EssenceSpecification syntaxTreeParameters)
-		throws PreprocessorException {
+		throws PreprocessorException, NormaliserException {
 	
  
     	parameters = new HashMap<String,Constant> ();
@@ -142,8 +143,71 @@ public class Preprocessor implements PreprocessorGlobals {
     	
        	//print_message("Starting processing constraints...");
     	// insert parameters, evaluate constraints and store them in a list
+    	
+    	
+    	// START new stuff
+    	
+    	// let's assume we have no parameters
+    	ExpressionMapper expressionMapper = new ExpressionMapper(this.decisionVariables, 
+    			                                                 new HashMap<String,Domain>());
+    	
+    	ArrayList<translator.expression.Expression> constraintList = new ArrayList<translator.expression.Expression>();
+
+    	print_debug("Amount of Constraints: "+syntaxTreeProblem.getExpressions().length);
+
+    	for(int i=0; i<syntaxTreeProblem.getExpressions().length; i++) {
+    		//print_debug("About to map expression:"+this.constraints.get(i));
+    		//constraintList.add(expressionMapper.mapExpression(this.constraints.get(i)));
+    		
+    		print_debug("About to map expression:"+syntaxTreeProblem.getExpressions()[i]);
+    		constraintList.add(expressionMapper.mapExpression(syntaxTreeProblem.getExpressions()[i]));
+    	}
+    
+    	
+    	print_debug("Amount of Constraints: "+constraintList.size());
+    	
+    	print_debug("Mapped constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		print_debug(i+": "+constraintList.get(i));
+    	}
+    	
+    	print_debug("About to order constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		constraintList.get(i).orderExpression();
+    	}
+    	
+    	print_debug("Ordered constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		print_debug(i+": "+constraintList.get(i));
+    	}
+    	
+    	print_debug("About to evaluate constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		constraintList.add(i,constraintList.remove(i).evaluate());
+    	}
+    	
+    	print_debug("Evaluated constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		print_debug(i+": "+constraintList.get(i));
+    	}
+    	
+    	print_debug("About to merge constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		constraintList.add(i,constraintList.remove(i).merge());
+    	}
+    	
+    	print_debug("Merged constraints.");
+    	for(int i=0; i<constraintList.size(); i++) {
+    		print_debug(i+": "+constraintList.get(i));
+    	}
+    	
+    	// END new stuff
+    	
+    	/** just for testing new structure
     	preprocessConstraints(syntaxTreeProblem.getExpressions());
-       	//print_message("Finished processing constraints...");
+       	
+    	
+    	//print_message("Finished processing constraints...");
     	
        	print_debug("Constraint expressions: ");
        	for(int i=0; i<constraints.size(); i++)
@@ -156,10 +220,12 @@ public class Preprocessor implements PreprocessorGlobals {
     	
  
     	// is still under construction
-    	//orderConstraints();
-    	//print_debug("ORDERED Constraint expressions: ");
-       	//for(int i=0; i<constraints.size(); i++)
-       	//	print_debug(i+": "+constraints.get(i));
+    	orderConstraints();
+    	print_debug("ORDERED Constraint expressions: ");
+       	for(int i=0; i<constraints.size(); i++)
+       		print_debug(i+": "+constraints.get(i));
+       		
+       	*/
     		
     }
   
@@ -196,7 +262,7 @@ public class Preprocessor implements PreprocessorGlobals {
     	
     	// order each constraint separately
     	for(int i=0; i<constraints.size(); i++ ) {
-    		Expression orderedConstraint = constraintOrderer.orderExpression(constraints.remove(i));
+    		Expression orderedConstraint = constraintOrderer.orderExpression(constraints.remove(i), false);
     		constraints.add(i, orderedConstraint);
     		constraintOrderer.expressionBuffer.clear();
     		print_debug("****************  ordered constraint: "+orderedConstraint);

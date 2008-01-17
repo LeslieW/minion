@@ -1,0 +1,32 @@
+ESSENCE' 1.0
+
+given n : int
+given p : int
+given c : int
+
+
+$$$ code to move along a sequence of 7 steps... 
+
+find SokPosn : matrix indexed by [int(1..n)] of int(1..n)
+find CratePosn : matrix indexed by [int(1..n)] of int(1..n)
+
+such that
+
+$ initial positions of the porter and the crate
+
+SokPosn[1] = p,
+CratePosn[1] = c,
+
+forall i : int(1..5) .
+
+SokPosn[i+1] = SokPosn[i] + 1,
+
+forall i : int(1..5) .
+
+((SokPosn[i+1] = CratePosn[i]) \/ (CratePosn[i+1] = CratePosn[i])),
+
+forall i : int(4..4) .
+
+(SokPosn[i+1] = CratePosn[i]) => (CratePosn[i+1] = (CratePosn[i] + 1))
+$=> (CratePosn[i+1] = (CratePosn[i] + 1))
+

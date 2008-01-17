@@ -12,6 +12,8 @@ public class BinaryExpression {
 	Expression expleft;
 	Expression expright;
 	
+	
+	
 	public BinaryOperator getOperator(){
 		return biop;
 	}
@@ -42,6 +44,9 @@ public class BinaryExpression {
 		biop = b;
 		expright = er;
 	}
+	
+	
+	
 	
 	public String toString(){
 		return " "+expleft.toString()+" " + biop.toString() + " "+expright.toString()+" ";

@@ -32,6 +32,7 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 	/** buffers certain expressions during the ordering of binary expressions */
 	protected ArrayList<Expression> expressionBuffer;
 	
+	private ArrayList<Expression> minusExpressions;
 	
 	
 	//private ArrayList<Expression> constraints;
@@ -53,7 +54,7 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 	 * @param constraint
 	 * @return
 	 */
-	public Expression orderExpression(Expression constraint) 
+	public Expression orderExpression(Expression constraint, boolean isNested) 
 		throws PreprocessorException {
 		
 		print_debug("====== I WILL ORDER THIS EXPRESSION:"+constraint);
@@ -68,13 +69,13 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 		
 		case EssenceGlobals.UNITOP_EXPR:
 			return new Expression( new UnaryExpression(constraint.getUnaryExpression().getRestrictionMode(),
-					              orderExpression(constraint.getUnaryExpression().getExpression()))
+					              orderExpression(constraint.getUnaryExpression().getExpression(),true))
 					               );		
 		case EssenceGlobals.BINARYOP_EXPR:
-			return orderBinaryExpression(constraint.getBinaryExpression());
+			return orderBinaryExpression(constraint.getBinaryExpression(), isNested);
 		
 		case EssenceGlobals.BRACKET_EXPR:
-			return new Expression(orderExpression(constraint.getExpression()));
+			return new Expression(orderExpression(constraint.getExpression(),isNested));
 			
 		case EssenceGlobals.FUNCTIONOP_EXPR:
 			return constraint;
@@ -87,7 +88,10 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 			
 			return new Expression(new QuantificationExpression(constraint.getQuantification().getQuantifier(),
 					                                           constraint.getQuantification().getBindingExpression(),
-					                                           orderExpression(constraint.getQuantification().getExpression())
+					                                           orderExpression(constraint.getQuantification().getExpression(),
+					                                        		   (constraint.getQuantification().getQuantifier().getRestrictionMode() ==
+					                                        			   EssenceGlobals.EXISTS) ?
+					                                        					   true : (false || isNested)  )
 					                                           ));
 		default:
 			throw new PreprocessorException("Unknow expression type or unsupported ordering for expression:"+constraint);
@@ -106,49 +110,60 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 	 * @param expression
 	 * @return
 	 */
-	protected Expression orderBinaryExpression(BinaryExpression expression) 
+	protected Expression orderBinaryExpression(BinaryExpression expression, boolean isNested) 
 		throws PreprocessorException {
 		
 		int operator = expression.getOperator().getRestrictionMode();
 		print_debug("ORDERING binary expression '"+expression+"' with operator: "+expression.getOperator());
 		
+		
 
+		// this does not work! building the expressions should be done at the ending!
+		// (when we reached the top-layer)
+		// we cant do it globally because we need to order nested expressions (that might
+		// contain + or - as well) and get mixed up. Needs to be reimplemented ARRRRGGGGH
 		if(operator == EssenceGlobals.MINUS) {
 			ArrayList<Expression> plusList = addRightMinusPart(expression.getRightExpression(), new ArrayList<Expression>());
 			print_debug("Did the right part thing. Have +list:"+plusList+", and -list:"+this.expressionBuffer);
 			
 			// copy the expressionBuffer in case it needs to be reused
-			ArrayList<Expression> minusExpressions = new ArrayList<Expression>();
-			for(int i=0; i<this.expressionBuffer.size(); i++)
-				minusExpressions.add(this.expressionBuffer.remove(i));
+			minusExpressions = new ArrayList<Expression>();
+			while(expressionBuffer.size() > 0) {
+				minusExpressions.add(this.expressionBuffer.remove(0));
+			}
 			
+			plusList = addLeftMinusPart(orderExpression(expression.getLeftExpression(), true), plusList);
+			// updating the copy of the expressionBuffer in case it needs to be reused
+			while(expressionBuffer.size() > 0) {
+				minusExpressions.add(this.expressionBuffer.remove(0));
+			}
 			
-			plusList = addLeftMinusPart(orderExpression(expression.getLeftExpression()), plusList);
-		
+			print_debug("Before building the expression. Have +list:"+plusList+", and -list:"+minusExpressions);
 			
 			Expression orderedPlusExpression = buildExpressionFromList(plusList, EssenceGlobals.PLUS);
 			Expression orderedMinusExpression = buildExpressionFromList(orderExpressionList(minusExpressions),
 					                                                    EssenceGlobals.MINUS);
 			
 			//this.expressionBuffer.clear();
-			print_debug("ORDER MINUS expression: "+new Expression(new BinaryExpression(orderedPlusExpression,
+			print_debug("Just ORDERED the MINUS expression: "+new Expression(new BinaryExpression(orderedPlusExpression,
 					 							       new BinaryOperator(EssenceGlobals.MINUS),
 					                                   orderedMinusExpression)));
+			print_debug("After ordering the MINUS expression. Have +list:"+plusList+", and -list:"+this.expressionBuffer);
 			return new Expression(new BinaryExpression(orderedPlusExpression,
 					 							       new BinaryOperator(EssenceGlobals.MINUS),
 					                                   orderedMinusExpression));
 		}
 		else if(!isCommutative(operator)) {
 			return new Expression(new BinaryExpression(
-					                 orderExpression(expression.getLeftExpression()),
+					                 orderExpression(expression.getLeftExpression(), true),
 					                  expression.getOperator(),
-					                  orderExpression(expression.getRightExpression())));
+					                  orderExpression(expression.getRightExpression(), true)));
 		}
 		
 		else if(isNonAssociative(operator)) {
 			ArrayList<Expression> orderedExpressions = new ArrayList<Expression>();
-			orderedExpressions.add(orderExpression(expression.getLeftExpression()));
-			orderedExpressions.add(orderExpression(expression.getRightExpression()));
+			orderedExpressions.add(orderExpression(expression.getLeftExpression(), true));
+			orderedExpressions.add(orderExpression(expression.getRightExpression(), true));
 			
 			orderedExpressions = orderExpressionList(orderedExpressions);
 			return new Expression(new BinaryExpression(
@@ -306,6 +321,8 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 		
 		Expression expression = null;
 		
+		print_debug("Building expression from expressionList: "+expressionList);
+		
 		if(expressionList.size() > 1) { // at least 2 elements left
 			return new Expression(new BinaryExpression(expressionList.remove(0),
 				                               new BinaryOperator(operator),
@@ -424,13 +441,13 @@ public class ConstraintOrdering implements PreprocessorGlobals {
 		if(currentOperator == operator) {
 			
 			if(leftExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR) 
-				expressionList = collectExpressionsToBeOrdered(orderExpression(leftExpression).getBinaryExpression(), operator, expressionList);
-			else expressionList.add(orderExpression(leftExpression));
+				expressionList = collectExpressionsToBeOrdered(orderExpression(leftExpression,true).getBinaryExpression(), operator, expressionList);
+			else expressionList.add(orderExpression(leftExpression, true));
 			
 			
 			if(rightExpression.getRestrictionMode() == EssenceGlobals.BINARYOP_EXPR)
-				expressionList = collectExpressionsToBeOrdered(orderExpression(rightExpression).getBinaryExpression(), operator, expressionList);
-			else expressionList.add(orderExpression(rightExpression));			
+				expressionList = collectExpressionsToBeOrdered(orderExpression(rightExpression, true).getBinaryExpression(), operator, expressionList);
+			else expressionList.add(orderExpression(rightExpression, true));			
 		}
 		
 		

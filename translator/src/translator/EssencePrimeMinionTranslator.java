@@ -26,9 +26,11 @@ public class EssencePrimeMinionTranslator extends EssencePrimeTranslator impleme
     	  //  ArrayList<Expression> constraints;
 	super(problemFile, parametersFile);
 		       
-	translator = new MinionModelTranslator(decisionVariables, decisionVariablesNames, constraints, objective, parameterArrays);
+	/** just for testing new structure
+	 * translator = new MinionModelTranslator(decisionVariables, decisionVariablesNames, constraints, objective, parameterArrays);
 	useWatchedLiterals = minionModel.USE_WATCHED_LITERALS;
 	useDiscreteVariables = minionModel.USE_DISCRETE_VARIABLES;
+	*/
     }
 
     

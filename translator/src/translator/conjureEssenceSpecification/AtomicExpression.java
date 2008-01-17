@@ -15,6 +15,10 @@ public class AtomicExpression implements EssenceGlobals {
 	private String identifier;
 	private Domain domain;
 	
+	private AuxiliaryVariable auxVariable;
+	
+	
+	
 	public int getRestrictionMode(){
 		return restriction_mode;
 	}
@@ -30,6 +34,12 @@ public class AtomicExpression implements EssenceGlobals {
 	public Domain getDomain(){
 		return domain;
 	}
+	
+	public AuxiliaryVariable getAuxiliaryVariable() {
+		return this.auxVariable;
+	}
+
+	
 	/*public void setRestrictionMode(int rm){
 		restriction_mode = rm;
 	}
@@ -62,19 +72,25 @@ public class AtomicExpression implements EssenceGlobals {
     }
 	
     public AtomicExpression (int i){
-	restriction_mode = NUMBER;
-	number = i;
+    	restriction_mode = NUMBER;
+    	number = i;
     }
     
     public AtomicExpression (boolean b){
-	restriction_mode = BOOLEAN;
-	bool = b;
+    	restriction_mode = BOOLEAN;
+    	bool = b;
     }
 	
     public AtomicExpression (String i){
-	restriction_mode = IDENTIFIER;
-	identifier = i;
+    	restriction_mode = IDENTIFIER;
+    	identifier = i;
     }
+    
+    public AtomicExpression(AuxiliaryVariable auxiliaryVariable) {
+    	this.auxVariable = auxiliaryVariable;
+    	this.restriction_mode = AUX_VARIABLE;
+    }
+    
     /**
      * 
      * @param i - restriction_mode<br/>&nbsp&nbsp&nbsp
@@ -93,9 +109,12 @@ public class AtomicExpression implements EssenceGlobals {
 	
     	switch(restriction_mode){
 		
-    	case NUMBER: output += toStringNumber();break;
-    	case BOOLEAN: {output += toStringBoolean();break;}
+    	/*case NUMBER: output += toStringNumber();break;
+    	case BOOLEAN: {output += toStringBoolean();break;} */
+    	case BOOLEAN: return this.bool+"";
+    	case NUMBER: return this.number+"";
     	case IDENTIFIER: output += identifier.toString();break;
+    	case AUX_VARIABLE: return auxVariable.toString();
     	case ATOMIC_SET_DOMAIN: output += toStringBracket();break;
     	case ATOMIC_MULTISET_DOMAIN: output += toStringHash();break;
 	    
@@ -103,12 +122,12 @@ public class AtomicExpression implements EssenceGlobals {
     	return output;
     }
     
-    private String toStringNumber(){		
+    /*private String toStringNumber(){		
 	return number + " ";
     }
     private String toStringBoolean(){		
 	return bool + " ";
-    }
+    }*/
     private String toStringBracket(){		
 	return "{ } : " + domain.toString() + " ";
     }

@@ -130,6 +130,8 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
 		if(args[0].endsWith("gui")) {
 			TranslatorFrame guiVersion = new TranslatorFrame();
 		}
+		else if(args.length == 1)
+			printWrongArgumentsErrorMsg();
 		else {
 		
 	    if(args.length >= 3) {
@@ -155,12 +157,14 @@ public abstract class EssencePrimeTranslator implements TranslatorGlobals {
 	    print_message(WELCOME_MESSAGE);
 
 	    EssencePrimeMinionTranslator translator = new EssencePrimeMinionTranslator(args[0], args[1]) ;
-	    String minionOutput = translator.translate(parameters) ;
+	    
+	    /** just for testing new structure
+	     * String minionOutput = translator.translate(parameters) ;
 	    print_message("Translation Successful") ;
 	    
-	    // write output into file
+	     write output into file
 	    writeOutputIntoFile(minionOutput);  
-	    print_message("Output written into "+outputFileName) ;		
+	    print_message("Output written into "+outputFileName) ; **/		
 	    
 		}
 	}

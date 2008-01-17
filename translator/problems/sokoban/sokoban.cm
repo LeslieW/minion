@@ -12,7 +12,11 @@ $ cell. These crates are to be moved into designated target positions
 $ by a porter. The number of target positions and the number of crates
 $ should be the same. The crates cannot be pulled and can be pushed 
 $ only one at a time. Thus at a time, a cell may be empty, occupied by 
-$ the porter, a packet, a target position or a part of the warehouse wall. 
+$ the porter, a packet, a target position or a part of the warehouse
+$ wall. 
+$
+$ by Geetha Ramachandran
+$ geetha.ramachandran@gmail.com
 
 ESSENCE' 1.0 
 

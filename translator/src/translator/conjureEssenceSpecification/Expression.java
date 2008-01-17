@@ -22,6 +22,8 @@ public class Expression implements EssenceGlobals {
     FunctionExpression functionop;
     QuantificationExpression quantifierop;
     LexExpression lexExpression;
+    LinearExpression linearExpression;
+    
     
     public int getRestrictionMode(){
 	return restriction_mode;
@@ -56,6 +58,11 @@ public class Expression implements EssenceGlobals {
     	return this.lexExpression;
     }
     
+    
+    public LinearExpression getLinearExpression() {
+    	return this.linearExpression;
+    }
+    
     public Expression copy() {
 	switch(this.getRestrictionMode()) {
 	    
@@ -82,6 +89,9 @@ public class Expression implements EssenceGlobals {
 		
 	case EssenceGlobals.BRACKET_EXPR:
 		return new Expression(this.exp.copy());
+		
+	case EssenceGlobals.LINEAR_EXPR:
+		return new Expression(this.linearExpression.copy());
 		
 	default:
 	    return null;
@@ -158,6 +168,11 @@ public class Expression implements EssenceGlobals {
 		lexExpression = e;
 	}
 	
+	public Expression(LinearExpression e) {
+		this.restriction_mode = LINEAR_EXPR;
+		this.linearExpression = e;
+	}
+	
 	public String toString() {
 		
 		switch(restriction_mode){
@@ -170,6 +185,7 @@ public class Expression implements EssenceGlobals {
 		case FUNCTIONOP_EXPR : return functionop.toString();
 		case QUANTIFIER_EXPR : return quantifierop.toString();
 		case LEX_EXPR: return lexExpression.toString();
+		case LINEAR_EXPR: return this.linearExpression.toString();
 		}		
 		return "";
 	}
