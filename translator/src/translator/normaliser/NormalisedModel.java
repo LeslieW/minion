@@ -93,6 +93,10 @@ public class NormalisedModel {
 		this.auxiliaryVariables.add(variable);
 	}
 	
+	public ArrayList<Variable> getAuxVariables() {
+		return this.auxiliaryVariables;
+	}
+	
 	public String toString() {
 		
 		// header

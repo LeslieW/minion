@@ -14,6 +14,11 @@ public class Sum extends NaryArithmeticExpression {
 		
 		this.positiveArguments = positiveArguments;
 		this.negativeArguments = negativeArguments;
+		
+		if(this.positiveArguments == null)
+			this.positiveArguments = new ArrayList<Expression>();
+		if(this.negativeArguments == null)
+			this.negativeArguments = new ArrayList<Expression>();
 	}
 	
 	

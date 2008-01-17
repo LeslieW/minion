@@ -319,36 +319,165 @@ public class Flattener {
 	}
 	
 	
+	/**
+	 * Given 2 expressions, leftExpression and rightExpression, both applied to the binary
+	 * arithmetic operator 'operator', flatten them and return the auxiliary variable
+	 * that represents the whole expression. For instance, given
+	 * (a,+,b) which represents 'a+b', flatten the expression by introducing an auxiliary
+	 * variable aux: 'aux = a+b' and return 'aux' since it represents the expression.
+	 * 
+	 * The method checks for common subexpressions.
+	 * 
+	 * @param leftExpression
+	 * @param operator
+	 * @param rightExpression
+	 * @return
+	 * @throws TailorException
+	 */
+	private ArithmeticAtomExpression createAndFlattenBinarySumConstraint(Expression leftExpression,
+			                                                             int operator,
+			                                                             Expression rightExpression)
+		throws TailorException {
+		
+		
+		System.out.println("flattening expression:"+leftExpression+" "+operator+" "+rightExpression);
+		
+		switch(operator) {
+		
+		case Expression.PLUS: 
+			// leftExpression + rightExpression
+			Variable auxVariablePlus = null;
+			if(hasCommonSubExpression(new NonCommutativeArithmeticBinaryExpression(leftExpression, Expression.PLUS, rightExpression))) {
+				auxVariablePlus = getCommonSubExpression(new NonCommutativeArithmeticBinaryExpression(leftExpression, 
+																												Expression.PLUS, 
+																												rightExpression));
+			}
+			else {
+				int lowerBound = leftExpression.getDomain()[0] + rightExpression.getDomain()[0];
+				int upperBound = leftExpression.getDomain()[1] + rightExpression.getDomain()[1];
+				auxVariablePlus = createAuxVariable(lowerBound,upperBound);
+				
+				this.subExpressions.put(new NonCommutativeArithmeticBinaryExpression(leftExpression, Expression.PLUS, rightExpression), 
+						                auxVariablePlus);
+			}
+			ArithmeticAtomExpression auxVarPlus = new ArithmeticAtomExpression(auxVariablePlus);
+			SumConstraint sumConstraint = new SumConstraint(new Expression[] {leftExpression, rightExpression},
+																								new Expression[0],
+																								Expression.EQ,
+																								auxVarPlus,
+																								true); // result is on left side 
+		    this.constraintBuffer.add(sumConstraint);
+		    return auxVarPlus;
+		
+		    
+		    
+		case Expression.MINUS:
+			// leftExpression - rightExpression
+			Variable auxVariableMinus = null;
+			if(hasCommonSubExpression(new NonCommutativeArithmeticBinaryExpression(leftExpression, Expression.MINUS, rightExpression))) {
+				auxVariablePlus = getCommonSubExpression(new NonCommutativeArithmeticBinaryExpression(leftExpression, 
+																													Expression.MINUS, 
+																													rightExpression));
+			}
+			else {
+				int lb = 0;
+				int ub = 0;
+				if(leftExpression instanceof UnaryMinus) {
+					lb = -leftExpression.getDomain()[1] - rightExpression.getDomain()[1];
+					ub = -leftExpression.getDomain()[0] - rightExpression.getDomain()[0];
+				}
+				else { 
+					lb = leftExpression.getDomain()[0] - rightExpression.getDomain()[1];
+					ub = leftExpression.getDomain()[1] - rightExpression.getDomain()[0];
+				}
+				auxVariablePlus = createAuxVariable(lb,ub);
+					
+				this.subExpressions.put(new NonCommutativeArithmeticBinaryExpression(leftExpression, Expression.MINUS, rightExpression), 
+							                auxVariablePlus);
+			}
+			ArithmeticAtomExpression auxVarMinus = new ArithmeticAtomExpression(auxVariablePlus);
+	
+			SumConstraint sumConstraintMinus = new SumConstraint(new Expression[] {leftExpression},
+																new Expression[] {rightExpression},
+																Expression.EQ,
+																auxVariableMinus,
+																true); // result is on left side
+			this.constraintBuffer.add(sumConstraintMinus);
+			return auxVarMinus;
+			
+
+		case Expression.MULT:
+			// leftExpression * rightExpression
+			Variable auxVariableMult = null;
+			if(hasCommonSubExpression(new NonCommutativeArithmeticBinaryExpression(leftExpression, Expression.MULT, rightExpression))) {
+				auxVariableMult = getCommonSubExpression(new NonCommutativeArithmeticBinaryExpression(leftExpression, 
+																												Expression.MULT, 
+																												rightExpression));
+			}
+			else {
+				int lowerBound = leftExpression.getDomain()[0] * rightExpression.getDomain()[0];
+				int upperBound = leftExpression.getDomain()[1] * rightExpression.getDomain()[1];
+				auxVariableMult = createAuxVariable(lowerBound,upperBound);
+				
+				this.subExpressions.put(new NonCommutativeArithmeticBinaryExpression(leftExpression, Expression.MULT, rightExpression), 
+						                auxVariableMult);
+			}
+			ArithmeticAtomExpression auxVarMult = new ArithmeticAtomExpression(auxVariableMult);
+			ProductConstraint prodConstraint = new ProductConstraint(new Expression[] {leftExpression, rightExpression},
+																     auxVarMult);
+		    this.constraintBuffer.add(prodConstraint);
+		    return auxVarMult;
+					
+			
+			
+		}
+		
+		throw new TailorException("Cannot create sum or product constraint from operator:"+operator);
+	}
+	
+	/**
+	 * This method can flatten any expressions that are combined with the operators 
+	 * =,- and *.
+	 * 
+	 * 
+	 * @param arguments
+	 * @param auxVariable
+	 * @param operator
+	 * @return
+	 * @throws TailorException
+	 */
 	private Expression flattenArithmeticNaryToBinaryExpression(ArrayList<Expression> arguments, 
 																Expression auxVariable, 
 																int operator) 
 		throws TailorException {
 		
 		// if the disjunction/conjunction only has 1 element, it has to hold
-		if(arguments.size() == 1 && auxVariable == null)
+		if(arguments.size() == 1 && auxVariable == null) {
 			return arguments.remove(0);
+		}
 		
 		// get the 2 expressions we are building the conjunction from
-		Expression rightExpression = arguments.remove(0);
 		Expression leftExpression = null;
 		if(auxVariable != null)
 			leftExpression = auxVariable;
 		else leftExpression = arguments.remove(0);
 		
+		Expression rightExpression = arguments.remove(0);
+		
 		// the last 2 elements, just return a conjunction of them
 		if(arguments.size() == 0) {
-			return new CommutativeBinaryRelationalExpression(rightExpression, operator, leftExpression);
+			return new NonCommutativeArithmeticBinaryExpression(leftExpression, operator, rightExpression);
 		}
-		else {// check if this is OK TODO!!
-			CommutativeBinaryRelationalExpression binConjunction = new CommutativeBinaryRelationalExpression(leftExpression,
-																										operator,
-																										rightExpression);
-			RelationalAtomExpression auxVariable2 = reifyConstraint(binConjunction);
-			return flattenRelationalNaryToBinaryCommutativeExpressions(arguments, auxVariable2, operator);
+		else {
+			ArithmeticAtomExpression auxVariable2 = createAndFlattenBinarySumConstraint(leftExpression,
+																						operator,
+																						rightExpression);
+			return flattenArithmeticNaryToBinaryExpression(arguments, auxVariable2, operator);
 		}
 		
 		
 	}
+	
 	
 	/**
 	 * Flatten an n-ary relational expression to a binary one (recursivly). For example, consider a conjunction 
@@ -385,7 +514,7 @@ public class Flattener {
 		
 		// the last 2 elements, just return a conjunction of them
 		if(arguments.size() == 0) {
-			return new CommutativeBinaryRelationalExpression(rightExpression, operator, leftExpression);
+			return new CommutativeBinaryRelationalExpression(leftExpression, operator, rightExpression);
 		}
 		else {
 			CommutativeBinaryRelationalExpression binConjunction = new CommutativeBinaryRelationalExpression(leftExpression,
@@ -792,6 +921,7 @@ public class Flattener {
 		boolean leftSideIsSum = (leftExpression instanceof Sum);
 		boolean rightSideIsSum = (rightExpression instanceof Sum);
 		
+	
 		
 		if(leftSideIsSum && rightSideIsSum) {
 			return flattenEqualityOfTwoSums((Sum) leftExpression, 
@@ -1036,7 +1166,7 @@ public class Flattener {
 	}
 	
 	/**
-	 * Creates a sum constraint, fiven a Sum expression and a result. Both subexpressions
+	 * Creates a sum constraint, given a Sum expression and a result. Both subexpressions
 	 * are flattened before creating the sum.
 	 * 
 	 * @param sum
@@ -1051,6 +1181,40 @@ public class Flattener {
 											  Expression sumResult, 
 											  boolean resultIsOnLeftSide)
 		throws TailorException {
+		
+		
+		if(!this.targetSolver.supportsConstraint(getNaryConstraintVariantOf(relationalOperator))) {
+			Expression sumExpression = flattenSum(sum);
+			
+			// commutative
+			if(relationalOperator == Expression.EQ || relationalOperator == Expression.NEQ) {
+				if(sumExpression instanceof NonCommutativeArithmeticBinaryExpression) {
+					NonCommutativeArithmeticBinaryExpression binExpression = (NonCommutativeArithmeticBinaryExpression) sumExpression;
+					if(binExpression.getType() == Expression.PLUS) {
+						return  new SumConstraint(new Expression[] {binExpression.getLeftArgument(), binExpression.getRightArgument()},
+																	new Expression[0],
+																	relationalOperator,
+																	sumResult,
+																	true);
+						
+					}
+					else return  new SumConstraint(new Expression[] {binExpression.getLeftArgument()},
+							new Expression[] {binExpression.getRightArgument()},
+							relationalOperator,
+							sumResult,
+							true);
+				}// is not non-commutative -> what else?
+				else {
+					
+				}
+					
+			}
+			// non-commutative
+			else {
+				
+			}
+				
+		}
 		
 		Expression[] positiveArguments = new Expression[0];
 		Expression[] negativeArguments = new Expression[0];
@@ -1119,6 +1283,14 @@ public class Flattener {
 	}
 	
 	
+	/**
+	 * Flatten a sum: in case there are no n-ary sum constraints available, flatten
+	 * them down to a set of binary sum constraints
+	 * 
+	 * @param sum
+	 * @return
+	 * @throws TailorException
+	 */
 	private Expression flattenSum(Sum sum) 
 		throws TailorException {
 		
@@ -1131,21 +1303,81 @@ public class Flattener {
 			for(int i=0;i<positiveArguments.size(); i++)
 				positiveArguments.add(i, flattenExpression(positiveArguments.remove(i)));
 			
-			if(sum.isGonnaBeReified()) 
-				return reifyConstraint(sum);
+			
+			if(sum.isGonnaBeReified()) {
+				Variable auxVariable = createAuxVariable(sum.getDomain()[0], sum.getDomain()[1]);
+				if(hasCommonSubExpression(sum)) {
+					Variable auxVar = getCommonSubExpression(sum);
+					return auxVar;
+				}
+				else {
+					ArithmeticAtomExpression auxAtom = new ArithmeticAtomExpression(auxVariable);
+					SumConstraint sumConstraint = createSumConstraint(sum,
+						                                          Expression.EQ,
+						                                          auxAtom,
+						                                          true);
+					this.subExpressions.put(sum,auxVariable);
+					this.constraintBuffer.add(sumConstraint);
+					return auxAtom; 
+				}
+			}
 			else return sum;
 		}
 		else {
-			Expression plusConstraint = flattenRelationalNaryToBinaryCommutativeExpressions(sum.getPositiveArguments(),
+			System.out.println("Solver DOES NOT support n-ary sum constraint. translating:"+sum);
+			Expression plusConstraint = flattenArithmeticNaryToBinaryExpression(sum.getPositiveArguments(),
 																		null,
 																		Expression.PLUS);
-			Expression finalConstraint = flattenRelationalNaryToBinaryCommutativeExpressions(sum.getNegativeArguments(),
-					 													plusConstraint,
+			if(sum.getNegativeArguments().size() == 0) {
+				if(sum.isGonnaBeReified()) {
+					if(plusConstraint instanceof ArithmeticAtomExpression)
+						return plusConstraint;
+					else {
+						NonCommutativeArithmeticBinaryExpression e = (NonCommutativeArithmeticBinaryExpression) plusConstraint;
+						if(hasCommonSubExpression(e)) {
+							return getCommonSubExpression(e);
+						}
+						else return createAndFlattenBinarySumConstraint(e.getLeftArgument(), 
+																e.getType(),
+																e.getRightArgument());
+					}
+				}
+				else return plusConstraint;
+			}
+			else { // we have negative arguments as well
+				ArithmeticAtomExpression plusPart = null;
+				if(hasCommonSubExpression(plusConstraint)){
+					plusPart = new ArithmeticAtomExpression(getCommonSubExpression(plusConstraint));
+				}
+				else {
+					Variable auxVar = createAuxVariable(plusConstraint.getDomain()[0], plusConstraint.getDomain()[1]);
+					this.subExpressions.put(plusConstraint,auxVar);
+					plusPart = new ArithmeticAtomExpression(auxVar);
+				}
+				// create aux variable
+				// create new sum constraint and then give the 
+				Expression finalConstraint = flattenArithmeticNaryToBinaryExpression(sum.getNegativeArguments(),
+					 													plusPart,
 					 													Expression.MINUS);
+				
+				if(sum.isGonnaBeReified()) {
+					if(finalConstraint instanceof ArithmeticAtomExpression)
+						return finalConstraint;
+					else {
+						NonCommutativeArithmeticBinaryExpression e = (NonCommutativeArithmeticBinaryExpression) finalConstraint;
+						if(hasCommonSubExpression(e)) {
+							return getCommonSubExpression(e);
+						}
+						else return createAndFlattenBinarySumConstraint(e.getLeftArgument(), 
+																e.getType(),
+																e.getRightArgument());
+					}
+				}
+				else return finalConstraint;
+			}
 			
 		}
 		
-		return sum;
 	}
 	
 	
@@ -1288,7 +1520,7 @@ public class Flattener {
 	 * @param reifiedVariable
 	 * @throws TailorException
 	 */
-	private void reifyConstraint(Expression constraint, Variable reifiedVariable) 
+	/*private void reifyConstraint(Expression constraint, Variable reifiedVariable) 
 		throws TailorException {
 		
 		if(!this.targetSolver.supportsReificationOf(constraint.getType()))
@@ -1300,7 +1532,7 @@ public class Flattener {
 		this.constraintBuffer.add(new Reification(constraint,
                 				  reifiedVariable));
 		
-	}
+	}*/
 	
 	/**
 	 * Create an auxiliary variable. It is added to the normalised model

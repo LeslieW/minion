@@ -90,6 +90,9 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		
 		case DIV: operator = "/";
 		case POWER: operator = "^";
+		case MINUS: operator ="-";
+		case PLUS: operator ="+";
+		case MULT: operator="*";
 		
 		}
 		return this.leftArgument+operator+this.rightArgument;

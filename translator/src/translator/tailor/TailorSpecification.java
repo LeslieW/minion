@@ -2,7 +2,8 @@ package translator.tailor;
 
 import translator.normaliser.NormalisedModel;
 //import translator.expression.Expression;
-
+import translator.tailor.minion.MinionException;
+import translator.solver.TargetSolver;
 /**
  * Gives a specification of tailors to solvers in general. Every tailor 
  * to new target solver has to implement the tailor
@@ -20,10 +21,10 @@ public interface TailorSpecification {
 	 * of the target solver input file. 
 	 *
 	 */
-	public String tailor(NormalisedModel normalisedModel) throws TailorException;
+	public String tailor(NormalisedModel normalisedModel) throws TailorException, MinionException;
 	
 
-	
+	public String tailor(NormalisedModel normalisedModel, TargetSolver solver) throws TailorException, MinionException;
 	//public String tailorExpression(Expression constraint) throws TailorException;
 
 	

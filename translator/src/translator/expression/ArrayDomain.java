@@ -75,4 +75,26 @@ public class ArrayDomain implements Domain {
 	public Domain[] getIndexDomains() {
 		return this.indexDomains;
 	}
+	
+	public int[] getIndexOffsetsFromZero() {
+		// we need the offset for every dimension
+		int[] offsetsFromZero = new int[this.indexDomains.length];
+		
+		for(int i=0; i<this.indexDomains.length; i++) {
+			Domain indexDomain = this.indexDomains[i];
+			if(indexDomain.isConstantDomain()) {
+				if(indexDomain instanceof BoolDomain)
+					offsetsFromZero[i] = 0;
+				else if(indexDomain instanceof IntRange)
+					offsetsFromZero[i] = ((IntRange) indexDomain).getRange()[0];
+				else if(indexDomain instanceof MultipleIntRange)
+					offsetsFromZero[i] = ((MultipleIntRange) indexDomain).getRange()[0];
+			
+			}
+			else return null; // we cannot throw an exception here
+			                  // we just don't know the offsets
+		}
+		
+		return offsetsFromZero;
+	}
 }
