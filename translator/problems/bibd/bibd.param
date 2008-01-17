@@ -1,6 +1,6 @@
 ESSENCE' 1.0
-letting b be 7
-letting v be 7
-letting r,k be 3
-letting l be 1
-letting n be 100
+param b be 7
+param v be 7
+param r,k be 3
+param l be 1
+param n be 100

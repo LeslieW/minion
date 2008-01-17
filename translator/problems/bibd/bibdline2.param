@@ -1,7 +1,7 @@
 ESSENCE' 1.0
-letting b be 210
-letting v be 7
-letting r be 90
-letting k be 3
-letting l be 30
-letting n be 1000
+param b be 210
+param v be 7
+param r be 90
+param k be 3
+param l be 30
+param n be 1000

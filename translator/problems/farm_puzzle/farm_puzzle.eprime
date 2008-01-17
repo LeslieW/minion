@@ -9,16 +9,8 @@ $ as soon as sparse domains are supported by the translator
 
 ESSENCE' 1.0
 letting numberOfLegs be 22
-letting FEET be domain int(2..4)
+letting FEET be domain int(2,4)
 find a1,a2,a3,a4,a5,a6,a7 : FEET 
 
 such that
-     (a1 + a2 + a3 + a4 + a5 + a6 + a7 = numberOfLegs) /\
-     (a1 != 3) /\ 
-     (a2 != 3) /\ 
-     (a3 != 3) /\ 
-     (a4 != 3) /\ 
-     (a5 != 3) /\ 
-     (a6 != 3) /\      
-     (a7 != 3)
-  
+     a1 + a2 + a3 + a4 + a5 + a6 + a7 = numberOfLegs 

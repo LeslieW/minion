@@ -1,9 +1,9 @@
 ESSENCE' 1.0
-letting b be 280
-letting v be 7
-letting r be 120
-letting k be 3
-letting l be 40
-letting n be 1000
+param b be 280
+param v be 7
+param r be 120
+param k be 3
+param l be 40
+param n be 1000
 
 
