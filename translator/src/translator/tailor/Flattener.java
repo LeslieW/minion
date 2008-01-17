@@ -10,7 +10,7 @@ import translator.normaliser.NormalisedModel;
 public class Flattener {
 
 	public final String AUXVARIABLE_NAME = "_aux";
-	
+	protected int noAuxVariables;
 	
 	/** the target solver we want to tailor the model to */
 	TargetSolver targetSolver;
@@ -31,6 +31,7 @@ public class Flattener {
 		this.normalisedModel = normalisedModel;
 		this.constraintBuffer = new ArrayList<Expression>();
 		this.subExpressions = new HashMap<Expression,Variable>();
+		this.noAuxVariables = 0;
 	}
 	
 	// ========== METHODS ================================
@@ -146,15 +147,18 @@ public class Flattener {
 		for(int i=arguments.size()-1; i>=0; i--)
 			arguments.add(i, flattenExpression(arguments.remove(i)));
 		
+		
+		
+		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
+		//        is supported by the target solver
 		if(this.targetSolver.supportsNaryDisjunction()) {
 			return disjunction;
 		}
-		// the solver does not support n-ary disjunction, we have to flatten it to binary
+		// 2. --- else the solver does not support n-ary disjunction, we have to flatten it to binary
 		else {
-			// TODO:!
+			return flattenNaryToBinaryExpressions(arguments,null,Expression.OR);
 		}
-		
-		return disjunction;
+	
 	}
 	
 	/**
@@ -188,28 +192,56 @@ public class Flattener {
 		}
 		// 2. ----else the solver does not support n-ary conjunction, we have to flatten it to binary
 		else {
-			// TODO:!
+			return flattenNaryToBinaryExpressions(arguments,null,Expression.AND);
 		}
-		return conjunction;
+
 	}
 	
-	
-/*	private Expression toBinaryConjunction(ArrayList<Expression> arguments) {
-
-		if(arguments.size() ==2) {
-			return new Conjunction(arguments);
-		}
-		else if(arguments.size() == 1)
-			return arguments.get(0);
+	/**
+	 * Flatten an n-ary relational expression to a binary one (recursivly). For example, consider a conjunction 
+	 * and(a,b,c,d) that represents a /\ b /\ c /\ d. This method flattens the 4-ary conjunction 
+	 * to a set of binary conjunctions (that are reified):
+	 * 
+	 * reify( and(a,b), aux1)         a /\ b == aux1
+	 * reify( and(aux1, c), aux2)    a /\ b /\ c == aux2
+	 * reify( aux2, d)               a /\ b /\ c /\ d == aux2 /\ d
+	 * 
+	 * This can be applied for any relational n-ary operator.
+	 * Initially the parameter "reifiedVariable" has to be null (since there has not been
+	 * any reification yet)! 
+	 * 
+	 * @param arguments
+	 * @param reifiedVariable
+	 * @param operator
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression flattenNaryToBinaryExpressions(ArrayList<Expression> arguments, Expression reifiedVariable, int operator) 
+	throws TailorException {
 		
-		else {
-			ArrayList<Expression> argsList = new ArrayList<Expression>();
-			argsList.add(arguments.remove(0));
-			argsList.add(toBinaryConjunction(arguments));
-			this.constraintBuffer.add(new Conjunction(argsList));
+		// if the disjunction/conjunction only has 1 element, it has to hold
+		if(arguments.size() == 1 && reifiedVariable == null)
+			return arguments.remove(0);
+		
+		// get the 2 expressions we are building the conjunction from
+		Expression leftExpression = arguments.remove(0);
+		Expression rightExpression = null;
+		if(reifiedVariable != null)
+			rightExpression = reifiedVariable;
+		else rightExpression = arguments.remove(0);
+		
+		// the last 2 elements, just return a conjunction of them
+		if(arguments.size() == 0) {
+			return new CommutativeBinaryRelationalExpression(leftExpression, operator, rightExpression);
 		}
-	}*/
-	
+		else {
+			CommutativeBinaryRelationalExpression binConjunction = new CommutativeBinaryRelationalExpression(leftExpression,
+																										operator,
+																										rightExpression);
+			RelationalAtomExpression auxVariable = reifyConstraint(binConjunction);
+			return flattenNaryToBinaryExpressions(arguments, auxVariable, operator);
+		}
+	}
 	
 	/**
 	 * Flatten unary expressions. Depending on if the expression will be reified and if it
@@ -495,9 +527,9 @@ public class Flattener {
 		Variable auxVariable = null;
 		
 		if(lb ==0 && ub == 1)
-			auxVariable = new SingleVariable(AUXVARIABLE_NAME,
+			auxVariable = new SingleVariable(AUXVARIABLE_NAME+noAuxVariables++,
 					                         new BoolDomain());
-		else auxVariable = new SingleVariable(AUXVARIABLE_NAME, 
+		else auxVariable = new SingleVariable(AUXVARIABLE_NAME+noAuxVariables++, 
 				                                  new BoundedIntRange(lb,ub));
 		
 		if(!this.targetSolver.willSearchOverAuxiliaryVariables())

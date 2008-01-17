@@ -75,6 +75,10 @@ public class NormalisedModel {
 	}
 	
 	
+	public ArrayList<String> getDecisionVariablesNames() {
+		return this.decisionVariablesNames;
+	}
+	
 	public ArrayList<Expression> getConstraints() {
 		return this.constraintList;
 	}

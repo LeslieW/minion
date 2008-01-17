@@ -314,7 +314,7 @@ public class ParameterInsertion {
 	    			declarations[i] = parameterDeclarations[i];
 	    	
 	       	for(int i=0; i< problemDeclarations.length; i++) 
-	    		declarations[i+parameterDeclarations.length] = problemDeclarations[i];
+	    		declarations[i+noParamDecl] = problemDeclarations[i];
 		
 		// 	collect parameters (given, where, letting)
 	    	collectParameterNames(declarations); 

@@ -74,6 +74,8 @@ public class CommutativeBinaryRelationalExpression implements
 		case IFF: operator = "<=>";break;
 		case EQ:  operator = "="; break;
 		case NEQ: operator = "!="; break;
+		case AND: operator = "/\\"; break;
+		case OR: operator = "\\/"; break;
 		}
 		
 		return this.leftArgument+operator+this.rightArgument;
@@ -121,6 +123,31 @@ public class CommutativeBinaryRelationalExpression implements
 			}
 			
 		}
+		else if(this.type == AND) {
+			if(leftArgument.getType() == BOOL) {
+				boolean leftConstant = ((RelationalAtomExpression) leftArgument).getBool();
+				return (leftConstant) ?
+					this.rightArgument : new RelationalAtomExpression(false);
+			}
+			else if(rightArgument.getType() == BOOL) {
+				boolean rightConstant = ((RelationalAtomExpression) rightArgument).getBool();
+				return (rightConstant) ?
+					this.leftArgument : new RelationalAtomExpression(false);
+			}
+		}
+		else if(this.type == OR) {
+			if(leftArgument.getType() == BOOL) {
+				boolean leftConstant = ((RelationalAtomExpression) leftArgument).getBool();
+				return (leftConstant) ?
+					new RelationalAtomExpression(true) : this.rightArgument;
+			}
+			else if(rightArgument.getType() == BOOL) {
+				boolean rightConstant = ((RelationalAtomExpression) rightArgument).getBool();
+				return (rightConstant) ?
+					new RelationalAtomExpression(true) : this.leftArgument;
+			}
+		}	
+			
 		
 		int leftConstant = -11111;
 		int rightConstant = -11111;
@@ -143,7 +170,8 @@ public class CommutativeBinaryRelationalExpression implements
 			case EQ: 	return new RelationalAtomExpression(leftConstant == rightConstant);
 			case NEQ: 	return new RelationalAtomExpression(leftConstant != rightConstant);
 			case IFF: return new RelationalAtomExpression(leftConstant == 1 &&  rightConstant ==1);
-
+			case AND: return new RelationalAtomExpression(leftConstant == 1 && rightConstant == 1);
+			case OR: return new RelationalAtomExpression(leftConstant == 1 || rightConstant == 1);
 			}
 				
 		}
