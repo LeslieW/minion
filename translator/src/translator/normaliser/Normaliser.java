@@ -177,11 +177,13 @@ public class Normaliser implements NormaliserSpecification {
 					this.parameterSpecification.getDeclarations() == null ||
 					  this.parameterSpecification.getDeclarations().length == 0)
 				this.expressionMapper =  new ExpressionMapper(decisionVariables, 
-					                                 	new HashMap<String, Domain> ());
+					                                 	new HashMap<String, Domain> (), 
+					                                 	this.parameterInserter.getParameters());
 			// if there have been parameters specified
 			else 
 				this.expressionMapper = new ExpressionMapper(decisionVariables, 
-						this.parameterInserter.getParameterDomainMap());
+						this.parameterInserter.getParameterDomainMap(), 
+						this.parameterInserter.getParameters());
 			
 			
 			ArrayList<Expression> newExpressionList = new ArrayList<Expression>();

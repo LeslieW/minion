@@ -4,6 +4,7 @@ public class AllDifferent implements UnaryRelationalExpression {
 
 	private Expression argument;
 	private boolean isNested;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	public AllDifferent(Expression argument) {
@@ -71,5 +72,13 @@ public class AllDifferent implements UnaryRelationalExpression {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 }

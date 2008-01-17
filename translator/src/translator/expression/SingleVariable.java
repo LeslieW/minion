@@ -9,6 +9,7 @@ public class SingleVariable implements Variable {
 	
 	private boolean isSearchVariable;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	
@@ -71,6 +72,10 @@ public class SingleVariable implements Variable {
 		return this.variableName;
 	}
 	
+	public String getVariableName() {
+		return this.variableName;
+	}
+	
 	public char isSmallerThanSameType(Expression e) {
 		
 		SingleVariable otherVariable = (SingleVariable) e;
@@ -107,6 +112,14 @@ public class SingleVariable implements Variable {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 	
 	

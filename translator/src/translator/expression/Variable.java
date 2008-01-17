@@ -17,4 +17,9 @@ public interface Variable extends Expression {
 	 */
 	public void setToSearchVariable(boolean isSearchVariable);
 	
+	
+	/**
+	 * @return the variable name of the corresponding variable
+	 */
+	public String getVariableName();
 }

@@ -19,6 +19,7 @@ public interface Domain {
 	public final int EXPR_SPARSE = 5;
 	public final int EXPR_MIXED = 6;
 	public final int IDENTIFIER = 7;
+	public final int ARRAY = 10;
 	
 	/**
 	 * Evaluate all the expressions in this domain. This concerns mainly

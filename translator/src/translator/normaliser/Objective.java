@@ -56,10 +56,12 @@ public class Objective {
 	
 	
 	public void normalise() {
+		if(this.objective != null) {
 		this.objective = this.objective.reduceExpressionTree();
 		this.objective = this.objective.evaluate();
 		this.objective = this.objective.reduceExpressionTree();
 		this.objective.orderExpression();
+		}
 	}
 	
 	protected void evaluate() {

@@ -16,6 +16,7 @@ public class RelationalAtomExpression implements
 	private Variable variable;
 	private boolean isParameter;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
    //============== Constructors ==================
 	
@@ -139,6 +140,14 @@ public class RelationalAtomExpression implements
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 	
 	

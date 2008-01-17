@@ -29,7 +29,8 @@ public interface TargetSolver {
 	public final char VARIABLE_ARRAY_INDEXING = 52;
 	
 	
-	// constraints stuff
+	// -------------- constraints stuff ----------------
+	// general
 	public final char NESTED_EXPRESSIONS = 69;
 	public final char NARY_CONJUNCTION = 70;
 	public final char NARY_DISJUNCTION = 71;
@@ -37,8 +38,16 @@ public interface TargetSolver {
 	public final char NARY_WEIGHTED_SUM = 73;
 	public final char NARY_MULTIPLICATION = 74;
 	
+	// nesting stuff
+	public final char UNNESTED_NEGATION = 75;
+	public final char REIFIED_ALLDIFFERENT = 76;
+	
+	// solving issues
+	public final char SEARCH_OVER_AUXILIARY_VARIABLES = 100;
+	
 	
 	// solver specific stuff
+	
 	
 	// ======= GENERAL STUFF ======================
 	
@@ -61,7 +70,8 @@ public interface TargetSolver {
 	public boolean supportsSearchStrategy(String strategy);
 	public String[] getBranchingStrategies();
 	public String[] getSearchStrategies();
-
+	public void setSearchOverAuxiliaryVariables(boolean turnOn);
+	public boolean willSearchOverAuxiliaryVariables();
 	
 	// ======== VARIABLE TYPES =====================
 	
@@ -76,9 +86,17 @@ public interface TargetSolver {
     public boolean supportsNarySum();
     public boolean supportsNaryMultiplication();
     public boolean supportsWeightedNarySum();
+    public boolean supportsUnnestedNegation();
+    
+    public boolean supportsReifiedAllDifferent();
+    
     
     // =============== CONSTRAINTS ==================
     
- 
+    
+    
+    
+    // ====== OTHER STUFF ===========================
+    public String toString();
     
 }

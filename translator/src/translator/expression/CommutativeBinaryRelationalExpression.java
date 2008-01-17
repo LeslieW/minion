@@ -9,6 +9,7 @@ public class CommutativeBinaryRelationalExpression implements
 	
 	private int type;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	
@@ -171,4 +172,11 @@ public class CommutativeBinaryRelationalExpression implements
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 }

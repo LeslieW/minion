@@ -18,7 +18,9 @@ public class QuantifiedSum implements ArithmeticExpression {
 	
 	private Domain domain;
 	private Expression quantifiedExpression;
+	
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	// =========== CONSTRUCTORS =============================
 	
@@ -85,6 +87,8 @@ public class QuantifiedSum implements ArithmeticExpression {
 	}
 
 	public void orderExpression() {
+		if(this.quantifiedExpression.getType() != EQ &&
+				this.quantifiedExpression.getType() != NEQ) 
 		this.quantifiedExpression.orderExpression();
 
 	}
@@ -115,6 +119,14 @@ public class QuantifiedSum implements ArithmeticExpression {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 	
 	

@@ -34,7 +34,7 @@ public interface Expression {
     //	 --------------------------------------------------------
 	// Unary Relational Expressions
 	public final int NEGATION = 31;
-	public final int ALLDIFFERENT = 33;
+	public final int ALLDIFFERENT = 220;
 	
 	
 	// unary arithmetic expressions
@@ -83,6 +83,11 @@ public interface Expression {
 	public final int Q_SUM = 201;
 	public final int FORALL = 202;
 	public final int EXISTS = 203;
+	
+	// Global Constraints
+	//public final int ALLDIFFERENT = 220;  => is defined above
+	public final int TABLE_CONSTRAINT = 221;
+	
 	
 	// --------------------------------------------------------
 	
@@ -209,4 +214,9 @@ public interface Expression {
 	 * Sets the expression to be not nested. By default, every expression is nested.
 	 */
 	public void setIsNotNested();
+	
+	
+	public  boolean isGonnaBeReified();
+	
+	public void willBeReified(boolean reified);
 }

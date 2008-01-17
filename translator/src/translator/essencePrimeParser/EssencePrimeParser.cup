@@ -114,10 +114,10 @@ non terminal given_block, where_block, letting_block, find_block;
 non terminal parameter_list, parameter, infinite_parameter_domain, domain_identifiers, identifier_list;
 non terminal domain, domain_list, range_atom_list, range_atom;
 non terminal expression, expression_list;
-non terminal atom_expression, deref_expression;
+non terminal atomic_expression, deref_expression, atom_expression;
 non terminal unitop_expression, binaryop_expression, lex_expression,  functionop_expression;
 non terminal quantifierop_expression, quantifier, binding_expression;
-non terminal table_constraint, constant_tuple_list, constant_tuple, integer_list;
+non terminal table_constraint, atom_list, constant_tuple_list, constant_tuple, integer_list;
 non terminal constant_list, constant;
 non terminal user_def_type, variable_list;
 
@@ -370,7 +370,7 @@ expression_list ::=  	  expression:e
 expression ::= 	  LPAREN expression:e RPAREN
 			{: RESULT = new Expression((Expression) e); :}
 
-	      	| atom_expression:ae
+	      	| atomic_expression:ae
 			{: RESULT = new Expression( (AtomicExpression) ae); :}
 
 		| deref_expression:de
@@ -396,7 +396,7 @@ expression ::= 	  LPAREN expression:e RPAREN
 ;
 
 
-atom_expression ::=   	  INTEGER:i 
+atomic_expression ::=   	  INTEGER:i 
 				{: 
 				  RESULT = new AtomicExpression(i); :}
 
@@ -422,6 +422,13 @@ deref_expression ::= 	expression:e LBRACK expression_list:e_list RBRACK
 								 e_array ); :}
 ;
 
+
+atom_expression ::= deref_expression:deref
+                     {: RESULT = new AtomExpression((NonAtomicExpression) deref); :} 
+
+                   | IDENTIFIER:id
+				     {: RESULT = new AtomExpression(new AtomicExpression(new String(id))); :}
+;
 
 unitop_expression ::= 	  MINUS expression:e 
 		           	{: RESULT = new UnaryExpression(EssenceGlobals.NEGATION, (Expression) e); :} 
@@ -573,12 +580,12 @@ binding_expression ::=	identifier_list:id_list COLON domain:d
 ;
 
 
-table_constraint ::= TABLE LPAREN LBRACK identifier_list:id_list RBRACK COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
+table_constraint ::= TABLE LPAREN LBRACK atom_list:a_list RBRACK COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
                    {:  
-                  	Object[] tmp = ((LinkedList) id_list).toArray();
-			        String[] id_array = new String[tmp.length];
+                  	Object[] tmp = ((LinkedList) a_list).toArray();
+			        AtomExpression[] id_array = new AtomExpression[tmp.length];
 			        for(int i=0;i<id_array.length;i++)
- 				          id_array[i] =  (String) tmp[i];                   
+ 				          id_array[i] =  (AtomExpression) tmp[i];                   
                    
                     Object[] tmp2 = ((LinkedList) t_list).toArray();
 			        ConstantTuple[] t_array = new ConstantTuple[tmp2.length];
@@ -590,6 +597,19 @@ table_constraint ::= TABLE LPAREN LBRACK identifier_list:id_list RBRACK COMMA LB
                    :}
 
 ;
+
+
+atom_list ::=    atom_expression:atom 
+               {: LinkedList list = new LinkedList();
+				  list.addFirst((AtomExpression) atom);
+				  RESULT = list; :}
+				  
+                 | atom_expression:atom COMMA atom_list:a_list 
+               {: ((LinkedList) a_list).addFirst((AtomExpression) atom); 
+				  RESULT = a_list; :}                 
+                      
+;                 
+
 
 constant_tuple_list ::= constant_tuple:c_tuple
                          {: LinkedList list = new LinkedList();

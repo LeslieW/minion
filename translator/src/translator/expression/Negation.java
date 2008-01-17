@@ -4,6 +4,7 @@ public class Negation implements UnaryRelationalExpression {
 
 	private Expression argument;
 	private boolean isNested;
+	private boolean willBeReified;
 	
 	//============== Constructors ==================
 	public Negation(Expression argument) {
@@ -75,6 +76,14 @@ public class Negation implements UnaryRelationalExpression {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 	
 }

@@ -4,6 +4,7 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 
 	private Expression argument;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	public UnaryMinus(Expression argument) {
@@ -88,6 +89,14 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 	
 }

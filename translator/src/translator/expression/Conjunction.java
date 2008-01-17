@@ -7,6 +7,7 @@ public class Conjunction extends NaryRelationalExpression {
 	
 	private ArrayList<Expression> conjointExpressions;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	
@@ -171,5 +172,12 @@ public class Conjunction extends NaryRelationalExpression {
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 }
 

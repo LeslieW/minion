@@ -4,6 +4,7 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 
 	private Expression argument;
 	boolean isNested;
+	boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	public AbsoluteValue(Expression argument) {
@@ -88,5 +89,13 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 }

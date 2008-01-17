@@ -16,6 +16,7 @@ public class NonCommutativeRelationalBinaryExpression implements
 	
 	private int type;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	public NonCommutativeRelationalBinaryExpression(Expression leftArgument,
@@ -182,5 +183,12 @@ public class NonCommutativeRelationalBinaryExpression implements
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 	
 }

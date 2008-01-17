@@ -28,4 +28,8 @@ public class ConstantTuple {
 		return s+">";
 	}
 	
+	public int[] getTupleElements() {
+		return this.tupleElements;
+	}
+	
 }

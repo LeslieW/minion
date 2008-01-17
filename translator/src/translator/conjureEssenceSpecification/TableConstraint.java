@@ -3,16 +3,9 @@ package translator.conjureEssenceSpecification;
 public class TableConstraint {
 
 	
-	String[] identifierList;
-	ConstantTuple[] tupleList;
-	
 	AtomExpression[] atomExpressionList;
+	ConstantTuple[] tupleList;
  	
-	public TableConstraint(String[] identifierList,
-			               ConstantTuple[] tupleList) {
-		this.identifierList = identifierList;
-		this.tupleList = tupleList;
-	}
 	
 	public TableConstraint(AtomExpression[] atomExpressions,
 			               ConstantTuple[]  tupleList) {
@@ -23,9 +16,9 @@ public class TableConstraint {
 	
 	public TableConstraint copy() {
 		
-		String[] copiedIdentifiers = new String[this.identifierList.length];
-		for(int i=0; i<this.identifierList.length; i++)
-			copiedIdentifiers[i] = new String(this.identifierList[i]);
+		AtomExpression[] copiedIdentifiers = new AtomExpression[this.atomExpressionList.length];
+		for(int i=0; i<this.atomExpressionList.length; i++)
+			copiedIdentifiers[i] = this.atomExpressionList[i].copy();
 		
 		ConstantTuple[] copiedTuples = new ConstantTuple[this.tupleList.length];
 		for(int i=0; i<this.tupleList.length; i++)
@@ -40,10 +33,10 @@ public class TableConstraint {
 	public String toString() {
 		String s = "table( [";
 		
-		if(this.identifierList.length >= 1)
-			s = s.concat(identifierList[0]);
-		for(int i=1; i<this.identifierList.length; i++)
-			s = s.concat(","+this.identifierList[i]);
+		if(this.atomExpressionList.length >= 1)
+			s = s.concat(atomExpressionList[0].toString());
+		for(int i=1; i<this.atomExpressionList.length; i++)
+			s = s.concat(","+this.atomExpressionList[i]);
 		
 		s = s.concat("], [");
 		
@@ -56,4 +49,11 @@ public class TableConstraint {
 	}
 	
 	
+	public AtomExpression[] getVariables() {
+		return this.atomExpressionList;
+	}
+	
+	public ConstantTuple[] getConstantTuples() {
+		return this.tupleList;
+	}
 }

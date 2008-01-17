@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import translator.expression.Domain;
 import translator.expression.Expression;
+import translator.expression.Variable;
 
 public class NormalisedModel {
 
@@ -21,6 +22,9 @@ public class NormalisedModel {
 	/** the objective expression */
 	Objective objective;
 	
+	/** auxiliary variables */
+	ArrayList<Variable> auxiliaryVariables;
+	
 	//=============== CONSTRUCTORS ==================================
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
@@ -32,6 +36,7 @@ public class NormalisedModel {
 		this.decisionVariablesNames = decisionVariablesNames;
 		this.constraintList = constraints;
 		this.objective = objective;
+		this.auxiliaryVariables = new ArrayList<Variable>();
 
 	}
 	
@@ -46,6 +51,7 @@ public class NormalisedModel {
 		this.constraintList = constraints;
 		this.parameterArrays = parameterArrays;
 		this.objective = objective;
+		this.auxiliaryVariables = new ArrayList<Variable>();
 	}
 	 
 	// =============== METHODS =======================================
@@ -73,6 +79,10 @@ public class NormalisedModel {
 		return this.constraintList;
 	}
 	
+	
+	public void addAuxiliaryVariable(Variable variable) {
+		this.auxiliaryVariables.add(variable);
+	}
 	
 	public String toString() {
 		

@@ -34,13 +34,18 @@ public class ExpressionMapper {
 	/** A hashmap containing all parameters with their corresponding domains */
 	HashMap<String, translator.conjureEssenceSpecification.Domain> parameters;
 	
+	/** contains all the parameter arrays with their values */
+	Parameters parameterArrays;
+	
     String debug = "";
 	
 	public ExpressionMapper(HashMap<String,translator.conjureEssenceSpecification.Domain> decisionVariables,
-			                HashMap<String, translator.conjureEssenceSpecification.Domain> parameters) {
+			                HashMap<String, translator.conjureEssenceSpecification.Domain> parameters, 
+			                Parameters parameterArrays) {
 		
 		this.decisionVariables = decisionVariables;
 		this.parameters = parameters;
+		this.parameterArrays = parameterArrays;
 	}
 	
 	
@@ -82,7 +87,7 @@ public class ExpressionMapper {
 			return mapLexConstraint(oldExpression.getLexExpression());
 			
 		case EssenceGlobals.TABLE_CONSTRAINT:
-			;
+			return mapTableConstraint(oldExpression.getTableConstraint());
 			
 		default: 
 			throw new NormaliserException("Cannot map expression yet or unknown expression type:\n"+oldExpression);
@@ -90,16 +95,6 @@ public class ExpressionMapper {
 		}
 	}
 	
-	
-	
-	protected translator.expression.TableConstraint mapTableConstraint(translator.conjureEssenceSpecification.TableConstraint oldConstraint)
-	   throws NormaliserException {
-		
-		return new translator.expression.TableConstraint(oldConstraint)
-		
-		
-		return null;
-	}
 	
 	
 	/**
@@ -120,6 +115,35 @@ public class ExpressionMapper {
 		
 		else return new Objective();
 			
+	}
+	
+	
+	/**
+	 * Maps table constraints to the other representation used throughout the translation process.
+	 * @param oldConstraint
+	 * @return
+	 * @throws NormaliserException
+	 */
+	protected translator.expression.TableConstraint mapTableConstraint(translator.conjureEssenceSpecification.TableConstraint oldConstraint)
+	   throws NormaliserException {
+		
+		AtomExpression[] oldVariables = oldConstraint.getVariables();
+		translator.expression.Variable[] newVariables = new translator.expression.Variable[oldVariables.length];
+		for(int i=0; i<oldVariables.length; i++) 
+			newVariables[i] = 
+			                (oldVariables[i].getNonAtomicVariable() != null) ? 
+			                		((translator.expression.ArithmeticAtomExpression) mapExpression(
+			                				    new translator.conjureEssenceSpecification.Expression(oldVariables[i].getNonAtomicVariable()))).getVariable() :
+			                		((translator.expression.ArithmeticAtomExpression) mapExpression(
+			                					new translator.conjureEssenceSpecification.Expression(oldVariables[i].getAtomicVariable()))).getVariable();	
+		
+		
+		translator.expression.ConstantTuple[] newConstantTuples = new translator.expression.ConstantTuple[oldConstraint.getConstantTuples().length] ;
+		for(int i=0; i<newConstantTuples.length; i++)
+			newConstantTuples[i] = new translator.expression.ConstantTuple(oldConstraint.getConstantTuples()[i].getTupleElements());
+			                				    
+		return new translator.expression.TableConstraint(newVariables,
+				                                         newConstantTuples);
 	}
 	
 	
@@ -221,8 +245,30 @@ public class ExpressionMapper {
 		// ------------- matrix domain ----------------------------------------------------
 		// get the domain of the matrixElement
 		translator.conjureEssenceSpecification.Domain domain = this.decisionVariables.get(arrayName);
-		if(domain == null)
-			throw new NormaliserException("Unknown array element:"+oldArrayElement);
+		if(domain == null) { // in this case the array element is a parameter
+			if(this.parameterArrays.isParameterVector(arrayName) ||	
+			    this.parameterArrays.isParameterMatrix(arrayName) ||
+					this.parameterArrays.isParameterCube(arrayName) ) {
+				
+				BoundedIntRange paramDomain = new BoundedIntRange(translator.expression.Expression.LOWER_BOUND, 
+ 		               translator.expression.Expression.UPPER_BOUND);
+				
+				// map the expression indices
+				translator.conjureEssenceSpecification.Expression[] oldIndices = oldArrayElement.getExpressionList();
+				translator.expression.Expression[] newIndices = new translator.expression.Expression[oldIndices.length];
+				for(int i=0; i<oldIndices.length; i++)
+					newIndices[i] = mapExpression(oldIndices[i]);
+				
+				translator.expression.ArrayVariable parameter = new ArrayVariable(arrayName,
+						                                                          newIndices,
+						                                                          paramDomain);
+				
+				return new ArithmeticAtomExpression(parameter, true);					
+			}
+			else throw new NormaliserException("Unknown array element:"+oldArrayElement);
+			
+		}
+		
 		
 		// should we just map the base domain, or also the dimensions??
 		if(domain.getRestrictionMode() != EssenceGlobals.MATRIX_DOMAIN) 
@@ -583,7 +629,7 @@ public class ExpressionMapper {
 			return new translator.expression.IdentifierDomain(domain.getIdentifierDomain().getIdentifier());
 			
 		case EssenceGlobals.MATRIX_DOMAIN:
-			;// TODO:!
+			return mapMatrixDomain(domain.getMatrixDomain());
 			
 			
 		default: throw new NormaliserException("Unknown domain type '"+domain.toString()+ 
@@ -595,6 +641,24 @@ public class ExpressionMapper {
 	
 	}
 	
+	
+	/**
+	 * Maps matrix domains to their representaiton in the advanced domain representation
+	 * @param oldMatrixDomain
+	 * @return
+	 * @throws NormaliserException
+	 */
+	protected ArrayDomain mapMatrixDomain(MatrixDomain oldMatrixDomain) 
+		throws NormaliserException {
+		
+		translator.expression.Domain baseDomain = mapDomain(oldMatrixDomain.getRangeDomain());
+		translator.expression.Domain indexDomains[] = new translator.expression.Domain[oldMatrixDomain.getIndexDomains().length];
+		for(int i=0;i< indexDomains.length; i++) {
+			indexDomains[i] = mapDomain(oldMatrixDomain.getIndexDomains()[i]);
+		}
+		
+		return new ArrayDomain(baseDomain, indexDomains);
+	}
 	
 	/**
 	 * the integer domain must not purely consist of integer values.

@@ -7,6 +7,7 @@ public class Multiplication extends NaryArithmeticExpression {
 	
 	private ArrayList<Expression> arguments;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	// ==================== CONSTRUCTOR ====================
 	public Multiplication(ArrayList<Expression> arguments) {
@@ -167,5 +168,12 @@ public class Multiplication extends NaryArithmeticExpression {
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 	
 }

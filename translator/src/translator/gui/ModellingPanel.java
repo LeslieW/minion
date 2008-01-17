@@ -364,21 +364,16 @@ public class ModellingPanel extends JPanel  {
 
 			fileChooser.setDialogTitle("Choose "+type+" File");
 		    int returnVal = fileChooser.showOpenDialog(this);
-		   
-		    File file = fileChooser.getSelectedFile();
-		    String fileName = file.getPath();
-		    
 		    
 		    // TODO: write this into a text-area instead of printing it on out
 		    if(returnVal == JFileChooser.APPROVE_OPTION) {
+		    	  File file = fileChooser.getSelectedFile();
+				    String fileName = file.getPath();
+				    
 		    	if(command.endsWith(LOAD_PROBLEM))
 		    		writeOnMessageOutput("Loading problem file: " +fileName+"\n");
 		    	else if(command.endsWith(LOAD_PARAMETER))
-		    		writeOnMessageOutput("Loading parameter file: " +fileName+"\n");
-		    }
-		    else {
-	            output.append("Choosing file cancelled by user.\n");
-	        }
+		    		writeOnMessageOutput("Loading parameter file: " +fileName+"\n");		   
 			
 		    try {
 		    	BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -401,6 +396,11 @@ public class ModellingPanel extends JPanel  {
 		    	writeOnMessageOutput(e.getMessage());
 		    	return;
 		    }
+		    
+		    }
+		    else {
+	            this.messageOutput.append("Choosing file cancelled by user.\n");
+	        }
 		
 	}
 	

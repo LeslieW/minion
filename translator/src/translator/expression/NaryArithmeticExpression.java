@@ -7,6 +7,8 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 
 	//public ArrayList<Expression> getArguments();
 	private boolean isNested = true;
+	private boolean willBeReified = false;
+	
 // ==================== Additional Methods =====================
 	
 	/**
@@ -94,5 +96,14 @@ public abstract class NaryArithmeticExpression implements ArithmeticExpression {
 	public void setIsNotNested() {
 		this.isNested = false;
 	}
+	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
+	
 	
 }

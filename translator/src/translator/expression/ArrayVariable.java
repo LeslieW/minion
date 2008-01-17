@@ -20,7 +20,8 @@ public class ArrayVariable implements Variable {
 	
 	private Domain domain;
 	private boolean isSearchVariable;
-	private boolean isNested;
+	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	// ========== CONSTRUCTORS ==========================
 	
@@ -194,6 +195,22 @@ public class ArrayVariable implements Variable {
 	}
 	
 	
+	public String getVariableName() {
+		String s = this.arrayName+"[";
+		
+		if(this.intIndices!=null) {
+			s = s.concat(intIndices[0]+"");
+			for(int i=1; i<intIndices.length; i++)
+				s = s.concat(","+intIndices[i]);
+		}
+		else {
+			s = s.concat(exprIndices[0].toString());
+			for(int i=1; i<exprIndices.length; i++)
+				s = s.concat(","+exprIndices[i].toString());			
+		}
+		return s+"]";
+	}
+	
 	public Expression insertValueForVariable(int value, String variableName) {
 	
 		if(this.exprIndices != null) {
@@ -223,5 +240,34 @@ public class ArrayVariable implements Variable {
 	public void setIsNotNested() {
 		this.isNested = false;
 	}
+
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
+	
+	// ====================== OTHER METHODS ========================
+	
+	/**
+	 * @return the integer indices of the array element. if the indices are 
+	 * expressions then null is returned
+	 */
+	public int[] getIntegerIndices() {
+		return this.intIndices;
+	}
+	
+	/**
+	 * 
+	 * @return the Expression indices of the array element. if the indices are 
+	 * integers then null is returned
+	 */
+	public Expression[] getExpressionIndices() {
+		return this.exprIndices;
+	}
+	
+
 }

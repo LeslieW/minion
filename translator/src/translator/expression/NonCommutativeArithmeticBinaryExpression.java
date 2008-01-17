@@ -19,6 +19,8 @@ public class NonCommutativeArithmeticBinaryExpression implements
 	
 	private int type;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
+	
 	//============== Constructors ==================
 	
 	public NonCommutativeArithmeticBinaryExpression(Expression leftArgument,
@@ -143,6 +145,12 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return this;
 	}
 	
+	public Expression insertValueForVariable(int value, String variableName) {
+		this.leftArgument = this.leftArgument.insertValueForVariable(value, variableName);
+		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}
@@ -151,7 +159,13 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
 	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 	
 	//======================== ADDITIONAL METHODS ===============================
 	private int power(int base, int exponent) {
@@ -172,9 +186,6 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return result;
 	}
 	
-	public Expression insertValueForVariable(int value, String variableName) {
-		this.leftArgument = this.leftArgument.insertValueForVariable(value, variableName);
-		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
-		return this;
-	}
+
+	
 }

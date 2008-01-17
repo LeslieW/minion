@@ -1,29 +1,31 @@
 package translator.tailor;
 
+//import translator.expression.Expression;
 import translator.normaliser.NormalisedModel;
-import translator.expression.Expression;
+import translator.solver.TargetSolver;
 
-/**
- * Gives a specification of tailors to solvers in general. Every tailor 
- * to new target solver has to implement the tailor
- * 
- * @author andrea
- *
- */
+public class Tailor implements TailorSpecification {
 
-public interface Tailor {
-
+	NormalisedModel problemModel;
+	TargetSolver targetSolver;
 	
-	/**
-	 * Tailor the given normalised model into a String representation
-	 * of the target solver input file. 
-	 *
-	 */
-	public String tailor(NormalisedModel normalisedModel) throws TailorException;
 	
+	// =================== CONSTRUCTOR ========================
+	
+	public Tailor(NormalisedModel model,
+		          TargetSolver targetSolver) {
+		
+		this.problemModel = model;
+		this.targetSolver= targetSolver;
+	}
+	 
+	// ================== INHERITED METHODS ==================
+	
+	public String tailor(NormalisedModel normalisedModel)
+			throws TailorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-	
-	public String tailorExpression(Expression constraint) throws TailorException;
 
-	
 }

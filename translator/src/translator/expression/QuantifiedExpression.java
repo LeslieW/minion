@@ -11,6 +11,7 @@ public class QuantifiedExpression implements RelationalExpression {
 	private Domain domain;
 	private Expression quantifiedExpression;
 	private boolean isNested = true;
+	private boolean willBeReified = false;
 	
 	// ===================== CONSTRUCTORS =======================
 	
@@ -177,5 +178,12 @@ public class QuantifiedExpression implements RelationalExpression {
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 	
 }

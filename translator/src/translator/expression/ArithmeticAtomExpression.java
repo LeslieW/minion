@@ -8,6 +8,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	private int type;
 	private boolean isParameter;
 	private boolean isNested;
+	private boolean willBeReified = false;
 	
 	//============== Constructors ==================
 	
@@ -147,5 +148,12 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	
 	public void setIsNotNested() {
 		this.isNested = false;
+	}
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
 	}
 }

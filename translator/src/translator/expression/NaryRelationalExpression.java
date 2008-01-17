@@ -6,7 +6,7 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 
 	private ArrayList<Expression> conjointExpressions;
 	private boolean isNested = true;
-	
+	private boolean willBeReified = false;
 	
 	public ArrayList<Expression> getArguments() {
 		return this.conjointExpressions;
@@ -27,14 +27,14 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 		
 		ArrayList<Expression> orderedList = new ArrayList<Expression>();
 		
-		print_debug("About to order list:"+list+" with size:"+list.size());
+		//print_debug("About to order list:"+list+" with size:"+list.size());
 		
 		for(int i=0; i<list.size(); i++) {
-			print_debug("Inserting element "+list.get(i)+" into ordered list:"+orderedList);
+			//print_debug("Inserting element "+list.get(i)+" into ordered list:"+orderedList);
 			orderedList = insertIntoOrderedList(list.get(i), orderedList);
 		}
 		
-		print_debug("Ordered list:"+orderedList);
+		//print_debug("Ordered list:"+orderedList);
 		return orderedList;
 	}
 
@@ -66,7 +66,7 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 		
 			// if the element is smaller the element we are comparing to
 			if(otherElement.getType() > expression.getType()) {
-				print_debug("smaller element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
+				//print_debug("smaller element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
 				list.add(i,expression);
 				return list;
 			}
@@ -74,7 +74,7 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 			else if(otherElement.getType() == expression.getType()) {
 				char expressionRelation = expression.isSmallerThanSameType(otherElement);
 				if(expressionRelation == EQUAL || expressionRelation == SMALLER) {
-				    print_debug("smaller element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
+				    //print_debug("smaller element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
 					list.add(i,expression);
 					return list;
 				}		
@@ -82,7 +82,7 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 			}
 			// if the element is the most expensive one, add it to the end of the list 
 			else if(i == list.size()-1) {
-				print_debug("last element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
+				//print_debug("last element '"+expression+"' to put into ordered list: "+list+" at position:"+i);
 				list.add(expression);
 				return list;
 			}
@@ -107,5 +107,12 @@ public abstract class NaryRelationalExpression implements RelationalExpression {
 		this.isNested = false;
 	}
 	
+	public boolean isGonnaBeReified() {
+		return this.willBeReified;
+	}
+	
+	public void willBeReified(boolean reified) {
+		this.willBeReified = reified;
+	}
 	
 }
