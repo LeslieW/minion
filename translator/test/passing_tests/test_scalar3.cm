@@ -1,5 +1,0 @@
-ESSENCE' 1.0
-letting RANGE be domain int(1..10)
-find x : RANGE, y : RANGE, z : RANGE
-such that 
-     y*x + 5*y + 7*z = 0 

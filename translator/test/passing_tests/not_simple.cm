@@ -1,6 +1,0 @@
-ESSENCE' 1.0
-find a,b,c : bool
-such that
-     (a = !b) => c,
-     !(a = b) => c,
-     

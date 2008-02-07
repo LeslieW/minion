@@ -1,9 +1,0 @@
-ESSENCE' 1.0
-letting AMOUNT_QUEENS be domain int(1..n)
-find queens : matrix indexed by [ AMOUNT_QUEENS ] of AMOUNT_QUEENS
-such that   (alldifferent(queens)) 
-            /\  
-            (forall i,j : AMOUNT_QUEENS . 
-                (i != j) /\
-                 (-i + queens[i] != -j + queens[j]) /\
-                 (queens[i] + i != queens[j] + j) )

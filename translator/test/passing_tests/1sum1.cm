@@ -1,9 +1,0 @@
-ESSENCE' 1.0
-given n : int(1..20)
-letting INDEX be domain int(1..n)
-find xxx : matrix indexed by [INDEX] of INDEX, 
-   yyy : matrix indexed by [INDEX] of INDEX
-such that  sum i : INDEX . 
-			   xxx[i] + yyy[i] = 0
-
-

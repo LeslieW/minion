@@ -1,5 +1,0 @@
-ESSENCE' 1.0
-find a,b,c : bool
-such that
-  (a=1) => (a /\ b /\ c),
-  (b=0) => ((a \/ b \/ c) /\ (b \/ c) /\ (a \/ c))

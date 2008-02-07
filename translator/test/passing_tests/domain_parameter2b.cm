@@ -1,6 +1,0 @@
-ESSENCE' 1.0
-given n:int,m:int
-letting RANGE be domain int(1..n)
-letting A be domain int(m..20)
-find x:A, y:RANGE
-such that x < y

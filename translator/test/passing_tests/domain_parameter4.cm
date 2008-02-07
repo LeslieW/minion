@@ -1,8 +1,0 @@
-ESSENCE' 1.0
-given n:int,m:int,i:int
-letting RANGE be domain int(1..n)
-letting A be domain int(i..m)
-letting bbb be domain A
-find x:A, y:RANGE, z:bbb
-such that x < y, z < y, z != i
-

@@ -1,7 +1,0 @@
-ESSENCE' 1.0
-find a,b,c,d,e : bool
-such that
-     !a + b + !c + d >= e,
-     a + !b + c - d>= 0,
-     a * b + d*!e  = !c
-     

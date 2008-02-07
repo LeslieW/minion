@@ -1,5 +1,0 @@
-ESSENCE' 1.0
-given a:int
-letting a be 6
-find x:int(3..7),y:int(0..2)
-such that y != a

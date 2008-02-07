@@ -1,1 +1,0 @@
-javadoc -protected -subpackages minionModel conjureEssenceSpecification minionExpressionTranslator preprocessor -verbose -d ../doc/html java.util.HashMap java.util.ArrayList EssencePrimeMinionTranslator.java EssencePrimeTranslator.java MinionModelTranslator.java TranslatorGlobals.java
