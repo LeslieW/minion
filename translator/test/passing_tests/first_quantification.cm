@@ -1,0 +1,8 @@
+ESSENCE' 1.0
+given n_ticks : int(1..n)
+letting INDEX be domain int(1..n_ticks)
+find x:bool, y : bool, xxx : matrix indexed by [INDEX] of INDEX, 
+   yyy : matrix indexed by [INDEX] of INDEX
+minimising max(ruler)
+such that x =y,
+          forall i,j : INDEX . xxx[i] = yyy[j] + i

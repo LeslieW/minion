@@ -1,0 +1,7 @@
+ESSENCE' 1.0
+given a:int,b:int,c:int
+letting c be a-2*a
+letting b be a^c
+letting RANGE be domain int(1..b+1)
+find x:RANGE,y:RANGE
+such that x = a, y != b

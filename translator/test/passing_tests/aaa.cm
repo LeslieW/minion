@@ -1,0 +1,13 @@
+ESSENCE' 1.0
+given n,k : int(1..)
+
+find a,b,c : int(1..10)
+find x,y,z : int(1,2,4,5,8,9,11)
+
+minimising x+y-3+4
+
+such that
+
+a = b + c - n,
+
+x+y - 6 + n - z*k = 5

@@ -1,0 +1,4 @@
+ESSENCE' 1.0
+parameter n is 3
+parameter diagonal is [1,1,1]
+parameter abelian, rank3 is true

@@ -1,0 +1,5 @@
+ESSENCE' 1.0
+given box:matrix indexed by [bool] of int(1..4)
+find x:int(1) , y:bool , z:int(1..2)
+find ginze:matrix indexed by [bool] of bool
+such that x < 2

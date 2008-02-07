@@ -1,0 +1,6 @@
+ESSENCE' 1.0
+letting b be 3*a+2
+given a:int,b:int(1..2+3)
+letting RANGE be domain int(1..(b-2)+1*a)
+find x:RANGE,y:RANGE,z:int(a+1..b-1)
+such that x = a, y != b, z != (b*a)-a

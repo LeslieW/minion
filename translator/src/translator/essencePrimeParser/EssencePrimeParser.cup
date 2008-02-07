@@ -1,0 +1,1127 @@
+/*
+CUP Parser Generator Copyright Notice, License, and Disclaimer
+Copyright 1996-1999 by Scott Hudson, Frank Flannery, C. Scott Ananian
+
+Permission to use, copy, modify, and distribute this software and its
+ documentation for any purpose and without fee is hereby granted,
+ provided that the above copyright notice appear in all copies and
+ that both the copyright notice and this permission notice and
+ warranty disclaimer appear in supporting documentation, and that the
+ names of the authors or their employers not be used in advertising or
+ publicity pertaining to distribution of the software without
+ specific, written prior permission.
+
+The authors and their employers disclaim all warranties with regard to 
+this software, including all implied warranties of merchantability and 
+fitness. In no event shall the authors or their employers be liable
+for any special, indirect or consequential damages or any damages
+whatsoever resulting from loss of use, data or profits, whether in an 
+action of contract, negligence or other tortious action, arising out
+of or in connection with the use or performance of this software.
+This is an open source license. It is also GPL-Compatible (see entry 
+for "Standard ML of New Jersey"). The portions of CUP output which are
+ hard-coded into the CUP source code are (naturally) covered by this
+ same license, as is the CUP runtime code linked with the generated parser.
+
+Java is a trademark of Sun Microsystems, Inc. References to the Java
+ programming language in relation to JLex are not meant to imply that 
+Sun endorses this product. 
+*/
+
+package translator.essencePrimeParser;
+
+import translator.conjureEssenceSpecification.*;
+import java.util.LinkedList;
+
+
+parser code {:
+
+     public StringBuffer errorMessage = new StringBuffer("");
+
+    /* The reason for the error is passed into the method in the
+       String 'message'. */
+
+    public void report_error(String message, Object info)  {
+
+        StringBuffer m = new StringBuffer("Parse error:");
+
+
+        if (info instanceof java_cup.runtime.Symbol) {
+                java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                                m.append(" in line "+(s.left));
+                if (s.right >= 0)
+                        m.append(", column "+(s.right));
+            }
+        }
+        m.append(" : "+message);
+        //throw new Exception(m);
+        errorMessage = m;
+        System.err.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info)  {
+        report_error(message, info);
+        //System.exit(1);
+    }
+
+
+
+:};
+
+action code {:
+
+        public int errors_found = 0;
+       
+
+:}
+
+
+
+/* Terminals (tokens returned by scanner) */
+
+/* keywords */
+terminal	   ALLDIFF, ATLEAST, ATMOST;
+terminal       BE, BE_DOMAIN, BE_NEW_TYPE;
+terminal       ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL;
+terminal 	   GIVEN, HEADER, INT, LETTING, MATRIX_INDEXED_BY;
+terminal       IS, IS_DOMAIN;
+terminal	   MAXIMISING, MAX, MINIMISING, MIN, PARAM;
+terminal 	   OCCURRENCE, OF, SUCH_THAT, SUM, TABLE; 
+terminal       TRUE, WHERE;
+
+
+/* separators  */
+terminal	   LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK;
+terminal	   DOT, DOTDOT, COMMA, COLON, BAR;
+
+/* operators */
+terminal 	   EQ, NEQ, LESS, LEQ, GREATER, GEQ;
+terminal	   PLUS, MINUS, MULT, DIVISION, POWER, UMINUS;
+terminal 	   AND, OR, NOT, IF, IFF;
+terminal       LEXLESS, LEXGREATER, LEXLEQ, LEXGEQ;
+
+
+terminal String    IDENTIFIER;
+terminal Integer   INTEGER;
+
+
+
+/* Non-terminals */
+
+non terminal essencemodel, body;
+non terminal declarations, declaration_list, declaration, objective, constraint_block;
+non terminal given_block, where_block, parameter_block, letting_block, find_block;
+non terminal parameter_list, parameter, infinite_parameter_domain, domain_identifiers, identifier_list;
+non terminal domain, domain_list, range_atom_list, range_atom;
+non terminal expression, expression_list;
+non terminal atomic_expression, deref_expression, atom_expression;
+non terminal index, index_list;
+non terminal unitop_expression, binaryop_expression, lex_expression,  functionop_expression;
+non terminal quantifierop_expression, quantifier, binding_expression;
+non terminal table_constraint, atom_list, constant_tuple_list, constant_tuple, integer_list;
+non terminal constant_list, constant_vector_list, constant, constant_vector, constant_matrix;
+non terminal user_def_type, variable_list;
+
+
+
+
+/* Precedences (according to "The Syntax of ESSENCE" paper) 
+   the operators on top have the lowest precedence  */
+
+precedence right DOT;
+precedence nonassoc EQ, NEQ;
+precedence nonassoc LESS, LEQ, GREATER, GEQ, LEXLESS, LEXLEQ, LEXGEQ, LEXGREATER; 
+precedence left PLUS, MINUS;
+precedence left MULT, DIVISION;
+precedence left POWER;
+precedence right UMINUS;
+precedence left IFF;
+precedence left IF;
+precedence left OR;
+precedence left AND;
+precedence right NOT;
+precedence left LBRACK, RBRACK;
+precedence left LPAREN, RPAREN;
+precedence left COLON;
+precedence left COMMA;
+
+
+
+
+
+/* Essence' grammar */
+
+
+essencemodel ::= HEADER body:b
+		{: RESULT = (EssenceSpecification) b; :}
+		
+;
+
+
+body ::= 	declarations:d_list 
+	        objective:obj 
+            constraint_block:expr_list 
+
+         	{:  Object[] tmp1 = ((LinkedList) d_list).toArray();
+	            Declaration[] d_array = new Declaration[tmp1.length];
+		    for(int i=0;i<d_array.length;i++)
+ 				d_array[i] = (Declaration) tmp1[i];
+
+                    Object[] tmp2 = ((LinkedList) expr_list).toArray();	
+	            Expression[] expr_array = new Expression[tmp2.length];
+		    for(int i=0;i<expr_array.length;i++)
+ 				expr_array[i] = (Expression) tmp2[i];
+
+		 RESULT = new EssenceSpecification(d_array,
+						   (Objective)  obj,
+						   expr_array); :} 
+						   
+		    	
+		    			   
+ ;
+
+
+/* Declarations  */
+
+declarations ::=	 declaration_list:d 
+				{: RESULT = d; :} 	
+	
+			| /* epsilon */ 
+			  {:	  RESULT = new LinkedList(); :}
+;		
+
+
+declaration_list ::=      declaration:d
+				{: LinkedList list = new LinkedList();
+				   list.addFirst((Declaration) d); 
+				   RESULT = list; :}
+
+  			| declaration:d declaration_list:d_list
+				{: ((LinkedList) d_list).addFirst((Declaration) d);
+				  RESULT = d_list; :} 
+;
+ 
+
+declaration ::=  given_block:d
+		    {: RESULT = (Declaration) d; :}
+	
+	         | where_block:d
+		    {: RESULT = (Declaration)  d; :}
+
+	     | parameter_block:d 
+	        {: RESULT = (Declaration) d;  :}
+
+		 | letting_block:d
+		    {: RESULT = (Declaration) d; :}
+
+		 | find_block:d
+		    {: RESULT =(Declaration)  d; :}
+
+;
+	
+	
+
+ 
+ 
+given_block ::= GIVEN parameter_list:p_list 
+	        {:  Object[] tmp = ((LinkedList) p_list).toArray();	
+	            Parameter[] p_array = new Parameter[tmp.length];
+		    for(int i=0;i<p_array.length;i++)
+ 				p_array[i] = (Parameter) tmp[i];
+
+ 		    RESULT = new Declaration(p_array); :}
+
+;
+
+
+parameter_list ::= parameter:p
+			{: 
+			   LinkedList list = new LinkedList();
+			   list.addFirst(p); 
+			   RESULT = list; :}
+
+	           | parameter_list:p_list COMMA parameter:p
+			{: ((LinkedList) p_list).addFirst(p); 
+		            RESULT = p_list; :} 
+;
+
+
+parameter ::= 	domain_identifiers:di 
+			{: RESULT = new Parameter((DomainIdentifiers) di); :}
+		| IDENTIFIER:id ENUM LPAREN DOT DOT DOT RPAREN
+			{: RESULT = new Parameter(id); :}	
+		| identifier_list:id_list COLON infinite_parameter_domain:d 
+		    {:
+		      Object[] tmp = ((LinkedList) id_list).toArray();
+			  String[] id_array = new String[tmp.length];
+			  for(int i=0;i<id_array.length;i++)
+ 				id_array[i] = (String) tmp[i];
+		    
+		    RESULT = new Parameter(new DomainIdentifiers(id_array, (Domain) d)); :}                        			
+;
+
+
+infinite_parameter_domain ::= 
+                   INT LPAREN expression:e DOTDOT RPAREN
+                     {: 
+                        RESULT = new Domain(
+                                     new IntegerDomain(
+                                           new RangeAtom[] {new RangeAtom(EssenceGlobals.RANGE_EXPR_DOTS ,(Expression) e) } 
+                                 )); 
+                      :}
+                  | INT LPAREN DOTDOT expression:e RPAREN
+                   {: 
+                      RESULT = new Domain(new IntegerDomain(new RangeAtom[] {new RangeAtom(EssenceGlobals.RANGE_DOTS_EXPR ,(Expression) e) } )); :}
+                  |
+                    INT LPAREN RPAREN
+                     {: RESULT = new Domain(new IntegerDomain()); :} 
+                  |
+                     INT LPAREN DOTDOT RPAREN
+                     {: RESULT = new Domain(new IntegerDomain()); :} 
+                  |
+                   INT
+                     {: RESULT = new Domain(new IntegerDomain()); :} 
+;
+
+domain_identifiers ::= identifier_list:id_list COLON domain:d
+			{: 
+			  Object[] tmp = ((LinkedList) id_list).toArray();
+			  String[] id_array = new String[tmp.length];
+			  for(int i=0;i<id_array.length;i++)
+ 				id_array[i] = (String) tmp[i];
+
+			 RESULT = new DomainIdentifiers(id_array, (Domain) d); :}
+;
+
+
+identifier_list ::=	  IDENTIFIER:id
+				   {: 	
+			           LinkedList list = new LinkedList();
+				   list.addFirst(new String(id));
+				   RESULT = list; :}
+
+			| IDENTIFIER:id COMMA identifier_list:id_list
+				{: ((LinkedList) id_list).addFirst(new String(id)); 
+				    RESULT = id_list; :}
+;
+
+
+domain ::= 	LPAREN domain:d RPAREN	     
+			{: RESULT = (Domain) d; :}
+
+	      | IDENTIFIER:id
+			{: if(id.equals("bool")) 
+			     RESULT = new Domain();
+	                   else 
+			     RESULT = new Domain(new IdentifierDomain(new String(id) )); :}
+
+          
+          | INT LPAREN range_atom_list:ra_list RPAREN
+               	        {:  Object[] tmp = ((LinkedList) ra_list).toArray();	
+	        	    RangeAtom[] ra_array = new RangeAtom[tmp.length];
+			    for(int i=0;i<ra_array.length;i++)
+ 			   	 ra_array[i] = (RangeAtom) tmp[i];			  
+	  
+			   RESULT = new Domain(new IntegerDomain(ra_array)); :}			   
+
+
+	      | MATRIX_INDEXED_BY LBRACK domain_list:d_list RBRACK OF domain:d
+               	        {:  Object[] tmp = ((LinkedList) d_list).toArray();	
+	        	    Domain[] d_array = new Domain[tmp.length];
+			    for(int i=0;i<d_array.length;i++)
+ 			   	 d_array[i] = (Domain) tmp[i];
+
+	                   
+			    RESULT = new Domain(new MatrixDomain(d_array, (Domain) d) ); :}
+;
+
+
+domain_list ::= domain:d
+		   {: LinkedList list = new LinkedList();
+		      list.add(  d); 
+		      RESULT = list; :}
+
+              | domain_list:d_list COMMA domain:d
+		   {: ((LinkedList) d_list).add(  d); 
+		       RESULT = d_list; :}
+;
+
+
+range_atom_list ::= 	range_atom:ra
+				{: LinkedList list = new LinkedList();
+				   list.addFirst(  ra);
+				   RESULT = list; :}
+
+		      | range_atom:ra COMMA range_atom_list:ra_list
+				{: ((LinkedList) ra_list).addFirst(  ra); 
+				   RESULT = ra_list; :}
+;
+	
+
+range_atom	 ::= 	expression:e
+				{:  
+				RESULT = new RangeAtom(EssenceGlobals.RANGE_EXPR, (Expression) e); :} 
+
+		      | expression:e1 DOTDOT expression:e2
+				{: RESULT = new RangeAtom((Expression) e1, (Expression) e2); :} 
+;
+
+
+expression_list ::=  	  expression:e
+				{: LinkedList e_list = new LinkedList();	
+				   e_list.addFirst(e); 
+				   RESULT = e_list; :}
+
+			| expression:e COMMA expression_list:e_list
+				{: ((LinkedList) e_list).addFirst(e); 
+				   RESULT = e_list;:}
+;
+
+
+expression ::= 	  LPAREN expression:e RPAREN
+			{: RESULT = new Expression((Expression) e); :}
+ 			
+	      	| atomic_expression:ae
+			{: RESULT = new Expression( (AtomicExpression) ae); :}
+
+		| deref_expression:de
+			{: RESULT = new Expression( (NonAtomicExpression) de); :}
+
+		| unitop_expression:ue
+			{: RESULT = new Expression( (UnaryExpression) ue); :}
+	
+		| binaryop_expression:be
+			{: RESULT = new Expression( (BinaryExpression) be); :}
+
+		| functionop_expression:fe
+			{: RESULT = new Expression( (FunctionExpression) fe); :}
+
+		| quantifierop_expression:qe
+			{: RESULT = new Expression( (QuantificationExpression) qe); :}
+			
+		| lex_expression:le
+		    {: RESULT = new Expression((LexExpression) le);  :}
+		    
+		|  table_constraint:tab_constraint
+	        {: RESULT = new Expression((TableConstraint) tab_constraint);:}	
+	        
+	   
+	    | ATLEAST LPAREN expression:e1 COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN
+	       
+		{: 
+		   Object[] tmp1 = ((LinkedList) int_list1).toArray();
+		   int[] int_array1 = new int[tmp1.length];
+		   for(int i=0;i<int_array1.length;i++)
+ 				int_array1[i] = (Integer) tmp1[i];
+ 				          
+ 	       Object[] tmp2 = ((LinkedList) int_list2).toArray();
+		   int[] int_array2 = new int[tmp2.length];
+		   for(int i=0;i<int_array2.length;i++)
+ 				int_array2[i] = (Integer) tmp2[i];
+ 				
+		   RESULT = new Expression( new AtmostConstraint((Expression) e1,
+									                     int_array1,
+									                     int_array2,
+									                     false)); //isAtmost =false :}	
+
+
+		| ATMOST LPAREN expression:e1 COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN
+		{: 
+		   Object[] tmp1 = ((LinkedList) int_list1).toArray();
+		   int[] int_array1 = new int[tmp1.length];
+		   for(int i=0;i<int_array1.length;i++)
+ 				int_array1[i] = (Integer) tmp1[i];
+ 				          
+ 	       Object[] tmp2 = ((LinkedList) int_list2).toArray();
+		   int[] int_array2 = new int[tmp2.length];
+		   for(int i=0;i<int_array2.length;i++)
+ 				int_array2[i] = (Integer) tmp2[i];
+ 				
+		   RESULT = new Expression( new AtmostConstraint((Expression) e1,
+									                     int_array1,
+									                     int_array2,
+									                     true)); //isAtmost =true :}	
+ 
+;
+
+
+atomic_expression ::=   	  INTEGER:i 
+				{: 
+				  RESULT = new AtomicExpression(i); :}
+
+	        	| TRUE
+				{: RESULT = new AtomicExpression(true); :}
+
+			| FALSE 
+				{: RESULT = new AtomicExpression(false); :}
+
+			| IDENTIFIER:id
+				{: RESULT = new AtomicExpression(new String(id)); :}
+;
+
+
+deref_expression ::= 	IDENTIFIER:id LBRACK index_list:e_list RBRACK
+               	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
+	        	            Index[] e_array = new Index[tmp.length];
+			                for(int i=0;i<e_array.length;i++)
+ 			   	               e_array[i] = (Index) tmp[i];
+	
+			              RESULT = new NonAtomicExpression(new String(id),
+								                           e_array ); :}
+;
+
+
+index ::=      DOTDOT 
+               {: RESULT = new BoundedIndex(); :}
+               
+             | DOTDOT expression:e 
+               {: RESULT = new BoundedIndex( (Expression) e, false); :}
+               
+             | expression:e DOTDOT
+               {: RESULT = new BoundedIndex( (Expression) e, true); :}
+             
+             | expression:e1 DOTDOT expression:e2
+               {: RESULT = new BoundedIndex( (Expression) e1, (Expression) e2); :}
+             
+             | expression:e 
+               {: RESULT = new ExpressionIndex( (Expression) e); :}
+             
+             | LPAREN expression_list:e_list RPAREN
+               {: Object[] tmp = ((LinkedList) e_list).toArray();
+			      Expression[] e_array = new Expression[tmp.length];
+			      for(int i=0;i<e_array.length;i++)
+ 				      e_array[i] = (Expression) tmp[i];
+                  RESULT = new SparseIndex(e_array); :}
+;             
+
+
+index_list ::=   index:i 
+                 {: LinkedList e_list = new LinkedList();	
+				   e_list.addFirst(i); 
+				   RESULT = e_list;   :}
+				   
+                 |   index:i COMMA index_list:i_list 
+                 {: ((LinkedList) i_list).addFirst(i); 
+				   RESULT = i_list;  :}
+;                 
+
+
+atom_expression ::= deref_expression:deref
+                     {: RESULT = new AtomExpression((NonAtomicExpression) deref); :} 
+
+                   | IDENTIFIER:id
+				     {: RESULT = new AtomExpression(new AtomicExpression(new String(id))); :}
+;
+
+unitop_expression ::= 	  MINUS expression:e 
+		           	{: RESULT = new UnaryExpression(EssenceGlobals.NEGATION, (Expression) e); :} 
+	      		      	 %prec UMINUS   
+
+		        | BAR expression:e BAR
+				{: RESULT = new UnaryExpression(EssenceGlobals.ABS, (Expression) e); :}
+
+			| NOT expression:e
+				{: RESULT = new UnaryExpression(EssenceGlobals.NOT, (Expression) e); :}
+;
+
+
+binaryop_expression ::=  expression:e1 EQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.EQ), (Expression) e2); :}
+
+			| expression:e1 NEQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.NEQ), (Expression) e2); :}
+
+			| expression:e1 LESS expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.LESS), (Expression) e2); :}
+
+			| expression:e1 LEQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.LEQ), (Expression) e2); :}
+
+			| expression:e1 GREATER expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.GREATER), (Expression) e2); :}
+
+			| expression:e1 GEQ expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.GEQ), (Expression) e2); :}
+
+                        | expression:e1 PLUS expression:e2	
+			{: RESULT = new BinaryExpression(	
+			(Expression) e1, new BinaryOperator (EssenceGlobals.PLUS), (Expression) e2); :}
+
+			| expression:e1 MINUS expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.MINUS), (Expression) e2); :}
+
+			| expression:e1 MULT expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.MULT), (Expression) e2); :}
+
+			| expression:e1 DIVISION expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.DIVIDE), (Expression) e2); :}
+
+			| expression:e1 POWER expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.POWER), (Expression) e2); :}
+
+			| expression:e1 AND expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.AND), (Expression) e2); :}
+
+			| expression:e1 OR expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.OR), (Expression) e2); :}
+
+			| expression:e1 IF expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.IF), (Expression) e2); :}
+
+			| expression:e1 IFF expression:e2
+			{: RESULT = new BinaryExpression(
+			(Expression) e1, new BinaryOperator (EssenceGlobals.IFF), (Expression) e2); :}
+
+;
+
+
+
+functionop_expression ::= 	  ALLDIFF LPAREN expression:e RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.ALLDIFF, (Expression) e); :}
+
+			  	| MIN LPAREN expression:e RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.MIN, (Expression) e); :}
+
+				| MAX LPAREN expression:e RPAREN
+					{: RESULT = new FunctionExpression(EssenceGlobals.MAX, (Expression) e); :}
+
+	            | OCCURRENCE LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN 
+	                {: RESULT = new FunctionExpression(EssenceGlobals.OCCURRENCE,
+	                                                   (Expression) e1,
+	                                                   (Expression) e2,
+	                                                   (Expression) e3);   :}
+	                                                   
+	            | ELEMENT LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN
+	                {: RESULT = new FunctionExpression(EssenceGlobals.ELEMENT,
+	                									(Expression) e1,
+	                									(Expression) e2,
+	                									(Expression) e3);   
+	              :}	   									
+	           
+;
+
+
+
+
+lex_expression ::=   expression:e1  LEXLESS expression:e2 
+                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_LESS), (Expression) e2); :}
+                     | expression:e1  LEXGREATER expression:e2 
+                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_GREATER), (Expression) e2); :}
+                     | expression:e1  LEXLEQ expression:e2 
+                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_LEQ), (Expression) e2); :}
+                     | expression:e1  LEXGEQ expression:e2 
+                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_GEQ), (Expression) e2); :}
+;
+
+
+quantifierop_expression ::= quantifier:q binding_expression:bind_e DOT expression:e
+				{: RESULT = new QuantificationExpression((Quantifier) q, 
+								       (BindingExpression) bind_e, 
+								        (Expression) e); :}
+;
+
+
+quantifier ::=	  EXISTS
+			{: RESULT = new Quantifier(EssenceGlobals.EXISTS); :}	
+		| FORALL 
+			{: RESULT = new Quantifier(EssenceGlobals.FORALL); :}	
+		| SUM
+			{: RESULT = new Quantifier(EssenceGlobals.SUM); :}	
+;
+
+
+binding_expression ::=	identifier_list:id_list COLON domain:d
+               	        {:  Object[] tmp = ((LinkedList) id_list).toArray();	
+	        	    String[] id_array = new String[tmp.length];
+			    for(int i=0;i<id_array.length;i++)
+ 			   	 id_array[i] = (String) tmp[i];
+				 
+			    RESULT = new BindingExpression(new DomainIdentifiers(id_array,(Domain) d )); :}
+;
+
+
+table_constraint ::= TABLE LPAREN LBRACK atom_list:a_list RBRACK COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
+                   {:  
+                  	Object[] tmp = ((LinkedList) a_list).toArray();
+			        AtomExpression[] id_array = new AtomExpression[tmp.length];
+			        for(int i=0;i<id_array.length;i++)
+ 				          id_array[i] =  (AtomExpression) tmp[i];                   
+                   
+                    Object[] tmp2 = ((LinkedList) t_list).toArray();
+			        ConstantTuple[] t_array = new ConstantTuple[tmp2.length];
+			        for(int i=0;i<t_array.length;i++)
+ 				          t_array[i] =  (ConstantTuple) tmp2[i];        
+                   
+                   RESULT = new TableConstraint(id_array,
+                                                t_array);
+                   :}
+
+;
+
+
+
+
+atom_list ::=    atom_expression:atom 
+               {: LinkedList list = new LinkedList();
+				  list.addFirst((AtomExpression) atom);
+				  RESULT = list; :}
+				  
+                 | atom_expression:atom COMMA atom_list:a_list 
+               {: ((LinkedList) a_list).addFirst((AtomExpression) atom); 
+				  RESULT = a_list; :}                 
+                      
+;                 
+
+
+constant_tuple_list ::= constant_tuple:c_tuple
+                         {: LinkedList list = new LinkedList();
+				            list.addFirst((ConstantTuple) c_tuple);
+				            RESULT = list; :}
+
+                        | constant_tuple:c_tuple COMMA constant_tuple_list:t_list
+                        {: ((LinkedList) t_list).addFirst((ConstantTuple) c_tuple); 
+				            RESULT = t_list; :}
+;                        
+                        
+
+constant_tuple ::= LESS  integer_list:int_list GREATER
+                   {:
+                   	Object[] tmp = ((LinkedList) int_list).toArray();
+			        int[] int_array = new int[tmp.length];
+			        for(int i=0;i<int_array.length;i++)
+ 				          int_array[i] = (Integer) tmp[i];
+ 				          
+ 				    RESULT = new ConstantTuple(int_array);     
+                   :}
+;                   
+
+integer_list ::=  INTEGER:i 
+                 {: LinkedList list = new LinkedList();
+				    list.addFirst((Integer) i);
+				    RESULT = list;
+                 :}
+                 | MINUS INTEGER:i
+                 {: LinkedList list = new LinkedList();
+                    list.addFirst((Integer) (i-2*i));
+                    RESULT = list;
+                 :}
+                 
+                 | INTEGER:i COMMA  integer_list:int_list 
+                {: ((LinkedList) int_list).addFirst((Integer) i); 
+				    RESULT = int_list; 
+				 :}
+				 
+				  | MINUS INTEGER:i COMMA  integer_list:int_list 
+                {: ((LinkedList) int_list).addFirst((Integer) (i-2*i)); 
+				    RESULT = int_list; 
+				 :}
+;
+
+
+			
+where_block ::= WHERE expression_list:e_list 
+               	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
+	        	    Expression[] e_array = new Expression[tmp.length];
+			    for(int i=0;i<e_array.length;i++)
+ 			   	 e_array[i] = (Expression) tmp[i];
+
+			    RESULT = new Declaration (e_array);  :}
+;
+
+
+parameter_block ::=  PARAM constant_list:c_list
+                {:  Object[] tmp = ((LinkedList) c_list).toArray();	
+	        	    Constant[] c_array = new Constant[tmp.length];
+			    for(int i=0;i<c_array.length;i++)
+ 			   	 c_array[i] = (Constant) tmp[i];
+
+			    RESULT = new Declaration(c_array, true);  :}
+;
+
+
+letting_block ::= LETTING constant_list:c_list 
+               	        {:  Object[] tmp = ((LinkedList) c_list).toArray();	
+	        	    Constant[] c_array = new Constant[tmp.length];
+			    for(int i=0;i<c_array.length;i++)
+ 			   	 c_array[i] = (Constant) tmp[i];
+
+			    RESULT = new Declaration(c_array); :}
+;
+
+
+constant_list ::=   constant:clist 
+			{:   
+			   RESULT = clist; :}
+
+		  | constant:c_list COMMA constant_list:constant_list
+			{: for(int i=0; i<((LinkedList) c_list).size(); i++) {
+		            ((LinkedList) constant_list).add( ((LinkedList) c_list).get(i)) ; 
+                           }
+			    RESULT = c_list; :}
+;
+
+
+constant ::=	  identifier_list:id_list BE_DOMAIN domain:d 
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident = (String) identifier_list[i];
+                              constantList.add(new Constant(new DomainConstant(ident, (Domain) d))); 
+			   }   
+			   RESULT = constantList;    :}			      
+
+        | identifier_list:id_list IS_DOMAIN domain:d 
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident = (String) identifier_list[i];
+                              constantList.add(new Constant(new DomainConstant(ident, (Domain) d))); 
+			   }   
+			   RESULT = constantList;    :}			      
+
+
+
+		| identifier_list:id_list COLON domain:d BE expression:e
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident= (String) identifier_list[i];
+                              constantList.add(new Constant(new ExpressionConstant(ident, (Domain) d,(Expression) e))); 
+			   }   
+			   RESULT = constantList;    :}		
+			   
+			   
+	| identifier_list:id_list COLON domain:d BE constant_vector:vector 
+		 	{: 
+		 	   Object[] tmp = ((LinkedList) vector).toArray();
+			    int[] intVector = new int[tmp.length];
+			    for(int j=0; j<intVector.length; j++) {
+			           intVector[j] = (Integer) tmp[j];
+			    }     
+		 	
+		 	
+		 	   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident= (String) identifier_list[i];
+                  constantList.add(new Constant(new ExpressionConstant(ident, 
+                                                                       (Domain) d,
+                                                                       (ConstantArray) new ConstantVector(new String(ident), intVector) 
+                                                                      )
+                                                )
+                                   ); 
+			   }   
+			   RESULT = constantList;    :}		
+			   
+		| identifier_list:id_list COLON domain:d BE constant_matrix:matrixE
+		 	{: 
+		 	         Object[] tmp = (Object[]) matrixE;
+                      //System.out.println("Object[] erstellt aus da linked list...");
+                                       
+                     int[] vector0 = (int[]) tmp[0];
+                     //System.out.println("first part hinter mir");
+                     int[][] matrix = new int[tmp.length][vector0.length];
+                   
+                     for(int i=0; i<tmp.length; i++) {
+                     
+                        int[] vector = (int[]) tmp[i];
+                        
+                        if(vector.length != vector0.length) 
+                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
+                        
+                        for(int j=0; j<vector.length; j++)
+                           matrix[i][j] = (Integer) vector[j];
+                     
+                     }
+                      
+		 	
+		 	
+		 	   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident= (String) identifier_list[i];
+                  constantList.add(new Constant(new ExpressionConstant(ident, 
+                                                                       (Domain) d,
+                                                                       (ConstantArray) new ConstantMatrix(new String(ident), matrix) 
+                                                                      )
+                                                )
+                                   ); 
+			   }   
+			   RESULT = constantList;    :}			   			   
+			   
+		| identifier_list:id_list COLON domain:d IS expression:e
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident= (String) identifier_list[i];
+                              constantList.add(new Constant(new ExpressionConstant(ident, (Domain) d,(Expression) e))); 
+			   }   
+			   RESULT = constantList;    :}				   	      
+
+		| identifier_list:id_list BE expression:e
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident= (String) identifier_list[i];
+                              constantList.add(new Constant(new ExpressionConstant(ident, (Expression) e))); 
+			   }   
+			   RESULT = constantList;    :}		
+			   
+		| identifier_list:id_list IS expression:e
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String ident= (String) identifier_list[i];
+                              constantList.add(new Constant(new ExpressionConstant(ident, (Expression) e))); 
+			   }   
+			   RESULT = constantList;    :}			   	      
+
+
+		| identifier_list:id_list BE_NEW_TYPE user_def_type:t	
+		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];
+                              constantList.add(new Constant(new NewTypeConstant(id, (Type) t))); 
+			   }   
+			   RESULT = constantList;    :}			      
+			   
+		| identifier_list:id_list BE constant_vector:vector 
+		    {:  
+		        Object[] tmp = ((LinkedList) vector).toArray();
+			    int[] intVector = new int[tmp.length];
+			    for(int j=0; j<intVector.length; j++) {
+			           intVector[j] = (Integer) tmp[j];
+			    }      
+		    //System.out.println("starting to generate eh constant objects");
+    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];    
+                  constantList.add(new Constant(new ConstantVector(new String(id), intVector))); 
+			   }   
+			   
+			   RESULT = constantList;
+		   
+		    :}	   
+		    
+		| identifier_list:id_list IS constant_vector:vector 
+		    {:  
+		        Object[] tmp = ((LinkedList) vector).toArray();
+			    int[] intVector = new int[tmp.length];
+			    for(int j=0; j<intVector.length; j++) {
+			           intVector[j] = (Integer) tmp[j];
+			    }      
+		    //System.out.println("starting to generate eh constant objects");
+    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];    
+                  constantList.add(new Constant(new ConstantVector(new String(id), intVector))); 
+			   }   
+			   
+			   RESULT = constantList;
+		   
+		    :}	       
+		    
+		| identifier_list:id_list BE constant_matrix:matrixE    
+            {:  
+  
+                       Object[] tmp = (Object[]) matrixE;
+                      //System.out.println("Object[] erstellt aus da linked list...");
+                                       
+                     int[] vector0 = (int[]) tmp[0];
+                     //System.out.println("first part hinter mir");
+                     int[][] matrix = new int[tmp.length][vector0.length];
+                   
+                     for(int i=0; i<tmp.length; i++) {
+                     
+                        int[] vector = (int[]) tmp[i];
+                        
+                        if(vector.length != vector0.length) 
+                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
+                        
+                        for(int j=0; j<vector.length; j++)
+                           matrix[i][j] = (Integer) vector[j];
+                     
+                     }
+                     
+                     
+		   
+    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];    
+                  constantList.add(new Constant(new ConstantMatrix(new String(id), matrix))); 
+			   }   
+			   
+			   RESULT = constantList;
+		   
+		    :}	   
+		| identifier_list:id_list IS constant_matrix:matrixE    
+            {:  
+  
+                       Object[] tmp = (Object[]) matrixE;
+                      //System.out.println("Object[] erstellt aus da linked list...");
+                                       
+                     int[] vector0 = (int[]) tmp[0];
+                     //System.out.println("first part hinter mir");
+                     int[][] matrix = new int[tmp.length][vector0.length];
+                   
+                     for(int i=0; i<tmp.length; i++) {
+                     
+                        int[] vector = (int[]) tmp[i];
+                        
+                        if(vector.length != vector0.length) 
+                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
+                        
+                        for(int j=0; j<vector.length; j++)
+                           matrix[i][j] = (Integer) vector[j];
+                     
+                     }
+                     
+                     
+		   
+    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
+			   LinkedList constantList = new LinkedList();
+			   for(int i=0; i<identifier_list.length; i++) {
+			      String id = (String) identifier_list[i];    
+                  constantList.add(new Constant(new ConstantMatrix(new String(id), matrix))); 
+			   }   
+			   
+			   RESULT = constantList;
+		   
+		    :}	       
+;
+
+constant_vector ::=  LBRACK  integer_list:i_list  RBRACK
+					{:   
+					   RESULT = i_list;
+					:}
+;
+
+
+constant_vector_list ::=  constant_vector:int_list  
+                          {: 
+                             LinkedList vectorList = new LinkedList();
+                             vectorList.addFirst(int_list);
+                             RESULT = vectorList; :}
+                          
+                          |  constant_vector:vector  COMMA constant_vector_list:list
+                          {:  
+                             LinkedList vectorList = (LinkedList) list;
+                             vectorList.addFirst(vector);
+                             RESULT = vectorList;
+                          :}
+;                          
+
+constant_matrix ::= LBRACK constant_vector_list:list RBRACK
+                    {: Object[] tmp = ((LinkedList) list  ).toArray();	
+               
+                                       
+                     LinkedList vector0 = (LinkedList) tmp[0];
+                     //System.out.println("first part hinter mir");
+                     int[][] matrix = new int[tmp.length][vector0.size()];
+                   
+                     for(int i=0; i<tmp.length; i++) {
+                     
+                        LinkedList vector = (LinkedList) tmp[i];
+                        
+                        if(vector.size() != vector0.size()) 
+                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
+                        
+                        for(int j=0; j<vector.size(); j++)
+                           matrix[i][j] = (Integer) vector.get(j);
+                     
+                     }
+                     
+                      RESULT = matrix;
+                    
+                      :}
+;
+
+	
+/* constant ::=	  IDENTIFIER:id BE_DOMAIN domain:d 
+		 	{: RESULT = new Constant(new DomainConstant(new String(id), (Domain) d)); :}
+
+		| IDENTIFIER:id COLON domain:d BE expression:e
+			{: RESULT = new Constant(new ExpressionConstant(new String(id),(Domain) d, (Expression) e)); :}
+
+		| IDENTIFIER:id BE expression:e
+			{: RESULT = new Constant(new ExpressionConstant(new String(id),(Expression) e)); :}		
+
+		| IDENTIFIER:id BE_NEW_TYPE user_def_type:t	
+			{: RESULT = new Constant(new NewTypeConstant(new String(id),(Type) t)); :}
+;	
+	*/
+
+
+user_def_type ::= ENUM LBRACE identifier_list:id_list RBRACE
+               	        {:  Object[] tmp = ((LinkedList) id_list).toArray();	
+	        	    Identifier[] id_array = new Identifier[tmp.length];
+			    for(int i=0;i<id_array.length;i++)
+ 			   	 id_array[i] = (Identifier) tmp[i];
+
+			    RESULT = new Type(new Enumeration(id_array)); :}
+;
+
+
+find_block ::= 	FIND variable_list:v_list 
+               	        {:  Object[] tmp = ((LinkedList) v_list).toArray();	
+	        	    DomainIdentifiers[] v_array = new DomainIdentifiers[tmp.length];
+			    for(int i=v_array.length; i>0; i--) {
+ 			   	          v_array[i-1] = (DomainIdentifiers) tmp[v_array.length-i];
+	            }
+			    RESULT = new Declaration(v_array); :}
+;
+
+
+variable_list ::=   domain_identifiers:di
+		     {: LinkedList list = new LinkedList();
+			list.addFirst((DomainIdentifiers) di); 
+			RESULT = list;  :}
+					   
+		  | domain_identifiers:di COMMA variable_list:di_list
+		     {: ((LinkedList) di_list).addFirst((DomainIdentifiers) di);  
+			 RESULT = di_list; :}
+;
+
+
+
+/*  Objective */
+
+
+
+objective ::= 	  MAXIMISING expression:e
+			{: RESULT = new Objective(false, (Expression) e); :}
+
+		| MINIMISING expression:e
+			{: RESULT = new Objective(true, (Expression) e); :}
+
+		| /* epsilon */
+			{:    
+			  RESULT = new Objective(); :}
+;
+
+
+
+constraint_block ::=     SUCH_THAT expression_list:e_list 
+			  {: RESULT = (LinkedList) e_list; :}
+		        | /* epsilon */
+			  {:
+		            RESULT = new LinkedList(); :}	
+;

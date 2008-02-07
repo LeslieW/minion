@@ -1,0 +1,51 @@
+body {
+      background: E9F6FF;
+      font-family: Helvetica, Arial
+     }
+
+a.m  {
+   text-decoration: none;
+   color: E9F6FF;
+   font-weight:bold
+   }
+
+
+p.current {
+   }
+
+p.other {
+    }
+
+p.main {
+    }
+
+
+td.links{
+	border-style: dashed;
+        border-width: thin;
+	border-color: #E9F6FF
+	}
+td.rechts{
+	border-style:dashed;
+	border-color:#E9F6FF
+	}
+table.main {
+	border-style:dashed;
+	border-color:#E9F6FF
+     }
+p.code {
+        font-family: courier, sans serif
+}
+
+
+a.losung { text-decoration: none;
+           font-family: courier, sans serif;
+           background-color: E9F6FF;
+           color: E9F6FF
+}
+
+a.losung:hover { text-decoration: none;
+             font-family: courier, sans serif;
+           background-color: E9F6FF;
+           color: #35416B
+}

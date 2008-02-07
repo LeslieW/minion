@@ -1,0 +1,21 @@
+ESSENCE' 1.0
+given n : int(1..20)
+letting INDEX1 be domain int(1..n)
+letting INDEX2 be domain int(2..n+2)
+letting INDEX3 be domain int(3..n+5)
+letting INDEX4 be domain int(0..n)
+letting INDEX be domain int(0..n*n)
+
+find xxx : matrix indexed by [INDEX1,INDEX2] of INDEX, 
+   yyy : matrix indexed by [INDEX3, INDEX4] of INDEX,
+   zzz : INDEX
+
+such that  exists i: INDEX1 . 
+		  forall j : INDEX2 .
+			 forall k: INDEX3 .
+				forall m: INDEX4 .
+                                    $((i > j)) =>
+				    (xxx[i,j] + yyy[k,m] = 0)
+		 
+		  
+		 

@@ -1,0 +1,1 @@
+All qg models in this directory take a single parameter (n), so the param files are suitable for any and all of them

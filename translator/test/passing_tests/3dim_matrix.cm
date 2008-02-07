@@ -1,0 +1,7 @@
+ESSENCE' 1.0
+letting D be domain int(1..5)
+
+find M : matrix indexed by [D,D,D] of D
+
+such that 
+      M[1,2,3] = 0

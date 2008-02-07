@@ -1,0 +1,19 @@
+-d doc/api
+-source 1.5
+-sourcepath src
+-breakiterator
+-author
+-umlautogen
+-generic
+-docletpath /home/andrea/Download/ydoc/lib/ydoc.jar:/home/andrea/Download/ydoc/resources:.translator/expression
+-doclet ydoc.doclets.YStandard
+-filterpath ./lib/ydoc.jar
+-filter ydoc.filters.ExcludeFilter
+-tag y.precondition
+-tag y.postcondition
+-tag y.complexity
+-tag param
+-tag return
+-tag see
+-tag y.uml 
+-subpackages translator.expression

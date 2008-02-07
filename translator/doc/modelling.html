@@ -1,0 +1,490 @@
+<html>
+<head>
+<title>Modelling with Essence'</title>
+<link rel="stylesheet" type="text/css" href="tutorial.css" />
+</head>
+<body>
+
+<table align="center"  width="900">
+<tr>
+<td>
+
+<center>
+<h2>Modelling with Essence'</h2>
+
+
+<h5>last update: June 29, 2007</h5> 
+</center>
+
+
+Essence' is a declarative modelling language to specify constraint
+problems. The problem specification is usually stored in a file with
+the ending <code> .cm</code> and the parameters in a <code>
+.param</code> file. An Essence' file consists of the following parts:
+
+<ol>
+<li> Header (stating the version of Essence')
+</li>
+<li> Declarations (of constants, parameters, domains, decision
+variables) [optional]
+</li>
+<li> Constraints [optional]
+</li>
+</ol>
+
+In the following we give some examples to illustrate how to use Essence' for modelling
+CSP problems. This page is updated and extended frequently.
+
+<ol>
+  <li><a href="#smm">A Simple Example: Send More Money</a>
+      <br>
+      (basic model structure)
+  </li>
+  <li><a href="#sudoku">An Advanced Example:  Sudoku</a>
+     <br>
+     (using matrix datastructures, universal quantifiers)
+  </li>
+</ol> 
+
+<center>
+   <a href="index.html">back</a>
+</center>
+
+<hr>
+
+<h4 id="smm">1. A Simple Example: Send more money</h4> 
+Let's construct an example by modelling the
+<a href="http://www.math.uah.edu/mathclub/puzzles/money.html"> Send More Money problem</a>,
+where one has to find a
+solution  to the following sum where every letter stands for a distinct
+number between 0 and 9:
+	     <pre>
+	     S E N D + 
+	     M O R E
+	   ----------
+	   M O N E Y  
+	    </pre> 
+
+We start with the header
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+Our decision variables are <code> S, E, N,
+D, M, O, R, Y</code> which are in the domain of 0..9. We state that
+<code>S</code> and <code>M</code>  must not equal zero and define two
+domains: one reaching from 0..9 and the other from 1..9. Domains and
+constants can be defined by the <code> letting </code> statement:
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting DOMAIN0 be domain int(0..9)
+    letting DOMAIN1 be domain int(1..9)
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+Now we can define our decision variables that range over domains
+    <code>DOMAIN0</code>
+and <code>DOMAIN1</code> by using the <code>find</code> statement.
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting DOMAIN0 be domain int(0..9)
+    letting DOMAIN1 be domain int(1..9)
+
+    find S,M : DOMAIN1, 
+         E,N,D,O,R,Y : DOMAIN0
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+All declarations have been done now and we can define our
+constraint. The constraints are stated after <code>such that</code>:
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting DOMAIN0 be domain int(0..9)
+    letting DOMAIN1 be domain int(1..9)
+
+    find S,M : DOMAIN1, 
+         E,N,D,O,R,Y : DOMAIN0
+
+    such that 
+              1000*S + 100*E + 10*N + D 
+            + 1000*M + 100*O + 10*R + E =
+    10000*M + 1000*O + 100*N + 10*E + Y 
+         
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+The code for the Send more money problem can be found <a href="../problems/sendMoreMoney/">here</a>.
+<hr>
+
+<h4 id="sudoku">2. Advanced Example: Sudoku</h4>
+      <a href="http://en.wikipedia.org/wiki/Sudoku">Sudoku</a> is a popular puzzle: assign each field
+      of the 9x9 board a number between (1..9) such that every row, column and 3x3 box contains different 
+      numbers. A sample sudoku puzzle is given below.
+
+<table cellpadding=20>
+   <tr>
+     <td>
+      <img src="sudoku.png" width=200>
+     </td>
+     <td>
+      One way of modelling this problem is to encode every field of the board as a decision variable
+      ranging from (1..9). To specify the constraints on the rows and columns of the board more easily,
+      we collect all decision variables by a matrix(array) datastructure: we define a two-dimensional 
+      matrix (array) <code>board</code>, whose indices both range from (1..9), giving us a representation 
+      of the 9x9 board.
+      This means that <code>board[2,3]</code> holds the value of the field positioned in row 2 at column 3 of the board
+      (in the example to the right <code>board[2,3]</code> is assigned the value <code>2</code>).
+      <br>
+      <br>
+       To make our lives easier, we explicitly define the domain (1..9) to be  <code>RANGE</code>. 
+      Since each decision variable of the matrix (also) ranges from (1..9), the matrix-elements' domain is specified 
+      by the keyword <code>of</code> to be <code>RANGE</code>.
+      So we get the first piece of our Essence' Sudoku-problem-model as follows.
+    </td>
+  </tr>
+</table>
+
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting   RANGE be domain int(1..9)
+
+    find      board: matrix indexed by [RANGE, RANGE] of RANGE
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+
+Let us now focus on the constraints for the puzzle: the first constraint states that 
+each row of the board has to contain different values. This can be done by imposing 
+the <code>alldifferent</code> constraint on every row of <code>board</code>. We can 
+either write down <code>alldifferent(board[1]), ... alldifferent(board[9])</code>,
+or just collect these constraints in a universal quantification, using <code> forall</code>.
+<code>forall</code> is somewhat similiar to <code>for</code>-loops in 
+programming languages such as Java: in our example below it states that forall <code>row</code>s,
+where <code>row</code> can take any value between <code>(1..9)</code>, the expression
+after the <code>.</code> has to hold. So it just corresponds to writing down all 9 cases 
+of <code>alldifferent(board[1]), ... alldifferent(board[9])</code>. 
+
+
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting   RANGE be domain int(1..9)
+
+    find      board: matrix indexed by [RANGE, RANGE] of RANGE
+
+    such that 
+              forall row : int(1..9) .
+                 alldifferent(board[row])
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+
+Then we want to impose <code>alldifferent</code> on all columns of the board. 
+Unfortunately, Essence' does not allow us to solely access the columns of a
+matrix without specifying the exact row of the matrix. This means, that there is 
+no expression such as <code>boards[_,1]</code> to represent column 1, for instance.
+But we can use a trick: we define another matrix, <code>columns</code>,
+that holds the same elements as <code>board</code>, but with the columns switched 
+with the rows. The example below illustrates the idea:
+
+
+<center>
+<table cellpadding="20">
+  <tr>
+    <td>
+
+     <table border=1 cellpadding="5">
+      <tr>
+        <td bgcolor="#FF0000" >1</td> <td bgcolor="#00FF00">4</td> <td  bgcolor="#0000FF">7</td>
+      </tr>
+      <tr>
+        <td bgcolor="#FF0000">2</td> <td bgcolor="#00FF00">5</td> <td  bgcolor="#0000FF">8</td>
+      </tr>
+      <tr>
+        <td bgcolor="#FF0000">3</td> <td bgcolor="#00FF00">6</td> <td  bgcolor="#0000FF">9</td>
+      </tr>
+     </table>
+
+
+    </td>
+    <td>becomes
+    </td>
+    <td>
+
+     <table border=1 cellpadding="5">
+      <tr bgcolor="#FF0000">
+        <td>1</td> <td>2</td> <td>3</td>
+      </tr>
+      <tr bgcolor="#00FF00">
+        <td>4</td> <td>5</td> <td>6</td>
+      </tr>
+      <tr bgcolor="#0000FF">
+        <td>7</td> <td>8</td> <td>9</td>
+      </tr>
+     </table>
+
+    </td>
+  </tr>
+
+</table>
+</center>
+
+We can then impose <code>alldifferent</code> on every row of <code>columns</code> which corresponds to
+imposing <code>alldifferent</code> on the columns of <code>board</code>.
+
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting   RANGE be domain int(1..9)
+
+    find      board: matrix indexed by [RANGE, RANGE] of RANGE,
+              columns : matrix indexed by [RANGE, RANGE] of RANGE
+
+    such that 
+          forall row : int(1..9) .
+              alldifferent(board[row])
+
+          forall row,col : RANGE .
+              columns[col,row] = board[row,col],     
+
+          forall col : RANGE .
+              alldifferent(columns[col])	
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+
+Now we have imposed <code>alldifferent</code> on both the rows and columns of 
+the board. It remains to state that every 3x3 box of the board contains
+9 different numbers. This is quite hard to state generally. One way would be to 
+define another matrix with each box as row and impose <code>alldifferent</code>
+on it, just as we have done with the columns. Another way is to simply specify
+that no element in a 3x3 box may be equal to another. This is
+expressed by a double-nested <code>forall</code> expression.
+
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+
+    letting   RANGE be domain int(1..9)
+
+    find      board: matrix indexed by [RANGE, RANGE] of RANGE,
+              columns : matrix indexed by [RANGE, RANGE] of RANGE
+
+    such that 
+          forall row : int(1..9) .
+              alldifferent(board[row])
+
+          forall row,col : RANGE .
+              columns[col,row] = board[row,col],     
+
+          forall col : RANGE .
+              alldifferent(columns[col]),
+
+          forall i,j : int(0..2) . 
+              forall col1,col2,row1,row2 : int(1..3) .
+	          ((col1 != col2) /\ (row1 != row2)) => 
+       		   (board[row1+(i*3), col1+(j*3)] 
+                                != board[row2+(i*3), col2+(j*3)])
+	
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+
+Now we need to specify initial values for our sudoku. Since every sudoku has
+different values, these constants are parameters and to make our lives easier, we
+specify them in a <b>separate</b> file, the <b>parameter file</b> (which we will do
+one step later). Still, we need to declare the parameter values in our problem file:
+we simply define a matrix of constants of the same size as the board which we
+call <code>values</code>. 
+Additionally, we need to think of a way of representing <i>unassigned</i> boards, which we simply
+denote with an assignement of 0. This means that
+<code>values[1,1] = 0</code> states that the board at index (1,1) has no 
+value assigned, and <code>values[2,2]=4</code> states that board (2,2) has value 4.
+Hence all elements of <code>values</code> range over the domain (0..9), which we 
+define as a new domain called <code>VALUES</code>. Finally, we need to assign 
+the constant values to the board:
+if an element of <code>values</code> does <b>not</b> equal 0, then the 
+element of <code>board</code> at the same position equals the value of 
+this element of <code>values</code>.  
+
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+    given     values : matrix indexed by [RANGE,RANGE] of VALUES
+
+    letting   RANGE be domain int(1..9)
+    letting   VALUES be domain int(0..9)
+
+    find      board: matrix indexed by [RANGE, RANGE] of RANGE,
+              columns : matrix indexed by [RANGE, RANGE] of RANGE
+
+    such that 
+          forall row : int(1..9) .
+              alldifferent(board[row])
+	  
+          forall row,col : RANGE .
+              columns[col,row] = board[row,col],     
+
+          forall col : RANGE .
+              alldifferent(columns[col]),
+
+          forall i,j : int(0..2) . 
+              forall col1,col2,row1,row2 : int(1..3) .
+	          ((col1 != col2) /\ (row1 != row2)) => 
+       		   (board[row1+(i*3), col1+(j*3)] 
+                                != board[row2+(i*3), col2+(j*3)])
+	  forall row,col : RANGE . 
+              (values[row,col] > 0) =>
+                            (board[row,col] = values[row,col])
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+
+Now all we need to do is specify our parameter values for our sudoku instance.
+This is done by writing it into a parameter file with the file extension <code>.param</code>.
+A parameter file for our sudoku problem could look like this (the sudoku instance is given in
+the comment):
+
+
+<center>
+<table  bgcolor="#eeeeee" width="500">
+  <tr>
+    <td>
+    <pre>
+    ESSENCE' 1.0
+    where forall row,col : int(1..9) .
+            values[row,col] = 0,
+
+  $ 5 3 0 | 0 7 0 | 0 0 0 
+  $ 6 0 0 | 1 9 5 | 0 0 0 
+  $ 0 9 8 | 0 0 0 | 0 6 0 
+  $ ---------------------
+  $ 8 0 0 | 0 6 0 | 0 0 3
+  $ 4 0 0 | 8 0 3 | 0 0 1
+  $ 7 0 0 | 0 2 0 | 0 0 6
+  $ ---------------------
+  $ 0 6 0 | 0 0 0 | 2 8 0 
+  $ 0 0 0 | 4 1 9 | 0 0 5
+  $ 0 0 0 | 0 8 0 | 0 7 9 
+
+   values[1,1] = 5,
+   values[1,2] = 3,
+   values[1,5] = 7,
+ 
+   values[2,1] = 6,	
+   values[2,4] = 1,	
+   values[2,5] = 9,	
+   values[2,6] = 5,	  
+
+   values[3,2] = 9,	
+   values[3,3] = 8,	
+   values[3,8] = 6,	
+
+   values[4,1] = 8,
+   values[4,5] = 6,
+   values[4,9] = 3,
+
+   values[5,1] = 4,
+   values[5,4] = 8,
+   values[5,6] = 3,
+   values[5,9] = 1,
+
+   values[6,1] = 7,
+   values[6,5] = 2,
+   values[6,9] = 6,
+
+   values[7,2] = 6,
+   values[7,7] = 2,
+   values[7,8] = 8,
+
+   values[8,4] = 4,
+   values[8,5] = 1,
+   values[8,6] = 9,
+   values[8,9] = 5,
+
+   values[9,5] = 8,
+   values[9,8] = 7,
+   values[9,9] = 9
+    </pre>
+     </td>
+    </tr>
+</table>
+</center>
+
+The code for the Sudoku problem file can be found here at <a href="../problems/sudoku/sudoku.cm">sudoku.cm</a>
+and there are two parameter files for the sudoku:  <a href="../problems/sudoku/sudoku2.param">sudoku2.param</a>
+and  <a href="../problems/sudoku/sudoku3.param">sudoku3.param</a>.
+
+<hr> 
+
+More examples can be found in the <a href="../problems/">problems/</a> directory.
+<br>
+<br>
+<center>
+   <a href="index.html">back</a>
+</center>
+
+
+</td>
+</tr>
+</table>
+</body>
+</noframes>
+</html>

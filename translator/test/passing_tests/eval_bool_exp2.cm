@@ -1,0 +1,7 @@
+ESSENCE' 1.0
+given a:bool,b:bool,c:bool, d:bool
+letting b be (a \/ c) => d
+find x:bool,y:bool,z:bool
+such that x = a /\ b, y != b, z = c 
+
+

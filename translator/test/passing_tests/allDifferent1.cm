@@ -1,0 +1,4 @@
+ESSENCE' 1.0
+letting RANGE be domain int(30..50)
+find x : matrix indexed by [int(1..5)] of RANGE 
+such that alldiff(x)
