@@ -427,10 +427,18 @@ public class Sum extends NaryArithmeticExpression {
 	
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
-		for(int i=0; i<this.positiveArguments.size(); i++)
+		
+		//System.out.println("Inserting domain "+domain+" for variable "+variableName+" in expression "+this);
+		
+		for(int i=0; i<this.positiveArguments.size(); i++) {
 			this.positiveArguments.add(i,this.positiveArguments.remove(i).insertDomainForVariable(domain, variableName));
+			//System.out.println("inserted domain into "+this.positiveArguments.get(i)+" with domain "+this.positiveArguments.get(i).getDomain()[0]+
+			//		" and type: "+this.positiveArguments.get(i).getType());
+		}
 		for(int i=0; i<this.negativeArguments.size(); i++)
 			this.negativeArguments.add(i,this.negativeArguments.remove(i).insertDomainForVariable(domain, variableName));
+		
+		//System.out.println("Inserted domain "+domain+" for variable "+variableName+" in expression "+this);
 		
 		return this;
 	}

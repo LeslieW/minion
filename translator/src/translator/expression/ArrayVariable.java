@@ -116,6 +116,8 @@ public class ArrayVariable implements Variable {
 	
 	public int[] getDomain() {
 		
+		//System.out.println("Domain of variable "+this+" is "+this.domain+" and eval:"+this.domain.evaluate());
+		
 		if(this.domain.isConstantDomain())
 			return ((ConstantDomain) this.domain).getRange();
 		else return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
@@ -328,6 +330,11 @@ public class ArrayVariable implements Variable {
 	
 
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		//System.out.println("Inserting "+domain+" for "+variableName+" in expression "+this+" with domain:"+domain+" and internal domain "+this.domain);
+		
+		if(this.domain.toString().equals(variableName))
+			this.domain = domain;
 		return this;
 	}
 	

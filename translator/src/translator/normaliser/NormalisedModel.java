@@ -100,6 +100,9 @@ public class NormalisedModel {
 		return offsets[index];
 	}
 	
+	
+	
+	
 
 	public Variable getLastAddedAuxiliaryVariable() {
 		if(this.auxiliaryVariables.size() ==0)

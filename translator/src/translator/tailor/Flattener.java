@@ -116,6 +116,8 @@ public class Flattener {
 		if(this.settings.applyDirectVariableReusage())
 			this.normalisedModel.setEqualAtoms(this.equalAtomsMap, this.replaceableVariables);
 		
+		
+		System.out.println("Common subexpressions:\n"+this.subExpressions);
 		return this.normalisedModel;
 	}
 	
@@ -663,6 +665,9 @@ public class Flattener {
 				addToSubExpressions(lSum,result);
 			
 
+			//System.out.println("left expression is sum etc ... and expr "+expression+" will be flattened to variable? "+expression.isGonnaBeFlattenedToVariable());
+			
+			
 			if(expression.isGonnaBeFlattenedToVariable()) {
 				return reifyConstraint(partWiseSumConstraint);
 			}
@@ -1907,6 +1912,7 @@ public class Flattener {
 		// treat it as a normal sum -> might be flattened to a variable
 		else {
 			if(!sum.isGonnaBeFlattenedToVariable()) {
+			//if(!sum.isGonnaBeFlattenedToVariable()) {
 				if(sum.getPositiveArguments() != null)
 					for(int i=0; i<sum.getPositiveArguments().size(); i++) {
 						sum.getPositiveArguments().add(i,flattenExpression(sum.getPositiveArguments().remove(i)));
@@ -1937,10 +1943,10 @@ public class Flattener {
 				sumConstraint.setResult(auxVariable, 
 						                Expression.EQ, 
 						                true);
-				return reifyConstraint(sumConstraint);
-				//this.constraintBuffer.add(sumConstraint);
-                //addToSubExpressions(sum,auxVariable);
-				//return auxVariable;
+				//return reifyConstraint(sumConstraint);
+				this.constraintBuffer.add(sumConstraint);
+                addToSubExpressions(sum,auxVariable);
+				return auxVariable;
 			}
 			
 			
@@ -2718,7 +2724,7 @@ public class Flattener {
 							index.willBeFlattenedToVariable(true);
 						
 						Domain d = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
-						System.out.println("Domain of variable "+(arrayVariable).getArrayNameOnly()+" is :"+d.toString());
+						//System.out.println("Domain of variable "+(arrayVariable).getArrayNameOnly()+" is :"+d.toString());
 						
 						if(!(d instanceof ArrayDomain) && !(d instanceof ConstantArrayDomain))
 							throw new TailorException("Indexed variable '"+(arrayVariable).getArrayNameOnly()+"' is not an array:"+atom);
@@ -3087,6 +3093,7 @@ public class Flattener {
 	
 	private ArithmeticAtomExpression getCommonSubExpression(Expression expression) {
 		this.usedCommonSubExpressions++;
+		//System.out.println("Using common subexpression: "+expression);
 		return this.subExpressions.get(expression.toString());
 	}
 	

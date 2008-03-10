@@ -1576,6 +1576,7 @@ public class MinionTailor {
 	
 	protected ArithmeticAtomExpression getCommonSubExpression(Expression constraint) {
 		this.usedCommonSubExpressions++;
+		System.out.println("Used common subexpression:"+constraint);
 		return this.essenceSubExpressions.get(constraint.toString());
 		
 	}

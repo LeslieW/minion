@@ -198,6 +198,8 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	}
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		if(this.variable != null)
+			this.variable.insertDomainForVariable(domain, variableName);
 		return this;
 	}
 	
