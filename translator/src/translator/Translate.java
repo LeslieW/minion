@@ -3,7 +3,7 @@ package translator;
 import javax.swing.JFrame;
 import java.io.*;
 import translator.solver.Minion;
-
+import translator.gui.TailorGUI;
 
 
 /**
@@ -31,12 +31,15 @@ public class Translate {
 	
 		if(args.length == 0) {
 			printHelpMessage();
-			startGuiVersion();
+			runNewGUI();
+			
 		}
 		
 		else if(args.length == 1) {
 			if(args[0].endsWith("help"))
 				printHelpMessage();
+			else if((args[0].endsWith("oldGui")) || (args[0].endsWith("oldGUI"))) 
+				runOldGUIVersion();
 			else translate(args[0]);
 		}
 			
@@ -129,7 +132,7 @@ public class Translate {
 	 *
 	 */
 	
-	private static void startGuiVersion() {
+	private static void runOldGUIVersion() {
 		JFrame frame = new JFrame(GUI_NAME);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -141,6 +144,11 @@ public class Translate {
 		frame.setVisible(true);
 	}
 	
+	private static void runNewGUI() {
+		
+		JFrame frame = new TailorGUI();
+		frame.setVisible(true);
+	}
 	
 	private static void translate(String filename, TranslationSettings settings) {
 		
@@ -281,7 +289,7 @@ public class Translate {
 	
 	
 	private static void printHelpMessage() {
-		System.out.println("\nUsage: java -jar translator.jar [options]");
+		System.out.println("\nUsage: java -jar tailor.jar [options]");
 		System.out.println("If no options are given, the graphical translator version is started.\n");
 		System.out.println("Available options are:");
 		System.out.println("filename.eprime");
