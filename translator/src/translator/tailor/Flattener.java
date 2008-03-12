@@ -700,6 +700,8 @@ public class Flattener {
 		if(leftExpression instanceof Multiplication) {
 			// flatten multiplication to partwise product constraint
 			Multiplication multiplication = (Multiplication) leftExpression;
+
+			//System.out.println("Left expression is a multiplication:"+multiplication);
 			Multiplication processedMultiplication = (Multiplication) multiplication.copy();
 			processedMultiplication.setWillBeConverteredToProductConstraint(true);
 			ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(processedMultiplication);
@@ -749,6 +751,7 @@ public class Flattener {
 		else if(rightExpression instanceof Multiplication) {
 			// flatten multiplication to partwise product constraint
 			Multiplication multiplication = (Multiplication) rightExpression;
+		
 			Multiplication processedMultiplication = (Multiplication) multiplication.copy();
 			processedMultiplication.setWillBeConverteredToProductConstraint(true);
 			ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(processedMultiplication);
@@ -1805,6 +1808,7 @@ public class Flattener {
 					                                    flattenExpression(arg2)});
 		
 		}
+			
 		else if (arguments.size() < 2 && argument == null) 
 			throw new TailorException("Internal error: Cannot flatten product to binary sum with less than 2 arguments:"+arguments.toString()); 	
 

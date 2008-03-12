@@ -177,8 +177,11 @@ public class Multiplication extends NaryArithmeticExpression {
 		
 		if(newConstant == 0)
 			return new ArithmeticAtomExpression(0);
-		else if(newConstant == 1)
+		else if(newConstant == 1) {
+			if(this.arguments.size() == 0)
+				return new ArithmeticAtomExpression(1);
 			return this; // don't add it to the list since it is the identity
+		}
 		else {
 			if(this.arguments.size() == 0)
 				return new ArithmeticAtomExpression(newConstant);
