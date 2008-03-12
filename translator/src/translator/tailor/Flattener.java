@@ -117,7 +117,7 @@ public class Flattener {
 			this.normalisedModel.setEqualAtoms(this.equalAtomsMap, this.replaceableVariables);
 		
 		
-		System.out.println("Common subexpressions:\n"+this.subExpressions);
+		//System.out.println("Common subexpressions:\n"+this.subExpressions);
 		return this.normalisedModel;
 	}
 	

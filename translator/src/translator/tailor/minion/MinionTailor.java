@@ -1372,7 +1372,14 @@ public class MinionTailor {
 		if(!(rightExpression instanceof ArithmeticAtomExpression)) {
 			if(rightExpression instanceof RelationalAtomExpression) 
 				rightArgument = ((RelationalAtomExpression)rightExpression).toArithmeticExpression();
-			else throw new MinionException("Cannot translate constraint nested in another expression as in:"+constraint);	
+			else if(rightExpression instanceof UnaryMinus) {
+				UnaryMinus minusExpression = (UnaryMinus) rightExpression;
+				if(minusExpression.getArgument() instanceof ArithmeticAtomExpression) {
+					return new MinusEq(toMinion(leftArgument), toMinion((ArithmeticAtomExpression) minusExpression.getArgument()));
+				}
+				else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
+			}
+			else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
 				
 		}
 		else rightArgument = (ArithmeticAtomExpression) rightExpression;
