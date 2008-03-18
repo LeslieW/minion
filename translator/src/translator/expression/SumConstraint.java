@@ -455,6 +455,15 @@ public class SumConstraint implements GlobalConstraint {
 	}
 	
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		this.result = this.result.replaceVariableWith(oldVariable, newVariable);
+		for(int i=0; i<this.positiveArguments.length; i++)
+			this.positiveArguments[i] = this.positiveArguments[i].replaceVariableWith(oldVariable, newVariable);
+		for(int i=0; i<this.negativeArguments.length; i++)
+			this.negativeArguments[i] = this.negativeArguments[i].replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
+	
 /*	public boolean isResultOnLeftSide() {
 		return this.resultIsOnLeftSide;
 	}*/

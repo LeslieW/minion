@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>TAILOR: home</title>
+<link rel="stylesheet" type="text/css" href="standard.css" />
+<script language = "javaScript">
+
+function foto(x)
+{
+p1 = eval("window.open('pic'+x+'.html','pp1','width=1100, height=900, resizable=yes');");
+}
+
+
+
+</script>
+</head>
+
+<body>
+<br><br><br>
+<table id="content" align="left" cellspacing="20">
+   <tr>
+      <td bgcolor="#f9d4a0">
+       <center><h3>
+       TAILOR - A translator from Essence' to Minion
+       </h3></center>
+
+       
+       </td>
+       </tr>
+       <tr>
+       <td bgcolor="#f9e6c1">        
+       <b>News</b><br>
+      </td>
+       </tr>
+       <tr>
+       <td>       
+              <font size="3">
+       <ul>
+          <li><b>Updated version of Tailor</b>: <a href="tailor.tar.gz">TAILOR v0.2</a> <b>(March 12, 2008)</b><br>
+	    <ul>
+	       <li> enhanced Graphical User Interface 
+          [<a href="#"  onclick="foto(1)">picture1</a>]  
+          [<a href="#"  onclick="foto(2)">picture2</a>] </li>
+	       <li> several bugfixes</li>
+	    </ul>
+	  </li>
+      </ul>
+
+     
+ 
+     </td>
+       </tr>
+       <tr>
+       <td bgcolor="#f9e6c1">        
+       <b>Overview</b><br>
+      </td>
+       </tr>
+       <tr>
+       <td>   <font size="3">      
+      <p>
+      TAILOR translates problem models formualted in Essence' to  
+      the format of the Constraint Solver <a href="http://minion.sourceforge.net/">MINION</a>.
+      Essence' is a solver-independent modelling language and a subset
+      of the abstract specification language <a href="http://www.cs.york.ac.uk/aig/constraints/AutoModel/">Essence</a>.       
+      </p>
+
+      <p>TAILOR provides a command-line and a graphical version  [<a href="#"  onclick="foto(1)">picture1</a>]. 
+         TAILOR is distributed as a Java .jar file and can easily be
+         executed on every platform.
+         There are different translation-options that enhance the
+         problem model, such as different kinds of common
+         subexpression exploition. 
+      </p>
+
+      <p>It is the aim of our
+         research to produce effective solver instances automatically.
+	 For more information about automatic model generation or 
+	 Essence, click <a href="http://www.cs.york.ac.uk/aig/constraints/AutoModel/">here</a>.
+      </p>
+       </font>
+       
+      </td>
+    </tr>
+</table>
+<br>
+<br>
+</body>
+</html>

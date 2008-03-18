@@ -130,6 +130,14 @@ public class Reification implements RelationalExpression {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		this.reifiedExpression = this.reifiedExpression.replaceVariableWith(oldVariable, newVariable);
+		if(this.reifiedVariable.getVariable().getVariableName().equals(oldVariable.getVariableName()))
+			this.reifiedVariable = new RelationalAtomExpression(newVariable);
+		return this;
+	}
+	
 	// ================= OTHER METHODS =========================================
 	
 	public Expression getReifiedConstraint() {

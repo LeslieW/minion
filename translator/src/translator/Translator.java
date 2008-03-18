@@ -214,6 +214,49 @@ public class Translator {
 	
 	
 	/**
+	 * Given a target solver, flatten the corresponding normalised model. To evoke this method, the
+	 * model MUST have been parsed and normalised (at least basically normalised).
+	 * 
+	 * @param targetSolver
+	 * @return
+	 */
+	public boolean tailorTo(NormalisedModel model, TargetSolver targetSolver) {
+		
+		this.normalisedModel = model;
+		
+		try {
+			// flattening
+			long startTime = System.currentTimeMillis();
+			this.settings.setTargetSolver(targetSolver);
+			this.tailor = new Tailor(this.normalisedModel,
+				 				 	 this.settings);
+			this.normalisedModel = tailor.flattenModel();
+			this.normalisedModelHasBeenFlattened = true;
+			
+			if(this.settings.giveTranslationTimeInfo) {
+				long stopTime = System.currentTimeMillis();
+				System.out.println("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
+			}
+			
+			// tailoring
+			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
+			if(this.settings.giveTranslationTimeInfo) {
+				long stopTime = System.currentTimeMillis();
+				System.out.println("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace(System.out);
+			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
+			return false;
+		}
+		return true;
+	}
+	
+	
+	
+	
+	/**
 	 * Tailor the already normalised and flattened normalised model to the specified 
 	 * target solver. This is the final step in the translation process.
 	 * 

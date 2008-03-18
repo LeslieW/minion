@@ -260,6 +260,14 @@ public class Multiplication extends NaryArithmeticExpression {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		for(int i=0; i<this.arguments.size(); i++)
+			this.arguments.add(i,this.arguments.remove(i).replaceVariableWith(oldVariable, newVariable));
+		
+		return this;
+		
+	}
+	
 	
 	// ================== ADDITIONAL METHODS ==============================
 	

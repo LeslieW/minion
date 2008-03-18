@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class ArithmeticAtomExpression implements ArithmeticExpression {
+public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpression {
 
 	private int constantValue;
 	private Variable variable;
@@ -150,12 +150,13 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 	public Expression insertValueForVariable(int value, String variableName) {
 		if(this.variable != null) {
 			// if this is a simple decision variable
-			if(this.variable instanceof SingleVariable) {
+			if(this.variable instanceof SingleVariable || this.variable instanceof SimpleVariable) {
 				Expression e = this.variable.insertValueForVariable(value,variableName);
 				if(e.getType() == INT)
 					return (ArithmeticAtomExpression) e;
 				else return this;
 			}
+			
 			// this is an array element
 			else {
 				this.variable = (Variable) this.variable.insertValueForVariable(value,variableName);
@@ -203,5 +204,12 @@ public class ArithmeticAtomExpression implements ArithmeticExpression {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		if(this.variable != null) {
+			if(this.variable.getVariableName().equals(oldVariable.getVariableName()))
+				this.variable = newVariable;
+		}
+		return this;
+	}
 	
 }

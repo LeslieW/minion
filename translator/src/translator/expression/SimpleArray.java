@@ -147,6 +147,10 @@ public class SimpleArray implements SingleArray {
 		
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		return this;
+	}
+	
 	// ================= ADDITIONAL METHODS =============================
 	
 	public boolean willBeFlattenedToVector() {

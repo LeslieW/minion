@@ -264,4 +264,10 @@ public class NonCommutativeRelationalBinaryExpression implements
 		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
 		return this;
 	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		this.leftArgument = this.leftArgument.replaceVariableWith(oldVariable, newVariable);
+		this.rightArgument = this.rightArgument.replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
 }

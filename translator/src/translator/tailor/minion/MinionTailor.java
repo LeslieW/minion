@@ -555,6 +555,28 @@ public class MinionTailor {
 					                      indexOffsets);
 			 
 		}
+		
+		else if(array instanceof VariableArray) {
+			
+			VariableArray varArray = (VariableArray) array;
+			AtomExpression[] variables = varArray.getVariables();
+			MinionAtom[] minionVariables= new MinionAtom[variables.length];
+			
+			for(int i=0; i<variables.length; i++) {
+				if(variables[i] instanceof RelationalAtomExpression) {
+					variables[i].willBeFlattenedToVariable(true);
+					minionVariables[i] = (MinionAtom) toMinion((RelationalAtomExpression) variables[i]);
+				}
+				else if(variables[i] instanceof ArithmeticAtomExpression) {
+					variables[i].willBeFlattenedToVariable(true);
+					minionVariables[i] = (MinionAtom) toMinion((ArithmeticAtomExpression) variables[i]);
+				}
+				else throw new MinionException("Unfeasible type '"+variables[i]+"' in VariableArray: "+varArray);
+			}
+			
+			return new MinionVariableArray(minionVariables);
+		}
+		
 		else throw new MinionException("Sorry, cannot translate array type yet:"+array);
 
 	}

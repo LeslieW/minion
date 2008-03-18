@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 import java.io.*;
 import translator.solver.Minion;
 import translator.gui.TailorGUI;
-
+import translator.xcsp2ep.Xcsp2Ep;
 
 /**
  * This is the started class. It can either evoke the GUI version or
@@ -18,9 +18,14 @@ import translator.gui.TailorGUI;
 
 public class Translate {
 
-	public static final String GUI_NAME = "TAILOR 0.1";
-	public static final String EMPTY_PARAM_STRING = "ESSENCE' 1.0\n";
+	public static final String GUI_NAME = "TAILOR v0.2";
+	public static final String EMPTY_PARAM_STRING = "language ESSENCE' 1.b.a\n";
 
+	/** Available flags */
+	public static final String XCSP_CONVERSION = "xcsp";
+	public static final String HELP = "help";
+	public static final String OLD_GUI = "oldgui";
+	public static final String NO_COMMON_SUBEXPRS = "no-cse";
 	
 	/**
 	 * Start the GUI version or command-line version of the translator.
@@ -44,7 +49,7 @@ public class Translate {
 		}
 			
 		else if(args.length == 2) {
-			if(args[1].endsWith("no-cse")) {
+			if(args[1].endsWith(NO_COMMON_SUBEXPRS)) {
 				TranslationSettings settings = new TranslationSettings();
 				settings.setUseCommonSubExpressions(false);
 				translate(args[0], settings);
@@ -59,12 +64,17 @@ public class Translate {
 				settings.setApplyDirectVariableReusage(true);
 				translate(args[0], settings);
 			}
+			else if(args[0].endsWith(XCSP_CONVERSION)) {
+				TranslationSettings settings = new TranslationSettings();
+				translateXCSP(args[1], args[1]+".minion",settings);
+				System.exit(0);
+			}
 			
 			translate(args[0], args[1]);
 		}
 		
 		else if(args.length == 3) {
-			if(args[2].endsWith("no-cse")) {
+			if(args[2].endsWith(NO_COMMON_SUBEXPRS)) {
 				TranslationSettings settings = new TranslationSettings();
 				settings.setUseCommonSubExpressions(false);
 				translate(args[0], args[1], settings);
@@ -79,18 +89,22 @@ public class Translate {
 				settings.setApplyDirectVariableReusage(true);
 				translate(args[0], args[1], settings);
 			}
+			else if(args[0].endsWith(XCSP_CONVERSION)) {
+				TranslationSettings settings = new TranslationSettings();
+				translateXCSP(args[1], args[2],settings);
+			}
 			else printHelpMessage();
 		}
 
 		else if(args.length == 4) {
-			if(args[2].endsWith("no-cse") || args[3].endsWith("no-cse") &&
+			if(args[2].endsWith(NO_COMMON_SUBEXPRS) || args[3].endsWith(NO_COMMON_SUBEXPRS) &&
 				(args[2].endsWith("no-ecse") || args[3].endsWith("no-ecse"))	) {
 				TranslationSettings settings = new TranslationSettings();
 				settings.setUseCommonSubExpressions(false);
 				settings.setUseInferredCommonSubExpressions(false);
 				translate(args[0], args[1], settings);
 			}
-			else if (args[2].endsWith("no-cse") || args[3].endsWith("no-cse") &&
+			else if (args[2].endsWith(NO_COMMON_SUBEXPRS) || args[3].endsWith(NO_COMMON_SUBEXPRS) &&
 				(args[2].endsWith("-dvr") || args[3].endsWith("-dvr"))	) {
 				TranslationSettings settings = new TranslationSettings();
 				settings.setUseCommonSubExpressions(false);
@@ -110,7 +124,7 @@ public class Translate {
 		
 		else if(args.length == 5) {
 			
-			if((args[2].endsWith("no-cse") || args[3].endsWith("no-cse") || args[4].endsWith("no-cse") ) &&
+			if((args[2].endsWith(NO_COMMON_SUBEXPRS) || args[3].endsWith(NO_COMMON_SUBEXPRS) || args[4].endsWith(NO_COMMON_SUBEXPRS) ) &&
 			   (args[2].endsWith("no-ecse") || args[3].endsWith("no-ecse")  ||  args[4].endsWith("no-ecse") ) &&
 			   (args[2].endsWith("-dvr") || args[3].endsWith("-dvr") || args[4].endsWith("-dvr")  )) {
 				TranslationSettings settings = new TranslationSettings();
@@ -276,7 +290,7 @@ public class Translate {
 			
 			File outputFile = writeStringIntoFile(parameterFileName+".minion", minionString);
 			System.out.println("Translated '"+problemFileName+"' and '"+parameterFileName+
-					"' to Minion and written output\n into '"+outputFile.getName()+"'.\n");
+					"' to Minion and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
 			System.out.println("Translation Time: "+translationTime+" sec");
 			
 		} catch(Exception e) {
@@ -287,6 +301,33 @@ public class Translate {
 		}
 	}
 	
+	
+	private static void translateXCSP(String inputFileName, String outputFileName, TranslationSettings settings) {
+		
+		try {
+			System.out.println("\nTranslating XCSP file '"+inputFileName+"'");
+			long startTime = System.currentTimeMillis();
+			Xcsp2Ep xcspConverter = new Xcsp2Ep();
+			Translator translator = new Translator(settings);
+			
+			translator.tailorTo(xcspConverter.translateToNormalisedModel(inputFileName), new Minion());
+			String minionString = translator.getTargetSolverInstance();
+			long stopTime = System.currentTimeMillis();
+			
+			double translationTime = (stopTime - startTime) / 1000.0;
+			minionString = "# Translation Time: "+translationTime+"\n"+minionString;
+			
+			File outputFile = writeStringIntoFile(outputFileName, minionString);
+			System.out.println("Translated '"+inputFileName+
+					"' to Minion and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
+			System.out.println("Translation Time: "+translationTime+" sec");
+			
+		} catch(Exception e) {
+			e.printStackTrace(System.out);
+			System.out.println("Cannot translate to Minion from XCSP file '"+inputFileName);
+			System.exit(1);
+		}
+	}
 	
 	private static void printHelpMessage() {
 		System.out.println("\nUsage: java -jar tailor.jar [options]");
@@ -299,6 +340,12 @@ public class Translate {
 		System.out.println("\tTranslates 'filename.eprime' with respect to the parameters given in"); 
 		System.out.println("\t'filename.param' to Minion input format.");
 		System.out.println("\tThe generated Minion file is written into 'filename.param.minion'\n");
+		System.out.println("-xcsp filename.xml");
+		System.out.println("\tTranslates the XCSP file 'filename.xml' to Minion input format.");
+		System.out.println("\tThe generated Minion file is written into 'filename.xml.minion'\n");
+		System.out.println("-xcsp input.xml output.minion");
+		System.out.println("\tTranslates the XCSP file 'input.xml' to Minion input format.");
+		System.out.println("\tThe generated Minion file is written into 'output.minion'\n");
 		System.out.println("help or -help\n\tprints this help message");
 		System.out.println("-no-cse");
 		System.out.println("\tTurn off reusing equivalent auxiliary variables (exploiting common subexpressions).");

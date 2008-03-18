@@ -2,6 +2,8 @@ package translator.expression;
 
 import java.util.ArrayList;
 
+import translator.expression.Expression;
+
 public class Disjunction extends NaryRelationalExpression {
 
 	private ArrayList<Expression> disjointExpressions;
@@ -13,6 +15,14 @@ public class Disjunction extends NaryRelationalExpression {
 		this.disjointExpressions = disjointExpressions;
 	}
 	
+	public Disjunction(Expression[] arguments) {
+		
+		this.disjointExpressions = new ArrayList<Expression>();
+		
+		for(int i=0; i<arguments.length; i++) {
+			disjointExpressions.add(arguments[i]);
+		}
+	}
 //	============== Interfaced Methods ==================
 	
 	public ArrayList<Expression> getArguments() {
@@ -41,14 +51,31 @@ public class Disjunction extends NaryRelationalExpression {
 	}
 	
 	public String toString() {
-		if(this.disjointExpressions.size() == 0)
+		
+		if(this.disjointExpressions.size() ==0)
+			return "false";
+		
+		else if(this.disjointExpressions.size() == 1)
+			return this.disjointExpressions.get(0).toString();
+		
+		else {
+			StringBuffer s = new StringBuffer("("+this.disjointExpressions.get(0).toString()+")");
+			
+			for(int i=1; i<this.disjointExpressions.size(); i++) {
+				s.append(" \\/ ("+this.disjointExpressions.get(i).toString()+")");
+			}
+			
+			return s.toString();
+		}
+		
+		/*if(this.disjointExpressions.size() == 0)
 			return "false";
 		
 		String s = "or("+this.disjointExpressions.get(0);
 		for(int i=1; i<this.disjointExpressions.size(); i++)
 			s = s.concat(",\n\t"+disjointExpressions.get(i));
 		
-		return s.concat(")");
+		return s.concat(")"); */
 	}
 	
 	public char isSmallerThanSameType(Expression e) {
@@ -187,6 +214,14 @@ public class Disjunction extends NaryRelationalExpression {
 		for(int i=0; i<this.disjointExpressions.size(); i++)
 			this.disjointExpressions.add(i,this.disjointExpressions.remove(i).insertDomainForVariable(domain, variableName));
 		return this;
+	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		for(int i=0; i<this.disjointExpressions.size(); i++)
+			this.disjointExpressions.add(i,this.disjointExpressions.remove(i).replaceVariableWith(oldVariable, newVariable));
+		
+		return this;
+		
 	}
 	
 }

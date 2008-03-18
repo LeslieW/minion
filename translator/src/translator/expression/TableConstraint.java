@@ -155,6 +155,12 @@ public class TableConstraint implements RelationalExpression {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		for(int i=0; i<this.variableList.length; i++)
+			this.variableList[i] = (Variable) this.variableList[i].replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
+	
 	// ============= ADDITIONAL METHODS ====================================
 	
 	

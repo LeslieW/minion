@@ -131,6 +131,10 @@ public class ConstantMatrix implements ConstantArray {
 		return s+"]";
 	}
 
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		return this;
+	}
 	
 	// ========= ADDITIONAL METHODS =======================
 	

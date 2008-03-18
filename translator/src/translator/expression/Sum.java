@@ -442,4 +442,16 @@ public class Sum extends NaryArithmeticExpression {
 		
 		return this;
 	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		for(int i=0; i<this.positiveArguments.size(); i++) {
+			this.positiveArguments.add(i,this.positiveArguments.remove(i).replaceVariableWith(oldVariable, newVariable));
+			//System.out.println("inserted domain into "+this.positiveArguments.get(i)+" with domain "+this.positiveArguments.get(i).getDomain()[0]+
+			//		" and type: "+this.positiveArguments.get(i).getType());
+		}
+		for(int i=0; i<this.negativeArguments.size(); i++)
+			this.negativeArguments.add(i,this.negativeArguments.remove(i).replaceVariableWith(oldVariable, newVariable));
+		return this;
+		
+	}
 }

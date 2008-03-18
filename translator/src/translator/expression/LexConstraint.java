@@ -131,6 +131,10 @@ public class LexConstraint implements RelationalExpression {
 		return s+" "+opString+" "+this.rightArray;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		return this;
+	}
+	
 	// ============== OTHER METHODS ==========================
 
 	public Array getLeftArray() {

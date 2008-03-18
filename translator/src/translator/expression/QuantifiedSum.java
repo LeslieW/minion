@@ -153,6 +153,12 @@ public class QuantifiedSum implements ArithmeticExpression {
 		return this;
 	}
 	
+    public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		this.quantifiedExpression = this.quantifiedExpression.replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
+    
 	// ================ OTHER METHODS ======================================
 	
 	public Domain getQuantifiedDomain() {

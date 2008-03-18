@@ -97,5 +97,9 @@ public class AllDifferent implements UnaryRelationalExpression {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		this.argument = (Array) this.argument.replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
 
 }

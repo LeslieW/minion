@@ -349,4 +349,12 @@ public class ArrayVariable implements Variable {
 	public void setWillBeFlattenedToPartwiseElementConstraint(boolean turnOn) {
 		this.willBeFlattenedToPartwiseElementConstraint = turnOn;
 	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		if(this.arrayName.equals(oldVariable.getVariableName()))
+			return newVariable;
+		
+		return this;
+	}
 }

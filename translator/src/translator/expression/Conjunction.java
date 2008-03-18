@@ -52,14 +52,31 @@ public class Conjunction extends NaryRelationalExpression {
 	}
 	
 	public String toString() {
+		
 		if(this.conjointExpressions.size() ==0)
+			return "true";
+		
+		else if(this.conjointExpressions.size() == 1)
+			return this.conjointExpressions.get(0).toString();
+		
+		else {
+			StringBuffer s = new StringBuffer("("+this.conjointExpressions.get(0).toString()+")");
+			
+			for(int i=1; i<this.conjointExpressions.size(); i++) {
+				s.append(" /\\ ("+this.conjointExpressions.get(i).toString()+")");
+			}
+			
+			return s.toString();
+		}
+		
+		/* if(this.conjointExpressions.size() ==0)
 			return "and()";
 		
 		String s = "and("+this.conjointExpressions.get(0);
 		for(int i=1; i<this.conjointExpressions.size(); i++)
 			s = s.concat(",\n\t"+conjointExpressions.get(i));
 		
-		return s.concat(")");
+		return s.concat(")"); */
 	}
 	
 	// if this conjunction has less elements/arguments than the other conjunction,
@@ -213,6 +230,14 @@ public class Conjunction extends NaryRelationalExpression {
 		for(int i=0; i<this.conjointExpressions.size(); i++)
 			this.conjointExpressions.add(i,this.conjointExpressions.remove(i).insertDomainForVariable(domain, variableName));
 		return this;
+	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		for(int i=0; i<this.conjointExpressions.size(); i++)
+			this.conjointExpressions.add(i,this.conjointExpressions.remove(i).replaceVariableWith(oldVariable, newVariable));
+		
+		return this;
+		
 	}
 }
 

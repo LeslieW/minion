@@ -200,6 +200,13 @@ public class ProductConstraint implements GlobalConstraint {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		this.result = this.result.replaceVariableWith(oldVariable, newVariable);
+		for(int i=0; i<this.arguments.length; i++)
+			this.arguments[i] = this.arguments[i].replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
+	
 	// ==================== ADDITIONAL METHODS ============================
 	
 	public Expression[] getProductArguments() {

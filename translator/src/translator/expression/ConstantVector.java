@@ -121,6 +121,12 @@ public class ConstantVector implements ConstantArray {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		return this;
+	}
+	
+	
 	// ========= ADDITIONAL METHODS =======================
 	
 	public int[] getElements() {

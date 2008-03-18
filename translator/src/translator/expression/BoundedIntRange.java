@@ -44,7 +44,7 @@ public class BoundedIntRange implements IntRange {
 	}
 	
 	public String toString() {
-		return "("+this.lowerBound+".."+this.upperBound+")";
+		return "int("+this.lowerBound+".."+this.upperBound+")";
 	}
 
 	public boolean isConstantDomain() {

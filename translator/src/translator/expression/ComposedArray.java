@@ -128,4 +128,8 @@ public class ComposedArray implements Array {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		return this;
+	}
 }

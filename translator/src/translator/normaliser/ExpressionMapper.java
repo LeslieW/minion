@@ -179,7 +179,7 @@ public class ExpressionMapper {
 	protected translator.expression.TableConstraint mapTableConstraint(translator.conjureEssenceSpecification.TableConstraint oldConstraint)
 	   throws NormaliserException {
 		
-		AtomExpression[] oldVariables = oldConstraint.getVariables();
+		translator.conjureEssenceSpecification.AtomExpression[] oldVariables = oldConstraint.getVariables();
 		translator.expression.Variable[] newVariables = new translator.expression.Variable[oldVariables.length];
 		for(int i=0; i<oldVariables.length; i++) 
 			newVariables[i] = 

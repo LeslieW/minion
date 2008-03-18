@@ -57,5 +57,4 @@ public interface Domain {
 	public Domain insertValueForVariable(int value, String variableName);
 	
 	
-	
 }

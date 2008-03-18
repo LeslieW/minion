@@ -642,8 +642,10 @@ public class MinionModel {
 						endlinePosition++;
 					}
 					
-					String intList = solverOutputString.substring(5, 7);
-					for(int j=8; j<endlinePosition; j++) {
+					String intList = "";
+					//String intList = solverOutputString.substring(5, 7);
+					//System.out.println("First part of inList is:"+intList+" (solverOutput.subString(5,7)");
+					for(int j=6; j<endlinePosition; j++) {
 						String number = "";
 						while(solverOutputString.charAt(j) != ' ' &&
 								solverOutputString.charAt(j) != '\n' &&
@@ -651,9 +653,10 @@ public class MinionModel {
 							number = number+solverOutputString.charAt(j);
 							j++;
 						}
-						intList = intList.concat(", "+number);
+						System.out.println("Number :"+number+" and intList:"+intList);
+						intList = intList.concat(number+", ");
 					}
-					
+					intList = intList.substring(0, intList.length()-2);
 					solutionString = solutionString.concat("variable "+variableName+" is ["+intList+"],\n");
 					solverOutputString = solverOutputString.delete(0, endlinePosition);
 				}

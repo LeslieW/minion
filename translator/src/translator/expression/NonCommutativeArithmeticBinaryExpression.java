@@ -191,6 +191,12 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		this.leftArgument = this.leftArgument.replaceVariableWith(oldVariable, newVariable);
+		this.rightArgument = this.rightArgument.replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
+	
 	//======================== ADDITIONAL METHODS ===============================
 	private int power(int base, int exponent) {
 		

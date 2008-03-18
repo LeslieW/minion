@@ -10,7 +10,7 @@ package translator.expression;
  */
 
 public class RelationalAtomExpression implements
-		  RelationalExpression {
+		  RelationalExpression,AtomExpression {
 
 	private boolean bool;
 	private Variable variable;
@@ -181,6 +181,14 @@ public class RelationalAtomExpression implements
 	}
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		return this;
+	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		if(this.variable != null) {
+			if(this.variable.getVariableName().equals(oldVariable.getVariableName()))
+				this.variable = newVariable;
+		}
 		return this;
 	}
 }

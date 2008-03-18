@@ -40,10 +40,12 @@ public class NormalisedModel {
 	
 	//=============== CONSTRUCTORS ==================================
 	
+	public NormalisedModel() {}
+	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
-            ArrayList<String> decisionVariablesNames,
-            ArrayList<Expression> constraints,
-            Objective objective) {
+						   ArrayList<String> decisionVariablesNames,
+						   ArrayList<Expression> constraints,
+						   Objective objective) {
 
 		this.decisionVariables = decisionVariables;
 		this.decisionVariablesNames = decisionVariablesNames;

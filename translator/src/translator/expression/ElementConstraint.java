@@ -4,6 +4,7 @@ public class ElementConstraint implements GlobalConstraint {
 
 	// element(variableArray, index, value) ===> variableArray[index] = value
 	
+	// variableArray is of type Array actually
 	private Expression variableArray;
 	private Expression index;
 	private Expression value;
@@ -160,6 +161,15 @@ public class ElementConstraint implements GlobalConstraint {
 		this.variableArray = this.variableArray.insertDomainForVariable(domain, variableName);
 		return this;
 	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		this.index = this.index.replaceVariableWith(oldVariable, newVariable);
+		this.value = this.value.replaceVariableWith(oldVariable, newVariable);
+		this.variableArray = this.variableArray.replaceVariableWith(oldVariable, newVariable);
+		return this;
+	}
+	
 	
 	//======================== ADDITIONAL METHODS =============================
 	

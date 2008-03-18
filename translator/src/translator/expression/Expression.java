@@ -7,6 +7,8 @@ public interface Expression {
 
 	public final boolean DEBUG = true;
 	
+	public final String VARIABLE_ARRAY_NAME = "variableArray";
+	
 	public final int UPPER_BOUND = 100000;
 	public final int LOWER_BOUND = -100000;
 	
@@ -28,11 +30,13 @@ public interface Expression {
 	public final int SIMPLE_ARRAY = 26;
 	public final int INDEXED_ARRAY = 27;
 	public final int COMPOSED_ARRAY = 28;
+	public final int VARIABLE_ARRAY = 29;
 
 	
 	// internal types for Variables
 	/** a decision variable that is indexed by a constant value and has an integer bounds domain */
 	public final int SINGLE_VARIABLE = 11;
+	public final int SIMPLE_VARIABLE = 12;
 	
 	/** an array element that is indexed by a constant value and has an integer bounds domain */
 	public final int ARRAY_VARIABLE = 14;
@@ -72,10 +76,13 @@ public interface Expression {
 	public final int IFF = 115;
 	public final int OR  = 117;
 	public final int AND = 118;
+	public final int XOR = 119; // no support for this operator!
 	
 	// Binary arithmetic commutative operators
 	public final int PLUS = 110;
 	public final int MINUS = 111;
+	public final int MIN = 120;
+	public final int MAX = 121;
 	
 	//public final int SUM = 200;
 	
@@ -83,6 +90,7 @@ public interface Expression {
 	public final int DIV = 112;
 	public final int MULT = 113;
 	public final int POWER = 114;
+	public final int MOD = 115;
 	
 	// Quantifications
 	
@@ -295,5 +303,19 @@ public interface Expression {
 	 * 
 	 * @return the restructured expression
 	 */
-	public Expression restructure(); 
+	public Expression restructure();
+	
+	
+	
+	/**
+	 * Replace every occurrence of oldVariable with newVariable => do not
+	 * care about if they have the same domain. This method should only be
+	 * evoked if the replacement does not alter the problem.
+	 * 
+	 * @param oldVariable the variable that is to be replaced
+	 * @param newVariable the variable that takes the place of oldVariable
+	 * @return the expression where every occurrence of oldVariable has been replaced 
+	 *          by newVariable
+	 */
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable);
 }

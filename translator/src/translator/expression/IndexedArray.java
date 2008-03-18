@@ -180,6 +180,12 @@ public class IndexedArray implements SingleArray {
 		return this;
 	}
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		if(this.arrayName.equals(oldVariable.getVariableName()))
+			return newVariable;
+		return this;
+	}
+	
 	 // =================== ADDITIONAL METHODS ===============================================
 	
 	

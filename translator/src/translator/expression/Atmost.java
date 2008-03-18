@@ -181,6 +181,10 @@ public class Atmost implements GlobalConstraint {
 	}
 	
 	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		return this;
+	}
+	
 	// ============== ADDITIONAL VALUES ======================
 	
 	public boolean isAtmost() {

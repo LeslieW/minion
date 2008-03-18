@@ -143,4 +143,10 @@ public class SingleVariable implements Variable {
 	public boolean isBooleanVariable() {
 		return (this.domain.getType() == Domain.BOOL);
 	}
+	
+	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		if(this.variableName.equals(oldVariable.getVariableName()))
+			return newVariable;
+		return this;
+	}
 }
