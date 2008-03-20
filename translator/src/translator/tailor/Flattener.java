@@ -736,17 +736,60 @@ public class Flattener {
 			
 			// aux = Multiplication
 		
+			//System.out.println("Looking at right expression:"+rightExpression+" of expression:"+expression);
+			//System.out.println("this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator()):"+
+					//this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator()));
 			
 			rightExpression.willBeFlattenedToVariable(this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator()));
-			rightExpression = flattenExpression(rightExpression);
 			
-			if(expression.isGonnaBeFlattenedToVariable())
-				return reifyConstraint(new CommutativeBinaryRelationalExpression(auxVar,
+			if(rightExpression instanceof Multiplication) {
+				Multiplication multiplicationRight = (Multiplication) rightExpression;
+				
+				Multiplication processedMultiplicationRight = (Multiplication) multiplicationRight.copy();
+				processedMultiplicationRight.setWillBeConverteredToProductConstraint(true);
+				ProductConstraint productConstraintRight = (ProductConstraint) flattenMultiplication(processedMultiplicationRight);
+				
+				// expression is nested
+				if(expression.isGonnaBeFlattenedToVariable()) {
+					
+					ArithmeticAtomExpression auxVar2 = null;
+					
+					if(hasCommonSubExpression(multiplicationRight)) 	
+						auxVar2 = getCommonSubExpression(multiplicationRight);
+					else {
+						auxVar2 = new ArithmeticAtomExpression(createAuxVariable(multiplicationRight.getDomain()[0], 
+								                                                multiplicationRight.getDomain()[1]));
+						addToSubExpressions(multiplicationRight, auxVar2);
+						productConstraintRight.setResult(auxVar2);
+						this.constraintBuffer.add(productConstraintRight);
+					}
+					
+					return reifyConstraint(new CommutativeBinaryRelationalExpression(auxVar,expression.getOperator(),auxVar2));
+				}
+				// expression is NOT nested
+				else {
+					productConstraintRight.setResult(auxVar); // use the same aux var as the product above
+					
+					if(!hasCommonSubExpression(multiplicationRight)) 
+						addToSubExpressions(multiplicationRight, auxVar);
+					
+					return productConstraintRight;
+				}
+			}
+			
+			// else: the right expression is NOT a multiplication
+			else {
+				rightExpression = flattenExpression(rightExpression);
+			
+			
+				if(expression.isGonnaBeFlattenedToVariable())
+					return reifyConstraint(new CommutativeBinaryRelationalExpression(auxVar,
 																					expression.getOperator(),
 						                                                           rightExpression));
-			else return new CommutativeBinaryRelationalExpression(auxVar,
-					expression.getOperator(),
-	                rightExpression);
+				else return new CommutativeBinaryRelationalExpression(auxVar,
+						expression.getOperator(),
+						rightExpression);
+			}
 		}
 		else if(rightExpression instanceof Multiplication) {
 			// flatten multiplication to partwise product constraint
@@ -1750,8 +1793,9 @@ public class Flattener {
 		}
 		// we have to flatten the multiplication to a binary multiplication
 		else {
-			
+			System.out.println("We have to flatten multiplications to binary mults");
 			if(multiplication.isGonnaBeFlattenedToVariable()) {
+				System.out.println("We have to flatten the multiplication:"+multiplication);
 				Multiplication binaryMultiplication = flattenToBinaryMultiplication(((Multiplication) multiplication.copy()).getArguments(), null);
 				
 				ArithmeticAtomExpression auxVariable = null;
@@ -1768,6 +1812,7 @@ public class Flattener {
 				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().get(0),
 																								binaryMultiplication.getArguments().get(1)}, 
 																								auxVariable);
+				System.out.println("We have flattened the multiplication:"+multiplication+" to product constraint"+productConstraint);
 				this.constraintBuffer.add(productConstraint);
 				return auxVariable;
 				

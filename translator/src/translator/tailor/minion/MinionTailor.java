@@ -746,6 +746,7 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(Disjunction disjunction)
 		throws MinionException {
 		
+		
 		ArrayList<Expression> disjointArgs = disjunction.getArguments();
 		MinionAtom[] arguments = new MinionAtom[disjointArgs.size()];
 		
@@ -801,7 +802,7 @@ public class MinionTailor {
 		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
 		addToSubExpressions(reifiedConstraint, reifiedVariable);
 		
-		///System.out.println("Mapped it now to :"+reifiedConstraint+" with var:"+reifiedVariable);
+		//System.out.println("Mapped it now to :"+reifiedConstraint+" with var:"+reifiedVariable);
 		
 		if(reification.isGonnaBeFlattenedToVariable()) {
 			this.minionModel.addConstraint(reifiedConstraint);
