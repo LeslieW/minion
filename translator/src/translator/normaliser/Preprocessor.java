@@ -130,6 +130,7 @@ public class Preprocessor {
 		computeParameterArrayOffsets();
 		
 		normalisedModel.constantOffsetsFromZero = this.constantArrayOffsets;
+		normalisedModel.evaluateDomains();
 		
 		return normalisedModel;
 	}

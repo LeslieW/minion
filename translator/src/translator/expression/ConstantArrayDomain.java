@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class ConstantArrayDomain implements ConstantDomain {
+public class ConstantArrayDomain  implements ConstantDomain {
 
 	ConstantDomain baseDomain;
 	ConstantDomain[] indexDomains;

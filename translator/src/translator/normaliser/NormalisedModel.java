@@ -40,7 +40,7 @@ public class NormalisedModel {
 	
 	//=============== CONSTRUCTORS ==================================
 	
-	public NormalisedModel() {}
+	//public NormalisedModel() {}
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
 						   ArrayList<String> decisionVariablesNames,
@@ -80,11 +80,23 @@ public class NormalisedModel {
 		this.subExpressions = new HashMap<String,ArithmeticAtomExpression> ();
 		this.equalAtoms = new HashMap<String, ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
+	
 	}
 	 
 	// =============== METHODS =======================================
 
 
+	protected void evaluateDomains() {
+		
+		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
+			Domain d = this.decisionVariables.get(decisionVariablesNames.get(i));
+			d = d.evaluate();
+			this.decisionVariables.put(this.decisionVariablesNames.get(i), d);
+		}
+		
+	}
+	
+	
 	public int getOffsetFromZeroAt(String arrayName, int index) 
 		throws NormaliserException {
 		

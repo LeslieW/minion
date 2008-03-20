@@ -2389,6 +2389,10 @@ public class Flattener {
 								auxVariable = getCommonSubExpression(atom);
 							}
 							else {
+								//System.out.println("Domain "+domain+" is of type:"+domain.getType());
+								//domain = domain.evaluate(); 
+								//System.out.println("Domain "+domain+" is of type (after evaluation):"+domain.getType());
+								
 								if(!(domain instanceof ConstantArrayDomain))
 										throw new TailorException("Cannot index array element '"+atom+
 												"' because the indexed variable's domain '"+domain+"' is not a constant array domain.");
@@ -2605,26 +2609,35 @@ public class Flattener {
 						
 						
 						Domain d = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
-						//System.out.println("Domain of variable "+(arrayVariable).getArrayNameOnly()+" is :"+d.toString());
+						//System.out.println("Domain of variable "+(arrayVariable).getArrayNameOnly()+" is :"+d.toString()+" with type:"
+							//	+d.getType());
 						
 						if(!(d instanceof ArrayDomain) && !(d instanceof ConstantArrayDomain))
 							throw new TailorException("Indexed variable '"+(arrayVariable).getArrayNameOnly()+"' is not an array:"+atom);
 						
-						Domain[] indexDs = ((ArrayDomain) d).getIndexDomains();
-						BasicDomain[] indexDomains = new BasicDomain[indexDs.length];
-						for(int i=0; i<indexDs.length; i++) {
-							if(!(indexDs[i] instanceof BasicDomain))
-								throw new TailorException("");
-							indexDomains[i] = (BasicDomain) indexDs[i];
-						}
+						Domain[] indexDs;
 						
-						SimpleArray array = new SimpleArray((arrayVariable).getArrayNameOnly(),
+						if(d instanceof ArrayDomain) 
+							indexDs = ((ArrayDomain) d).getIndexDomains();
+						else // ConstantArrayDomain 							
+							indexDs = ((ConstantArrayDomain) d).getIndexDomains();
+							
+							BasicDomain[] indexDomains = new BasicDomain[indexDs.length];
+							for(int i=0; i<indexDs.length; i++) {
+								if(!(indexDs[i] instanceof BasicDomain))
+									throw new TailorException("");
+								indexDomains[i] = (BasicDomain) indexDs[i];
+							}
+						
+							SimpleArray array = new SimpleArray((arrayVariable).getArrayNameOnly(),
 								                            indexDomains,
 								                            (arrayVariable).getBaseDomain());
 						
 						
-						return new ElementConstraint(array,
+							return new ElementConstraint(array,
 												     index);
+						
+					
 					}
 					else if(indices.length == 2) {
 						Expression rowIndexExpression = indices[0].evaluate();
@@ -2667,7 +2680,7 @@ public class Flattener {
 							Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
 							domain = domain.evaluate();
 							//System.out.println("Domain "+domain+" is the domain of variable: "+arrayVariable.getArrayNameOnly()+
-							//		" and it is of Type: "+domain.getType());
+								//	" and it is of Type: "+domain.getType());
 							
 							if(domain instanceof ConstantArrayDomain) {
 							    //	 creating m[row,..]   (indexedArray)
