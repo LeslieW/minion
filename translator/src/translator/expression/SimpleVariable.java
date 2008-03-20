@@ -5,8 +5,13 @@ public class SimpleVariable implements Variable {
 	private String variableName;
 	private boolean isSearchVariable;
 	
+	private int lb;
+	private int ub;
+	
 	public SimpleVariable(String name) {
 		this.variableName = name;
+		this.lb = Expression.LOWER_BOUND;
+		this.ub = Expression.UPPER_BOUND;
 	}
 	
 	public String getVariableName() {
@@ -28,13 +33,19 @@ public class SimpleVariable implements Variable {
 	public Expression evaluate() {
 		return this;
 	}
-
+	
 	public int[] getDomain() {
-		return new int[] {Expression.LOWER_BOUND,
-						  Expression.UPPER_BOUND } ;
+		System.out.println("Getting domain of SimgleVariable :"+this);
+		return new int[] {this.lb,
+						  this.ub } ;
 		
 	}
 
+	public void setDomain(int lb, int ub) {
+		this.lb = lb;
+		this.ub = ub;
+	}
+	
 	public int getType() {
 		return Expression.SIMPLE_VARIABLE;
 	}

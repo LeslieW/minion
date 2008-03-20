@@ -64,6 +64,8 @@ public class Sum extends NaryArithmeticExpression {
 		// positive arguments first
 		for(int i=0; i<this.positiveArguments.size(); i++) {
 			int[]  iBounds = positiveArguments.get(i).getDomain();
+			//System.out.println("Lb of arg:"+this.positiveArguments.get(i)+" with type "+this.positiveArguments.get(i).getType()+" is :"+iBounds[0]);
+			//System.out.println("Ub of arg:"+this.positiveArguments.get(i)+" is :"+iBounds[1]);
 			lowerBound = lowerBound + iBounds[0];  // lowerBound = lowerBound + lb(E)
 			upperBound = upperBound + iBounds[iBounds.length-1]; // upperBound = upperBound + ub(E)
             // we use size because it might be a sparse domain..

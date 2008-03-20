@@ -1985,8 +1985,10 @@ public class Flattener {
 					throw new TailorException("Internal error: expect half empty sum constraint instead of:"+sumConstraint);
 				
 				
-				int lb = sumConstraint.getSumDomain()[0];
-				int ub = sumConstraint.getSumDomain()[1];
+				int lb = sum.getDomain()[0];
+				int ub = sum.getDomain()[1];//sumConstraint.getSumDomain()[1];
+				
+				//System.out.println("Flattening sum to aux var with domain:"+lb+".."+ub);
 				
 				ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 				sumConstraint.setResult(auxVariable, 

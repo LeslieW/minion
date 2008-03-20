@@ -204,10 +204,14 @@ public class Mapper {
 				predicateExpression = predicateExpression.insertValueForVariable(((ArithmeticAtomExpression) parameters.get(i)).getConstant(),
 															                      predicateParameters[i]);
 			
-			else if(parameters.get(i) instanceof ArithmeticAtomExpression)
+			else if(parameters.get(i) instanceof ArithmeticAtomExpression) {
 			// 2. insert constraint parameters for predicate parameters into the predicateExpression
-				predicateExpression = predicateExpression.replaceVariableWith(new SimpleVariable(predicateParameters[i]), 
-					                                                          ((ArithmeticAtomExpression) parameters.get(i)).getVariable());
+				
+				predicateExpression = predicateExpression.replaceVariableWith(
+											new SimpleVariable(predicateParameters[i]), 
+					                      ((ArithmeticAtomExpression) parameters.get(i)).getVariable());
+				
+			}
 			else throw new MapperException("Unknown or unsupported Parameter for Functional:"+parameters.get(i));
 		}
 		
@@ -304,7 +308,12 @@ public class Mapper {
 			}
 			// we have a variable
 			if(elem.charAt(0) == 'V') {
-				list.add(new ArithmeticAtomExpression(new SimpleVariable(elem.toString())));
+				Domain domain = this.variablesMap.get(elem.toString());
+				if(domain == null)
+					throw new MapperException("Unknown variable '"+elem.toString()+"'. Has no domain associated with it.");
+				
+				
+				list.add(new ArithmeticAtomExpression(new SingleVariable(elem.toString(), domain )));
 			} // we have an integer value
 			else list.add(new ArithmeticAtomExpression(new Integer(elem.toString())));
 			

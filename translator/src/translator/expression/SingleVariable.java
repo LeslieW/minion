@@ -26,7 +26,7 @@ public class SingleVariable implements Variable {
 			                     Domain domain) {
 		
 		this.variableName = variableName;
-		this.domain = domain;
+		this.domain = domain.evaluate();
 		this.isSearchVariable = true;
 	}	
 	
@@ -52,6 +52,7 @@ public class SingleVariable implements Variable {
 
 	
 	public int[] getDomain() {
+		//System.out.println("Getting domain of SimgleVariable :"+this);
 		if(this.domain instanceof ConstantDomain)
 			return ((ConstantDomain) this.domain).getRange();
 		

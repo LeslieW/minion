@@ -263,6 +263,9 @@ public class MinionTailor {
 		if(constraint instanceof TableConstraint)
 			return toMinion((TableConstraint) constraint);
 		
+		if(constraint instanceof AbsoluteValue) 
+			return toMinion((AbsoluteValue) constraint);
+		
 		throw new MinionException("Cannot tailor expression to Minion yet:"+constraint);
 	}
 	
@@ -813,6 +816,51 @@ public class MinionTailor {
 		
 		return new Reify(reifiedConstraint, reifiedVariable);
 	}
+	
+	
+	/**
+	 * Tailor absolute value constraint | x | into Minion. For this we need 
+	 * to flatten the representation as |x | = y and use y instead.
+	 * 
+	 * @param constraint
+	 * @return
+	 * @throws MinionException
+	 */
+	private MinionAtom toMinion(AbsoluteValue constraint) 
+		throws MinionException {
+		
+		if(constraint.getArgument() instanceof ArithmeticAtomExpression) {
+			ArithmeticAtomExpression e = (ArithmeticAtomExpression) constraint.getArgument();
+		
+			MinionAtom auxVar;
+			MinionAtom argument = toMinion(e);
+			
+			if(hasCommonSubExpression(argument)) {
+				auxVar = getCommonSubExpression(argument);
+			}
+			else {
+				int ub = e.getDomain()[1];
+				
+				if(ub <0) ub = -ub;
+				
+				auxVar = createMinionAuxiliaryVariable(0,ub);
+				addToSubExpressions(argument, auxVar);
+			}
+			
+			/*if(constraint.isGonnaBeFlattenedToVariable()) {
+				return auxVar;
+			} 
+			else return new MinionAbsoluteValue(argument, auxVar);
+			*/
+			this.minionModel.constraintList.add(new MinionAbsoluteValue(argument, auxVar));
+			return auxVar;
+		}
+		
+		else throw new MinionException("Internal error or invalid argument. Cannot tailor constraint expression '"+constraint.getArgument()
+				+"' as argument of an absolute constraint: "+constraint);
+		
+	}
+	
 	
 	/**
 	 * Translate a sum constraint to Minion. A sum constraint is a collection
@@ -1383,10 +1431,23 @@ public class MinionTailor {
 		Expression rightExpression = constraint.getRightArgument();
 		ArithmeticAtomExpression rightArgument = null;
 		
+		MinionAtom rightAtom = null;
+		MinionAtom leftAtom = null;
+		
 		// get the left and right atoms 
 		if(!(leftExpression instanceof ArithmeticAtomExpression)) {
 			if(leftExpression instanceof RelationalAtomExpression) 
 				leftArgument = ((RelationalAtomExpression)leftExpression).toArithmeticExpression();
+			else if(leftExpression instanceof UnaryMinus) {
+				UnaryMinus minusExpression = (UnaryMinus) leftExpression;
+				if(minusExpression.getArgument() instanceof ArithmeticAtomExpression) {
+					return new MinusEq(toMinion(rightArgument), toMinion((ArithmeticAtomExpression) minusExpression.getArgument()));
+				}
+				else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
+			}
+			else if(leftExpression instanceof AbsoluteValue) {
+				leftAtom = toMinion((AbsoluteValue) leftExpression);
+			}
 			else throw new MinionException("Cannot translate constraint nested in another expression as in:"+constraint);	
 				
 		}
@@ -1402,6 +1463,9 @@ public class MinionTailor {
 				}
 				else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
 			}
+			else if(rightExpression instanceof AbsoluteValue) {
+				rightAtom = toMinion((AbsoluteValue) rightExpression);
+			}
 			else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
 				
 		}
@@ -1409,15 +1473,19 @@ public class MinionTailor {
 		
 		MinionConstraint minionConstraint = null;
 		
+		if(leftAtom == null) leftAtom = toMinion(leftArgument);
+		if(rightAtom == null) rightAtom = toMinion(rightArgument);
+		
+		
 		if(operator == Expression.EQ ||
 				operator == Expression.IFF) {
 			
-			minionConstraint =  new EqConstraint(toMinion(leftArgument), 
-					                toMinion(rightArgument));
+			minionConstraint =  new EqConstraint(leftAtom, 
+					                		     rightAtom);
 		}
 		else if(operator == Expression.NEQ) {
-			minionConstraint =  new DiseqConstraint(toMinion(leftArgument), 
-	                toMinion(rightArgument));
+			minionConstraint =  new DiseqConstraint(leftAtom, 
+	                								rightAtom);
 		}
 		else throw new MinionException("Unknown commutative binary relation:"+constraint);	
 		
