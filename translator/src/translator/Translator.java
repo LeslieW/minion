@@ -332,7 +332,7 @@ public class Translator {
 				long stopTime = System.currentTimeMillis();
 				System.out.println("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
-			
+			//System.out.println("Normalisation Time: "+(System.currentTimeMillis() - startTime)/1000.0+"sec");
 			
 			// ---- 3. flatten the essence' problem model according to the specified solver
 			startTime = System.currentTimeMillis();

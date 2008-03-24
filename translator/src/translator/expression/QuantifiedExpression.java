@@ -152,7 +152,9 @@ public class QuantifiedExpression implements RelationalExpression {
 	public Expression insertValueForVariable(int value, String variableName) {
 		
 		this.domain.insertValueForVariable(value, variableName);
+		//System.out.println("inserted value in domain:"+domain);
 		this.quantifiedExpression.insertValueForVariable(value, variableName);
+		//System.out.println("inserted value in qExpression:"+quantifiedExpression);
 		
 		return this;
 	}

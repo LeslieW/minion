@@ -653,7 +653,7 @@ public class MinionModel {
 							number = number+solverOutputString.charAt(j);
 							j++;
 						}
-						System.out.println("Number :"+number+" and intList:"+intList);
+						//System.out.println("Number :"+number+" and intList:"+intList);
 						intList = intList.concat(number+", ");
 					}
 					intList = intList.substring(0, intList.length()-2);
@@ -800,7 +800,7 @@ public class MinionModel {
 						i+16 < solverOutput.length()) {
 					i++;
 				}
-				System.out.println("translating Minion part to Essence:"+solverOutput.substring(0, i+16)+"\n\n\n");
+				//System.out.println("translating Minion part to Essence:"+solverOutput.substring(0, i+16)+"\n\n\n");
 				
 				essence = essence+printEssenceOptimisationSolution(solverOutput.substring(0,i+16))+"\n\n$------------------------\n";
 				solverOutput = solverOutput.delete(0, i+16);

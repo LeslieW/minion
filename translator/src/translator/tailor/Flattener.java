@@ -2228,16 +2228,53 @@ public class Flattener {
 		argument = flattenExpression(argument);
 		argument = argument.evaluate();
 		
-		if(expression instanceof UnaryMinus)
-			expression = new  UnaryMinus(argument);
+		//System.out.println("Flattened expression '"+expression+"' 's argument to: "+argument);
 		
-		else if(expression instanceof AbsoluteValue)
-			expression = new AbsoluteValue(argument);
+		if(expression instanceof UnaryMinus) {
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				UnaryMinus uminusExpr = new UnaryMinus(argument);
+				ArithmeticAtomExpression aux;
+				
+				if(hasCommonSubExpression(uminusExpr))
+					aux = getCommonSubExpression(uminusExpr);
+				else { 
+					aux = new ArithmeticAtomExpression(this.createAuxVariable(uminusExpr.getDomain()[0], uminusExpr.getDomain()[1]));
+					this.addToSubExpressions(uminusExpr, aux);
+				}
+				
+				this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(aux, Expression.EQ, uminusExpr));
+				return aux;
+			} 
+			
+			// expression is not flattened to a variable
+			else 
+				return new UnaryMinus(argument);
+		}
+			
+		else if(expression instanceof AbsoluteValue) {
 		
-		if(expression.isGonnaBeFlattenedToVariable())
-			return reifyConstraint(expression);
-		
-		else return expression;
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				AbsoluteValue absValue = new AbsoluteValue(argument);
+				ArithmeticAtomExpression aux;
+				
+				if(hasCommonSubExpression(absValue))
+					aux = getCommonSubExpression(absValue);
+				else { 
+					aux = new ArithmeticAtomExpression(this.createAuxVariable(absValue.getDomain()[0], absValue.getDomain()[1]));
+					this.addToSubExpressions(absValue, aux);
+				}
+				
+				this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(aux, Expression.EQ, absValue));
+				return aux;
+			} 
+			
+			// expression is not flattened to a variable
+			else 
+				return new AbsoluteValue(argument);
+		}
+			
+		else throw new TailorException("Unknown unary arithmetic constraint:"+expression);
 	}
 	
 	/**

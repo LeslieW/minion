@@ -1361,7 +1361,7 @@ public class MinionTailor {
 		throws MinionException {
 		
 		// lex-constraints!!!! -> move them to another expression type!!
-		
+		//System.out.println("Translating expression: "+constraint);
 		
 		int operator = constraint.getOperator();
 		Expression leftExpression = constraint.getLeftArgument();
@@ -1369,10 +1369,23 @@ public class MinionTailor {
 		Expression rightExpression = constraint.getRightArgument();
 		ArithmeticAtomExpression rightArgument = null;
 		
+		MinionAtom rightAtom = null;
+		MinionAtom leftAtom = null;
+		
 		// get the left and right atoms 
 		if(!(leftExpression instanceof ArithmeticAtomExpression)) {
 			if(leftExpression instanceof RelationalAtomExpression) 
 				leftArgument = ((RelationalAtomExpression)leftExpression).toArithmeticExpression();
+			/* else if(leftExpression instanceof UnaryMinus) {
+				UnaryMinus minusExpression = (UnaryMinus) leftExpression;
+				if(minusExpression.getArgument() instanceof ArithmeticAtomExpression) {
+					return new MinusEq(toMinion(rightArgument), toMinion((ArithmeticAtomExpression) minusExpression.getArgument()));
+				}
+				else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
+			}
+			else if(leftExpression instanceof AbsoluteValue) {
+				leftAtom = toMinion((AbsoluteValue) leftExpression);
+			} */
 			else throw new MinionException("Cannot translate constraint nested in another expression as in:"+constraint);	
 				
 		}
@@ -1381,10 +1394,24 @@ public class MinionTailor {
 		if(!(rightExpression instanceof ArithmeticAtomExpression)) {
 			if(rightExpression instanceof RelationalAtomExpression) 
 				rightArgument = ((RelationalAtomExpression)rightExpression).toArithmeticExpression();
+			/*else if(rightExpression instanceof UnaryMinus) {
+				UnaryMinus minusExpression = (UnaryMinus) rightExpression;
+				if(minusExpression.getArgument() instanceof ArithmeticAtomExpression) {
+					// TODO: fix this!
+					return new MinusEq(toMinion(leftArgument), toMinion((ArithmeticAtomExpression) minusExpression.getArgument()));
+				}
+				else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
+			}
+			else if(rightExpression instanceof AbsoluteValue) {
+				rightAtom = toMinion((AbsoluteValue) rightExpression);
+			} */
 			else throw new MinionException("Cannot translate constraint nested in another expression as in:"+constraint);	
 				
 		}
 		else rightArgument = (ArithmeticAtomExpression) rightExpression;
+		
+		if(leftAtom == null) leftAtom = toMinion(leftArgument);
+		if(rightAtom == null) rightAtom = toMinion(rightArgument);
 		
 		MinionConstraint minionConstraint = null;
 		
@@ -1674,7 +1701,7 @@ public class MinionTailor {
 	
 	protected ArithmeticAtomExpression getCommonSubExpression(Expression constraint) {
 		this.usedCommonSubExpressions++;
-		System.out.println("Used common subexpression:"+constraint);
+		//System.out.println("Used common subexpression:"+constraint);
 		return this.essenceSubExpressions.get(constraint.toString());
 		
 	}

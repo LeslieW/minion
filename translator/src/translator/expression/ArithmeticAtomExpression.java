@@ -148,6 +148,9 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 	}
 	
 	public Expression insertValueForVariable(int value, String variableName) {
+		
+		//System.out.println("inserting value for "+variableName+" with value "+value+" does it match?:"+this.toString());
+		
 		if(this.variable != null) {
 			// if this is a simple decision variable
 			if(this.variable instanceof SingleVariable || this.variable instanceof SimpleVariable) {

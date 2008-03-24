@@ -19,7 +19,7 @@ import translator.xcsp2ep.Xcsp2Ep;
 public class Translate {
 
 	public static final String GUI_NAME = "TAILOR v0.2";
-	public static final String EMPTY_PARAM_STRING = "language ESSENCE' 1.b.a\n";
+	public static final String EMPTY_PARAM_STRING = "ESSENCE' 1.0\n";
 
 	/** Available flags */
 	public static final String XCSP_CONVERSION = "xcsp";
@@ -363,14 +363,14 @@ public class Translate {
 		throws IOException {
 		
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
-    	String loadedString = "";
+    	StringBuffer loadedString = new StringBuffer("");
     	String s = reader.readLine();
     	while(s != null && !(s.equalsIgnoreCase("null"))) {
-    		loadedString = loadedString.concat(s+"\n");
+    		loadedString.append(s+"\n");
     		s = reader.readLine();
     	}
     	reader.close();
-    	return loadedString;
+    	return loadedString.toString();
 		
 	}
 	

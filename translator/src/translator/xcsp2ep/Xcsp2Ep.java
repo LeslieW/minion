@@ -39,7 +39,7 @@ public class Xcsp2Ep{
 	 * @throws MapperException
 	 * @throws Exception
 	 */
-	public static void translate(String inputFile, String outputFile) 
+	public static void translateXCSP(String inputFile, String outputFile) 
 		throws MapperException, Exception {
 		
 		writeStartMessage(inputFile);
@@ -63,7 +63,7 @@ public class Xcsp2Ep{
 	}
 	
 	
-	public static String translate(String fileName) 
+	public static String translateXCSP(String fileName) 
 		throws MapperException, Exception {
 		
 		writeStartMessage(fileName);
@@ -160,10 +160,10 @@ public class Xcsp2Ep{
 		try {
 			
 			if(args.length == 1) 
-				translate(args[0]);
+				translateXCSP(args[0]);
 			
 			else if(args.length == 2)
-				translate(args[0], args[1]);
+				translateXCSP(args[0], args[1]);
 			
 			else writeHelpMessage();
 			

@@ -97,6 +97,8 @@ public class Preprocessor {
 				                                      this.constantArrays);
  		HashMap<String,translator.expression.Domain> decisionVariables = this.expressionMapper.getNewDecisionVariables(decisionVariablesNames);
  		
+ 		//System.out.println("Mapped decision variables:"+decisionVariables);
+ 		
  		for(int i=0; i<this.todoConstantArrays.size(); i++) {
  			ExpressionConstant c = todoConstantArrays.get(i);
  			computeConstantArrayOffset(c.getName(), c.getDomain()); 
@@ -106,6 +108,7 @@ public class Preprocessor {
 		readParameters(problemSpecification, parameterSpecification);
 		mergeConstantAndParameterLists();
 		this.expressionMapper.constantArrays = this.constantArrays; // update the constant arrays
+		//System.out.println("Mapped and merged constants and parameters");
 		
         //----------------- constant arrays -------------------------------------
 		HashMap<String, translator.expression.ConstantArray> mappedConstantArrays = mapConstants(this.constantArrays);
@@ -114,10 +117,11 @@ public class Preprocessor {
 		
 		// -------------- map constraints -------------------------------------
 		ArrayList<translator.expression.Expression> constraintsList = expressionMapper.mapExpressions(problemSpecification.getExpressions());
-	
+	//	System.out.println("Mapped constraints:"+constraintsList);
 		
 		// ----------- map objective -----------------------------------------
 		Objective objective = this.expressionMapper.mapObjective(problemSpecification.getObjective());
+		//System.out.println("Mapped objective:"+objective);
 		
 		NormalisedModel normalisedModel  = new NormalisedModel(decisionVariables,
                 decisionVariablesNames,
@@ -127,11 +131,14 @@ public class Preprocessor {
                 objective);
 		
 		normalisedModel = insertParameters(normalisedModel);
+		//System.out.println("Inserted parameters");
 		computeParameterArrayOffsets();
+		//System.out.println("Computed param offsets");
 		
 		normalisedModel.constantOffsetsFromZero = this.constantArrayOffsets;
 		normalisedModel.evaluateDomains();
 		
+		//System.out.println("Finished generating and preprocessing normalised model");
 		return normalisedModel;
 	}
 	
@@ -170,6 +177,7 @@ public class Preprocessor {
 		for(int i=0; i<this.constantNames.size(); i++) {
 			
 			String constantName = constantNames.get(i);
+			//System.out.println("Starting parameter insertion of:"+constantName);
 			
 			// ---------- we have an expression constant ----------------------
 			if(this.constantExpressions.containsKey(constantName)) {
@@ -181,32 +189,46 @@ public class Preprocessor {
 				if(constant.getType() == translator.expression.Expression.INT) {
 					int value = ((ArithmeticAtomExpression) constant).getConstant();
 					
+					System.out.println("INT parameter insertion:"+value);
+					
 					for(int j=0; j<constraintList.size(); j++) {
+						//System.out.println("INT parameter insertion:"+value+" in constraint:"+constraintList.get(j));
 						constraintList.get(j).insertValueForVariable(value, constantName);
+						
 					}
 					for(int j=0; j<this.decisionVariablesNames.size(); j++) {
+						//System.out.println("INT parameter insertion:"+value+" in decision vars ");
 						translator.expression.Domain domain = decisionVariables.get(decisionVariablesNames.get(j));
 						domain = domain.insertValueForVariable(value, constantName);
 						decisionVariables.put(this.decisionVariablesNames.get(j), domain);
+						
 					}
 					
 					for(int j=0; j<this.todoParameterArrayNames.size(); j++) {
+						//System.out.println("INT parameter insertion:"+value+" in todo parameter arrays ");
 						String arrayName = this.todoParameterArrayNames.get(j);
 						translator.expression.Domain domain = this.todoParameterDomains.get(arrayName);
 						domain = domain.insertValueForVariable(value, constantName);
 						this.todoParameterDomains.put(arrayName, domain);
+						
 					}
 					
 					for(int j=0; j<constantHeap.size(); j++) {
+						//System.out.println("INT parameter insertion:"+value+" in constant heap"+constantHeap);
 						translator.expression.Expression constExpr = constantHeapMap.get(constantHeap.get(j)); 
 						constExpr = constExpr.insertValueForVariable(value, constantName);
 						constantHeapMap.put(constantHeap.get(j),constExpr);
+						
 					}
 					for(int j=0; j<domainHeap.size(); j++) {
+						//System.out.println("INT parameter insertion:"+value+" in domain heap: "+domainHeap);
 						translator.expression.Domain constDomain = domainHeapMap.get(domainHeap.get(j));
 						constDomain = constDomain.insertValueForVariable(value, constantName);
 						domainHeapMap.put(domainHeap.get(j), constDomain);
+						
 					}
+					
+					//System.out.println("part 1 finished parameter insertion of "+constantName);
 					
 					if(model.objective.objective != null)
 						model.objective.objective = model.objective.objective.insertValueForVariable(value, constantName);
@@ -356,11 +378,13 @@ public class Preprocessor {
 		}
 		
 		
-		
+	//	System.out.println("finished parameter insertion part 1.");
 		
       //------------- then iterate over all the constants that are still left in the heap	
 		
 		for(int i=0; i<constantHeap.size(); i++) {
+			
+			//System.out.println("Working on constant heap:"+constantHeap);
 			
 			String constantName = constantHeap.get(i);
 			translator.expression.Expression constant = constantHeapMap.get(constantName);

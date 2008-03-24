@@ -849,20 +849,20 @@ public class TailorGUI extends javax.swing.JFrame {
 			
 		    try {
 		    	BufferedReader reader = new BufferedReader(new FileReader(file));
-		    	String loadedString = "";
+		    	StringBuffer loadedString = new StringBuffer("");
 		    	String s = reader.readLine();
 		    	while(s != null && !(s.equalsIgnoreCase("null"))) {
 		    		//s = reader.readLine();
 		    		//if(s != null || s.equalsIgnoreCase("null")) break;
-		    		loadedString = loadedString.concat(s+"\n");
+		    		loadedString.append(s+"\n");
 		    		s = reader.readLine();
 		    	}
 		    	
 		    	
 		    	if(command.equalsIgnoreCase(LOAD_PROBLEM))
-		    		writeOnProblemInput(loadedString);
+		    		writeOnProblemInput(loadedString.toString());
 		    	else if(command.equalsIgnoreCase(LOAD_PARAMETER))
-		    		writeOnParameterInput(loadedString);
+		    		writeOnParameterInput(loadedString.toString());
 		    	
 		    	reader.close();
 		    	

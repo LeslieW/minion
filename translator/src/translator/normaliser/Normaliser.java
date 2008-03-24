@@ -98,6 +98,8 @@ public class Normaliser implements NormaliserSpecification {
 		NormalisedModel normalisedModel = this.preprocessor.proprocessModel(this.problemSpecification,
 				this.parameterSpecification);
 		
+		//System.out.println("Preprocessed model");
+		
 		// --------2. insert constants and parameters --------------
 		normalisedModel = this.preprocessor.insertParameters(normalisedModel);
 		
