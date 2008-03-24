@@ -1793,9 +1793,9 @@ public class Flattener {
 		}
 		// we have to flatten the multiplication to a binary multiplication
 		else {
-			System.out.println("We have to flatten multiplications to binary mults");
+			//System.out.println("We have to flatten multiplications to binary mults");
 			if(multiplication.isGonnaBeFlattenedToVariable()) {
-				System.out.println("We have to flatten the multiplication:"+multiplication);
+				//System.out.println("We have to flatten the multiplication:"+multiplication);
 				Multiplication binaryMultiplication = flattenToBinaryMultiplication(((Multiplication) multiplication.copy()).getArguments(), null);
 				
 				ArithmeticAtomExpression auxVariable = null;

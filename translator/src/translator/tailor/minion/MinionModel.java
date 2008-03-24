@@ -15,7 +15,7 @@ import translator.solver.Minion;
 public class MinionModel {
 
 	public final String MINION_HEADER = "MINION 3";
-	public final int DISCRETE_UPPER_BOUND = 20;
+	public final int DISCRETE_UPPER_BOUND = 200;
 	public final String REDUCED_ARRAY_SUFFIX = "_ORIG";
 	
 	ArrayList<MinionConstraint> constraintList;
@@ -30,6 +30,8 @@ public class MinionModel {
 	MinionAtom objective;
 	boolean maximising;
 	boolean printStatistics;
+	
+	HashMap<String, Boolean> variableAppearsInDiseqConstraint;
 	
 	// ========== CONSTRUCTOR =========================================
 	public MinionModel(ArrayList<MinionConstraint> constraints,
@@ -48,6 +50,7 @@ public class MinionModel {
 		this.variableAliases = new ArrayList<String>();
 		this.printStatistics = true;
 		this.equalAtoms = new HashMap<String,MinionAtom>();
+		this.variableAppearsInDiseqConstraint = new HashMap<String, Boolean>();
 	}
 	
 	
@@ -60,6 +63,10 @@ public class MinionModel {
 	
 	public void setAmountOfUsedEqualSubExpressions(int noEqualSubExpressionsUsed) {
 		this.usedInferredEqualSubExpressions = noEqualSubExpressionsUsed;
+	}
+	
+	public void setVariableAppearsInDisequality(String variableName) {
+		this.variableAppearsInDiseqConstraint.put(variableName, new Boolean(true));
 	}
 	
 	public void setObjective(MinionAtom objective, boolean isMaximising) {

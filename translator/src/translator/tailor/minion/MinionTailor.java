@@ -607,6 +607,8 @@ public class MinionTailor {
 		throws MinionException {
 		
 		Domain domain = this.normalisedModel.getDomainOfVariable(arrayName);
+		//System.out.println("Checking if domain is full: "+domain+" with type:"+domain.getType());
+		
 		
 		if(domain == null)
 			throw new MinionException("Unknown array variable '"+arrayName+", or cannot tailor constant vector to Minion");
@@ -614,6 +616,25 @@ public class MinionTailor {
 		
 		if(domain instanceof ArrayDomain) {
 			ArrayDomain arrayDomain  = (ArrayDomain) domain;
+			Domain[] indexDomains = arrayDomain.getIndexDomains();
+			if(index < indexDomains.length && index >= 0) {
+				Domain indexDomain = indexDomains[index];
+					
+				if(indexDomain instanceof ConstantDomain) { 
+						if(indexDomain.getType() == d.getType()) {
+						    if(d.isSmallerThanSameType((ConstantDomain) indexDomain) == Expression.EQUAL)
+						    	return true;
+						    
+						}
+				}
+				return false;
+			}
+			else throw new MinionException("Wrong dimensions: the variable '"+arrayName+"' has been declared to be a "+indexDomains.length+
+					"-dimensional array/matrix, so you cannot index it at dimension '"+index+"', sorry.");
+			
+		}
+		else if (domain instanceof ConstantArrayDomain) {
+			ConstantArrayDomain arrayDomain  = (ConstantArrayDomain) domain;
 			Domain[] indexDomains = arrayDomain.getIndexDomains();
 			if(index < indexDomains.length && index >= 0) {
 				Domain indexDomain = indexDomains[index];
