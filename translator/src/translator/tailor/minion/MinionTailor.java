@@ -1369,8 +1369,8 @@ public class MinionTailor {
 		Expression rightExpression = constraint.getRightArgument();
 		ArithmeticAtomExpression rightArgument = null;
 		
-		MinionAtom rightAtom = null;
-		MinionAtom leftAtom = null;
+		//MinionAtom rightAtom = null;
+		//MinionAtom leftAtom = null;
 		
 		// get the left and right atoms 
 		if(!(leftExpression instanceof ArithmeticAtomExpression)) {
@@ -1410,8 +1410,8 @@ public class MinionTailor {
 		}
 		else rightArgument = (ArithmeticAtomExpression) rightExpression;
 		
-		if(leftAtom == null) leftAtom = toMinion(leftArgument);
-		if(rightAtom == null) rightAtom = toMinion(rightArgument);
+		//if(leftAtom == null) leftAtom = toMinion(leftArgument);
+		//if(rightAtom == null) rightAtom = toMinion(rightArgument);
 		
 		MinionConstraint minionConstraint = null;
 		
