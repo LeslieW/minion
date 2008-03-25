@@ -1635,6 +1635,7 @@ public class MinionTailor {
 		
 		else {
 			Variable variable = atom.getVariable();
+			//System.out.println("Mapping Atom "+atom+" to minion");
 			
 			if(variable instanceof ArrayVariable) {
 				ArrayVariable arrayElement = (ArrayVariable) variable;

@@ -87,6 +87,8 @@ public class MinionModel {
 	protected void applyEqualAtoms() 
 		throws MinionException {
 		
+		//System.out.println("Equal atoms are: "+equalAtoms);
+		
 		// if there are not equal atoms, do nothing
 		if(this.equalAtoms.size() == 0)
 			return;
@@ -146,6 +148,7 @@ public class MinionModel {
 							if(this.equalAtoms.containsKey(replacedVarName+"["+col+"]")) {
 								// replace the element with the equal atom at this position in the alias vector
 								String replacedElement = equalAtoms.get(replacedVarName+"["+col+"]").toString();
+								//System.out.println("MinionAtom "+replacedVarName+"["+col+"]"+" equals replacing atom:"+replacedElement);
 								
 								// if we replace something from our own vector, we need to get the new name...
 								if(replacedElement.startsWith(replacedVarName+"[")) {
@@ -213,6 +216,7 @@ public class MinionModel {
 								if(this.equalAtoms.containsKey(replacedVarName+"["+row+", "+col+"]")) {
 								// replace the element with the equal atom at this position in the alias vector
 									MinionAtom replacingAtom = equalAtoms.get(replacedVarName+"["+row+", "+col+"]");
+									//System.out.println("MinionAtom "+replacedVarName+"["+col+"]"+" equals replacing atom: "+replacingAtom);
 									String replacedElement = replacingAtom.getVariableName();
 									
 								// 	if we replace something from our own matrix, we need to get the new name and the new index
@@ -224,7 +228,7 @@ public class MinionModel {
 										
 										aliasMatrix.placeElementAt(newVarName, row,col);
 									}
-									else aliasMatrix.placeElementAt(replacedElement, row,col);
+									else aliasMatrix.placeElementAt(replacingAtom.toString(), row,col);
 								
 									elementHasBeenReplaced = true;
 								}
@@ -376,6 +380,7 @@ public class MinionModel {
 		
 		return "# amount of common subexpressions used:"+this.usedCommonSubExpressions+"\n" +
 				"# amount of inferred common subexpressions used:"+this.usedInferredEqualSubExpressions+"\n"+
+				"# amount of original variables saved (over direct equality):"+this.equalAtoms.size()+"\n"+
 				"# amount of constraints:"+this.constraintList.size()+"\n"+
 				"# amount of auxiliary variables: "+this.auxVariables.size()+"\n\n";
 	}
@@ -488,7 +493,7 @@ public class MinionModel {
 		
 		
 		s.append("\n# aliases\n");
-		for(int i=0; i<this.variableAliases.size(); i++)
+		for(int i=this.variableAliases.size()-1; i>= 0; i--)
 			s.append(variableAliases.get(i)+"\n");
 		
 		
@@ -1027,10 +1032,7 @@ public class MinionModel {
 	
 	public void printModelStatistics() {
 		if(this.settings.giveTranslationInfo()) {
-			System.out.println("Amount of Auxiliary Variables:"+this.auxVariables.size());
-			System.out.println("Amount of Common Subexpressions:"+this.usedCommonSubExpressions);
-			System.out.println("Amount of inferred common subexpressions:"+this.usedInferredEqualSubExpressions);
-			System.out.println("Amount of constraints:"+this.constraintList.size());
+			System.out.println(this.printStatistics());
 		}
 	}
 	

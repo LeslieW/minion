@@ -601,7 +601,12 @@ public class Flattener {
 				(leftExpression instanceof ArithmeticAtomExpression || leftExpression instanceof RelationalAtomExpression) &&
 				(rightExpression instanceof ArithmeticAtomExpression || rightExpression instanceof RelationalAtomExpression) &&
 				(leftExpression.getType() != Expression.INT && leftExpression.getType() != Expression.BOOL &&
-					rightExpression.getType() != Expression.INT && rightExpression.getType() != Expression.BOOL )) {
+					rightExpression.getType() != Expression.INT && rightExpression.getType() != Expression.BOOL )){
+			// TODO: might not necessary
+			//System.out.println("Found equal atoms: left:"+leftExpression+" = right:"+rightExpression);
+			
+			rightExpression.willBeFlattenedToVariable(true);
+			rightExpression = flattenExpression(rightExpression);
 			
 			addToDirectlyEqualAtoms(rightExpression, leftExpression);
 			// then return and don't translate this expression
