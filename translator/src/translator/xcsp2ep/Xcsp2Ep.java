@@ -25,9 +25,10 @@ public class Xcsp2Ep{
 
 	// the file we will write the Essence' instance into
 	private static final String OUTPUT_FILE_NAME = "out.eprime";
+	private static boolean WRITE_TIME_STATS;
 	
-	
-	public Xcsp2Ep() {
+	public Xcsp2Ep(boolean giveTranslationTimeInfo) {
+		WRITE_TIME_STATS = giveTranslationTimeInfo;
 	}
 	
 	/**
@@ -92,14 +93,23 @@ public class Xcsp2Ep{
 		throws MapperException, Exception {
 		
 		boolean displayParsedInstance = false;
+		long startTime = System.currentTimeMillis();
+		
 		InstanceParser parser = new InstanceParser();
 		parser.loadInstance(fileName);
 		XCSPInstance xcspInstance = parser.parse(displayParsedInstance);
+		long stopTime = System.currentTimeMillis();
+		double time = (stopTime - startTime) / 1000.0;
+		writeTimeInfo("XCSP parsing time: "+time);
 		
 		Mapper mapper = new Mapper();
 		EssencePModel essencePmodel = mapper.mapToEssencePrime(xcspInstance);
 		writeStringIntoFileNonStatic(fileName+".eprime", essencePmodel.toString());
-	
+		stopTime = System.currentTimeMillis();
+		time = (stopTime - startTime) / 1000.0;
+		writeTimeInfo("Time for Mapping XCSP to Essence': "+time);
+		System.out.println("Written Essence' model into file: "+fileName+".eprime");
+		
 		return essencePmodel.mapToNormalisedModel();
 	}
 	
@@ -175,4 +185,11 @@ public class Xcsp2Ep{
 		}
 		
 	}
+	
+	public static void writeTimeInfo(String info) {
+		if(WRITE_TIME_STATS)
+			System.out.println(info);
+		
+	}
+	
 }

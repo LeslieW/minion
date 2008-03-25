@@ -162,7 +162,7 @@ public class Translator {
 			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 		} catch(Exception e) {
@@ -200,7 +200,7 @@ public class Translator {
 			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 		} catch(Exception e) {
@@ -235,14 +235,14 @@ public class Translator {
 			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 			// tailoring
 			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 		} catch(Exception e) {
@@ -275,7 +275,7 @@ public class Translator {
 				this.targetSolverInstance = this.tailor.tailor(this.normalisedModel, targetSolver);
 				if(this.settings.giveTranslationTimeInfo) {
 					long stopTime = System.currentTimeMillis();
-					System.out.println("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
+					writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 				}
 				return true;
 				
@@ -321,7 +321,7 @@ public class Translator {
 			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Parse Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Parse Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 			// ---- 2. then normalise the essence' problem model
@@ -330,7 +330,7 @@ public class Translator {
 			this.normalisedModel = this.normaliser.normalise(NormaliserSpecification.NORMALISE_FULL);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			//System.out.println("Normalisation Time: "+(System.currentTimeMillis() - startTime)/1000.0+"sec");
 			
@@ -342,7 +342,7 @@ public class Translator {
 			this.normalisedModel = tailor.flattenModel();			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Flattening Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 			// ---- 4. tailor the essence' problem model to the target solver's input format
@@ -350,7 +350,7 @@ public class Translator {
 			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			return true;			
 			
@@ -453,16 +453,16 @@ public class Translator {
 	public String printConstraints() {
 		if(this.normalisedModel != null) {
 			ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
-			String s= constraints.get(0).toString();
+			StringBuffer s= new StringBuffer(constraints.get(0).toString());
 			for(int i=1; i<constraints.size(); i++)
-				s = s.concat(",\n\t"+constraints.get(i));
+				s.append(",\n\t"+constraints.get(i));
 			return s+"\n";
 		}
 		else {
 			translator.conjureEssenceSpecification.Expression[] constraints = this.problemSpecification.getExpressions();
-			String s = constraints[0].toString();
+			StringBuffer s = new StringBuffer(constraints[0].toString());
 			for(int i=1; i<constraints.length; i++) 
-				s = s.concat(",\n\t"+constraints[i].toString());
+				s.append(",\n\t"+constraints[i].toString());
 			return s+"\n";
 		}
 	}
@@ -491,5 +491,10 @@ public class Translator {
 	
 	public String[] getPrintedVariables() {
 		return this.settings.getPrintedVariables();
+	}
+	
+	private void writeTimeInfo(String info) {
+		if(this.settings.giveTranslationInfo)
+			System.out.println(info);
 	}
 }

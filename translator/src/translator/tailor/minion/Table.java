@@ -25,33 +25,33 @@ public class Table implements MinionConstraint {
 	
 	public String toString() {
 		
-		String s = "table(";
+		StringBuffer s = new StringBuffer("table(");
 	
-		String variables = "";
+		StringBuffer variables; // = new StringBuffer("");
 		
 		// depending on if we have a list of variables or an array
 		if(this.variableList != null) {
-			variables = "[";
+			variables = new StringBuffer("[");
 			for(int i=0; i<this.variableList.length; i++) {
-				if(i >0) variables = variables+",";
-				variables = variables.concat(variableList[i]+"");
+				if(i >0) variables.append(",");
+				variables.append(variableList[i]+"");
 			}
-			variables = variables+"]";
+			variables.append("]");
 		}
 		else {
-			variables = this.array.toString();
+			variables = new StringBuffer(this.array.toString());
 		}
 		
 		
-		s = s+variables;
+		s.append(variables);
 		
-		String tuples = "";
+		StringBuffer tuples = new StringBuffer("");
 		for(int i=0; i<this.tuples.length; i++) {
-			if(i > 0) tuples = tuples+", ";
-			tuples = tuples+this.tuples[i];
+			if(i > 0) tuples.append(", ");
+			tuples.append(this.tuples[i]);
 		}
 		
-		return s+",{"+tuples+"})";
+		return s.append(",{"+tuples+"})").toString();
 	}
 	
 }

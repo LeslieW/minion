@@ -894,8 +894,10 @@ public class TailorGUI extends javax.swing.JFrame {
 			type = "problem";
 		else if(command.equalsIgnoreCase(SAVE_PARAMETER))
 			type = "parameter";
+		else if(command.equalsIgnoreCase(SAVE_OUTPUT))
+			type ="output";
 		
-		fileChooser.setDialogTitle("Save "+type+" File");
+		fileChooser.setDialogTitle("Save "+type+" file");
 		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
@@ -917,11 +919,24 @@ public class TailorGUI extends javax.swing.JFrame {
 						writer.write(this.parameterInput.getText());
                     	writeOnMessageOutput("Saving Essence' parameter in:\n " + file.getName() + "." +"\n");
 					}
-					else if(command == SAVE_OUTPUT) {
-						if(this.outputTabbedPanel.getSelectedComponent() != null) {
-							writer.write(((JTextArea) this.outputTabbedPanel.getSelectedComponent()).getText());
+					else if(command == SAVE_OUTPUT) {						
+							String text = "";
+							int selection = this.outputTabbedPanel.getSelectedIndex();
+							
+							if(selection == this.MINION_TAB_NR)
+								text = this.minionOutput.getText();
+							else if(selection == this.FLAT_TAB_NR)
+								text = this.flatOutput.getText();
+							else if(selection == this.SOLUTION_TAB_NR)
+								text = this.solutionOutput.getText();
+							else if(selection == this.NORMALISE_TAB_NR)
+								text = this.normaliseOutput.getText();
+							else text = this.minionOutput.getText();
+							
+							
+							writer.write(text);
 							writeOnMessageOutput("Saving output in:\n " + file.getName() + "." +"\n");
-						}
+						
 					}
 					writer.flush();
                     writer.close();

@@ -23,6 +23,7 @@ public class TranslationSettings {
 	boolean useExplicitCommonSubExpressions;
 	boolean applyDirectVariableReusage;
 	boolean giveTranslationTimeInfo;
+	boolean  giveTranslationInfo;
 	String pathToMinion;
 	// the variables whose solutions have been printed by the target solver
 	String[] printedVariables;
@@ -39,7 +40,8 @@ public class TranslationSettings {
 		this.useExplicitCommonSubExpressions = true;
 		this.applyStrictCopyPropagation = false;
 		this.giveTranslationTimeInfo = true;
-		this.applyDirectVariableReusage = false;
+		this.giveTranslationInfo = true;
+		this.applyDirectVariableReusage = true;
 		this.pathToMinion = readPathToMinion();
 	}
 	
