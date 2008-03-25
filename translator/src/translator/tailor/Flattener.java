@@ -118,7 +118,12 @@ public class Flattener {
 		
 		
 		//System.out.println("Common subexpressions:\n"+this.subExpressions);
+		//System.out.println("Constraints:"+flattenedConstraints);
+		//for(int i=0; i <flattenedConstraints.size(); i++)
+			//System.out.println("Constraint: "+flattenedConstraints.get(i)+" will be reified? "+flattenedConstraints.get(i).isGonnaBeFlattenedToVariable());
+	
 		return this.normalisedModel;
+		
 	}
 	
 	
@@ -620,18 +625,6 @@ public class Flattener {
 		
 		//System.out.println("We have a comm bin expr between: "+leftExpression+" "+expression.getOperator()+" "+rightExpression);
 		
-		if(leftExpression instanceof QuantifiedSum ||
-				leftExpression instanceof QuantifiedExpression) {
-			//if(expression.isGonnaBeFlattenedToVariable()) 
-				//leftExpression.willBeFlattenedToVariable(true);
-			
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
-				leftExpression.willBeFlattenedToVariable(true);
-			}
-			
-			leftExpression = flattenExpression(leftExpression);
-		}
-		
 		if(rightExpression instanceof QuantifiedSum ||
 				rightExpression instanceof QuantifiedExpression) {
 			
@@ -645,10 +638,46 @@ public class Flattener {
 			rightExpression = flattenExpression(rightExpression);
 		}
 		
+		if(leftExpression instanceof QuantifiedSum ||
+				leftExpression instanceof QuantifiedExpression) {
+			//if(expression.isGonnaBeFlattenedToVariable()) 
+				//leftExpression.willBeFlattenedToVariable(true);
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
+				leftExpression.willBeFlattenedToVariable(true);
+			}
+			
+			leftExpression = flattenExpression(leftExpression);
+		}
+		
+		
+		
 		//System.out.println("We have an equality between(after qsum): "+leftExpression+" == "+rightExpression);
 		
 		// 1. detect sum expressions (we can only have 1 sum expression on one side due to normalisation)
-		if(leftExpression instanceof Sum) {
+		if(rightExpression instanceof Sum) {
+			//System.out.println("We have a sum on the right hand side\n: "+rightExpression);
+			rightExpression.reduceExpressionTree();
+			Sum rSum = (Sum) rightExpression;
+			Sum rightSum = (Sum) rSum.copy();
+			rightSum.setWillBeConvertedToSumConstraint(true);
+			SumConstraint partWiseSumConstraint = (SumConstraint) flattenSum(rightSum);
+			
+			leftExpression.willBeFlattenedToVariable(true);
+			Expression result = flattenExpression(leftExpression);
+			partWiseSumConstraint.setResult(result, 
+					                        expression.getOperator(), 
+					                        true); // result Is on left side
+			
+			if(expression.getOperator() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable())
+				addToSubExpressions(rSum,result);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				return reifyConstraint(partWiseSumConstraint);
+			}
+			else return partWiseSumConstraint;
+		}
+		else if(leftExpression instanceof Sum) {
 			leftExpression.reduceExpressionTree();
 			Sum lSum = (Sum) leftExpression;
 			Sum leftSum = (Sum) lSum.copy();
@@ -673,28 +702,7 @@ public class Flattener {
 			}
 			else return partWiseSumConstraint;
 		}
-		else if(rightExpression instanceof Sum) {
-			//System.out.println("We have a sum on the right hand side\n: "+rightExpression);
-			rightExpression.reduceExpressionTree();
-			Sum rSum = (Sum) rightExpression;
-			Sum rightSum = (Sum) rSum.copy();
-			rightSum.setWillBeConvertedToSumConstraint(true);
-			SumConstraint partWiseSumConstraint = (SumConstraint) flattenSum(rightSum);
-			
-			leftExpression.willBeFlattenedToVariable(true);
-			Expression result = flattenExpression(leftExpression);
-			partWiseSumConstraint.setResult(result, 
-					                        expression.getOperator(), 
-					                        true); // result Is on left side
-			
-			if(expression.getOperator() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable())
-				addToSubExpressions(rSum,result);
-			
-			if(expression.isGonnaBeFlattenedToVariable()) {
-				return reifyConstraint(partWiseSumConstraint);
-			}
-			else return partWiseSumConstraint;
-		}
+		
 	
 		
 		if(leftExpression instanceof Multiplication) {
@@ -1238,7 +1246,9 @@ public class Flattener {
 		
 		// 2. if the constraint has to be reified	
 		if(elementConstraint.isGonnaBeFlattenedToVariable()) {
-			return reifyConstraint(elementConstraint);
+			this.constraintBuffer.add(elementConstraint);
+			elementConstraint.willBeFlattenedToVariable(false);
+			return elementConstraint.getValueExpression();
 		}
 		else 			
 			return elementConstraint;
@@ -2642,10 +2652,17 @@ public class Flattener {
 			else {
 					if(indices.length == 1) {
 						Expression index = indices[0];
+						//System.out.println("Flattening index '"+index+"' in expression: "+expression);
+						
 						if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 							index.willBeFlattenedToVariable(true);
 						index = flattenExpression(index);
 						
+						
+						// OIOIOI
+						//this.constraintBuffer.get(this.constraintBuffer.size()-1).willBeFlattenedToVariable(false);
+						
+						//System.out.println("Flattened index to '"+index+"' in expression: "+expression);
 						
 						Domain d = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
 						//System.out.println("Domain of variable "+(arrayVariable).getArrayNameOnly()+" is :"+d.toString()+" with type:"

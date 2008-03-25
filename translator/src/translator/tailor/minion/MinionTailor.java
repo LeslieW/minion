@@ -60,7 +60,7 @@ public class MinionTailor {
 				                           mapDecisionVariables(),
 				                           this.normalisedModel.getDecisionVariablesNames(),
 				                           this.normalisedModel.getAuxVariables(),
-				                           this.solverSettings
+				                           this.solverSettings, settings
 				                           );
 		
 		tailorObjective();
@@ -146,7 +146,7 @@ public class MinionTailor {
 				                           mapDecisionVariables(),
 				                           this.normalisedModel.getDecisionVariablesNames(),
 				                           this.normalisedModel.getAuxVariables(),
-				                           this.solverSettings
+				                           this.solverSettings, settings
 				                           );
 		
 		// 2. tailor the constraints
@@ -360,7 +360,7 @@ public class MinionTailor {
 		
 		MinionAtom index = (MinionAtom) toMinion(indexExpression);
 		
-		// check if the index is an atom
+		// check if the result is an atom
 		if(!(resultExpression instanceof ArithmeticAtomExpression) &&
 				!(resultExpression instanceof RelationalAtomExpression)) 
 			throw new MinionException("Cannot tailor expression '"+elementConstraint+"' to Minion element constraint:\n"

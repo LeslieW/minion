@@ -131,6 +131,10 @@ public class TranslationSettings {
 		return this.giveTranslationTimeInfo;
 	}
 	
+	public boolean giveTranslationInfo() {
+		return this.giveTranslationInfo;
+	}
+	
 	public boolean applyDirectVariableReusage() {
 		return this.applyDirectVariableReusage;
 	}

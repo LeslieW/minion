@@ -177,4 +177,12 @@ public class ElementConstraint implements GlobalConstraint {
 		this.value = result;
 	}
 	
+	
+	public Expression getValueExpression() {
+		return this.value;
+	}
+	
+	public Expression getIndexExpression() {
+		return this.index;
+	}
 }

@@ -42,7 +42,7 @@ public class Tailor implements TailorSpecification {
 			String minionInput = model.toString();
 			if(this.settings.giveTranslationTimeInfo()) {
 				long stopTime = System.currentTimeMillis();
-				System.out.println("Minion Model toString Time: "+(stopTime - startTime)/1000.0+"sec");
+				writeTimeInfo("Minion Model toString Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			return minionInput;
 		}
@@ -66,6 +66,7 @@ public class Tailor implements TailorSpecification {
 					                                     this.settings);
 			
 			return minionTailor.tailorToMinion().toString();
+			
 			
 		}
 		
@@ -101,5 +102,12 @@ public class Tailor implements TailorSpecification {
 		}
 		else throw new TailorException("Cannot return Essence' output for solver: '"+this.targetSolver.getSolverName()
 				+"'. no tailor for solver available.");
+	}
+	
+	
+	
+	private void writeTimeInfo(String info) {
+		if(this.settings.giveTranslationInfo())
+			System.out.println(info);
 	}
 }

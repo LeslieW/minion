@@ -493,6 +493,7 @@ public class Translator {
 		return this.settings.getPrintedVariables();
 	}
 	
+	
 	private void writeTimeInfo(String info) {
 		if(this.settings.giveTranslationInfo)
 			System.out.println(info);
