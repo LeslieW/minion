@@ -193,7 +193,8 @@ public class MinionTailor {
 						else if(indices[j] instanceof BoundedIntRange)
 							offsets[j] = ((BoundedIntRange) indices[j]).getRange()[0]; // lowerBound
 						
-						else throw new MinionException("Cannot translate sparse domains as array-indices yet.");
+						else throw new MinionException("Cannot translate sparse domains as array-indices yet: variable '"+
+								varName+"', domain: "+domain);
 					}
 					this.offsetsFromZero.put(varName, offsets);
 				}

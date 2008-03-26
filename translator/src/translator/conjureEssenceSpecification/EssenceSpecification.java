@@ -53,19 +53,19 @@ public class EssenceSpecification {
 	
 	public String toString(){
 		
-		String output = "";
+		StringBuffer output = new StringBuffer("");
 		for(int i =0;i<declarations.length;i++){
-			output += declarations[i].toString()+"\n";
+			output.append(declarations[i].toString()+"\n");
 		}
-		output += objective.toString()+"\n";
+		output.append(objective.toString()+"\n");
 		if(expressions.length>0){
-			output += "such that\n";
+			output.append("such that\n");
 			for(int i =0;i<expressions.length;i++){
-				output += "\t"+expressions[i].toString()+"\n";
+				output.append("\t"+expressions[i].toString()+"\n");
 			}
 		}
 		
-		return output;
+		return output.toString();
 	}
 	
 }

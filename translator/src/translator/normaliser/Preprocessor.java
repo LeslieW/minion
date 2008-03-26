@@ -189,7 +189,7 @@ public class Preprocessor {
 				if(constant.getType() == translator.expression.Expression.INT) {
 					int value = ((ArithmeticAtomExpression) constant).getConstant();
 					
-					System.out.println("INT parameter insertion:"+value);
+					//System.out.println("INT parameter insertion:"+value);
 					
 					for(int j=0; j<constraintList.size(); j++) {
 						//System.out.println("INT parameter insertion:"+value+" in constraint:"+constraintList.get(j));

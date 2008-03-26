@@ -238,40 +238,40 @@ public class NormalisedModel {
 	public String toString() {
 		
 		// header
-		String s = "ESSENCE' 1.0\n\n";
+		StringBuffer s = new StringBuffer("ESSENCE' 1.0\n\n");
 		
 	
 		// decision variables
 		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
 			String variableName = decisionVariablesNames.get(i);
-			s = s.concat("find\t"+variableName+"\t: "+this.decisionVariables.get(variableName)+"\n");
+			s.append("find\t"+variableName+"\t: "+this.decisionVariables.get(variableName)+"\n");
 		}
 		
 		
-		s = s.concat("\n\n");
+		s.append("\n\n");
 		// auxiliary variables
 		for(int i=0; i<this.auxiliaryVariables.size(); i++) {
 			Variable auxVar = auxiliaryVariables.get(i);
-			if(i%5 ==0) s = s.concat("\n$");
-			s = s.concat("  "+auxVar+" : {"+auxVar.getDomain()[0]+", "+auxVar.getDomain()[1]+"}  ");
+			if(i%5 ==0) s.append("\n$");
+			s.append("  "+auxVar+" : {"+auxVar.getDomain()[0]+", "+auxVar.getDomain()[1]+"}  ");
 		}
-		s = s.concat("$\n"+printStatistics());
+		s.append("$\n"+printStatistics());
 		
 		
 		// objective
-		s = s.concat("\n"+this.objective.toString()+"\n\n");
+		s.append("\n"+this.objective.toString()+"\n\n");
 		
 		// constraints
-		s = s.concat("such that\n");
+		s.append("such that\n");
 		
 		if(this.constraintList.size() == 0)
-			return s;
+			return s.toString();
 		
 		for(int i=0; i<this.constraintList.size()-1; i++)
-			s = s.concat("\t"+constraintList.get(i)+",\n\n");
-		s= s.concat("\t"+constraintList.get(constraintList.size()-1)+"\n");
+			s.append("\t"+constraintList.get(i)+",\n\n");
+		s.append("\t"+constraintList.get(constraintList.size()-1)+"\n");
 		
-		return s;
+		return s.toString();
 	}
 	
 	
