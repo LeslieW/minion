@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import translator.TranslationSettings;
 import translator.xcsp2ep.mapper.Mapper;
 import translator.xcsp2ep.mapper.MapperException;
 import translator.xcsp2ep.parser.InstanceParser;
@@ -24,11 +25,22 @@ import translator.normaliser.NormalisedModel;
 public class Xcsp2Ep{
 
 	// the file we will write the Essence' instance into
-	private static final String OUTPUT_FILE_NAME = "out.eprime";
+	private static String OUTPUT_FILE_NAME;
 	private static boolean WRITE_TIME_STATS;
+	private static boolean PRINT_INFO;
+	TranslationSettings settings;
 	
-	public Xcsp2Ep(boolean giveTranslationTimeInfo) {
-		WRITE_TIME_STATS = giveTranslationTimeInfo;
+	public Xcsp2Ep(TranslationSettings settings) {
+		WRITE_TIME_STATS = settings.giveTranslationTimeInfo();
+		PRINT_INFO = settings.giveTranslationInfo();
+		OUTPUT_FILE_NAME = settings.getEssencePrimeOutputFileName();
+	}
+	
+	public Xcsp2Ep() {
+		this.settings = new TranslationSettings();
+		WRITE_TIME_STATS = true;
+		PRINT_INFO = true;
+		OUTPUT_FILE_NAME = this.settings.getEssencePrimeOutputFileName();
 	}
 	
 	/**
@@ -100,15 +112,21 @@ public class Xcsp2Ep{
 		XCSPInstance xcspInstance = parser.parse(displayParsedInstance);
 		long stopTime = System.currentTimeMillis();
 		double time = (stopTime - startTime) / 1000.0;
-		writeTimeInfo("XCSP parsing time: "+time);
+		writeTimeInfo("XCSP parsing time: "+time+"sec");
 		
 		Mapper mapper = new Mapper();
 		EssencePModel essencePmodel = mapper.mapToEssencePrime(xcspInstance);
-		writeStringIntoFileNonStatic(fileName+".eprime", essencePmodel.toString());
+		startTime = stopTime;
 		stopTime = System.currentTimeMillis();
 		time = (stopTime - startTime) / 1000.0;
-		writeTimeInfo("Time for Mapping XCSP to Essence': "+time);
-		System.out.println("Written Essence' model into file: "+fileName+".eprime");
+		
+		writeTimeInfo("Time for Mapping XCSP to Essence': "+time+"sec");
+		writeStringIntoFileNonStatic(fileName+".eprime", essencePmodel.toString());
+		startTime = stopTime;
+		stopTime = System.currentTimeMillis();
+		time = (stopTime - startTime) / 1000.0;
+		writeInfo("Written Essence' model into file: "+fileName+".eprime");
+		writeTimeInfo("Writing time:"+time+"sec");
 		
 		return essencePmodel.mapToNormalisedModel();
 	}
@@ -188,6 +206,12 @@ public class Xcsp2Ep{
 	
 	public static void writeTimeInfo(String info) {
 		if(WRITE_TIME_STATS)
+			System.out.println(info);
+		
+	}
+	
+	private static void writeInfo(String info) {
+		if(PRINT_INFO)
 			System.out.println(info);
 		
 	}

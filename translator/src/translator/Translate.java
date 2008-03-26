@@ -71,7 +71,7 @@ public class Translate {
 				
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
 					settings.setGiveTranslationTimeInfo(false);
-					giveTranslationInfo = false;
+					giveTimeInfo = false;
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+NO_INFO) || args[i].equalsIgnoreCase("-s")) {
@@ -156,105 +156,7 @@ public class Translate {
 		}
 		
 		
-		/*if(args.length == 1) {
-			if(args[0].endsWith("help"))
-				printHelpMessage();
-			else if((args[0].endsWith("oldGui")) || (args[0].endsWith("oldGUI"))) 
-				runOldGUIVersion();
-			else translate(args[0]);
-		}
-			
-		else if(args.length == 2) {
-			if(args[1].endsWith(NO_COMMON_SUBEXPRS)) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseCommonSubExpressions(false);
-				translate(args[0], settings);
-			}
-			else if(args[1].endsWith("no-ecse")) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseInferredCommonSubExpressions(false);
-				translate(args[0], settings);
-			}
-			else if(args[1].endsWith("-dvr")) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setApplyDirectVariableReusage(true);
-				translate(args[0], settings);
-			}
-			else if(args[0].endsWith(XCSP_CONVERSION)) {
-				TranslationSettings settings = new TranslationSettings();
-				translateXCSP(args[1], args[1]+".minion",settings);
-				System.exit(0);
-			}
-			
-			translate(args[0], args[1]);
-		}
-		
-		else if(args.length == 3) {
-			if(args[2].endsWith(NO_COMMON_SUBEXPRS)) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseCommonSubExpressions(false);
-				translate(args[0], args[1], settings);
-			}
-			else if(args[2].endsWith("no-ecse")) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseInferredCommonSubExpressions(false);
-				translate(args[0], args[1], settings);
-			}
-			else if(args[2].endsWith("-dvr")) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setApplyDirectVariableReusage(true);
-				translate(args[0], args[1], settings);
-			}
-			else if(args[0].endsWith(XCSP_CONVERSION)) {
-				TranslationSettings settings = new TranslationSettings();
-				translateXCSP(args[1], args[2],settings);
-			}
-			else printHelpMessage();
-		}
-
-		else if(args.length == 4) {
-			if(args[2].endsWith(NO_COMMON_SUBEXPRS) || args[3].endsWith(NO_COMMON_SUBEXPRS) &&
-				(args[2].endsWith("no-ecse") || args[3].endsWith("no-ecse"))	) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseCommonSubExpressions(false);
-				settings.setUseInferredCommonSubExpressions(false);
-				translate(args[0], args[1], settings);
-			}
-			else if (args[2].endsWith(NO_COMMON_SUBEXPRS) || args[3].endsWith(NO_COMMON_SUBEXPRS) &&
-				(args[2].endsWith("-dvr") || args[3].endsWith("-dvr"))	) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseCommonSubExpressions(false);
-				settings.setApplyDirectVariableReusage(true);
-				translate(args[0], args[1], settings);
-			}
-			else if (args[2].endsWith("no-ecse") || args[3].endsWith("no-ecse") &&
-					(args[2].endsWith("-dvr") || args[3].endsWith("-dvr"))	) {
-					TranslationSettings settings = new TranslationSettings();
-					settings.setUseInferredCommonSubExpressions(false);
-					settings.setApplyDirectVariableReusage(true);
-					translate(args[0], args[1], settings);
-				}
-			
-			else printHelpMessage();
-		}
-		
-		else if(args.length == 5) {
-			
-			if((args[2].endsWith(NO_COMMON_SUBEXPRS) || args[3].endsWith(NO_COMMON_SUBEXPRS) || args[4].endsWith(NO_COMMON_SUBEXPRS) ) &&
-			   (args[2].endsWith("no-ecse") || args[3].endsWith("no-ecse")  ||  args[4].endsWith("no-ecse") ) &&
-			   (args[2].endsWith("-dvr") || args[3].endsWith("-dvr") || args[4].endsWith("-dvr")  )) {
-				TranslationSettings settings = new TranslationSettings();
-				settings.setUseCommonSubExpressions(false);
-				settings.setUseInferredCommonSubExpressions(false);
-				settings.setApplyDirectVariableReusage(true);
-				translate(args[0], args[1], settings);
-				
-			}
-			else printHelpMessage();
-		}
-		
-		else printHelpMessage();
-		*/
+	
 	}
 
 
@@ -428,7 +330,7 @@ public class Translate {
 			giveTimeInfo = settings.giveTranslationTimeInfo;
 			writeInfo("\nTranslating XCSP file '"+inputFileName+"'");
 			long startTime = System.currentTimeMillis();
-			Xcsp2Ep xcspConverter = new Xcsp2Ep(settings.giveTranslationTimeInfo);
+			Xcsp2Ep xcspConverter = new Xcsp2Ep(settings);
 			Translator translator = new Translator(settings);
 			
 			translator.tailorTo(xcspConverter.translateToNormalisedModel(inputFileName), new Minion());

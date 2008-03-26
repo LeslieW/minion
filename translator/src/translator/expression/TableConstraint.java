@@ -122,19 +122,19 @@ public class TableConstraint implements RelationalExpression {
 	}
 
 	public String toString() {
-		String s = "table( [";
+		StringBuffer s = new StringBuffer("table( [");
 		
 		if(this.variableList.length >= 1)
-			s = s.concat(variableList[0].toString());
+			s.append(variableList[0].toString());
 		for(int i=1; i<this.variableList.length; i++)
-			s = s.concat(","+this.variableList[i].toString());
+			s.append(","+this.variableList[i].toString());
 		
-		s = s.concat("], [");
+		s.append("], [");
 		
 		if(this.tupleList.length >= 1)
-			s = s.concat(tupleList[0].toString());
+			s.append(tupleList[0].toString());
 		for(int i=1; i<this.tupleList.length; i++)
-			s = s.concat(", "+this.tupleList[i]);
+			s.append(", "+this.tupleList[i]);
 		
 		return s+"] )";
 	}

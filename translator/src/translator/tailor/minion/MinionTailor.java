@@ -1644,7 +1644,7 @@ public class MinionTailor {
 					int[] offsets = this.offsetsFromZero.get(((ArrayVariable) variable).getArrayNameOnly());
 					
 					int[] indices = arrayElement.getIntegerIndices();
-					if(indices ==null) 
+					if(indices == null) 
 						throw new MinionException("Cannot translate array element with non-constant element index:"+atom);
 					
 					//System.out.println("Computing offsets of indices of "+arrayElement+" and indices-length is "+indices.length);

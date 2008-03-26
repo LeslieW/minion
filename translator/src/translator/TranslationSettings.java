@@ -29,6 +29,7 @@ public class TranslationSettings {
 	String[] printedVariables;
 	
 	String settingsFileName;
+	String essenceP_outputFileName;
 	
 	
 	// DEFAULT settings for every translation
@@ -43,6 +44,7 @@ public class TranslationSettings {
 		this.giveTranslationInfo = true;
 		this.applyDirectVariableReusage = true;
 		this.pathToMinion = readPathToMinion();
+		this.essenceP_outputFileName = "out.eprime";
 	}
 	
 	
@@ -113,6 +115,10 @@ public class TranslationSettings {
 	
 	public TargetSolver getTargetSolver() {
 		return this.targetSolver;
+	}
+	
+	public String getEssencePrimeOutputFileName() {
+		return this.essenceP_outputFileName;
 	}
 	
 	public boolean useCommonSubExpressions() {

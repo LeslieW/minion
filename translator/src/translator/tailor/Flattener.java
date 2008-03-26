@@ -601,7 +601,19 @@ public class Flattener {
 				(leftExpression instanceof ArithmeticAtomExpression || leftExpression instanceof RelationalAtomExpression) &&
 				(rightExpression instanceof ArithmeticAtomExpression || rightExpression instanceof RelationalAtomExpression) &&
 				(leftExpression.getType() != Expression.INT && leftExpression.getType() != Expression.BOOL &&
-					rightExpression.getType() != Expression.INT && rightExpression.getType() != Expression.BOOL )){
+						rightExpression.getType() != Expression.INT && rightExpression.getType() != Expression.BOOL ) && 
+				
+				// we don't want a variable that will be translated to an element constraint
+				!(leftExpression.getType() == Expression.INT_ARRAY_VAR &&  leftExpression instanceof ArithmeticAtomExpression &&
+						((ArrayVariable) ((ArithmeticAtomExpression)leftExpression).getVariable()).isIndexedBySomethingNotConstant()  ) &&
+				!(leftExpression.getType() == Expression.INT_ARRAY_VAR &&  leftExpression instanceof RelationalAtomExpression &&
+						((ArrayVariable) ((RelationalAtomExpression)leftExpression).getVariable()).isIndexedBySomethingNotConstant()  ) &&
+				!(rightExpression.getType() == Expression.INT_ARRAY_VAR &&  rightExpression instanceof ArithmeticAtomExpression &&
+						((ArrayVariable) ((ArithmeticAtomExpression)rightExpression).getVariable()).isIndexedBySomethingNotConstant()  ) &&
+				!(rightExpression.getType() == Expression.INT_ARRAY_VAR &&  rightExpression instanceof RelationalAtomExpression &&
+						((ArrayVariable) ((RelationalAtomExpression)rightExpression).getVariable()).isIndexedBySomethingNotConstant()  ))						
+						 
+				{
 			// TODO: might not necessary
 			//System.out.println("Found equal atoms: left:"+leftExpression+" = right:"+rightExpression);
 			
