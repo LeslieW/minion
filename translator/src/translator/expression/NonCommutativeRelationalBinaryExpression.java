@@ -141,11 +141,15 @@ public class NonCommutativeRelationalBinaryExpression implements
 			if(rightArgument.getType() == BOOL)
 				rightConstant = ((RelationalAtomExpression) rightArgument).toArithmeticExpression().getConstant();
 			
-			else if(leftArgument.getType() == INT && rightArgument.getType() == INT) {
-			
+			if(leftArgument.getType() == INT) {
 				leftConstant = ((ArithmeticAtomExpression) leftArgument).getConstant();
+			}
+			
+			if(rightArgument.getType() == INT) {
 				rightConstant = ((ArithmeticAtomExpression) rightArgument).getConstant();
 			}
+			
+			
 			
 			if(leftConstant != -11111 && rightConstant != -11111) {
 				switch(this.type) {
@@ -162,6 +166,121 @@ public class NonCommutativeRelationalBinaryExpression implements
 				}
 					
 			}
+			
+			// Constant OP E
+			else if(leftConstant != -11111) {
+				
+				//System.out.println("Evaluating non-com. expression: "+this+" with leftConstant:"+leftConstant);
+				
+				// Constant < E
+				if(this.type == LESS) {  
+					
+					//System.out.println("Evaluating LESS expression. Right Argument: "+rightArgument+" has lb:"+rightArgument.getDomain()[0]+
+					//		"and ub:"+rightArgument.getDomain()[1]);
+					
+					//  Constant  < lb(E) ==> true
+					if(rightArgument.getDomain()[0] > leftConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant >= ub(E)  ==> false
+					else if(leftConstant >= rightArgument.getDomain()[1]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+				// Constant <= E
+				else if(this.type == LEQ) { 
+					//  C <= lb(E) ==> true
+					if(rightArgument.getDomain()[0] > leftConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant > ub(E)  ==> false
+					else if(leftConstant > rightArgument.getDomain()[1]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+				
+				// Constant > E
+				else if(this.type == GREATER) { 
+					// C > ub(E)
+					if(rightArgument.getDomain()[1] < leftConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant <= lb(E)  ==> false
+					else if(leftConstant <= rightArgument.getDomain()[0]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+				
+				// Constant >= E
+				else if(this.type == GEQ) { // C >= ub(E)
+					if(rightArgument.getDomain()[1] < leftConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant < lb(E)  ==> false
+					else if(leftConstant < rightArgument.getDomain()[0]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+			}
+			
+			
+			// Constant OP E
+			else if(rightConstant != -11111) {
+				
+				//System.out.println("Evaluating non-com. expression: "+this+" with rightConstant:"+rightConstant);
+				
+				// E > Constant
+				if(this.type == GREATER) {  
+					
+					//  Constant  < lb(E) ==> true
+					if(leftArgument.getDomain()[0] > rightConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant >= ub(E)  ==> false
+					else if(rightConstant >= leftArgument.getDomain()[1]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+				// E >= Constant
+				else if(this.type == GEQ) { 
+					//  C <= lb(E) ==> true
+					if(leftArgument.getDomain()[0] > rightConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant > ub(E)  ==> false
+					else if(rightConstant > leftArgument.getDomain()[1]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+				
+				// E < Constant
+				else if(this.type == LESS) { 
+					
+					//System.out.println("Evaluating GREATER expression. left Argument: "+leftArgument+" has lb:"+leftArgument.getDomain()[0]+
+							//"and ub:"+leftArgument.getDomain()[1]);
+					
+					// C > ub(E)
+					if(leftArgument.getDomain()[1] < rightConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant <= lb(E)  ==> false
+					else if(rightConstant <= leftArgument.getDomain()[0]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+				
+				// E <= Constant
+				else if(this.type == LEQ) { // C >= ub(E)
+					if(leftArgument.getDomain()[1] < rightConstant)
+						return new RelationalAtomExpression(true);
+					
+					// Constant < lb(E)  ==> false
+					else if(rightConstant < leftArgument.getDomain()[0]) {
+						return new RelationalAtomExpression(false);
+					}
+				}
+			}
+			
 		}
 	
 		return this;

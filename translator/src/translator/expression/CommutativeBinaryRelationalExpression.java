@@ -159,9 +159,11 @@ public class CommutativeBinaryRelationalExpression implements
 		if(rightArgument.getType() == BOOL)
 			rightConstant = ((RelationalAtomExpression) rightArgument).toArithmeticExpression().getConstant();
 		
-		else if(leftArgument.getType() == INT && rightArgument.getType() == INT) {
-		
+		if(leftArgument.getType() == INT) {
 			leftConstant = ((ArithmeticAtomExpression) leftArgument).getConstant();
+		}
+		
+		if(rightArgument.getType() == INT) {
 			rightConstant = ((ArithmeticAtomExpression) rightArgument).getConstant();
 		}
 		
@@ -176,6 +178,26 @@ public class CommutativeBinaryRelationalExpression implements
 			}
 				
 		}
+		
+		// Constant OP E
+		else if(leftConstant != -11111) {
+			
+			// Constant = E
+			if(this.type == EQ) {  
+				//  C < lb(E) || C > ub(E) ==> false (constant is out of bounds)
+				if(rightArgument.getDomain()[0] > leftConstant || 
+						leftConstant > rightArgument.getDomain()[1])
+					return new RelationalAtomExpression(false);
+			}
+			// Constant != E  
+			else if(this.type == NEQ) { 
+				//   C < lb(E) || C > ub(E) ==>  true   (constant is out of bounds)
+				if(rightArgument.getDomain()[0] > leftConstant || 
+						leftConstant > rightArgument.getDomain()[1])
+					return new RelationalAtomExpression(true);
+			}
+		}
+		
 
 	return this;
 		

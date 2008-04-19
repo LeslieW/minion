@@ -14,6 +14,10 @@ public class TableConstraint implements RelationalExpression {
 	private ConstantTuple[] tupleList;
 	private boolean isNested;
 	private boolean willBeReified = false;
+	/** negative tables are table constraints that contain conflicting
+	 * value tuples. By default, table constraints are NOT conflicting */
+	private boolean isConflictingTable = false;
+	
 	
 	public TableConstraint(Variable[] identifierList,
 			               ConstantTuple[] tupleList) {
@@ -122,7 +126,10 @@ public class TableConstraint implements RelationalExpression {
 	}
 
 	public String toString() {
-		StringBuffer s = new StringBuffer("table( [");
+		
+		String conflicting = (this.isConflictingTable) ? "Conflict" : "";
+		
+		StringBuffer s = new StringBuffer("table"+conflicting+"( [");
 		
 		if(this.variableList.length >= 1)
 			s.append(variableList[0].toString());
@@ -172,4 +179,11 @@ public class TableConstraint implements RelationalExpression {
 		return this.tupleList;
 	}
 	
+	public boolean isConflictingTableConstraint() {
+		return this.isConflictingTable;
+	}
+	
+	public void setToConflictingTableConstraint(boolean isConflicting) {
+		this.isConflictingTable = isConflicting;
+	}
 }
