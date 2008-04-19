@@ -17,6 +17,18 @@ public class ConstantMatrix implements ConstantArray {
 		this.elements = elements;
 	}
 	
+	public ConstantMatrix(String arrayName,
+						  Integer[][] values) {
+		this.arrayName = arrayName;
+		this.elements = new int[values.length][values[0].length];
+		
+		for(int i=0; i<values.length; i++) {
+			for(int j=0; j<values[0].length; j++) {
+				this.elements[i][j] = (int) values[i][j];
+			}
+		}
+		
+	}
 	
 	// =========== INHERITED METHODS ===========
 	
@@ -24,6 +36,10 @@ public class ConstantMatrix implements ConstantArray {
 		return this.arrayName;
 	}
 
+	public int getDimension() {
+		return 2;
+	}
+	
 	public Expression copy() {
 		int [][] copiedElements = new int[elements.length][this.elements[0].length];
 		for(int i=0; i<copiedElements.length; i++) {
@@ -53,6 +69,10 @@ public class ConstantMatrix implements ConstantArray {
 	
 	public Expression insertValueForVariable(boolean value, String variableName) {
 		return this;
+	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		return this;	
 	}
 
 	public boolean isGonnaBeFlattenedToVariable() {

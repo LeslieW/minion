@@ -68,6 +68,24 @@ public class ComposedArray implements Array {
 		
 		return this;
 	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		for(int i=0; i<this.arrayList.length; i++) {
+			try { 
+			Expression e = this.arrayList[i].replaceVariableWithExpression(variableName, expression);
+			if(e instanceof SingleArray)
+				this.arrayList[i] = (SingleArray) e;
+			else throw new Exception ("Replacing variable '"+variableName+
+					"' with infeasible expression '"+expression+"' that changes index to become "+e+
+					". Expected a single array type.");
+			} catch (Exception exc) {
+				exc.printStackTrace(System.out);
+				System.exit(1);
+			}
+		}
+		return this;
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;

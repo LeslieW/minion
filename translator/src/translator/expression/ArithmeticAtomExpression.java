@@ -31,7 +31,8 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 	public ArithmeticAtomExpression(Variable variable, 
 			                        boolean isParameter) {
 		this.variable = variable;
-		this.type = (this.variable.getType() == Expression.ARRAY_VARIABLE) ?
+		this.type = (this.variable.getType() == Expression.ARRAY_VARIABLE ||
+					this.variable.getType() == Expression.SIMPLE_ARRAY_VARIABLE) ?
 				Expression.INT_ARRAY_VAR :
 					Expression.INT_VAR; 
 			
@@ -50,7 +51,8 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 	 */
 	public ArithmeticAtomExpression(Variable variable) {
 		this.variable = variable;
-		this.type = (this.variable.getType() == Expression.ARRAY_VARIABLE) ?
+		this.type = (this.variable.getType() == Expression.ARRAY_VARIABLE ||
+					this.variable.getType() == Expression.SIMPLE_ARRAY_VARIABLE) ?
 				Expression.INT_ARRAY_VAR :
 					Expression.INT_VAR;
 		this.isParameter = false;
@@ -181,6 +183,17 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 		return this;
 	}
 	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		if(this.variable != null) {
+			Expression e = this.variable.replaceVariableWithExpression(variableName, expression);
+			if(!(e instanceof Variable) ) {
+				return e; 
+			}
+			else this.variable = (Variable) e;
+		}
+		return this;
+	}
 	
 	public boolean isNested() {
 		return isNested;

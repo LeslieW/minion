@@ -3,6 +3,7 @@ package translator;
 import javax.swing.JFrame;
 import java.io.*;
 import translator.solver.Minion;
+import translator.solver.Gecode;
 import translator.gui.TailorGUI;
 import translator.xcsp2ep.Xcsp2Ep;
 
@@ -20,10 +21,13 @@ public class Translate {
 
 	public static final String GUI_NAME = "TAILOR v0.2";
 	public static final String VERSION ="0.2";
-	public static final String EMPTY_PARAM_STRING = "ESSENCE' 1.0\n";
-
+	public static final String ESSENCE_PRIME_HEADER = "ESSENCE' 1.0\n";
+	public static final String ERROR = "ERROR:";
+	
 	/** Available flags */
 	public static final String XCSP_CONVERSION = "xcsp";
+	public static final String MINION_TRANSLATION = "minion";
+	public static final String GECODE_TRANSLATION = "gecode";
 	public static final String HELP = "help";
 	public static final String OLD_GUI = "oldgui";
 	public static final String NO_COMMON_SUBEXPRS = "no-cse";
@@ -31,6 +35,7 @@ public class Translate {
 	public static final String TIME_OFF = "no-time"; // don't display time statistics
 	public static final String NO_INFO = "silent"; // silent -> no verbose info
 	public static final String DIRECT_VAR_REUSE = "dvr";
+	public static final String DEBUG_MODE = "debug";
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -58,7 +63,7 @@ public class Translate {
 				
 				if(args[i].equalsIgnoreCase("-"+HELP) || args[i].equalsIgnoreCase("-h")) {
 					printHelpMessage();
-					System.exit(1);
+					System.exit(0);
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+NO_COMMON_SUBEXPRS)) {
@@ -81,56 +86,64 @@ public class Translate {
 					giveTranslationInfo = false;
 				}
 				
-				else if(args[i].equalsIgnoreCase("-"+OLD_GUI)) {
-					runOldGUIVersion(); 
-				}
 				
 				else if(args[i].equalsIgnoreCase("-"+DIRECT_VAR_REUSE)) {
 					settings.setApplyDirectVariableReusage(true);
 				}
 
+				//else if(args[i].equalsIgnoreCase("-"+GECODE_TRANSLATION) || args[i].equalsIgnoreCase("-g")) {
+				//	settings.setTargetSolver(new Gecode());
+				//}
+				
+				else if(args[i].equalsIgnoreCase("-"+MINION_TRANSLATION) || args[i].equalsIgnoreCase("-m")) {
+					settings.setTargetSolver(new Minion());
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+DEBUG_MODE)) {
+					settings.debugMode = true;
+				}
 				
 				else if(args[i].equalsIgnoreCase("-"+XCSP_CONVERSION)) {
 					if(i+1 == args.length) {
 						System.out.println("No xml-input file specified...");
 						System.out.println("Aborting translation process.\n");
 						printHelpMessage();
-						System.exit(0);
+						System.exit(1);
 					}
 					else if(i+2 == args.length) {
 						if(args[i+1].startsWith("-")) {
 							System.out.println("No xml-input file specified...");
 							System.out.println("Aborting translation process.\n");
 							printHelpMessage();
-							System.exit(0);
+							System.exit(1);
 						}
 							
 						translateXCSP(args[i+1], args[i+1]+".minion", settings);
-						System.exit(1);
+						System.exit(0);
 					}
 					else if(i+3 == args.length) {
 						if(args[i+1].startsWith("-") || args[i+2].startsWith("-")) {
 							System.out.println("No xml-input file specified...");
 							System.out.println("Aborting translation process.\n");
 							printHelpMessage();
-							System.exit(0);
+							System.exit(1);
 						}
 						translateXCSP(args[i+1], args[i+2], settings);
-						System.exit(1);
+						System.exit(0);
 					}
 					else {
 						System.out.println("Too many input files specified for XCSP translation...");
 						System.out.println("Trying to translate '"+args[i+1]+" as XCSP input file and '"+
 								args[i+2]+"' as Minion output file.");
 						translateXCSP(args[i+1], args[i+2], settings);
-						System.exit(1);
+						System.exit(0);
 					}
 				}
 				
 				else {
 					System.out.println("Sorry, did not understand the flag '"+args[i]+"'\n");
 					printHelpMessage();
-					System.exit(0);
+					System.exit(1);
 				}
 				
 			}
@@ -138,11 +151,11 @@ public class Translate {
 			else {
 				if(i+1 == args.length) {
 					translate(args[i], settings);
-					System.exit(1);
+					System.exit(0);
 				}
 				else if(i+2 == args.length) {
 					translate(args[i], args[i+1], settings);
-					System.exit(1);
+					System.exit(0);
 				}
 				else {
 					System.out.println("Too many input files specified for translation...");
@@ -160,22 +173,7 @@ public class Translate {
 	}
 
 
-	/**
-	 * Starts the GUI version of the Essence' translator
-	 *
-	 */
-	
-	private static void runOldGUIVersion() {
-		JFrame frame = new JFrame(GUI_NAME);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-	    //Add content to the window.
-		frame.add(new translator.gui.TranslatorGUI());
-
-	    //Display the window.
-		frame.pack();
-		frame.setVisible(true);
-	}
+	// ======================== METHODS THAT INITIATE TRANSLATION =======================================
 	
 	private static void runNewGUI() {
 		
@@ -183,32 +181,49 @@ public class Translate {
 		frame.setVisible(true);
 	}
 	
+	
+	
 	private static void translate(String filename, TranslationSettings settings) {
 		
 		try {
+			
+			settings = readModelName(filename, settings);
 			giveTimeInfo = settings.giveTranslationTimeInfo;
 			writeInfo("\nTranslating "+filename);
 			long startTime = System.currentTimeMillis();
 			
 			String problemString = readStringFromFile(filename);
 	    	Translator translator = new Translator(settings);
-	    	translator.tailorTo(problemString,
-	    			                EMPTY_PARAM_STRING,
-	    			                new Minion()); 
-			String minionString = translator.getTargetSolverInstance();
+	    	boolean noError = translator.tailorTo(problemString,
+	    			                ESSENCE_PRIME_HEADER,
+	    			                settings.targetSolver);
+	    	
+	    	if(!noError) {
+				System.out.println(ERROR+"Cannot translate to "+settings.targetSolver.getSolverName()
+						+" from problem file '"+problemString+"'.");
+				System.out.println(translator.errorMessage);
+				System.exit(1);
+	    	}
+	    	
+			String solverInstance = translator.getTargetSolverInstance();
 			long stopTime = System.currentTimeMillis();
 			
 			
 			double translationTime = (stopTime - startTime) / 1000.0;
-			minionString = "# Translation Time: "+translationTime+"\n"+minionString;
+			solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
 			
-			File outputFile = writeStringIntoFile(filename+".minion", minionString);
-			writeInfo("Translated '"+filename+"' to Minion and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
+			File outputFile = writeStringIntoFile(filename+"."+settings.targetSolver.getSolverInputExtension(),
+					                              solverInstance);
+			writeInfo("Translated '"+filename+"' to "+settings.targetSolver.getSolverName()
+					+" and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
 	    	
 		} catch(Exception e) {
-			e.printStackTrace(System.out);
-			System.out.println("Cannot translate to Minion from problemfile:"+filename);
+			System.out.println(ERROR);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
+			else System.out.println(e.getMessage());
+			System.out.println("Cannot translate to "+settings.targetSolver.getSolverName()+" from problemfile:"+filename);
 			System.exit(1);
 		}
 		
@@ -217,46 +232,11 @@ public class Translate {
 	}
 	
 	
-	/**
-	 * Translate the problem file, specified by the filename, to a Minion
-	 * instance and write it into a Minion file.
-	 * 
-	 * @param filename
-	 */
-	/* private static void translate(String filename) {
-		
-		try {
-			writeInfo("\nTranslating "+filename);
-			long startTime = System.currentTimeMillis();
-			
-			String problemString = readStringFromFile(filename);
-	    	Translator translator = new Translator(new TranslationSettings());
-	    	giveTimeInfo = translator.settings.giveTranslationTimeInfo;
-	    	translator.tailorTo(problemString,
-	    			                EMPTY_PARAM_STRING,
-	    			                new Minion()); 
-			String minionString = translator.getTargetSolverInstance();
-			long stopTime = System.currentTimeMillis();
-			
-			
-			double translationTime = (stopTime - startTime) / 1000.0;
-			minionString = "# Translation Time: "+translationTime+"\n"+minionString;
-			
-			File outputFile = writeStringIntoFile(filename+".minion", minionString);
-			writeInfo("Translated '"+filename+"' to Minion and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
-			writeTimeInfo("Translation Time: "+translationTime+" sec");
-	    	
-		} catch(Exception e) {
-			e.printStackTrace(System.out);
-			System.out.println("Cannot translate to Minion from problemfile:"+filename);
-			System.exit(1);
-		}
-		
-	}
-	*/
+	
 	
 	private static void translate(String problemFileName, String parameterFileName, TranslationSettings settings) {
 		try {
+			settings = readModelName(parameterFileName, settings);
 			giveTimeInfo = settings.giveTranslationTimeInfo;
 			writeInfo("\nTranslating "+problemFileName+" with "+parameterFileName);
 			long startTime = System.currentTimeMillis();
@@ -266,63 +246,44 @@ public class Translate {
 			String parameterString = readStringFromFile(parameterFileName);
 	    	Translator translator = new Translator(settings);
 	    	
-	    	translator.tailorTo(problemString,
+	    	boolean noError = translator.tailorTo(problemString,
 	    			                parameterString,
-	    			                new Minion()); 
-			String minionString = translator.getTargetSolverInstance();
-			long stopTime = System.currentTimeMillis();
-			
-			double translationTime = (stopTime - startTime) / 1000.0;
-			minionString = "# Translation Time: "+translationTime+"\n"+minionString;
-			
-			File outputFile = writeStringIntoFile(parameterFileName+".minion", minionString);
-			writeInfo("Translated '"+problemFileName+"' and '"+parameterFileName+
-					"' to Minion and written output\n into '"+outputFile.getName()+"'.\n");
-			writeTimeInfo("Translation Time: "+translationTime+" sec");
-			
-		} catch(Exception e) {
-			e.printStackTrace(System.out);
-			System.out.println("Cannot translate to Minion from problem file '"+problemFileName+
-					"' and parameter file '"+parameterFileName+"'.");
-			System.exit(1);
-		}
-	}
-
-
-	/*
-	private static void translate(String problemFileName, String parameterFileName) {
-		try {
-			writeInfo("\nTranslating "+problemFileName+" with "+parameterFileName);
-			long startTime = System.currentTimeMillis();
-			
-			
-			String problemString = readStringFromFile(problemFileName);
-			String parameterString = readStringFromFile(parameterFileName);
-	    	Translator translator = new Translator(new TranslationSettings());
-	    	giveTimeInfo = translator.settings.giveTranslationTimeInfo;
+	    			                settings.targetSolver); 
+	    	if(!noError) {
+				System.out.println(ERROR+"Cannot translate to "+settings.targetSolver.getSolverName()
+						+" from problem file '"+problemFileName+
+						"' and parameter file '"+parameterFileName+"'.");
+				System.out.println(translator.errorMessage);
+				System.exit(1);
+	    	}
 	    	
-	    	translator.tailorTo(problemString,
-	    			                parameterString,
-	    			                new Minion()); 
-			String minionString = translator.getTargetSolverInstance();
+			String solverInstance = translator.getTargetSolverInstance();
 			long stopTime = System.currentTimeMillis();
 			
 			double translationTime = (stopTime - startTime) / 1000.0;
-			minionString = "# Translation Time: "+translationTime+"\n"+minionString;
+			solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
 			
-			File outputFile = writeStringIntoFile(parameterFileName+".minion", minionString);
+			File outputFile = writeStringIntoFile(parameterFileName+"."+settings.targetSolver.getSolverInputExtension(),
+												  solverInstance);
 			writeInfo("Translated '"+problemFileName+"' and '"+parameterFileName+
-					"' to Minion and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
+					"' to "+settings.targetSolver.getSolverName()+
+					" and written output\n into '"+outputFile.getName()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
 			
 		} catch(Exception e) {
-			e.printStackTrace(System.out);
-			System.out.println("Cannot translate to Minion from problem file '"+problemFileName+
+			System.out.println(ERROR);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
+			else System.out.println(e.getMessage());
+			System.out.println(ERROR+"Cannot translate to "+settings.targetSolver.getSolverName()
+					+" from problem file '"+problemFileName+
 					"' and parameter file '"+parameterFileName+"'.");
+			System.out.println(e.getMessage());
 			System.exit(1);
 		}
 	}
-	*/
+
+
 	
 	private static void translateXCSP(String inputFileName, String outputFileName, TranslationSettings settings) {
 		
@@ -333,7 +294,14 @@ public class Translate {
 			Xcsp2Ep xcspConverter = new Xcsp2Ep(settings);
 			Translator translator = new Translator(settings);
 			
-			translator.tailorTo(xcspConverter.translateToNormalisedModel(inputFileName), new Minion());
+			boolean noError = translator.tailorTo(xcspConverter.translateToNormalisedModel(inputFileName), settings.targetSolver);
+			if(!noError) {
+				System.out.println(ERROR+"Cannot translate to "+settings.targetSolver.getSolverName()
+						+" from XCSP instance '"+inputFileName+"'.");
+				System.out.println(translator.errorMessage);
+				System.exit(1);
+	    	}
+			
 			String minionString = translator.getTargetSolverInstance();
 			long stopTime = System.currentTimeMillis();
 			
@@ -342,15 +310,23 @@ public class Translate {
 			
 			File outputFile = writeStringIntoFile(outputFileName, minionString);
 			writeInfo("Translated '"+inputFileName+
-					"' to Minion and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
+					"' to "+settings.targetSolver.getSolverName()
+					+" and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
 			
 		} catch(Exception e) {
-			e.printStackTrace(System.out);
-			System.out.println("Cannot translate to Minion from XCSP file '"+inputFileName);
+			System.out.println(ERROR);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
+			else System.out.println(e.getMessage());
+			System.out.println(ERROR+"Cannot translate to "+settings.targetSolver.getSolverName()+" from XCSP file '"+inputFileName);
+			System.out.println(e.getMessage());
 			System.exit(1);
 		}
 	}
+	
+	
+	// ======================= HELPER METHODS ============================================================
 	
 	private static void printHelpMessage() {
 		System.out.println("\nUsage: java -jar tailor.jar [flags] [inputfiles]");
@@ -375,6 +351,10 @@ public class Translate {
 		
 		System.out.println("\nAvailable flags:");
 		System.out.println("-"+HELP+" or -h\n\tprints this help message");
+		System.out.println("-"+MINION_TRANSLATION+" or -m");
+		System.out.println("\tTranslates input files to solver Minion (default).");
+		//System.out.println("-"+GECODE_TRANSLATION+" or -g");
+		//System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
 		System.out.println("-"+NO_COMMON_SUBEXPRS);
 		System.out.println("\tTurn off reusing equivalent auxiliary variables (exploiting common subexpressions).");
 		System.out.println("\tDefault: on");
@@ -387,6 +367,9 @@ public class Translate {
 		System.out.println("-"+NO_INFO);
 		System.out.println("\tSilent mode. Don't give translation information.");
 		System.out.println("\tDefault: give translation info");
+		System.out.println("-"+DEBUG_MODE);
+		System.out.println("\tDebug mode. Prints stack trace when exception is thrown.");
+		System.out.println("\tDefault: off.");
 		System.out.println("-"+DIRECT_VAR_REUSE);
 		System.out.println("\tTranslate with directly reusing variables (e.g. in x=y, replacing x with y).");
 		System.out.println("\tDefault: off (not stable yet)");
@@ -400,7 +383,8 @@ public class Translate {
     	StringBuffer loadedString = new StringBuffer("");
     	String s = reader.readLine();
     	while(s != null && !(s.equalsIgnoreCase("null"))) {
-    		loadedString.append(s+"\n");
+    		loadedString.append(s);
+    		loadedString.append("\n");
     		s = reader.readLine();
     	}
     	reader.close();
@@ -437,5 +421,20 @@ public class Translate {
 	private static void writeTimeInfo(String info) {
 		if(giveTimeInfo)
 			System.out.println(info);
+	}
+	
+	private static TranslationSettings readModelName(String filename, TranslationSettings settings) {
+		
+		int positionOfDot = 0;
+		
+		for(positionOfDot = 0; positionOfDot < filename.length(); positionOfDot++) {
+			if(filename.charAt(positionOfDot) == '.') {
+				settings.setModelName(filename.substring(0,positionOfDot));
+				return settings;
+			}
+		}
+		settings.setModelName(filename.substring(0,positionOfDot));
+		return settings;
+	
 	}
 }

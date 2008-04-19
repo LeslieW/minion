@@ -52,10 +52,12 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 		
 		this.argument = argument.evaluate();
 		
+		//System.out.println("Evaluating abs expression: "+this);
+		
 		if(argument.getType() == INT) {
 			int constant = ((ArithmeticAtomExpression) argument).getConstant();
 			return (constant < 0) ? 
-			 new ArithmeticAtomExpression(constant+2*constant) :
+			 new ArithmeticAtomExpression(-constant) :
 				 new ArithmeticAtomExpression(constant);
 			
 		}
@@ -113,6 +115,13 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 		this.argument = this.argument.insertDomainForVariable(domain, variableName);
 		return this;
 	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		this.argument = this.argument.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
 	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
 		this.argument= this.argument.replaceVariableWith(oldVariable, newVariable);
 		return this;

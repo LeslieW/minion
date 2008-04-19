@@ -59,12 +59,13 @@ public class Disjunction extends NaryRelationalExpression {
 			return this.disjointExpressions.get(0).toString();
 		
 		else {
-			StringBuffer s = new StringBuffer("("+this.disjointExpressions.get(0).toString()+")");
+			StringBuffer s = new StringBuffer("( ("+this.disjointExpressions.get(0).toString()+")");
 			
 			for(int i=1; i<this.disjointExpressions.size(); i++) {
 				s.append(" \\/ ("+this.disjointExpressions.get(i).toString()+")");
 			}
 			
+			s.append(" )");
 			return s.toString();
 		}
 		
@@ -191,6 +192,13 @@ public class Disjunction extends NaryRelationalExpression {
 		for(int i=0; i<this.disjointExpressions.size(); i++) {
 			this.disjointExpressions.add(i, this.disjointExpressions.remove(i).insertValueForVariable(value, variableName));
 		}
+		return this;
+	}
+	
+public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		for(int i=0; i<this.disjointExpressions.size(); i++)
+			this.disjointExpressions.add(i, this.disjointExpressions.remove(i).replaceVariableWithExpression(variableName, expression));
 		return this;
 	}
 	

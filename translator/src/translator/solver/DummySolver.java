@@ -20,11 +20,11 @@ public class DummySolver extends GeneralTargetSolver {
 	public DummySolver() {
 		// general stuff
 		this.solverName = "Dummy Solver 1.0";
-		this.branchingStrategies = new String[] {DEFAULT_BRANCHING, FIRST_FAIL, LARGEST_DOMAIN, RANDOM_DOMAIN};
+		this.branchingStrategies = new String[] {DEFAULT_BRANCHING, BRANCH_SMALLEST_DOMAIN, BRANCH_LARGEST_DOMAIN, RANDOM_DOMAIN};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH, DEPTH_FIRST, BREADTH_FIRST};
 		
 		this.searchStrategy = DEPTH_FIRST;
-		this.branchingStrategy = FIRST_FAIL;
+		this.branchingStrategy = BRANCH_SMALLEST_DOMAIN;
 	
 		
 		this.featureMap = new HashMap<Integer, Boolean>();
@@ -78,7 +78,7 @@ public class DummySolver extends GeneralTargetSolver {
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_QUANTIFIED_SUM), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NARY_SUM), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_UNARY_MINUS), new Boolean(false));
-		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMNEQ_CONSTRAINT), new Boolean(false));

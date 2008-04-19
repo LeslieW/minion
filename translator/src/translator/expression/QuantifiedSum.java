@@ -1,5 +1,7 @@
 package translator.expression;
 
+import java.util.ArrayList;
+
 /**
  * Represents a quantified sum. I thought long about just converting 
  * every quantified sum straight to the normal sum representation, but
@@ -29,6 +31,18 @@ public class QuantifiedSum implements ArithmeticExpression {
 			             Expression quantifiedExpression) {
 	
 		this.quantifiedVariables = quantifiedVariables;
+		this.domain = quantifiedDomain;
+		this.quantifiedExpression = quantifiedExpression;
+	}
+	
+	public QuantifiedSum(ArrayList<String> quantifiedVars,
+            			Domain quantifiedDomain,
+            			Expression quantifiedExpression) {
+
+		this.quantifiedVariables = new String[quantifiedVars.size()];
+		for(int i=quantifiedVars.size()-1; i>=0; i--)
+			this.quantifiedVariables[i] = quantifiedVars.remove(i);
+		
 		this.domain = quantifiedDomain;
 		this.quantifiedExpression = quantifiedExpression;
 	}
@@ -74,6 +88,12 @@ public class QuantifiedSum implements ArithmeticExpression {
 	}
 
 	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		this.quantifiedExpression = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
 	public char isSmallerThanSameType(Expression e) {
 	
 		QuantifiedSum otherSum = (QuantifiedSum) e;
@@ -110,7 +130,7 @@ public class QuantifiedSum implements ArithmeticExpression {
 		for(int i=1; i<this.quantifiedVariables.length; i++)
 			s = s.concat(","+quantifiedVariables[i]);
 		
-		s = s.concat(": "+this.domain+"\n");
+		s = s.concat(": "+this.domain+".\n");
 		s = s.concat("\t"+this.quantifiedExpression);
 		
 		

@@ -117,6 +117,15 @@ public class SingleVariable implements Variable {
 		else return this;
 	}
 
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		if(this.variableName.equals(variableName)) {
+			return expression;
+		}
+		//this = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}
@@ -149,5 +158,11 @@ public class SingleVariable implements Variable {
 		if(this.variableName.equals(oldVariable.getVariableName()))
 			return newVariable;
 		return this;
+	}
+	
+	// =============== ADDITIONAL METHODS ==================
+	
+	public Domain getExplicitDomain() {
+		return this.domain;
 	}
 }

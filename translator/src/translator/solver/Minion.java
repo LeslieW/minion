@@ -18,11 +18,13 @@ public class Minion extends GeneralTargetSolver {
 	public Minion() {
 		// general stuff
 		this.solverName = "Minion";
+		this.inputFileExtension = "minion";
+		this.version = "0.5.1";
 		this.branchingStrategies = new String[] {DEFAULT_BRANCHING};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH};
 		
 		this.searchStrategy = DEPTH_FIRST;
-		this.branchingStrategy = FIRST_FAIL;
+		this.branchingStrategy = BRANCH_SMALLEST_DOMAIN;
 	
 		this.useWatchedSum = true;
 		
@@ -88,7 +90,7 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_QUANTIFIED_SUM), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NARY_SUM), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_UNARY_MINUS), new Boolean(false));
-		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE), new Boolean(false));
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_PRODUCT_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_NARY_SUMNEQ_CONSTRAINT), new Boolean(false));
@@ -138,6 +140,7 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.REIFIED_ATMOST), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_OCCURRENCE), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_TABLE), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_NEGATION), new Boolean(true));
 		
 		// variables
 		featureMap.put(new Integer(SPARSE_VARIABLES),new Boolean(true));
@@ -150,4 +153,5 @@ public class Minion extends GeneralTargetSolver {
 		return this.useWatchedSum;
 	}
 
+	
 }

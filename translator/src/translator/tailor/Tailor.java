@@ -8,8 +8,10 @@ import translator.TranslationSettings;
 import translator.solver.*;
 import translator.tailor.minion.MinionTailor;
 import translator.tailor.minion.MinionException;
+import translator.tailor.gecode.GecodeTailor;
+import translator.tailor.gecode.GecodeException;
 
-public class Tailor implements TailorSpecification {
+public class Tailor {
 
 	NormalisedModel problemModel;
 	TargetSolver targetSolver;
@@ -29,15 +31,19 @@ public class Tailor implements TailorSpecification {
 	 
 	// ================== INHERITED METHODS ==================
 	
-	
-	public String tailor(NormalisedModel normalisedModel)
-			throws TailorException, MinionException  {
+	/**
+	 * Tailors the normalisedModel in Essence' to the specified targetsolver
+	 * and returns the String that represents the target solver model.
+	 * 
+	 */
+	public String tailor(NormalisedModel normalisedModel, TargetSolver solver)
+			throws TailorException, MinionException, GecodeException  {
 		this.problemModel = normalisedModel;
+		this.targetSolver = solver;
 		
-		if(targetSolver instanceof Minion) {
-			this.minionTailor = new MinionTailor(this.problemModel,
-					                                   settings);
-			translator.tailor.minion.MinionModel model = minionTailor.tailorToMinion();
+		if(solver instanceof Minion) {
+			this.minionTailor = new MinionTailor();
+			translator.tailor.minion.MinionModel model = minionTailor.tailorToMinion(normalisedModel, settings);
 			long startTime = System.currentTimeMillis();
 			String minionInput = model.toString();
 			if(this.settings.giveTranslationTimeInfo()) {
@@ -47,32 +53,28 @@ public class Tailor implements TailorSpecification {
 			return minionInput;
 		}
 		
-		else throw new TailorException("Cannot tailor model to specified solver: '"+this.targetSolver.getSolverName()
+		else if(solver instanceof Gecode) {
+			writeInfo("Flattened Essence' for solver Gecode:\n"+this.problemModel.toString());
+			GecodeTailor gecodeTailor = new GecodeTailor();
+			translator.tailor.gecode.GecodeModel model = gecodeTailor.tailorToGecode(normalisedModel, settings);
+			
+			long startTime = System.currentTimeMillis();
+			String gecodeInput = model.toString();
+			if(this.settings.giveTranslationTimeInfo()) {
+				long stopTime = System.currentTimeMillis();
+				writeTimeInfo("Gecode Model toString Time: "+(stopTime - startTime)/1000.0+"sec");
+			}
+			return gecodeInput;
+			
+			//throw new TailorException("Cannot tailor model to specified solver: '"+solver.getSolverName()
+			//		+"'. The Gecode-Tailor is still under development.");
+		}
+		
+		else throw new TailorException("Cannot tailor model to specified solver: '"+solver.getSolverName()
 				+"'. no tailor for solver available.");
 	}
 
-	
-	
-	
-	public String tailor(NormalisedModel normalisedModel,
-			             TargetSolver targetSolver)
-	throws TailorException, MinionException  {
-		this.problemModel = normalisedModel;
-		this.targetSolver = targetSolver;
-        
-		
-		if(this.targetSolver instanceof Minion) {
-			this.minionTailor = new MinionTailor(problemModel,
-					                                     this.settings);
-			
-			return minionTailor.tailorToMinion().toString();
-			
-			
-		}
-		
-		else throw new TailorException("Cannot tailor model to specified solver: '"+this.targetSolver.getSolverName()
-				+"'. no tailor for solver available.");
-	}
+
 
 
 	/**
@@ -92,6 +94,14 @@ public class Tailor implements TailorSpecification {
 	}
 	
 
+	/**
+	 * Given the solverOutput, this method returns the solution 
+	 * of the problem instance in Essence'
+	 * 
+	 * @param solverOutput
+	 * @return
+	 * @throws TailorException
+	 */
 	public String getEssenceSolution(String solverOutput) 
 		throws TailorException {
 		if(this.targetSolver instanceof Minion) {
@@ -100,14 +110,18 @@ public class Tailor implements TailorSpecification {
 			}
 			else throw new TailorException("Please tailor model before mapping the solver output.");
 		}
-		else throw new TailorException("Cannot return Essence' output for solver: '"+this.targetSolver.getSolverName()
+		else throw new TailorException("Cannot return Essence' output for solver '"+this.targetSolver.getSolverName()
 				+"'. no tailor for solver available.");
 	}
 	
 	
+	private void writeInfo(String info) {
+		if(this.settings.giveTranslationInfo())
+			System.out.println(info);
+	}
 	
 	private void writeTimeInfo(String info) {
-		if(this.settings.giveTranslationInfo())
+		if(this.settings.giveTranslationTimeInfo())
 			System.out.println(info);
 	}
 }

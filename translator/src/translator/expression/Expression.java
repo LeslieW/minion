@@ -40,7 +40,7 @@ public interface Expression {
 	
 	/** an array element that is indexed by a constant value and has an integer bounds domain */
 	public final int ARRAY_VARIABLE = 14;
-
+	public final int SIMPLE_ARRAY_VARIABLE = 15;
 	
     //	 --------------------------------------------------------
 	// Unary Relational Expressions
@@ -126,10 +126,13 @@ public interface Expression {
 	public final int BINARY_SUMGREATER_CONSTRAINT = 274;
 	public final int BINARY_SUMGEQ_CONSTRAINT = 275;
 	public final int BINARY_PRODUCT_CONSTRAINT = 280;
+	public final int ABSOLUTE_CONSTRAINT = 281;
 	
 	// other implicit operations
 	public final int ARRAY_INDEXING = 300;
 	
+	
+	public final int OBJECTIVE = 500;
 	// --------------------------------------------------------
 	
 	
@@ -255,7 +258,10 @@ public interface Expression {
 	public Expression insertValueForVariable(boolean value, String variableName);
 	
 	/**
-	 * This method os used
+	 * This method is used to 
+	 *  - either replace 'variableName' with a domain
+	 *  - or turn a simple Variable (that has an unknown domain) 
+	 *    with name 'variableName' into a proper variable with domain 'domain' 
 	 * 
 	 * @param domain
 	 * @param variableName
@@ -318,4 +324,8 @@ public interface Expression {
 	 *          by newVariable
 	 */
 	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable);
+	
+	
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression);
 }

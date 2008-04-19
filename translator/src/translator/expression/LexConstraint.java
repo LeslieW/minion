@@ -2,8 +2,8 @@ package translator.expression;
 
 public class LexConstraint implements RelationalExpression {
 
-	Array leftArray;
-	Array rightArray;
+	Expression leftArray;
+	Expression rightArray;
 	int operator;
 	boolean willBeFlattenedToVariable = false;
 	boolean isNested = true;
@@ -19,12 +19,20 @@ public class LexConstraint implements RelationalExpression {
 		this.operator = operator;
 	}
 	
+	public LexConstraint(Expression left,
+			             int operator,
+			             Expression right) {
+		
+		this.leftArray = left;
+		this.rightArray = right;
+		this.operator = operator;
+	}
 	
 	// ============= INHERITED METHODS ============================
 	public Expression copy() {
-		return new LexConstraint((Array) this.leftArray.copy(),
+		return new LexConstraint( this.leftArray.copy(),
 				                 this.operator,
-				                 (Array) this.rightArray.copy());
+				                 this.rightArray.copy());
 	}
 
 	public Expression evaluate() {
@@ -40,21 +48,28 @@ public class LexConstraint implements RelationalExpression {
 	}
 
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
-		this.leftArray = (Array) this.leftArray.insertDomainForVariable(domain, variableName);
-		this.rightArray = (Array) this.rightArray.insertDomainForVariable(domain, variableName);
+		this.leftArray = this.leftArray.insertDomainForVariable(domain, variableName);
+		this.rightArray =  this.rightArray.insertDomainForVariable(domain, variableName);
 		return this;
 	}
 
 	public Expression insertValueForVariable(int value, String variableName) {
-		this.leftArray = (Array) this.leftArray.insertValueForVariable(value, variableName);
-		this.rightArray = (Array) this.rightArray.insertValueForVariable(value, variableName);
+		this.leftArray =  this.leftArray.insertValueForVariable(value, variableName);
+		this.rightArray =  this.rightArray.insertValueForVariable(value, variableName);
 		
 		return this;
 	}
 	
 	public Expression insertValueForVariable(boolean value, String variableName) {
-		this.leftArray = (Array) this.leftArray.insertValueForVariable(value, variableName);
-		this.rightArray = (Array) this.rightArray.insertValueForVariable(value, variableName);
+		this.leftArray =  this.leftArray.insertValueForVariable(value, variableName);
+		this.rightArray =  this.rightArray.insertValueForVariable(value, variableName);
+		
+		return this;
+	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		this.leftArray = this.leftArray.replaceVariableWithExpression(variableName, expression);
+		this.rightArray = this.rightArray.replaceVariableWithExpression(variableName, expression);
 		
 		return this;
 	}
@@ -137,11 +152,11 @@ public class LexConstraint implements RelationalExpression {
 	
 	// ============== OTHER METHODS ==========================
 
-	public Array getLeftArray() {
+	public Expression getLeftArray() {
 		return this.leftArray;
 	}
 	
-	public Array getRightArray() {
+	public Expression getRightArray() {
 		return this.rightArray;
 	}
 	

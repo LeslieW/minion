@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class ConstantArrayDomain  implements ConstantDomain {
+public class ConstantArrayDomain  implements ConstantDomain,MatrixDomain {
 
 	ConstantDomain baseDomain;
 	ConstantDomain[] indexDomains;
@@ -46,10 +46,17 @@ public class ConstantArrayDomain  implements ConstantDomain {
 		return this;
 	}
 
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		return this;
+	}
+	
 	public boolean isConstantDomain() {
 		return true;
 	}
 
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		return this;
+	}
 	
 	public char isSmallerThanSameType(BasicDomain d) {
 		int f;
@@ -78,5 +85,14 @@ public class ConstantArrayDomain  implements ConstantDomain {
 		s = s+"] of "+this.baseDomain.toString();
 		
 		return s;
+	}
+	
+	public int getOffsetFromZeroAt(int index) 
+		throws Exception {
+		
+		if(index >= this.indexDomains.length || index < 0)
+			throw new Exception("Index '"+index+"' out of bounds:"+this);
+
+		return this.indexDomains[index].getRange()[0];
 	}
 }

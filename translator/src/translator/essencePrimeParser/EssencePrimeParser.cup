@@ -30,8 +30,12 @@ Sun endorses this product.
 
 package translator.essencePrimeParser;
 
-import translator.conjureEssenceSpecification.*;
-import java.util.LinkedList;
+//import translator.conjureEssenceSpecification.*;
+//import java.util.LinkedList;
+
+
+import translator.expression.*;
+import java.util.ArrayList;
 
 
 parser code {:
@@ -82,17 +86,16 @@ action code {:
 
 /* keywords */
 terminal	   ALLDIFF, ATLEAST, ATMOST;
-terminal       BE, BE_DOMAIN, BE_NEW_TYPE;
-terminal       ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL;
+terminal	   BE, BE_DOMAIN, BE_NEW_TYPE;
+terminal	   ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL;
 terminal 	   GIVEN, HEADER, INT, LETTING, MATRIX_INDEXED_BY;
-terminal       IS, IS_DOMAIN;
-terminal	   MAXIMISING, MAX, MINIMISING, MIN, PARAM;
+terminal	   MAXIMISING, MAX, MINIMISING, MIN, MODULO;
 terminal 	   OCCURRENCE, OF, SUCH_THAT, SUM, TABLE; 
-terminal       TRUE, WHERE;
+terminal            TRUE, WHERE;
 
 
 /* separators  */
-terminal	   LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK;
+terminal	   LPAREN, RPAREN, LBRACK, RBRACK;
 terminal	   DOT, DOTDOT, COMMA, COLON, BAR;
 
 /* operators */
@@ -111,17 +114,18 @@ terminal Integer   INTEGER;
 
 non terminal essencemodel, body;
 non terminal declarations, declaration_list, declaration, objective, constraint_block;
-non terminal given_block, where_block, parameter_block, letting_block, find_block;
-non terminal parameter_list, parameter, infinite_parameter_domain, domain_identifiers, identifier_list;
-non terminal domain, domain_list, range_atom_list, range_atom;
+non terminal given_block, where_block, letting_block, find_block;
+non terminal variable_declaration_list, infinite_variable_declaration_list;
+non terminal identifiers_with_domain, identifiers_with_infinite_domain, identifier_list;
+non terminal domain, domain_list, infinite_domain;
 non terminal expression, expression_list;
 non terminal atomic_expression, deref_expression, atom_expression;
 non terminal index, index_list;
-non terminal unitop_expression, binaryop_expression, lex_expression,  functionop_expression;
-non terminal quantifierop_expression, quantifier, binding_expression;
-non terminal table_constraint, atom_list, constant_tuple_list, constant_tuple, integer_list;
-non terminal constant_list, constant_vector_list, constant, constant_vector, constant_matrix;
-non terminal user_def_type, variable_list;
+non terminal unary_expression, binary_expression, lex_expression,  global_constraint;
+non terminal quantified_expression, variable_array;
+non terminal table_constraint, atom_list, integer_list;
+non terminal constant_vector_list, constant_vector, constant_matrix;
+non terminal user_def_type;
 
 
 
@@ -133,7 +137,7 @@ precedence right DOT;
 precedence nonassoc EQ, NEQ;
 precedence nonassoc LESS, LEQ, GREATER, GEQ, LEXLESS, LEXLEQ, LEXGEQ, LEXGREATER; 
 precedence left PLUS, MINUS;
-precedence left MULT, DIVISION;
+precedence left MULT, DIVISION, MODULO;
 precedence left POWER;
 precedence right UMINUS;
 precedence left IFF;
@@ -154,69 +158,87 @@ precedence left COMMA;
 
 
 essencemodel ::= HEADER body:b
-		{: RESULT = (EssenceSpecification) b; :}
+		{: RESULT = (EssencePrimeModel) b; :}
 		
 ;
 
 
 body ::= 	declarations:d_list 
 	        objective:obj 
-            constraint_block:expr_list 
+                constraint_block:expr_list 
 
-         	{:  Object[] tmp1 = ((LinkedList) d_list).toArray();
-	            Declaration[] d_array = new Declaration[tmp1.length];
-		    for(int i=0;i<d_array.length;i++)
- 				d_array[i] = (Declaration) tmp1[i];
-
-                    Object[] tmp2 = ((LinkedList) expr_list).toArray();	
-	            Expression[] expr_array = new Expression[tmp2.length];
-		    for(int i=0;i<expr_array.length;i++)
- 				expr_array[i] = (Expression) tmp2[i];
-
-		 RESULT = new EssenceSpecification(d_array,
+         	{: 
+		       RESULT = new EssencePrimeModel(
+						   (ArrayList<GeneralDeclaration>) d_list,
 						   (Objective)  obj,
-						   expr_array); :} 
+						   (ArrayList<Expression>)expr_list 
+                                               ); 
+                :} 
 						   
 		    	
 		    			   
  ;
 
 
-/* Declarations  */
+
+
+
+
+/* General Declarations  */
 
 declarations ::=	 declaration_list:d 
 				{: RESULT = d; :} 	
 	
 			| /* epsilon */ 
-			  {:	  RESULT = new LinkedList(); :}
+			  {:	  RESULT = new ArrayList<GeneralDeclaration>(); :}
 ;		
 
 
 declaration_list ::=      declaration:d
-				{: LinkedList list = new LinkedList();
-				   list.addFirst((Declaration) d); 
-				   RESULT = list; :}
+				{: RESULT = d; :}
 
-  			| declaration:d declaration_list:d_list
-				{: ((LinkedList) d_list).addFirst((Declaration) d);
-				  RESULT = d_list; :} 
+  			| declaration:d1 declaration_list:d2
+				{: 
+					ArrayList<GeneralDeclaration> list1 = (ArrayList<GeneralDeclaration>) d1; 
+					ArrayList<GeneralDeclaration> list2 = (ArrayList<GeneralDeclaration>) d2; 
+					
+					if(list1.size() > list2.size()) {
+					   
+					   for(int i=list2.size()-1; i>=0; i--) {
+					   	   list1.add(0,list2.get(i));
+					   }
+					   RESULT = list1;	
+					}
+					
+					else {
+					
+					   for(int i=list1.size()-1; i>=0; i--) {
+					   	   list2.add(0,list1.get(i));
+					   }
+					   RESULT = list2;	
+				    }
+                :} 
 ;
  
 
 declaration ::=  given_block:d
-		    {: RESULT = (Declaration) d; :}
+		    {: RESULT = (ArrayList<GeneralDeclaration>) d; :}
 	
 	         | where_block:d
-		    {: RESULT = (Declaration)  d; :}
-
-	     | parameter_block:d 
-	        {: RESULT = (Declaration) d;  :}
+		    {:
+		      ArrayList<GeneralDeclaration> list = new ArrayList<GeneralDeclaration>();
+		      list.add((ConstantRestriction)  d);
+		      RESULT = list; 
+		     :}
 
 		 | letting_block:d
-		    {: RESULT = (Declaration) d; :}
+		    {: ArrayList<GeneralDeclaration> list = new ArrayList<GeneralDeclaration>();
+		      list.add((GeneralDeclaration)  d);
+		      RESULT = list;
+		     :}
 
 		 | find_block:d
-		    {: RESULT =(Declaration)  d; :}
+		    {: RESULT =(ArrayList<GeneralDeclaration>)  d; :}
 
 ;
 	
@@ -224,189 +246,340 @@ declaration ::=  given_block:d
 
  
  
-given_block ::= GIVEN parameter_list:p_list 
-	        {:  Object[] tmp = ((LinkedList) p_list).toArray();	
-	            Parameter[] p_array = new Parameter[tmp.length];
-		    for(int i=0;i<p_array.length;i++)
- 				p_array[i] = (Parameter) tmp[i];
+given_block ::= GIVEN variable_declaration_list:list
+	        {:  
+		   		ArrayList<VariableDeclaration> parameters =(ArrayList<VariableDeclaration>) list;		   
+		   		ArrayList<GeneralDeclaration> declarations = new ArrayList<GeneralDeclaration>();
+		   		   
+                for(int i=0; i<parameters.size(); i++) {
+		      	    declarations.add(new ParameterDeclaration(parameters.get(i).getNames(),
+		      	    										  parameters.get(i).getDomain()
+		      	    										  )
+		      	    	             );
+                }		       		   
 
- 		    RESULT = new Declaration(p_array); :}
+		        RESULT = declarations; 
 
-;
-
-
-parameter_list ::= parameter:p
-			{: 
-			   LinkedList list = new LinkedList();
-			   list.addFirst(p); 
-			   RESULT = list; :}
-
-	           | parameter_list:p_list COMMA parameter:p
-			{: ((LinkedList) p_list).addFirst(p); 
-		            RESULT = p_list; :} 
-;
-
-
-parameter ::= 	domain_identifiers:di 
-			{: RESULT = new Parameter((DomainIdentifiers) di); :}
-		| IDENTIFIER:id ENUM LPAREN DOT DOT DOT RPAREN
-			{: RESULT = new Parameter(id); :}	
-		| identifier_list:id_list COLON infinite_parameter_domain:d 
-		    {:
-		      Object[] tmp = ((LinkedList) id_list).toArray();
-			  String[] id_array = new String[tmp.length];
-			  for(int i=0;i<id_array.length;i++)
- 				id_array[i] = (String) tmp[i];
+		    :}
 		    
-		    RESULT = new Parameter(new DomainIdentifiers(id_array, (Domain) d)); :}                        			
+		   | GIVEN infinite_variable_declaration_list:list
+	        {:  
+		   		ArrayList<VariableDeclaration> parameters =(ArrayList<VariableDeclaration>) list;		   
+		   		ArrayList<GeneralDeclaration> declarations = new ArrayList<GeneralDeclaration>();
+		   		   
+                for(int i=0; i<parameters.size(); i++) {
+		      	    declarations.add(new ParameterDeclaration(parameters.get(i).getNames(),
+		      	    										  parameters.get(i).getDomain()
+		      	    										  )
+		      	    				);
+                }		       		   
+
+		        RESULT = declarations; 
+
+		    :}												
+
 ;
 
 
-infinite_parameter_domain ::= 
+where_block ::= WHERE expression_list:e_list 
+               	        {:
+			              RESULT = new ConstantRestriction((ArrayList<Expression>) e_list);  
+		                :}
+;
+
+
+
+
+letting_block ::= LETTING IDENTIFIER:id BE expression:e 
+	        {: 
+		   RESULT = new ExpressionDefinition((String) id,
+                                                      (Expression) e);
+
+                :}
+
+	    | LETTING IDENTIFIER:id COLON domain:d BE expression:e
+		{: 
+		   RESULT = new ExpressionDefinition((String) id,
+						      (Expression) e,
+						      (Domain) d);
+		:}
+                
+                
+                
+        | LETTING IDENTIFIER:id BE_DOMAIN domain:d     
+		{: 
+		  RESULT = new DomainDefinition( (String) id,
+					         (Domain) d);
+		:}
+	
+	
+	    | LETTING IDENTIFIER:id BE constant_vector:cv
+	    {: 
+	      ArrayList<Integer> i_list = (ArrayList<Integer>) cv;
+	      Integer[] i_array = new Integer[i_list.size()];
+	      for(int i=i_array.length-1; i>=0; i--)
+	      	i_array[i] = i_list.remove(i);
+	      
+	      RESULT = new ExpressionDefinition( (String) id,
+	                                          new ConstantVector( (String) id,
+	                                                              i_array)
+	                                       );
+	    
+	    :}
+		
+		
+		| LETTING IDENTIFIER:id BE constant_matrix:constant_matrix 
+		{: 
+		  RESULT = new ExpressionDefinition( (String) id,
+		                                      new ConstantMatrix( (String) id,
+		                                                          (Integer[][]) constant_matrix
+		                                                         )
+		                                   );
+		                                                          
+		:}
+		
+	
+				
+;
+
+
+
+
+find_block ::= 	FIND variable_declaration_list:v_list
+	       {:  
+	          RESULT = v_list;
+	       :}
+;
+
+
+
+/*  Objective */
+
+
+
+objective ::= 	  MAXIMISING expression:e
+			      {: 
+			         boolean isMaximising = true;
+			         RESULT = new Objective((Expression) e, isMaximising); 
+			       :}
+
+		        | MINIMISING expression:e
+			      {: 
+ 	                 boolean isMaximising = false;
+			         RESULT = new Objective((Expression) e, isMaximising); 
+			       :}
+			       
+		        | /* epsilon */
+			       {:    
+			         RESULT = new Objective(); 
+			       :}
+;
+
+
+/*  Constraints */
+
+constraint_block ::=     SUCH_THAT expression_list:e_list 
+			  {: RESULT = e_list; :}
+		        | /* epsilon */
+			  {:
+		            RESULT = new ArrayList<Expression>(); :}	
+;
+
+
+
+
+/* Rest */
+
+variable_declaration_list ::=   identifiers_with_domain:id
+		     {: 
+			    ArrayList<VariableDeclaration> list = new ArrayList<VariableDeclaration>();
+			    list.add( (VariableDeclaration) id);
+			     RESULT = list;  
+			  :}
+					   
+		  | identifiers_with_domain:di COMMA variable_declaration_list:di_list
+		     {: 
+		         ((ArrayList<VariableDeclaration>) di_list).add(0,(VariableDeclaration) di);  
+			     RESULT = di_list; 
+			 :}
+;
+
+
+
+infinite_variable_declaration_list ::= identifiers_with_infinite_domain:id
+		     {: 
+			    ArrayList<VariableDeclaration> list = new ArrayList<VariableDeclaration>();
+			    list.add( (VariableDeclaration) id);
+			     RESULT = list;  
+			  :}
+					   
+		  | identifiers_with_infinite_domain:di COMMA variable_declaration_list:di_list
+		     {: 
+		         ((ArrayList<VariableDeclaration>) di_list).add(0,(VariableDeclaration) di);  
+			     RESULT = di_list; 
+			 :}
+;
+
+
+
+
+identifiers_with_domain ::= identifier_list:id_list COLON domain:d
+			{: 
+				RESULT = new VariableDeclaration((ArrayList<String>) id_list,
+										         (Domain) d);
+			 :}
+;
+
+
+
+identifiers_with_infinite_domain ::= identifier_list:id_list COLON infinite_domain:d
+			{: 
+			   boolean isParameter = true; /* only parameters are allowed to have infinte domains*/
+			   RESULT = new VariableDeclaration((ArrayList<String>) id_list,
+										         (Domain) d,
+										          isParameter);
+             :}
+;
+
+
+
+infinite_domain ::= 
                    INT LPAREN expression:e DOTDOT RPAREN
                      {: 
-                        RESULT = new Domain(
-                                     new IntegerDomain(
-                                           new RangeAtom[] {new RangeAtom(EssenceGlobals.RANGE_EXPR_DOTS ,(Expression) e) } 
-                                 )); 
+                        boolean isLowerBound = true;
+                        RESULT = new InfiniteDomain((Expression) e, isLowerBound); 
                       :}
+                      
                   | INT LPAREN DOTDOT expression:e RPAREN
                    {: 
-                      RESULT = new Domain(new IntegerDomain(new RangeAtom[] {new RangeAtom(EssenceGlobals.RANGE_DOTS_EXPR ,(Expression) e) } )); :}
+                       boolean isLowerBound = false;
+                        RESULT = new InfiniteDomain((Expression) e, isLowerBound); 
+                   :}     
+                      
                   |
                     INT LPAREN RPAREN
-                     {: RESULT = new Domain(new IntegerDomain()); :} 
+                     {: RESULT = new InfiniteDomain();
+                     :} 
                   |
                      INT LPAREN DOTDOT RPAREN
-                     {: RESULT = new Domain(new IntegerDomain()); :} 
+                     {: RESULT = new InfiniteDomain(); :} 
                   |
                    INT
-                     {: RESULT = new Domain(new IntegerDomain()); :} 
-;
-
-domain_identifiers ::= identifier_list:id_list COLON domain:d
-			{: 
-			  Object[] tmp = ((LinkedList) id_list).toArray();
-			  String[] id_array = new String[tmp.length];
-			  for(int i=0;i<id_array.length;i++)
- 				id_array[i] = (String) tmp[i];
-
-			 RESULT = new DomainIdentifiers(id_array, (Domain) d); :}
+                     {: RESULT = new InfiniteDomain(); :} 
 ;
 
 
 identifier_list ::=	  IDENTIFIER:id
 				   {: 	
-			           LinkedList list = new LinkedList();
-				   list.addFirst(new String(id));
-				   RESULT = list; :}
+			           ArrayList<String> list = new ArrayList<String>();
+				       list.add(0,new String(id));
+				       RESULT = list; 
+				   :}
 
-			| IDENTIFIER:id COMMA identifier_list:id_list
-				{: ((LinkedList) id_list).addFirst(new String(id)); 
-				    RESULT = id_list; :}
+			       | IDENTIFIER:id COMMA identifier_list:id_list
+				   {: 
+				       ((ArrayList<String>) id_list).add(0,new String(id)); 
+				       RESULT = id_list; 
+				   :}
 ;
 
+
+
+/*   Domain */
 
 domain ::= 	LPAREN domain:d RPAREN	     
 			{: RESULT = (Domain) d; :}
 
 	      | IDENTIFIER:id
-			{: if(id.equals("bool")) 
-			     RESULT = new Domain();
-	                   else 
-			     RESULT = new Domain(new IdentifierDomain(new String(id) )); :}
+			{: if(id.equals("bool") || id.equals("BOOL")) 
+			     RESULT = new BoolDomain();
+			     
+	           else 
+			     RESULT = new IdentifierDomain(new String(id) ); :}
 
           
-          | INT LPAREN range_atom_list:ra_list RPAREN
-               	        {:  Object[] tmp = ((LinkedList) ra_list).toArray();	
-	        	    RangeAtom[] ra_array = new RangeAtom[tmp.length];
-			    for(int i=0;i<ra_array.length;i++)
- 			   	 ra_array[i] = (RangeAtom) tmp[i];			  
-	  
-			   RESULT = new Domain(new IntegerDomain(ra_array)); :}			   
+          | INT LPAREN expression:e1 DOTDOT expression:e2 RPAREN
+             {: 
+                RESULT = new BoundedExpressionRange( (Expression) e1,
+                                                     (Expression) e2);
+             
+             :}
 
+          | INT LPAREN expression_list:e_list RPAREN 
+            {: 
+            	RESULT = new SparseExpressionRange((ArrayList<Expression>) e_list);
+            :}
+          
 
 	      | MATRIX_INDEXED_BY LBRACK domain_list:d_list RBRACK OF domain:d
-               	        {:  Object[] tmp = ((LinkedList) d_list).toArray();	
-	        	    Domain[] d_array = new Domain[tmp.length];
-			    for(int i=0;i<d_array.length;i++)
- 			   	 d_array[i] = (Domain) tmp[i];
+             {:  
+				RESULT = new ArrayDomain( (Domain) d,
+				                          (ArrayList<Domain>) d_list) ;
 
-	                   
-			    RESULT = new Domain(new MatrixDomain(d_array, (Domain) d) ); :}
+              :}
 ;
 
 
 domain_list ::= domain:d
-		   {: LinkedList list = new LinkedList();
-		      list.add(  d); 
-		      RESULT = list; :}
+		    {: 
+		       ArrayList<Domain> list = new ArrayList<Domain>();
+		      list.add((Domain)  d); 
+		      RESULT = list; 
+		    :}
 
               | domain_list:d_list COMMA domain:d
-		   {: ((LinkedList) d_list).add(  d); 
-		       RESULT = d_list; :}
+		   {: 
+		       ((ArrayList<Domain>) d_list).add( (Domain)  d); 
+		       RESULT = d_list; 
+		    :}
 ;
 
-
-range_atom_list ::= 	range_atom:ra
-				{: LinkedList list = new LinkedList();
-				   list.addFirst(  ra);
-				   RESULT = list; :}
-
-		      | range_atom:ra COMMA range_atom_list:ra_list
-				{: ((LinkedList) ra_list).addFirst(  ra); 
-				   RESULT = ra_list; :}
-;
-	
-
-range_atom	 ::= 	expression:e
-				{:  
-				RESULT = new RangeAtom(EssenceGlobals.RANGE_EXPR, (Expression) e); :} 
-
-		      | expression:e1 DOTDOT expression:e2
-				{: RESULT = new RangeAtom((Expression) e1, (Expression) e2); :} 
-;
 
 
 expression_list ::=  	  expression:e
-				{: LinkedList e_list = new LinkedList();	
-				   e_list.addFirst(e); 
-				   RESULT = e_list; :}
+				{: ArrayList<Expression> e_list = new ArrayList<Expression>();	
+				   e_list.add(0,(Expression) e); 
+				   RESULT = e_list; 
+				:}
 
 			| expression:e COMMA expression_list:e_list
-				{: ((LinkedList) e_list).addFirst(e); 
-				   RESULT = e_list;:}
+				{: ((ArrayList<Expression>) e_list).add(0,(Expression) e); 
+				   RESULT = e_list;
+				:}
 ;
 
 
+
 expression ::= 	  LPAREN expression:e RPAREN
-			{: RESULT = new Expression((Expression) e); :}
+			{: RESULT = e; :}
  			
 	      	| atomic_expression:ae
-			{: RESULT = new Expression( (AtomicExpression) ae); :}
+			{: RESULT = ae; :}
 
-		| deref_expression:de
-			{: RESULT = new Expression( (NonAtomicExpression) de); :}
-
-		| unitop_expression:ue
-			{: RESULT = new Expression( (UnaryExpression) ue); :}
+     		| deref_expression:de
+			{: RESULT = de; :}
+  
+	 	    | unary_expression:ue
+	 		{: RESULT = ue; :}
 	
-		| binaryop_expression:be
-			{: RESULT = new Expression( (BinaryExpression) be); :}
+		    | binary_expression:be
+			{: RESULT = be; :}
 
-		| functionop_expression:fe
-			{: RESULT = new Expression( (FunctionExpression) fe); :}
+		    | global_constraint:g
+			{: RESULT = g; :}
 
-		| quantifierop_expression:qe
-			{: RESULT = new Expression( (QuantificationExpression) qe); :}
+		    | quantified_expression:qe
+			{: RESULT = qe; :}
 			
-		| lex_expression:le
-		    {: RESULT = new Expression((LexExpression) le);  :}
+	    	| lex_expression:le
+		    {: RESULT = le;  :}
 		    
-		|  table_constraint:tab_constraint
-	        {: RESULT = new Expression((TableConstraint) tab_constraint);:}	
+		 /*   |  table_constraint:tab_constraint
+	        {: RESULT = tab_constraint;:}	
+	       
+	     */
 	        
-	   
+	   /*
 	    | ATLEAST LPAREN expression:e1 COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN
 	       
 		{: 
@@ -442,261 +615,524 @@ expression ::= 	  LPAREN expression:e RPAREN
 									                     int_array1,
 									                     int_array2,
 									                     true)); //isAtmost =true :}	
- 
+    */
 ;
 
 
-atomic_expression ::=   	  INTEGER:i 
+atomic_expression ::=  INTEGER:i 
 				{: 
-				  RESULT = new AtomicExpression(i); :}
+				  RESULT = new ArithmeticAtomExpression(i); :}
 
 	        	| TRUE
-				{: RESULT = new AtomicExpression(true); :}
+				{: RESULT = new RelationalAtomExpression(true); :}
 
-			| FALSE 
-				{: RESULT = new AtomicExpression(false); :}
+				| FALSE 
+				{: RESULT = new RelationalAtomExpression(false); :}
 
-			| IDENTIFIER:id
-				{: RESULT = new AtomicExpression(new String(id)); :}
+			   | IDENTIFIER:id
+			    {: RESULT = new SimpleVariable(new String(id)); :}
 ;
+
 
 
 deref_expression ::= 	IDENTIFIER:id LBRACK index_list:e_list RBRACK
-               	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
-	        	            Index[] e_array = new Index[tmp.length];
-			                for(int i=0;i<e_array.length;i++)
- 			   	               e_array[i] = (Index) tmp[i];
-	
-			              RESULT = new NonAtomicExpression(new String(id),
-								                           e_array ); :}
+               	        {:  
+							RESULT = new SimpleArrayVariable(new String(id), 
+							                                 (ArrayList<Domain>) e_list); 
+							                                   
+								                           
+					    :}
 ;
 
 
 index ::=      DOTDOT 
-               {: RESULT = new BoundedIndex(); :}
+               {: RESULT = new InfiniteDomain(); :}
                
              | DOTDOT expression:e 
-               {: RESULT = new BoundedIndex( (Expression) e, false); :}
+               {: 
+                  boolean isLowerBound = false;
+                  RESULT = new InfiniteDomain( (Expression) e, isLowerBound);
+                :}
                
              | expression:e DOTDOT
-               {: RESULT = new BoundedIndex( (Expression) e, true); :}
+               {:  
+                   boolean isLowerBound = true;
+                   RESULT = new InfiniteDomain( (Expression) e, isLowerBound);
+                :}
              
              | expression:e1 DOTDOT expression:e2
-               {: RESULT = new BoundedIndex( (Expression) e1, (Expression) e2); :}
+               {: RESULT = new BoundedExpressionRange( (Expression) e1, (Expression) e2); :}
              
              | expression:e 
-               {: RESULT = new ExpressionIndex( (Expression) e); :}
+               {: RESULT = new SingleExpressionRange( (Expression) e); :}
              
              | LPAREN expression_list:e_list RPAREN
-               {: Object[] tmp = ((LinkedList) e_list).toArray();
-			      Expression[] e_array = new Expression[tmp.length];
-			      for(int i=0;i<e_array.length;i++)
- 				      e_array[i] = (Expression) tmp[i];
-                  RESULT = new SparseIndex(e_array); :}
+               {: 
+		         RESULT = new SparseExpressionRange( (ArrayList<Expression>) e_list);
+               :}
 ;             
 
 
 index_list ::=   index:i 
-                 {: LinkedList e_list = new LinkedList();	
-				   e_list.addFirst(i); 
-				   RESULT = e_list;   :}
+                 {: 
+                    ArrayList<Domain> e_list = new ArrayList<Domain>();	
+				     e_list.add(0, (Domain) i); 
+				     RESULT = e_list;   :}
 				   
                  |   index:i COMMA index_list:i_list 
-                 {: ((LinkedList) i_list).addFirst(i); 
-				   RESULT = i_list;  :}
+                 {: 
+                   ((ArrayList<Domain>) i_list).add(0, (Domain)  i); 
+				     RESULT = i_list;  
+				 :}
 ;                 
 
 
 atom_expression ::= deref_expression:deref
-                     {: RESULT = new AtomExpression((NonAtomicExpression) deref); :} 
+                     {: RESULT = deref; :} 
 
                    | IDENTIFIER:id
-				     {: RESULT = new AtomExpression(new AtomicExpression(new String(id))); :}
+				     {: RESULT = new SimpleVariable(new String(id)); :}
 ;
 
-unitop_expression ::= 	  MINUS expression:e 
-		           	{: RESULT = new UnaryExpression(EssenceGlobals.NEGATION, (Expression) e); :} 
+
+
+unary_expression ::= 	MINUS expression:e 
+		           	    {: RESULT = new UnaryMinus((Expression) e); :} 
 	      		      	 %prec UMINUS   
 
-		        | BAR expression:e BAR
-				{: RESULT = new UnaryExpression(EssenceGlobals.ABS, (Expression) e); :}
+		               | BAR expression:e BAR
+				         {: RESULT = new AbsoluteValue( (Expression) e); :}
 
-			| NOT expression:e
-				{: RESULT = new UnaryExpression(EssenceGlobals.NOT, (Expression) e); :}
+			           | NOT expression:e
+				         {: RESULT = new Negation( (Expression) e); :}
 ;
 
 
-binaryop_expression ::=  expression:e1 EQ expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.EQ), (Expression) e2); :}
+
+binary_expression ::=  expression:e1 EQ expression:e2
+			{: RESULT =  new CommutativeBinaryRelationalExpression( (Expression) e1, 
+			                                                         Expression.EQ,
+			                                                        (Expression) e2 ); 
+			:}
 
 			| expression:e1 NEQ expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.NEQ), (Expression) e2); :}
-
+			{: RESULT =  new CommutativeBinaryRelationalExpression( (Expression) e1, 
+			                                                         Expression.NEQ,
+			                                                        (Expression) e2 ); 
+			:}
+			
 			| expression:e1 LESS expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.LESS), (Expression) e2); :}
-
+			{: RESULT =  new NonCommutativeRelationalBinaryExpression( (Expression) e1, 
+			                                                         Expression.LESS,
+			                                                        (Expression) e2 ); 
+			:}
+			
 			| expression:e1 LEQ expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.LEQ), (Expression) e2); :}
-
+			{: RESULT =  new NonCommutativeRelationalBinaryExpression( (Expression) e1, 
+			                                                         Expression.LEQ,
+			                                                        (Expression) e2 ); 
+			:}
+			
 			| expression:e1 GREATER expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.GREATER), (Expression) e2); :}
-
+			{: RESULT =  new NonCommutativeRelationalBinaryExpression( (Expression) e1, 
+			                                                         Expression.GREATER,
+			                                                        (Expression) e2 ); 
+			:}
+			
 			| expression:e1 GEQ expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.GEQ), (Expression) e2); :}
-
-                        | expression:e1 PLUS expression:e2	
-			{: RESULT = new BinaryExpression(	
-			(Expression) e1, new BinaryOperator (EssenceGlobals.PLUS), (Expression) e2); :}
+			{: RESULT =  new NonCommutativeRelationalBinaryExpression( (Expression) e1, 
+			                                                         Expression.GEQ,
+			                                                        (Expression) e2 ); 
+			:}
+                        
+            | expression:e1 PLUS expression:e2	
+			{: RESULT = new Sum ( new Expression[] { (Expression) e1, (Expression) e2 },
+								  new Expression[] {} 
+								 ); 
+			:}
 
 			| expression:e1 MINUS expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.MINUS), (Expression) e2); :}
+			{: RESULT = new Sum ( new Expression[] {(Expression) e1} ,
+								  new Expression[] {(Expression) e2 } 
+								 ); 
+			:}
 
 			| expression:e1 MULT expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.MULT), (Expression) e2); :}
+			{: RESULT = new Multiplication (new Expression[] { (Expression) e1, (Expression) e2} 
+			                                );
+		     :}
 
 			| expression:e1 DIVISION expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.DIVIDE), (Expression) e2); :}
+			{: RESULT = new NonCommutativeArithmeticBinaryExpression( (Expression) e1, 
+			                                                           Expression.DIV, 
+			                                                           (Expression) e2
+			                                                         ); 
+			                                          
+			:}
 
 			| expression:e1 POWER expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.POWER), (Expression) e2); :}
-
+			{: RESULT = new NonCommutativeArithmeticBinaryExpression( (Expression) e1, 
+			                                                           Expression.POWER, 
+			                                                           (Expression) e2
+			                                                         ); 
+			                                          
+			:}
+			
+			| expression:e1 MODULO expression:e2
+			{: RESULT = new NonCommutativeArithmeticBinaryExpression( (Expression) e1, 
+			                                                           Expression.MOD, 
+			                                                           (Expression) e2
+			                                                         ); 
+			                                          
+			:}
+			
 			| expression:e1 AND expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.AND), (Expression) e2); :}
+			{: RESULT = new Conjunction( new Expression[] { (Expression) e1, (Expression) e2 }); :}
+
 
 			| expression:e1 OR expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.OR), (Expression) e2); :}
+			{: RESULT = new Disjunction( new Expression[] { (Expression) e1, (Expression) e2 }); :}
 
 			| expression:e1 IF expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.IF), (Expression) e2); :}
+			{: RESULT =  new NonCommutativeRelationalBinaryExpression( (Expression) e1, 
+			                                                         Expression.IF,
+			                                                        (Expression) e2 ); 
+			:}
 
 			| expression:e1 IFF expression:e2
-			{: RESULT = new BinaryExpression(
-			(Expression) e1, new BinaryOperator (EssenceGlobals.IFF), (Expression) e2); :}
-
+			{: RESULT =  new CommutativeBinaryRelationalExpression( (Expression) e1, 
+			                                                         Expression.IFF,
+			                                                        (Expression) e2 ); 
+			:}
 ;
 
 
 
-functionop_expression ::= 	  ALLDIFF LPAREN expression:e RPAREN
-					{: RESULT = new FunctionExpression(EssenceGlobals.ALLDIFF, (Expression) e); :}
+global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
+					{: RESULT = new AllDifferent( (Expression) e); :}
 
-			  	| MIN LPAREN expression:e RPAREN
-					{: RESULT = new FunctionExpression(EssenceGlobals.MIN, (Expression) e); :}
+			       | ALLDIFF LPAREN variable_array:va RPAREN 
+			        {: RESULT = new AllDifferent( (VariableArray) va); 
+			         :}
 
-				| MAX LPAREN expression:e RPAREN
-					{: RESULT = new FunctionExpression(EssenceGlobals.MAX, (Expression) e); :}
+			  	   | MIN LPAREN variable_array:va RPAREN
+					{: 
+					  boolean isMaximum = false;
+					  RESULT = new Minimum( (Expression) va,
+					                         isMaximum ); 
+					 :}
 
-	            | OCCURRENCE LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN 
-	                {: RESULT = new FunctionExpression(EssenceGlobals.OCCURRENCE,
-	                                                   (Expression) e1,
-	                                                   (Expression) e2,
-	                                                   (Expression) e3);   :}
+				   | MAX LPAREN variable_array:va RPAREN
+			  		{: 
+					  boolean isMaximum = true;
+					  RESULT = new Minimum( (Expression) va,
+					                         isMaximum ); 
+					 :}
+
 	                                                   
-	            | ELEMENT LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN
-	                {: RESULT = new FunctionExpression(EssenceGlobals.ELEMENT,
-	                									(Expression) e1,
+	               | ELEMENT LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN
+	                 {: RESULT = new ElementConstraint( (Expression) e1,
 	                									(Expression) e2,
 	                									(Expression) e3);   
-	              :}	   									
+	                 :}	   									
+
+		           | ATMOST LPAREN expression:e COMMA IDENTIFIER:occ COMMA IDENTIFIER:val RPAREN 
+		             {: 
+		                boolean isAtmost = true;
+		                RESULT = new Atmost((Expression) e, 
+		                                     (String) occ,
+		                                     (String) val,
+		                                      isAtmost 
+		                                    );
+		             
+		             :}
+		             
+		           | ATLEAST LPAREN expression:e COMMA IDENTIFIER:occ COMMA IDENTIFIER:val RPAREN 
+		             {: 
+		                boolean isAtmost = false;
+		                RESULT = new Atmost((Expression) e, 
+		                                     (String) occ,
+		                                     (String) val,
+		                                      isAtmost 
+		                                    );
+		             :}
+		             
+		             
+		             /*
+		             | ATMOST LPAREN expression:e COMMA LBRACK integer_list:occ_list RBRACK COMMA IDENTIFIER:val RPAREN 
+		             {: 
+		             	int[] occList = new int[( (ArrayList<Integer>) occ_list).size()];
+		             	
+		             	for(int i=occList.length-1; i>=0; i--) 
+		             		occList[i] = (int) ( (ArrayList<Integer>) occ_list ).remove(i);
+		             		
+		             	
+		             
+		                boolean isAtmost = true;
+		                RESULT = new Atmost((Expression) e, 
+		                                     occList,
+		                                     (String) val,
+		                                      isAtmost 
+		                                    );
+		             
+		             :}
+		             
+		           | ATLEAST LPAREN expression:e COMMA LBRACK integer_list:occ_list RBRACK COMMA IDENTIFIER:val RPAREN 
+		             {: 
+		             	int[] occList = new int[( (ArrayList<Integer>) occ_list).size()];
+		             	
+		             	for(int i=occList.length-1; i>=0; i--) 
+		             		occList[i] = (int) ( (ArrayList<Integer>) occ_list ).remove(i);
+		             		
+		             	
+		             
+		                boolean isAtmost = false;
+		                RESULT = new Atmost((Expression) e, 
+		                                     occList,
+		                                     (String) val,
+		                                      isAtmost 
+		                                    );
+		             
+		             :}
+		             
+		             | ATMOST LPAREN expression:e COMMA IDENTIFIER:occ COMMA LBRACK integer_list:val_list RBRACK RPAREN 
+		             {: 
+		             	int[] valList = new int[( (ArrayList<Integer>) val_list).size()];
+		             	
+		             	for(int i=valList.length-1; i>=0; i--) 
+		             		valList[i] = (int) ( (ArrayList<Integer>) val_list ).remove(i);
+		             		
+		             	
+		             
+		                boolean isAtmost = true;
+		                RESULT = new Atmost((Expression) e, 
+		                                     (String) occ,
+		                                     valList,
+		                                      isAtmost 
+		                                    );
+		             
+		             :} 
+		             
+		             
+		              | ATLEAST LPAREN expression:e COMMA IDENTIFIER:occ COMMA LBRACK integer_list:val_list RBRACK RPAREN 
+		             {: 
+		             	int[] valList = new int[( (ArrayList<Integer>) val_list).size()];
+		             	
+		             	for(int i=valList.length-1; i>=0; i--) 
+		             		valList[i] = (int) ( (ArrayList<Integer>) val_list ).remove(i);
+		             		
+		             	
+		             
+		                boolean isAtmost = false;
+		                RESULT = new Atmost((Expression) e, 
+		                                     (String) occ,
+		                                     valList,
+		                                      isAtmost 
+		                                    );
+		             
+		             :} 
+		            
+		            
+		            
+	               | ATMOST LPAREN expression:e COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN 
+		             {: 
+		             	int[] occList = new int[( (ArrayList<Integer>) int_list1).size()];
+		             	int[] valList = new int[( (ArrayList<Integer>) int_list2).size()];
+		             	
+		             	for(int i=occList.length-1; i>=0; i--) 
+		             		occList[i] = (int) ( (ArrayList<Integer>) int_list1 ).remove(i);
+		             		
+		             	for(int i=valList.length-1; i>=0; i--) 
+		             		valList[i] = (int) ( (ArrayList<Integer>) int_list2 ).remove(i);
+		             	
+		             
+		                boolean isAtmost = true;
+		                RESULT = new Atmost((Expression) e, 
+		                                     occList,
+		                                     valList,
+		                                      isAtmost 
+		                                    );
+		             
+		             :}
+		             
+		          | ATLEAST LPAREN expression:e COMMA LBRACK integer_list:int_list1 RBRACK  COMMA LBRACK integer_list:int_list2 RBRACK RPAREN 
+		             {: 
+		             	int[] occList = new int[( (ArrayList<Integer>) int_list1).size()];
+		             	int[] valList = new int[( (ArrayList<Integer>) int_list2).size()];
+		             	
+		             	for(int i=occList.length-1; i>=0; i--) 
+		             		occList[i] = (int) ( (ArrayList<Integer>) int_list1 ).remove(i);
+		             		
+		             	for(int i=valList.length-1; i>=0; i--) 
+		             		valList[i] = (int) ( (ArrayList<Integer>) int_list2 ).remove(i);
+		             	
+		             
+		                boolean isAtmost = false;
+		                RESULT = new Atmost((Expression) e, 
+		                                     occList,
+		                                     valList,
+		                                      isAtmost 
+		                                    );
+		             
+		             :}  */
+		            
+		            
+		            | ATMOST LPAREN expression:e COMMA LBRACK expression_list:list1 RBRACK COMMA LBRACK expression_list:list2 RBRACK RPAREN 
+		             {: 
+					    boolean isAtmost = true;
+		                RESULT = new Atmost((Expression) e, 
+		                                     (ArrayList<Expression>) list1,
+		                                     (ArrayList<Expression>) list2,
+		                                      isAtmost 
+		                                    );
+		             
+		             :}
+	           
+	               | ATLEAST LPAREN expression:e COMMA LBRACK expression_list:list1 RBRACK COMMA LBRACK expression_list:list2 RBRACK RPAREN 
+		             {: 
+					    boolean isAtmost = false;
+		                RESULT = new Atmost((Expression) e, 
+		                                     (ArrayList<Expression>) list1,
+		                                     (ArrayList<Expression>) list2,
+		                                      isAtmost 
+		                                    );
+		             
+		             :} 
 	           
 ;
 
 
 
+variable_array ::=  LBRACK atom_list:list  RBRACK
+                    {:  
+                    	RESULT = new VariableArray( (ArrayList<AtomExpression>) list);  
+                    
+                    :} 
+;                    
+                    
+
 
 lex_expression ::=   expression:e1  LEXLESS expression:e2 
-                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_LESS), (Expression) e2); :}
+                     {: 
+                        RESULT = new LexConstraint( (Expression) e1, 
+                                                     Expression.LEX_LESS, 
+                                                    (Expression) e2); 
+                      :}
+                     
+                     
                      | expression:e1  LEXGREATER expression:e2 
-                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_GREATER), (Expression) e2); :}
+                     {: 
+                        RESULT = new LexConstraint( (Expression) e1, 
+                                                     Expression.LEX_GREATER, 
+                                                    (Expression) e2); 
+                      :}
+                      
                      | expression:e1  LEXLEQ expression:e2 
-                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_LEQ), (Expression) e2); :}
+                     {: 
+                        RESULT = new LexConstraint( (Expression) e1, 
+                                                     Expression.LEX_LEQ, 
+                                                    (Expression) e2); 
+                      :}
+                      
                      | expression:e1  LEXGEQ expression:e2 
-                     {: RESULT = new LexExpression( (Expression) e1, new LexOperator(EssenceGlobals.LEX_GEQ), (Expression) e2); :}
+                     {: 
+                        RESULT = new LexConstraint( (Expression) e1, 
+                                                     Expression.LEX_GEQ, 
+                                                    (Expression) e2); 
+                      :}
 ;
 
 
-quantifierop_expression ::= quantifier:q binding_expression:bind_e DOT expression:e
-				{: RESULT = new QuantificationExpression((Quantifier) q, 
-								       (BindingExpression) bind_e, 
-								        (Expression) e); :}
+
+quantified_expression ::= EXISTS identifier_list:id_list COLON domain:d DOT expression:e
+			         	{: 
+			         	  boolean isUniversal = false;
+			         	  RESULT = new QuantifiedExpression(isUniversal, 
+								                            (ArrayList<String>) id_list,
+								                            (Domain) d, 
+								                            (Expression) e); 
+					    :}
+					    
+					    | FORALL identifier_list:id_list COLON domain:d DOT expression:e
+			         	{: 
+			         	  boolean isUniversal = true;
+			         	  RESULT = new QuantifiedExpression(isUniversal, 
+								                            (ArrayList<String>) id_list,
+								                            (Domain) d, 
+								                            (Expression) e); 
+					    :}
+					    
+					    | SUM identifier_list:id_list COLON domain:d DOT expression:e
+			         	{: 
+			         	  RESULT = new QuantifiedSum((ArrayList<String>) id_list,
+								                     (Domain) d, 
+								                     (Expression) e); 
+					    :}
 ;
 
 
-quantifier ::=	  EXISTS
-			{: RESULT = new Quantifier(EssenceGlobals.EXISTS); :}	
-		| FORALL 
-			{: RESULT = new Quantifier(EssenceGlobals.FORALL); :}	
-		| SUM
-			{: RESULT = new Quantifier(EssenceGlobals.SUM); :}	
-;
 
-
-binding_expression ::=	identifier_list:id_list COLON domain:d
-               	        {:  Object[] tmp = ((LinkedList) id_list).toArray();	
-	        	    String[] id_array = new String[tmp.length];
-			    for(int i=0;i<id_array.length;i++)
- 			   	 id_array[i] = (String) tmp[i];
-				 
-			    RESULT = new BindingExpression(new DomainIdentifiers(id_array,(Domain) d )); :}
-;
-
-
-table_constraint ::= TABLE LPAREN LBRACK atom_list:a_list RBRACK COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
+/*
+table_constraint ::= TABLE LPAREN variable_array:va COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
                    {:  
-                  	Object[] tmp = ((LinkedList) a_list).toArray();
-			        AtomExpression[] id_array = new AtomExpression[tmp.length];
-			        for(int i=0;i<id_array.length;i++)
- 				          id_array[i] =  (AtomExpression) tmp[i];                   
-                   
-                    Object[] tmp2 = ((LinkedList) t_list).toArray();
-			        ConstantTuple[] t_array = new ConstantTuple[tmp2.length];
-			        for(int i=0;i<t_array.length;i++)
- 				          t_array[i] =  (ConstantTuple) tmp2[i];        
-                   
-                   RESULT = new TableConstraint(id_array,
+                  
+                    AtomExpression[] variables = ((VariableArray) va).getVariables();
+                    Variable[] vars = new Variable[variables.length];
+                    
+                    for(int i=0; i<variables.length; i++) {
+                       if(variables[i].getType == Expression.INT_ARRAY_VAR) {
+                          vars[i] = ((ArithmeticAtomExpression) variables[i]).getVariable();
+                       } 
+                       else if(variables[i].getType == Expression.BOOL_ARRAY_VAR) {
+                          vars[i] = ((RelationalAtomExpression) variables[i]).getVariable();
+                       } 
+                       else report_error("Unfeasible argument for table constraint: "+va+". Expected a variable.");
+                    }  	
+  	
+  	
+  	               
+  	               
+  	               
+  	
+                   RESULT = new TableConstraint(vars,
                                                 t_array);
                    :}
 
 ;
+*/
 
 
 
 
 atom_list ::=    atom_expression:atom 
-               {: LinkedList list = new LinkedList();
-				  list.addFirst((AtomExpression) atom);
-				  RESULT = list; :}
+               {: 
+                  ArrayList<AtomExpression> list = new ArrayList<AtomExpression>();
+				  list.add(0,(AtomExpression) atom);
+				  RESULT = list; 
+			    :}
+				  
 				  
                  | atom_expression:atom COMMA atom_list:a_list 
-               {: ((LinkedList) a_list).addFirst((AtomExpression) atom); 
-				  RESULT = a_list; :}                 
+               {: 
+                  ((ArrayList<AtomExpression>) a_list).add(0,(AtomExpression) atom); 
+				  RESULT = a_list; 
+			   :}                 
                       
 ;                 
 
 
+/*
 constant_tuple_list ::= constant_tuple:c_tuple
                          {: LinkedList list = new LinkedList();
-				            list.addFirst((ConstantTuple) c_tuple);
+				            list.add(0,(ConstantTuple) c_tuple);
 				            RESULT = list; :}
 
                         | constant_tuple:c_tuple COMMA constant_tuple_list:t_list
-                        {: ((LinkedList) t_list).addFirst((ConstantTuple) c_tuple); 
+                        {: ((LinkedList) t_list).add(0,(ConstantTuple) c_tuple); 
 				            RESULT = t_list; :}
 ;                        
                         
+
 
 constant_tuple ::= LESS  integer_list:int_list GREATER
                    {:
@@ -708,305 +1144,33 @@ constant_tuple ::= LESS  integer_list:int_list GREATER
  				    RESULT = new ConstantTuple(int_array);     
                    :}
 ;                   
+*/
 
 integer_list ::=  INTEGER:i 
-                 {: LinkedList list = new LinkedList();
-				    list.addFirst((Integer) i);
+                 {: ArrayList<Integer> list = new ArrayList<Integer>();
+				    list.add(0,(Integer) i);
 				    RESULT = list;
                  :}
                  | MINUS INTEGER:i
-                 {: LinkedList list = new LinkedList();
-                    list.addFirst((Integer) (i-2*i));
+                 {: ArrayList<Integer> list = new ArrayList<Integer>();
+                    list.add(0,(Integer) (i-2*i));
                     RESULT = list;
                  :}
                  
                  | INTEGER:i COMMA  integer_list:int_list 
-                {: ((LinkedList) int_list).addFirst((Integer) i); 
+                {: ((ArrayList<Integer>) int_list).add(0,(Integer) i); 
 				    RESULT = int_list; 
 				 :}
 				 
 				  | MINUS INTEGER:i COMMA  integer_list:int_list 
-                {: ((LinkedList) int_list).addFirst((Integer) (i-2*i)); 
+                {: ((ArrayList<Integer>) int_list).add(0,(Integer) (i-2*i)); 
 				    RESULT = int_list; 
 				 :}
 ;
 
 
-			
-where_block ::= WHERE expression_list:e_list 
-               	        {:  Object[] tmp = ((LinkedList) e_list).toArray();	
-	        	    Expression[] e_array = new Expression[tmp.length];
-			    for(int i=0;i<e_array.length;i++)
- 			   	 e_array[i] = (Expression) tmp[i];
+		
 
-			    RESULT = new Declaration (e_array);  :}
-;
-
-
-parameter_block ::=  PARAM constant_list:c_list
-                {:  Object[] tmp = ((LinkedList) c_list).toArray();	
-	        	    Constant[] c_array = new Constant[tmp.length];
-			    for(int i=0;i<c_array.length;i++)
- 			   	 c_array[i] = (Constant) tmp[i];
-
-			    RESULT = new Declaration(c_array, true);  :}
-;
-
-
-letting_block ::= LETTING constant_list:c_list 
-               	        {:  Object[] tmp = ((LinkedList) c_list).toArray();	
-	        	    Constant[] c_array = new Constant[tmp.length];
-			    for(int i=0;i<c_array.length;i++)
- 			   	 c_array[i] = (Constant) tmp[i];
-
-			    RESULT = new Declaration(c_array); :}
-;
-
-
-constant_list ::=   constant:clist 
-			{:   
-			   RESULT = clist; :}
-
-		  | constant:c_list COMMA constant_list:constant_list
-			{: for(int i=0; i<((LinkedList) c_list).size(); i++) {
-		            ((LinkedList) constant_list).add( ((LinkedList) c_list).get(i)) ; 
-                           }
-			    RESULT = c_list; :}
-;
-
-
-constant ::=	  identifier_list:id_list BE_DOMAIN domain:d 
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident = (String) identifier_list[i];
-                              constantList.add(new Constant(new DomainConstant(ident, (Domain) d))); 
-			   }   
-			   RESULT = constantList;    :}			      
-
-        | identifier_list:id_list IS_DOMAIN domain:d 
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident = (String) identifier_list[i];
-                              constantList.add(new Constant(new DomainConstant(ident, (Domain) d))); 
-			   }   
-			   RESULT = constantList;    :}			      
-
-
-
-		| identifier_list:id_list COLON domain:d BE expression:e
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident= (String) identifier_list[i];
-                              constantList.add(new Constant(new ExpressionConstant(ident, (Domain) d,(Expression) e))); 
-			   }   
-			   RESULT = constantList;    :}		
-			   
-			   
-	| identifier_list:id_list COLON domain:d BE constant_vector:vector 
-		 	{: 
-		 	   Object[] tmp = ((LinkedList) vector).toArray();
-			    int[] intVector = new int[tmp.length];
-			    for(int j=0; j<intVector.length; j++) {
-			           intVector[j] = (Integer) tmp[j];
-			    }     
-		 	
-		 	
-		 	   Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident= (String) identifier_list[i];
-                  constantList.add(new Constant(new ExpressionConstant(ident, 
-                                                                       (Domain) d,
-                                                                       (ConstantArray) new ConstantVector(new String(ident), intVector) 
-                                                                      )
-                                                )
-                                   ); 
-			   }   
-			   RESULT = constantList;    :}		
-			   
-		| identifier_list:id_list COLON domain:d BE constant_matrix:matrixE
-		 	{: 
-		 	         Object[] tmp = (Object[]) matrixE;
-                      //System.out.println("Object[] erstellt aus da linked list...");
-                                       
-                     int[] vector0 = (int[]) tmp[0];
-                     //System.out.println("first part hinter mir");
-                     int[][] matrix = new int[tmp.length][vector0.length];
-                   
-                     for(int i=0; i<tmp.length; i++) {
-                     
-                        int[] vector = (int[]) tmp[i];
-                        
-                        if(vector.length != vector0.length) 
-                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
-                        
-                        for(int j=0; j<vector.length; j++)
-                           matrix[i][j] = (Integer) vector[j];
-                     
-                     }
-                      
-		 	
-		 	
-		 	   Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident= (String) identifier_list[i];
-                  constantList.add(new Constant(new ExpressionConstant(ident, 
-                                                                       (Domain) d,
-                                                                       (ConstantArray) new ConstantMatrix(new String(ident), matrix) 
-                                                                      )
-                                                )
-                                   ); 
-			   }   
-			   RESULT = constantList;    :}			   			   
-			   
-		| identifier_list:id_list COLON domain:d IS expression:e
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident= (String) identifier_list[i];
-                              constantList.add(new Constant(new ExpressionConstant(ident, (Domain) d,(Expression) e))); 
-			   }   
-			   RESULT = constantList;    :}				   	      
-
-		| identifier_list:id_list BE expression:e
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident= (String) identifier_list[i];
-                              constantList.add(new Constant(new ExpressionConstant(ident, (Expression) e))); 
-			   }   
-			   RESULT = constantList;    :}		
-			   
-		| identifier_list:id_list IS expression:e
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String ident= (String) identifier_list[i];
-                              constantList.add(new Constant(new ExpressionConstant(ident, (Expression) e))); 
-			   }   
-			   RESULT = constantList;    :}			   	      
-
-
-		| identifier_list:id_list BE_NEW_TYPE user_def_type:t	
-		 	{: Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String id = (String) identifier_list[i];
-                              constantList.add(new Constant(new NewTypeConstant(id, (Type) t))); 
-			   }   
-			   RESULT = constantList;    :}			      
-			   
-		| identifier_list:id_list BE constant_vector:vector 
-		    {:  
-		        Object[] tmp = ((LinkedList) vector).toArray();
-			    int[] intVector = new int[tmp.length];
-			    for(int j=0; j<intVector.length; j++) {
-			           intVector[j] = (Integer) tmp[j];
-			    }      
-		    //System.out.println("starting to generate eh constant objects");
-    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String id = (String) identifier_list[i];    
-                  constantList.add(new Constant(new ConstantVector(new String(id), intVector))); 
-			   }   
-			   
-			   RESULT = constantList;
-		   
-		    :}	   
-		    
-		| identifier_list:id_list IS constant_vector:vector 
-		    {:  
-		        Object[] tmp = ((LinkedList) vector).toArray();
-			    int[] intVector = new int[tmp.length];
-			    for(int j=0; j<intVector.length; j++) {
-			           intVector[j] = (Integer) tmp[j];
-			    }      
-		    //System.out.println("starting to generate eh constant objects");
-    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String id = (String) identifier_list[i];    
-                  constantList.add(new Constant(new ConstantVector(new String(id), intVector))); 
-			   }   
-			   
-			   RESULT = constantList;
-		   
-		    :}	       
-		    
-		| identifier_list:id_list BE constant_matrix:matrixE    
-            {:  
-  
-                       Object[] tmp = (Object[]) matrixE;
-                      //System.out.println("Object[] erstellt aus da linked list...");
-                                       
-                     int[] vector0 = (int[]) tmp[0];
-                     //System.out.println("first part hinter mir");
-                     int[][] matrix = new int[tmp.length][vector0.length];
-                   
-                     for(int i=0; i<tmp.length; i++) {
-                     
-                        int[] vector = (int[]) tmp[i];
-                        
-                        if(vector.length != vector0.length) 
-                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
-                        
-                        for(int j=0; j<vector.length; j++)
-                           matrix[i][j] = (Integer) vector[j];
-                     
-                     }
-                     
-                     
-		   
-    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String id = (String) identifier_list[i];    
-                  constantList.add(new Constant(new ConstantMatrix(new String(id), matrix))); 
-			   }   
-			   
-			   RESULT = constantList;
-		   
-		    :}	   
-		| identifier_list:id_list IS constant_matrix:matrixE    
-            {:  
-  
-                       Object[] tmp = (Object[]) matrixE;
-                      //System.out.println("Object[] erstellt aus da linked list...");
-                                       
-                     int[] vector0 = (int[]) tmp[0];
-                     //System.out.println("first part hinter mir");
-                     int[][] matrix = new int[tmp.length][vector0.length];
-                   
-                     for(int i=0; i<tmp.length; i++) {
-                     
-                        int[] vector = (int[]) tmp[i];
-                        
-                        if(vector.length != vector0.length) 
-                           throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
-                        
-                        for(int j=0; j<vector.length; j++)
-                           matrix[i][j] = (Integer) vector[j];
-                     
-                     }
-                     
-                     
-		   
-    		   Object[] identifier_list = ((LinkedList) id_list).toArray();
-			   LinkedList constantList = new LinkedList();
-			   for(int i=0; i<identifier_list.length; i++) {
-			      String id = (String) identifier_list[i];    
-                  constantList.add(new Constant(new ConstantMatrix(new String(id), matrix))); 
-			   }   
-			   
-			   RESULT = constantList;
-		   
-		    :}	       
-;
 
 constant_vector ::=  LBRACK  integer_list:i_list  RBRACK
 					{:   
@@ -1017,29 +1181,29 @@ constant_vector ::=  LBRACK  integer_list:i_list  RBRACK
 
 constant_vector_list ::=  constant_vector:int_list  
                           {: 
-                             LinkedList vectorList = new LinkedList();
-                             vectorList.addFirst(int_list);
+                             ArrayList<ArrayList<Integer>> vectorList = new ArrayList<ArrayList<Integer>>();
+                             vectorList.add(0, (ArrayList<Integer>) int_list);
                              RESULT = vectorList; :}
                           
                           |  constant_vector:vector  COMMA constant_vector_list:list
                           {:  
-                             LinkedList vectorList = (LinkedList) list;
-                             vectorList.addFirst(vector);
+                             ArrayList<ArrayList<Integer>> vectorList = (ArrayList<ArrayList<Integer>>) list;
+                             vectorList.add(0,(ArrayList<Integer>) vector);
                              RESULT = vectorList;
                           :}
 ;                          
 
 constant_matrix ::= LBRACK constant_vector_list:list RBRACK
-                    {: Object[] tmp = ((LinkedList) list  ).toArray();	
-               
-                                       
-                     LinkedList vector0 = (LinkedList) tmp[0];
-                     //System.out.println("first part hinter mir");
-                     int[][] matrix = new int[tmp.length][vector0.size()];
-                   
-                     for(int i=0; i<tmp.length; i++) {
+                    {:      
+                      ArrayList<ArrayList<Integer>> vectorList = (ArrayList<ArrayList<Integer>>) list;     
+                     ArrayList<Integer> vector0 =  vectorList.get(0);
+                  
                      
-                        LinkedList vector = (LinkedList) tmp[i];
+                     Integer[][] matrix = new Integer[vectorList.size()][vector0.size()];
+                   
+                     for(int i=0; i<vectorList.size(); i++) {
+                     
+                        ArrayList<Integer> vector = vectorList.get(i);
                         
                         if(vector.size() != vector0.size()) 
                            throw new Exception("Illegal constant array: every vector/row has to have the same amount of elements!");
@@ -1055,21 +1219,8 @@ constant_matrix ::= LBRACK constant_vector_list:list RBRACK
 ;
 
 	
-/* constant ::=	  IDENTIFIER:id BE_DOMAIN domain:d 
-		 	{: RESULT = new Constant(new DomainConstant(new String(id), (Domain) d)); :}
 
-		| IDENTIFIER:id COLON domain:d BE expression:e
-			{: RESULT = new Constant(new ExpressionConstant(new String(id),(Domain) d, (Expression) e)); :}
-
-		| IDENTIFIER:id BE expression:e
-			{: RESULT = new Constant(new ExpressionConstant(new String(id),(Expression) e)); :}		
-
-		| IDENTIFIER:id BE_NEW_TYPE user_def_type:t	
-			{: RESULT = new Constant(new NewTypeConstant(new String(id),(Type) t)); :}
-;	
-	*/
-
-
+/*
 user_def_type ::= ENUM LBRACE identifier_list:id_list RBRACE
                	        {:  Object[] tmp = ((LinkedList) id_list).toArray();	
 	        	    Identifier[] id_array = new Identifier[tmp.length];
@@ -1080,48 +1231,5 @@ user_def_type ::= ENUM LBRACE identifier_list:id_list RBRACE
 ;
 
 
-find_block ::= 	FIND variable_list:v_list 
-               	        {:  Object[] tmp = ((LinkedList) v_list).toArray();	
-	        	    DomainIdentifiers[] v_array = new DomainIdentifiers[tmp.length];
-			    for(int i=v_array.length; i>0; i--) {
- 			   	          v_array[i-1] = (DomainIdentifiers) tmp[v_array.length-i];
-	            }
-			    RESULT = new Declaration(v_array); :}
-;
+*/
 
-
-variable_list ::=   domain_identifiers:di
-		     {: LinkedList list = new LinkedList();
-			list.addFirst((DomainIdentifiers) di); 
-			RESULT = list;  :}
-					   
-		  | domain_identifiers:di COMMA variable_list:di_list
-		     {: ((LinkedList) di_list).addFirst((DomainIdentifiers) di);  
-			 RESULT = di_list; :}
-;
-
-
-
-/*  Objective */
-
-
-
-objective ::= 	  MAXIMISING expression:e
-			{: RESULT = new Objective(false, (Expression) e); :}
-
-		| MINIMISING expression:e
-			{: RESULT = new Objective(true, (Expression) e); :}
-
-		| /* epsilon */
-			{:    
-			  RESULT = new Objective(); :}
-;
-
-
-
-constraint_block ::=     SUCH_THAT expression_list:e_list 
-			  {: RESULT = (LinkedList) e_list; :}
-		        | /* epsilon */
-			  {:
-		            RESULT = new LinkedList(); :}	
-;

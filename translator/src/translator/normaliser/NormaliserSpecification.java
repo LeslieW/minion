@@ -3,6 +3,8 @@ package translator.normaliser;
 //import translator.conjureEssenceSpecification.*;
 //import java.util.ArrayList;
 
+import translator.expression.EssencePrimeModel;
+
 public interface NormaliserSpecification {
 
 	
@@ -24,7 +26,9 @@ public interface NormaliserSpecification {
 	 * @return a normalised model. 
 	 * @throws NormaliserException
 	 */
-	public NormalisedModel normalise() throws NormaliserException,Exception;
+	public NormalisedModel normalise(EssencePrimeModel problemClass, 
+			                         EssencePrimeModel parameterFile) 
+	   throws NormaliserException,Exception;
 	
 	/**
 	 * Normalises the problem- and parameter-specification and returns a 
@@ -35,7 +39,10 @@ public interface NormaliserSpecification {
 	 * @return a normalised model. 
 	 * @throws NormaliserException
 	 */
-	public NormalisedModel normalise(char normaliseType) throws NormaliserException,Exception;
+	public NormalisedModel normalise(EssencePrimeModel problemClass, 
+            						 EssencePrimeModel parameterFile,
+            						 char normaliseType) 
+	   throws NormaliserException,Exception;
 	
 	/**
 	 * Provides FULL normalisation: basics (parameter insertion), 

@@ -8,7 +8,7 @@ package translator.expression;
  *
  */
 
-public interface IntRange extends ConstantDomain {
+public interface IntRange extends ConstantDomain,ExpressionRange {
 
 	public ExpressionRange toExpressionRange();
 	

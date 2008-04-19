@@ -11,7 +11,7 @@ import translator.xcsp2ep.mapper.functionalsParser.*;
 import translator.xcsp2ep.parser.XCSPInstance;
 import translator.xcsp2ep.parser.components.*;
 import translator.expression.*;
-import translator.normaliser.Objective;
+import translator.expression.Objective;
 
 /**
  * The mapper maps the XCSP instance to an Essence' model
@@ -44,6 +44,22 @@ public class Mapper {
 		
 		// map the constraints
 		ArrayList<Expression> constraints = mapConstraints(xcspInstance);
+		
+		// normalise (evaluate and order) constraints
+		for(int i=0; i<constraints.size(); i++) {
+			Expression e = constraints.remove(i);
+			e.orderExpression();
+			e = e.evaluate();
+			e = e.reduceExpressionTree();
+			e.orderExpression();
+			if(e.getType() == Expression.BOOL) {
+				 if(! ( (RelationalAtomExpression) e).getBool()) {
+					 throw new MapperException("Instance is not satisfiable:\n"+xcspInstance);
+				 }
+				// else throw constraint away
+			}
+			else constraints.add(i, e);
+		}
 	
 		// create an Essence' model
 		return new EssencePModel(this.variablesMap,
@@ -116,9 +132,14 @@ public class Mapper {
 		
 		PRelation relation = xcspConstraint.getRelation();
 		
-		if(relation.getSemantics().equals("supports")) {
+		String semantics = relation.getSemantics();
+		
+		if(semantics.equals("supports") || semantics.equals("conflicts")) {
 			// tuples
 			int[][] xcspTuples = relation.getTuples();
+			if(xcspTuples.length == 0) // if there are no tuples the expression is TRUE or FALSE (depending on semantic)
+				return new RelationalAtomExpression(semantics.equals("conflicts"));
+			
 			ConstantTuple[] tuples = new ConstantTuple[xcspTuples.length];
 			for(int i=0; i<xcspTuples.length; i++) {
 				tuples[i] = new ConstantTuple(xcspTuples[i]);
@@ -133,10 +154,15 @@ public class Mapper {
 			for(int i=0; i<variables.length; i++)
 				variables[i] = mapVariable(xcspVariables[i]);
 			
-			return new TableConstraint(variables, tuples);
+			TableConstraint table = new TableConstraint(variables, tuples);
+			
+			if(semantics.equals("conflicts"))
+				table.setToConflictingTableConstraint(true);
+			
+			return table;
 		}
 		
-		else throw new MapperException("Cannot map 'conflicting' extensional constraint (table constraint) yet.");
+		else throw new MapperException("Cannot map semantics '"+semantics+"' for extensional constraint (table constraint) yet.");
 
 	}
 	

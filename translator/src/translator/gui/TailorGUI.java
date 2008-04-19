@@ -1008,7 +1008,7 @@ protected void translate(String command) {
 		
 		
 		if(!flatten()) return false;
-		System.out.println("Flattened the stuff, now tailoring.");
+		//System.out.println("Flattened the stuff, now tailoring.");
 		boolean tailoring = this.translator.tailorTo(solver);
 		
 		if(tailoring) {	
@@ -1033,10 +1033,10 @@ protected void translate(String command) {
 		boolean flattening = this.translator.flatten(solver);
 		
 		if(flattening) {
-			System.out.println("Flattening is fertig.");
+			//System.out.println("Flattening is fertig.");
 			writeOnOutput(this.FLAT_TAB_NR, this.translator.printAdvancedModel());
 			writeOnMessageOutput("Flattened constraints for target solver "+solver.getSolverName()+"\n");
-			System.out.println("Flattening is WIRKLICK fertig.");
+			//System.out.println("Flattening is WIRKLICK fertig.");
 		}
 		else {
 			writeOnMessageOutput("================== ERROR ======================\n"+

@@ -4,12 +4,13 @@ import java.io.StringReader;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-import translator.conjureEssenceSpecification.EssenceSpecification;
+//import translator.conjureEssenceSpecification.EssenceSpecification;
 import translator.essencePrimeParser.EssencePrimeLexer;
 import translator.essencePrimeParser.EssencePrimeParser;
 
 import translator.normaliser.*;
 import translator.expression.Expression;
+import translator.expression.EssencePrimeModel;
 
 import translator.solver.TargetSolver;
 import translator.tailor.*;
@@ -28,18 +29,16 @@ import translator.TranslationSettings;
 
 public class Translator {
 	
-		
-	/** Essence' parser */
-    EssencePrimeParser parser ;
-	/** normalises the Essence' model */
-    Normaliser normaliser;
+	/** parser for Essence' */
+	EssencePrimeParser parser;
+	
     /** tailors a normalised model to a target solver */
     Tailor tailor;
     
     /** Essence' syntax tree of problem file */
-    EssenceSpecification problemSpecification;  
+    EssencePrimeModel problemSpecification;  
     /** Essence' syntax tree of parameter file */
-    EssenceSpecification parameterSpecification ; 
+    EssencePrimeModel parameterSpecification ; 
     /** the normalised model. is produced by the normalise() method */
     NormalisedModel normalisedModel;
     
@@ -80,16 +79,17 @@ public class Translator {
 			
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(problemString)) );
-			this.problemSpecification = (EssenceSpecification) parser.parse().value;
+			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
 			//print_debug(problemSpec.toString());
     	
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(parameterString)) );
-			this.parameterSpecification = (EssenceSpecification) parser.parse().value;
+			this.parameterSpecification = (EssencePrimeModel) parser.parse().value;
 			//print_debug(parameterSpec.toString());
 		}
 		catch(Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
 			return false;
 		}
@@ -115,16 +115,15 @@ public class Translator {
 		try {
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 				(new StringReader(problemString)) );
-			this.problemSpecification = (EssenceSpecification) parser.parse().value;
+			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
 			this.normalisedModelHasBeenFlattened = false;
 			// create an empty parameter file
-			this.parameterSpecification = new EssenceSpecification(new translator.conjureEssenceSpecification.Declaration[0],
-					                                               new translator.conjureEssenceSpecification.Objective(),
-					                                               new translator.conjureEssenceSpecification.Expression[0]);
+			this.parameterSpecification = new EssencePrimeModel();
 			//print_debug(problemSpec.toString());
 		}
 		catch(Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = e.getMessage();
 			//this.errorMessage = "\n"+this.parser.errorMessage;
 			this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
@@ -156,8 +155,10 @@ public class Translator {
 			
 		try { 
 			long startTime = System.currentTimeMillis();
-			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.normalisedModel = this.normaliser.normalise(normaliseType);
+			Normaliser normaliser = new Normaliser();
+			this.normalisedModel = normaliser.normalise(this.problemSpecification,
+					                                    this.parameterSpecification,
+					                                    normaliseType);
 			this.normalisedModelHasBeenFlattened = false;
 			
 			if(this.settings.giveTranslationTimeInfo) {
@@ -166,7 +167,8 @@ public class Translator {
 			}
 			
 		} catch(Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}
@@ -204,7 +206,8 @@ public class Translator {
 			}
 			
 		} catch(Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}
@@ -239,14 +242,15 @@ public class Translator {
 			}
 			
 			// tailoring
-			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
+			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel, settings.targetSolver);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
 			
 		} catch(Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 			return false;
 		}
@@ -273,7 +277,7 @@ public class Translator {
 			try{ 
 				long startTime = System.currentTimeMillis();
 				System.out.println("Starting to tailor the stuff");
-				this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
+				this.targetSolverInstance = this.tailor.tailor(this.normalisedModel, settings.targetSolver);
 				if(this.settings.giveTranslationTimeInfo) {
 					long stopTime = System.currentTimeMillis();
 					writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
@@ -281,7 +285,8 @@ public class Translator {
 				return true;
 				
 			} catch (Exception e) {
-				e.printStackTrace(System.out);
+				if(settings.debugMode)
+					e.printStackTrace(System.out);
 				this.errorMessage = errorMessage.concat(e.getMessage()+"\n");
 				return false;
 			}
@@ -314,11 +319,11 @@ public class Translator {
 			long startTime = System.currentTimeMillis();
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 				(new StringReader(problemString)) );
-			this.problemSpecification = (EssenceSpecification) parser.parse().value;
+			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
 			
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(parameterString)) );
-			this.parameterSpecification = (EssenceSpecification) parser.parse().value;
+			this.parameterSpecification = (EssencePrimeModel) parser.parse().value;
 			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
@@ -327,8 +332,10 @@ public class Translator {
 			
 			// ---- 2. then normalise the essence' problem model
 			startTime = System.currentTimeMillis();
-			this.normaliser = new Normaliser(this.problemSpecification, this.parameterSpecification);
-			this.normalisedModel = this.normaliser.normalise(NormaliserSpecification.NORMALISE_FULL);
+			Normaliser normaliser = new Normaliser();
+			this.normalisedModel = normaliser.normalise(this.problemSpecification,
+					                                    this.parameterSpecification,
+					                                    NormaliserSpecification.NORMALISE_FULL);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");
@@ -348,7 +355,7 @@ public class Translator {
 			
 			// ---- 4. tailor the essence' problem model to the target solver's input format
 			startTime = System.currentTimeMillis();
-			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel);
+			this.targetSolverInstance = this.tailor.tailor(this.normalisedModel, settings.targetSolver);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
@@ -357,7 +364,8 @@ public class Translator {
 			
 		}
 		catch(Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = e.getMessage();
 			//this.errorMessage = "\n"+this.parser.errorMessage;
 			this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
@@ -373,8 +381,10 @@ public class Translator {
 			return this.tailor.getEssenceSolution(solverOutput);
 			
 		} catch (Exception e) {
-			e.printStackTrace(System.out);
+			if(settings.debugMode)
+				e.printStackTrace(System.out);
 			this.errorMessage = e.getMessage();
+			//System.out.println(errorMessage);
 			return "";
 		}
 		
@@ -410,26 +420,11 @@ public class Translator {
     }
     
     
-    /**
-     * Collects the debug messages from all packages that
-     * are involved in the translation process.
-     * 
-     * @return the debug messages of all packages
-     */
-    public String getDebugMessages() {
-    	String s = "";
-    	if(normaliser != null)
-    		s = s.concat(normaliser.getDebugMessage());
-    	
-    	s = s.concat(this.debug);
-    	return s;
-    }
-    
-    public EssenceSpecification getInitialProblemSpecification() {
+    public EssencePrimeModel getInitialProblemSpecification() {
     	return this.problemSpecification;
     }
 	
-    public EssenceSpecification getInitialParameterSpecification() {
+    public EssencePrimeModel getInitialParameterSpecification() {
     	return this.parameterSpecification;
     }
     
@@ -460,10 +455,10 @@ public class Translator {
 			return s+"\n";
 		}
 		else {
-			translator.conjureEssenceSpecification.Expression[] constraints = this.problemSpecification.getExpressions();
-			StringBuffer s = new StringBuffer(constraints[0].toString());
-			for(int i=1; i<constraints.length; i++) 
-				s.append(",\n\t"+constraints[i].toString());
+			ArrayList<Expression> constraints = this.problemSpecification.getConstraints();
+			StringBuffer s = new StringBuffer(constraints.get(0).toString());
+			for(int i=1; i<constraints.size(); i++) 
+				s.append(",\n\t"+constraints.get(i).toString());
 			return s+"\n";
 		}
 	}

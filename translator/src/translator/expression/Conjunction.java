@@ -60,12 +60,12 @@ public class Conjunction extends NaryRelationalExpression {
 			return this.conjointExpressions.get(0).toString();
 		
 		else {
-			StringBuffer s = new StringBuffer("("+this.conjointExpressions.get(0).toString()+")");
+			StringBuffer s = new StringBuffer("( ("+this.conjointExpressions.get(0).toString()+")");
 			
 			for(int i=1; i<this.conjointExpressions.size(); i++) {
 				s.append(" /\\ ("+this.conjointExpressions.get(i).toString()+")");
 			}
-			
+			s.append(" )");
 			return s.toString();
 		}
 		
@@ -200,6 +200,13 @@ public class Conjunction extends NaryRelationalExpression {
 		for(int i=0; i<this.conjointExpressions.size(); i++) {
 			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).insertValueForVariable(value, variableName));
 		}
+		return this;
+	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		for(int i=0; i<this.conjointExpressions.size(); i++)
+			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).replaceVariableWithExpression(variableName, expression));
 		return this;
 	}
 	

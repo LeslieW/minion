@@ -116,6 +116,8 @@ public class CommutativeBinaryRelationalExpression implements
 		this.leftArgument = this.leftArgument.evaluate();
 		this.rightArgument = this.rightArgument.evaluate();
 		
+		//System.out.println("Evaluating comm bin rel: "+this);
+		
 		if(this.type == IFF) {
 			if(leftArgument.getType() == BOOL && rightArgument.getType() == BOOL) {
 				boolean leftConstant = ((RelationalAtomExpression) leftArgument).getBool();
@@ -221,6 +223,13 @@ public class CommutativeBinaryRelationalExpression implements
 		return this;
 	}
 	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		this.leftArgument = this.leftArgument.replaceVariableWithExpression(variableName, expression);
+		this.rightArgument = this.rightArgument.replaceVariableWithExpression(variableName, expression);
+		
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}
@@ -242,36 +251,7 @@ public class CommutativeBinaryRelationalExpression implements
 	
 		if(this.type == Expression.EQ) {
 		
-			if(this.leftArgument instanceof Sum) {
-				Sum leftSum = (Sum) this.leftArgument;
-			    // sum = - E   ====>   sum + E = 0
-				if(this.rightArgument instanceof UnaryMinus) {
-					ArrayList<Expression> positiveArgs = leftSum.getPositiveArguments();
-					positiveArgs.add(((UnaryMinus) rightArgument).getArgument());
-					this.rightArgument = new ArithmeticAtomExpression(0);
-				}
-				else if(!(this.rightArgument instanceof ArithmeticAtomExpression) &&
-						!(this.rightArgument instanceof RelationalAtomExpression) ){  
-					// sum = E     ====>   sum - E = 0
-					ArrayList<Expression> negativeArgs = leftSum.getNegativeArguments();
-					negativeArgs.add(this.rightArgument.copy());
-					this.rightArgument = new ArithmeticAtomExpression(0);
-					
-				}
-				// then flatten the sum
-				this.leftArgument = this.leftArgument.reduceExpressionTree();
-				this.leftArgument = this.leftArgument.restructure();
-				this.leftArgument.orderExpression();
-				this.leftArgument = this.leftArgument.evaluate();
-				
-				if(leftArgument instanceof Sum) {
-					ArrayList<Expression> negArgs = ((Sum) leftArgument).getNegativeArguments();
-					if(negArgs.size() > 0 && negArgs.get(0).getType() == INT){
-						rightArgument = negArgs.remove(0);
-					}
-				}
-			}
-			else if(this.rightArgument instanceof Sum) {
+			if(this.rightArgument instanceof Sum) {
 				Sum rightSum = (Sum) this.rightArgument;
 			    // sum = - E   ====>   sum + E = 0
 				if(this.leftArgument instanceof UnaryMinus) {
@@ -301,6 +281,36 @@ public class CommutativeBinaryRelationalExpression implements
 					}
 				}
 			}
+			else if(this.leftArgument instanceof Sum) {
+				Sum leftSum = (Sum) this.leftArgument;
+			    // sum = - E   ====>   sum + E = 0
+				if(this.rightArgument instanceof UnaryMinus) {
+					ArrayList<Expression> positiveArgs = leftSum.getPositiveArguments();
+					positiveArgs.add(((UnaryMinus) rightArgument).getArgument());
+					this.rightArgument = new ArithmeticAtomExpression(0);
+				}
+				else if(!(this.rightArgument instanceof ArithmeticAtomExpression) &&
+						!(this.rightArgument instanceof RelationalAtomExpression) ){  
+					// sum = E     ====>   sum - E = 0
+					ArrayList<Expression> negativeArgs = leftSum.getNegativeArguments();
+					negativeArgs.add(this.rightArgument.copy());
+					this.rightArgument = new ArithmeticAtomExpression(0);
+					
+				}
+				// then flatten the sum
+				this.leftArgument = this.leftArgument.reduceExpressionTree();
+				this.leftArgument = this.leftArgument.restructure();
+				this.leftArgument.orderExpression();
+				this.leftArgument = this.leftArgument.evaluate();
+				
+				if(leftArgument instanceof Sum) {
+					ArrayList<Expression> negArgs = ((Sum) leftArgument).getNegativeArguments();
+					if(negArgs.size() > 0 && negArgs.get(0).getType() == INT){
+						rightArgument = negArgs.remove(0);
+					}
+				}
+			}
+			
 		} // else: not EQ
 		
 		return this;

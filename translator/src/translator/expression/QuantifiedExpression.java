@@ -27,6 +27,21 @@ public class QuantifiedExpression implements RelationalExpression {
 		this.quantifiedExpression = quantifiedExpression;
 	}
 
+	public QuantifiedExpression(boolean isUniversal,
+            					ArrayList<String> quantifiedVars,
+            					Domain domain,
+            					Expression quantifiedExpression
+            	                ) {
+
+		this.isUniversal = isUniversal;
+		this.quantifiedVariables = new String[quantifiedVars.size()];
+		for(int i=quantifiedVars.size()-1; i>=0; i--)
+			this.quantifiedVariables[i] = quantifiedVars.remove(i);
+		
+		this.domain = domain;
+		this.quantifiedExpression = quantifiedExpression;
+	}
+
 	
 	//=================== INHERITED METHODS ======================
 	
@@ -166,6 +181,12 @@ public class QuantifiedExpression implements RelationalExpression {
 		
 		return this;
 	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		this.quantifiedExpression = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
 
 
 	public String toString() {
@@ -178,7 +199,7 @@ public class QuantifiedExpression implements RelationalExpression {
 		for(int i=1; i<this.quantifiedVariables.length; i++)
 			s = s.concat(","+quantifiedVariables[i]);
 	
-		s = s.concat(": "+this.domain+"\n");
+		s = s.concat(": "+this.domain+".\n");
 		s = s.concat("\t"+this.quantifiedExpression);
 	
 	
@@ -211,8 +232,16 @@ public class QuantifiedExpression implements RelationalExpression {
 		if(this.domain instanceof IdentifierDomain) {
 			String domainName = ((IdentifierDomain) this.domain).getDomainName();
 			
+			
 			if(domainName.equals(variableName)) 
 				this.domain= domain;	
+		}
+		
+		// add the quantified domain as the domain of each binding variable
+		for(int i=0; i<this.quantifiedVariables.length; i++) {
+			String quantifiedVar = quantifiedVariables[i];
+			//System.out.println("inserting binding domain "+this.domain+" for quantified variable "+quantifiedVar+" in quantified expr:"+this);
+			this.quantifiedExpression = this.quantifiedExpression.insertDomainForVariable(this.domain, quantifiedVar);
 		}
 		
 		

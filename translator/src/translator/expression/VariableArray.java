@@ -1,5 +1,7 @@
 package translator.expression;
 
+import java.util.ArrayList;
+
 /**
  * Variable arrays are arrays that contain a set of independent 
  * variables, such as [a,x,y,z]. They are one-dimensional.
@@ -24,6 +26,13 @@ public class VariableArray implements SingleArray {
 		this.name = name;
 	}
 	
+	public VariableArray(ArrayList<AtomExpression> atoms) {
+		
+		this.variables = new AtomExpression[atoms.size()];
+		for(int i=this.variables.length-1; i>=0; i--)
+			variables[i] = atoms.remove(i);
+		this.name = Expression.VARIABLE_ARRAY_NAME;
+	}
 	
 	//============ INHERITED METHODS ======================
 	
@@ -67,6 +76,26 @@ public class VariableArray implements SingleArray {
 			variables[i] = (AtomExpression) variables[i].insertValueForVariable(value, variableName);
 		}
 		
+		return this;
+	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		for(int i=0; i<this.variables.length; i++) {
+			Expression e = this.variables[i].replaceVariableWithExpression(variableName, expression);
+			if(e instanceof AtomExpression) 
+				this.variables[i] = (AtomExpression) e;
+			
+			else {
+				try {
+					throw new Exception("Replacing variable '"+variableName+"' with infeasible expression '"+expression+
+							"' that modifies variable-array into:"+e+". Expected atom expression type.");
+				} catch (Exception exc) {
+					exc.printStackTrace(System.out);
+					System.exit(1);
+				}
+			}
+		}
 		return this;
 	}
 

@@ -63,16 +63,17 @@ Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteS
 <YYINITIAL> "forall"             { return getSymbol(sym.FORALL); }
 <YYINITIAL> "given"          	 { return getSymbol(sym.GIVEN); }
 <YYINITIAL> "int"                { return getSymbol(sym.INT); }
-<YYINITIAL> "is domain"          { return getSymbol(sym.IS_DOMAIN); }
-<YYINITIAL> "is"                 { return getSymbol(sym.IS); }
+<YYINITIAL> "is domain"          { return getSymbol(sym.BE_DOMAIN); }
+<YYINITIAL> "is"                 { return getSymbol(sym.BE); }
 <YYINITIAL> "letting"            { return getSymbol(sym.LETTING); }
 <YYINITIAL> "matrix indexed by"  { return getSymbol(sym.MATRIX_INDEXED_BY); }
 <YYINITIAL> "maximising"         { return getSymbol(sym.MAXIMISING); }
 <YYINITIAL> "max"                { return getSymbol(sym.MAX); }
 <YYINITIAL> "minimising"         { return getSymbol(sym.MINIMISING); }
 <YYINITIAL> "min"                { return getSymbol(sym.MIN); }
-<YYINITIAL> "parameter"          { return getSymbol(sym.PARAM); }
-<YYINITIAL> "param"              { return getSymbol(sym.PARAM); }
+<YYINITIAL> "mod"                { return getSymbol(sym.MODULO); }
+<YYINITIAL> "parameter"          { return getSymbol(sym.LETTING); }
+<YYINITIAL> "param"              { return getSymbol(sym.LETTING); }
 <YYINITIAL> "occurrence"         { return getSymbol(sym.OCCURRENCE); }
 <YYINITIAL> "of"                 { return getSymbol(sym.OF); }
 <YYINITIAL> "such that"          { return getSymbol(sym.SUCH_THAT); }
@@ -90,8 +91,6 @@ Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteS
 
   "("                           { return getSymbol(sym.LPAREN); }
   ")"                           { return getSymbol(sym.RPAREN); }
-  "{"                            { return getSymbol(sym.LBRACE); }
-  "}"                            { return getSymbol(sym.RBRACE); }
   "["                           { return getSymbol(sym.LBRACK); }
   "]"                           { return getSymbol(sym.RBRACK); }
   "."                           { return getSymbol(sym.DOT); }
@@ -121,7 +120,7 @@ Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteS
   "*"                            { return getSymbol(sym.MULT); }
   "/"                            { return getSymbol(sym.DIVISION); }
   "^"                            { return getSymbol(sym.POWER); }
-
+  "%"                            { return getSymbol(sym.MODULO); }
   	
 
   /* boolean ops */

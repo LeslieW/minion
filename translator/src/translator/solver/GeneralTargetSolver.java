@@ -22,6 +22,8 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	protected HashMap<Integer, Boolean> featureMap;
 	
 	protected String solverName;
+	protected String inputFileExtension;
+	protected String version;
 	
 	// ------- solving ---------------
 	protected String[] branchingStrategies;
@@ -42,6 +44,14 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		return this.solverName;
 	}
 
+	public String getSolverInputExtension() {
+		return this.inputFileExtension;
+	}
+	
+	public String getVersion() {
+		return this.version;
+	}
+	
 	public void setFeature(char feature, boolean turnOn) {
 		if(this.featureMap.containsKey(feature))
 			featureMap.put(new Integer(feature), new Boolean(turnOn));
@@ -301,6 +311,8 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.TABLE_CONSTRAINT:
 			return this.featureMap.get(TargetSolver.REIFIED_TABLE);
 			
+		case Expression.NEGATION:
+			return this.featureMap.get(TargetSolver.REIFIED_NEGATION);
 			
 		}
 		
@@ -391,7 +403,7 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT));
 			
 		case Expression.ABS:
-			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE));
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT));
 			
 		case Expression.U_MINUS:
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_UNARY_MINUS));

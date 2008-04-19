@@ -280,6 +280,31 @@ public class ArrayVariable implements Variable {
 	}
 	
 	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		if(this.exprIndices != null) {
+			boolean allIndicesAreInteger = true;
+			for(int i=0; i<this.exprIndices.length; i++) {
+				this.exprIndices[i] = this.exprIndices[i].replaceVariableWithExpression(variableName, expression).evaluate();
+				if(exprIndices[i].getType() != INT) 
+					allIndicesAreInteger = false;
+				
+			}
+			
+			if(allIndicesAreInteger) {
+				int[] newIntIndices = new int[this.exprIndices.length];
+				for(int i=0; i<this.exprIndices.length;i++)
+					newIntIndices[i] = ((ArithmeticAtomExpression) exprIndices[i]).getConstant();
+				return new ArrayVariable(this.arrayName,
+						newIntIndices,
+						this.domain);
+			}
+		}
+		
+		return this;
+	}
+		
+	
 	
 	public boolean isNested() {
 		return isNested;

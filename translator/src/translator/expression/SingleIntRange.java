@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class SingleIntRange implements ConstantDomain {
+public class SingleIntRange implements ConstantDomain, SingleRange {
 
 	
 	private int value;
@@ -22,7 +22,16 @@ public class SingleIntRange implements ConstantDomain {
 	public int[] getRange() {
 		return new int[] {value,value};
 	}
+	
+	public Expression[] getLowerAndUpperBound() {
+		return new Expression[] {new ArithmeticAtomExpression(this.value), 
+				                 new ArithmeticAtomExpression(this.value)};
+	}
 
+	public Expression getSingleExpressionRange() {
+		return new ArithmeticAtomExpression(this.value);
+	}
+	
 	public char isSmallerThanSameType(BasicDomain d) {
 		
 		SingleIntRange other = (SingleIntRange) d;
@@ -47,6 +56,14 @@ public class SingleIntRange implements ConstantDomain {
 	}
 
 	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
+	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		return this;
+	}
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
 		return this;
 	}
 

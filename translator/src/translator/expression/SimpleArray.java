@@ -76,6 +76,15 @@ public class SimpleArray implements SingleArray {
 		return this;
 	}
 
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		if(this.arrayName.equals(variableName)) {
+			return expression;
+		}
+		//this = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;
 	}

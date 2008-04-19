@@ -97,6 +97,50 @@ public class MultipleExpressionRange implements ExpressionDomain {
 		return this;
 	}
 	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		boolean allExpressionsAreInteger = true;
+		
+		for(int i=0; i < this.rangeList.size(); i++) {
+			ExpressionRange range = (ExpressionRange) rangeList.remove(i).insertValueForVariable(value, variableName);
+			this.rangeList.add(i, range);
+			
+			if(!range.isConstantDomain())
+				allExpressionsAreInteger = false;
+		}
+		
+		if(allExpressionsAreInteger) {
+			ArrayList<IntRange> intRangeList = new ArrayList<IntRange>();
+			for(int i=this.rangeList.size()-1; i>=0; i++) 
+				intRangeList.add(0, (IntRange) this.rangeList.remove(i));
+			return new MultipleIntRange(intRangeList);
+		}
+		
+		return this;
+	}
+	
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		
+		boolean allRangesAreConstant = true;
+		
+		for(int i=this.rangeList.size()-1; i>= 0; i--) {
+			ExpressionRange range = rangeList.remove(i);
+			range = (ExpressionRange) range.replaceVariableWithDomain(variableName, newDomain);
+			range = (ExpressionRange) range.evaluate();
+			allRangesAreConstant = allRangesAreConstant && (range instanceof ConstantDomain);
+			rangeList.add(i, range);
+		}
+		
+		if(allRangesAreConstant) {
+			ArrayList<IntRange> constantRange = new ArrayList<IntRange> ();
+			for(int i=0; i< rangeList.size(); i++) {
+				constantRange.add(i,(IntRange) this.rangeList.get(i));
+			}
+			return new MultipleIntRange(constantRange);
+		}
+		
+		return this;
+	}
 	
 	public char isSmallerThanSameType(BasicDomain d) {
 		

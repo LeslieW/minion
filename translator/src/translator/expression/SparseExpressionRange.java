@@ -1,5 +1,7 @@
 package translator.expression;
 
+import java.util.ArrayList;
+
 /**
  * Represents domains that consist of a set of sparse 
  * elements, for instance the domain (a,5,32,512*b). 
@@ -23,6 +25,15 @@ public class SparseExpressionRange implements ExpressionRange {
 		this.sparseElements = rangeElements;
 	}
 	
+	
+	public SparseExpressionRange(ArrayList<Expression> elements) {
+		
+		this.sparseElements = new Expression[elements.size()];
+		
+		for(int i=this.sparseElements.length-1; i>=0; i--)
+			this.sparseElements[i] = elements.remove(i);
+		
+	}
 	
 	//============= INHERTITED METHODS ======================
 	
@@ -52,6 +63,10 @@ public class SparseExpressionRange implements ExpressionRange {
 		return this;
 	}
 
+	public Expression[] getLowerAndUpperBound() {
+		return new Expression[] {this.sparseElements[0], this.sparseElements[this.sparseElements.length-1]};
+	}
+	
 	public int getType() {
 		return EXPR_SPARSE;
 	}
@@ -93,6 +108,32 @@ public class SparseExpressionRange implements ExpressionRange {
 		return this;
 	}
 	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		
+		boolean allSparseElementsAreInteger = true;
+		
+		for(int i=0; i<this.sparseElements.length; i++) {
+			this.sparseElements[i] = this.sparseElements[i].insertValueForVariable(value, variableName);
+			if(this.sparseElements[i].getType() != Expression.INT) {
+				allSparseElementsAreInteger = false;
+			}
+		}
+		
+		if(allSparseElementsAreInteger) {
+			int[] sparseIntElements = new int[this.sparseElements.length];
+			for(int i=0; i<sparseIntElements.length; i++)
+				sparseIntElements[i] = ((ArithmeticAtomExpression) this.sparseElements[i]).getConstant();
+			
+			return new SparseIntRange(sparseIntElements);
+		}
+		
+		return this;
+	}
+	
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		return this;
+	}
 	
 	public char isSmallerThanSameType(BasicDomain d) {
 		

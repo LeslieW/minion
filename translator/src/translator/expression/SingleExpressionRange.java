@@ -1,6 +1,6 @@
 package translator.expression;
 
-public class SingleExpressionRange implements ExpressionRange {
+public class SingleExpressionRange implements ExpressionRange, SingleRange {
 
 	private Expression expressionRange;
 	
@@ -24,6 +24,10 @@ public class SingleExpressionRange implements ExpressionRange {
 
 	}
 
+	public Expression[] getLowerAndUpperBound() {
+		return new Expression[] {this.expressionRange, this.expressionRange};
+	}
+	
 	public Domain copy() {
 		return new SingleExpressionRange(this.expressionRange.copy());
 	}
@@ -45,7 +49,17 @@ public class SingleExpressionRange implements ExpressionRange {
 		this.expressionRange = this.expressionRange.insertValueForVariable(value, variableName);
 		return this;
 	}
+	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		this.expressionRange = this.expressionRange.insertValueForVariable(value, variableName);
+		return this;
+	}
 
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		return this;
+	}
+	
 	public boolean isConstantDomain() {
 		return false;
 	}

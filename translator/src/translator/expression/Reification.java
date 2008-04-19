@@ -53,6 +53,12 @@ public class Reification implements RelationalExpression {
 		return this;
 	}
 
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	
+		this.reifiedExpression = this.reifiedExpression.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}

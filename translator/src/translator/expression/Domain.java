@@ -24,7 +24,9 @@ public interface Domain {
 	public final int CONSTANT_ARRAY = 10;
 	public final int ARRAY = 11;
 	public final int FULL_RANGE = 12;
-	
+	public final int INFINITE_LB = 20;
+	public final int INFINITE_UB = 21;
+	public final int INFINITE = 22;
 	
 	
 	
@@ -57,4 +59,8 @@ public interface Domain {
 	public Domain insertValueForVariable(int value, String variableName);
 	
 	
+	public Domain insertValueForVariable(boolean value, String variableName);
+	
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain);
 }

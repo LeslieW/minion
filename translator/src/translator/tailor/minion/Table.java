@@ -7,7 +7,7 @@ public class Table implements MinionConstraint {
 	MinionArray array;
 	MinionAtom[] variableList;
 	ConstantTuple[] tuples;
-	
+	boolean isNegative = false;
 	
 	public Table(MinionAtom[] variableList,
 			     ConstantTuple[] tuples) {
@@ -22,10 +22,18 @@ public class Table implements MinionConstraint {
 		this.tuples = tuples;
 	}
 	
+	public void setIsNegative(boolean isNegative) {
+		this.isNegative = isNegative;
+	}
+	
 	
 	public String toString() {
 		
-		StringBuffer s = new StringBuffer("table(");
+		//System.out.println("This table is negative? "+this.isNegative);
+		
+		String negative = (this.isNegative) ? "negative" : "";
+		
+		StringBuffer s = new StringBuffer(negative+"table(");
 	
 		StringBuffer variables; // = new StringBuffer("");
 		

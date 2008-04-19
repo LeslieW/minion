@@ -161,6 +161,13 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return this;
 	}
 	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		this.leftArgument = this.leftArgument.replaceVariableWithExpression(variableName, expression);
+		this.rightArgument = this.rightArgument.replaceVariableWithExpression(variableName, expression);
+		
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

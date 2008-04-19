@@ -18,8 +18,16 @@ public interface TargetSolver {
 	public final int USE_COMMON_SUBEXPRESSIONS = 1000;
 	
 	// branching strategies
-	public final String FIRST_FAIL = "smallest domain first (first fail)";
-	public final String LARGEST_DOMAIN = "largest domain first";
+	public final String BRANCH_SMALLEST_DOMAIN = "smallest domain first (first fail)";
+	public final String BRANCH_LARGEST_DOMAIN = "largest domain first";
+	public final String BRANCH_SMALLEST_MINIMUM ="domain with smallest minimum first";
+	public final String BRANCH_SMALLEST_MAXIMUM ="domain with smallest maximum first";
+	public final String BRANCH_LARGEST_MINIMUM = "domain with largest minimum first";
+	public final String BRANCH_LARGEST_MAXIMUM = "domain with largest maximum first";
+	public final String BRANCH_SMALLEST_VAR_DEGREE = "smallest variable degree first";
+	public final String BRANCH_LARGEST_VAR_DEGREE = "largest variable degree first";	
+	// TODO: some more branching strategies of GECODE
+	
 	public final String RANDOM_DOMAIN = "random";
 	public final String STATIC_NORMAL = "static normal order";
 	public final String DEFAULT_BRANCHING = "default";
@@ -35,6 +43,8 @@ public interface TargetSolver {
 	public final char DISCRETE_BOUNDS_VARIABLES = 51;
 	public final char VARIABLE_ARRAY_INDEXING = 52;
 	public final char VARIABLE_ALIASES = 53;
+	// is it allowed to do for instance M[ N[1], 1]
+	public final char ARRAY_INDEXING_WITH_ARRAYVARS = 54;
 	
 	// ============= constraints stuff =================
 	/** supports nested expressions in ANY constraint */
@@ -113,7 +123,8 @@ public interface TargetSolver {
 	public final int CONSTRAINT_NESTED_IN_NARY_SUMGREATER_CONSTRAINT = 125;
 	public final int CONSTRAINT_NESTED_IN_BINARY_SUMGREATER_CONSTRAINT = 126;
 	public final int CONSTRAINT_NESTED_IN_UNARY_MINUS = 127;
-	public final int CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE = 128;
+	public final int CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT = 128;
+	public final int CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT = 129;
 	
 	// ----- reification of constraints ----------------
 	public final int REIFIED_IF = 277;
@@ -168,6 +179,8 @@ public interface TargetSolver {
 	// ======= GENERAL STUFF ======================
 	
 	public String getSolverName();
+	
+	public String getSolverInputExtension();
 	
 	/** Set the feature of a solver to true or false (i.e. turn it on(true)
 	 *  or off (false)). Features can only be turned on if they are 

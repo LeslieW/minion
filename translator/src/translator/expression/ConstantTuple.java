@@ -11,6 +11,7 @@ public class ConstantTuple {
 	
 	
 	
+	// ============= INHERITED METHODS =====================
 	
 	public ConstantTuple copy() {
 		

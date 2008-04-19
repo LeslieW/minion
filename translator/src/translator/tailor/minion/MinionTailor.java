@@ -28,29 +28,17 @@ public class MinionTailor {
 	
 	// ======== CONSTRUCTOR ==================================
 	
-	public MinionTailor(NormalisedModel normalisedModel,
-						TranslationSettings settings) {
-			
-		this.settings = settings;
-		this.offsetsFromZero = new HashMap<String,int[]>();
-		this.normalisedModel = normalisedModel;
-		TargetSolver solver = settings.getTargetSolver();
-		if(solver instanceof Minion)
-			this.solverSettings = (Minion) solver;
-		else this.solverSettings = new Minion();
-		this.noMinionAuxVars = this.normalisedModel.getAuxVariables().size();
-		this.usedCommonSubExpressions = this.normalisedModel.getAmountOfCommonSubExpressionsUsed();
-		this.minionSubExpressions = new HashMap<String,MinionAtom>();
-		this.useCommonSubexpressions = this.settings.useCommonSubExpressions();
-		this.essenceSubExpressions = this.normalisedModel.getSubExpressions();
-		
+	public MinionTailor() {
 	}
 	
 	// ====== TRANSLATION TO MINION REPRESENTATION ===========
 	
 	
-	public MinionModel tailorToMinion() 
+	public MinionModel tailorToMinion(NormalisedModel normalisedModel, TranslationSettings settings) 
 		throws MinionException {
+		
+		// 0. initialise everything
+		initialiseMinionTailor(normalisedModel, settings);
 		
 		// 1. tailor the variables and create a new empty model
 		
@@ -66,7 +54,7 @@ public class MinionTailor {
 		tailorObjective();
 		if(this.settings.giveTranslationTimeInfo()) {
 			long stopTime = System.currentTimeMillis();
-			System.out.println("Variable Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
+			writeTimeInfo("Variable Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 		}
 		startTime = System.currentTimeMillis();
 		
@@ -83,7 +71,7 @@ public class MinionTailor {
 		
 		if(this.settings.giveTranslationTimeInfo()) {
 			long stopTime = System.currentTimeMillis();
-			System.out.println("Constraint Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
+			writeTimeInfo("Constraint Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 		}
 		
 		if(this.settings.applyDirectVariableReusage()) {
@@ -95,6 +83,29 @@ public class MinionTailor {
 		
 		
 		
+	}
+	
+	/**
+	 * Initialise everything before we start tailoring ...
+	 * 
+	 * @param normalisedModel
+	 * @param settings
+	 */
+	private void initialiseMinionTailor(NormalisedModel normalisedModel,
+								        TranslationSettings settings) {
+			
+		this.settings = settings;
+		this.offsetsFromZero = new HashMap<String,int[]>();
+		this.normalisedModel = normalisedModel;
+		TargetSolver solver = settings.getTargetSolver();
+		if(solver instanceof Minion)
+			this.solverSettings = (Minion) solver;
+		else this.solverSettings = new Minion();
+		this.noMinionAuxVars = this.normalisedModel.getAuxVariables().size();
+		this.usedCommonSubExpressions = this.normalisedModel.getAmountOfCommonSubExpressionsUsed();
+		this.minionSubExpressions = new HashMap<String,MinionAtom>();
+		this.useCommonSubexpressions = this.settings.useCommonSubExpressions();
+		this.essenceSubExpressions = this.normalisedModel.getSubExpressions();
 	}
 	
 	/**
@@ -193,6 +204,9 @@ public class MinionTailor {
 						else if(indices[j] instanceof BoundedIntRange)
 							offsets[j] = ((BoundedIntRange) indices[j]).getRange()[0]; // lowerBound
 						
+						else if(indices[j] instanceof SingleIntRange)
+							offsets[j] = ((SingleIntRange) indices[j]).getRange()[0];
+						
 						else throw new MinionException("Cannot translate sparse domains as array-indices yet: variable '"+
 								varName+"', domain: "+domain);
 					}
@@ -221,6 +235,9 @@ public class MinionTailor {
 		
 		if(constraint instanceof ArithmeticAtomExpression)
 			return toMinion((ArithmeticAtomExpression) constraint);
+		
+		if(constraint instanceof AbsoluteConstraint) 
+			return toMinion((AbsoluteConstraint) constraint);
 		
 		if(constraint instanceof CommutativeBinaryRelationalExpression)
 			return toMinion((CommutativeBinaryRelationalExpression) constraint);
@@ -267,7 +284,10 @@ public class MinionTailor {
 		if(constraint instanceof AbsoluteValue) 
 			return toMinion((AbsoluteValue) constraint);
 		
-		throw new MinionException("Cannot tailor expression to Minion yet:"+constraint);
+		if(constraint instanceof Negation)
+			return toMinion((Negation) constraint);
+		
+		throw new MinionException("Cannot tailor expression of type "+constraint.getClass()+" to Minion yet:"+constraint);
 	}
 	
 	
@@ -289,13 +309,21 @@ public class MinionTailor {
 		}
 		
 		if(table.isGonnaBeFlattenedToVariable()){
-			if(this.solverSettings.supportsReificationOf(Expression.TABLE_CONSTRAINT))
+			if(this.solverSettings.supportsReificationOf(Expression.TABLE_CONSTRAINT)) {
+				Table tableConstraint = new Table(variables, table.getTupleList());
+				tableConstraint.setIsNegative(table.isConflictingTableConstraint());
 				return reifyMinionConstraint(new Table(variables, table.getTupleList()));
+			}
 			else throw new MinionException("Cannot tailor TABLE constraint to Minion:"+table+
 					"\ntable is not reifiable.");
 		}
-		else 	
-			return new Table(variables, table.getTupleList());
+		else {
+			Table tableConstraint = new Table(variables, table.getTupleList());
+			tableConstraint.setIsNegative(table.isConflictingTableConstraint());
+			//System.out.println("Tailoring the table. is it conflicting? old:"+table.isConflictingTableConstraint()+
+			//		" and new :"+tableConstraint.isNegative);
+			return tableConstraint;
+		}
 	}
 	
 	
@@ -313,6 +341,31 @@ public class MinionTailor {
 		
 		int[] occurrences = atmost.getOccurrences();
 		int[] values = atmost.getValues();
+		
+		//System.out.println("mapping atmost to Minion:"+atmost);
+		
+		if(occurrences.length == 0) {
+			ArrayList<Expression> occ = atmost.getOccurrenceExpressions();
+			for(int i=occ.size()-1; i>=0;i--) {
+				Expression e = occ.remove(i);
+				if(e.getType() == Expression.INT) {
+					occurrences[i] = ((ArithmeticAtomExpression) e).getConstant();
+				}
+				else throw new MinionException("Infeasible atmost/aleast argument that is not a constant "+e+" in "+atmost);
+			}
+		}
+		
+		if(values.length == 0) {
+			ArrayList<Expression> val = atmost.getOccurrenceExpressions();
+			for(int i=val.size()-1; i>=0;i--) {
+				Expression e = val.remove(i);
+				if(e.getType() == Expression.INT) {
+					values[i] = ((ArithmeticAtomExpression) e).getConstant();
+				}
+				else throw new MinionException("Infeasible atmost/aleast argument that is not a constant "+e+" in "+atmost);
+			}
+		}
+		
 		
 		if(occurrences.length != values.length)
 			throw new MinionException("Cannot tailor atmost/atleast constraint:"+atmost+
@@ -394,8 +447,18 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(LexConstraint lexConstraint)
 		throws MinionException {
 		
-		MinionArray leftArray = toMinionArray(lexConstraint.getLeftArray());
-		MinionArray rightArray = toMinionArray(lexConstraint.getRightArray());
+		if(!(lexConstraint.getLeftArray() instanceof Array))
+			throw new MinionException("Infeasible argument '"+lexConstraint.getLeftArray()
+					+"' for lex-constraint:"+lexConstraint
+					+". Expected an array.");
+		
+		if(!(lexConstraint.getRightArray() instanceof Array))
+			throw new MinionException("Infeasible argument '"+lexConstraint.getRightArray()
+					+"' for lex-constraint:"+lexConstraint
+					+". Expected an array.");
+		
+		MinionArray leftArray = toMinionArray((Array) lexConstraint.getLeftArray());
+		MinionArray rightArray = toMinionArray((Array) lexConstraint.getRightArray());
 		
 		if(lexConstraint.getOperator() == Expression.LEX_GEQ) {
 			return new LexlessConstraint(rightArray, leftArray, false);
@@ -844,6 +907,8 @@ public class MinionTailor {
 	 * Tailor absolute value constraint | x | into Minion. For this we need 
 	 * to flatten the representation as |x | = y and use y instead.
 	 * 
+	 * This method should actually be redundant since flattening should take care of that
+	 * 
 	 * @param constraint
 	 * @return
 	 * @throws MinionException
@@ -883,7 +948,63 @@ public class MinionTailor {
 		
 	}
 	
+	private MinionConstraint toMinion(Negation negation) 
+		throws MinionException {
+		
+		RelationalAtomExpression auxVariable;
+		
+		if(this.hasCommonSubExpression(negation)) {
+			auxVariable = getCommonSubExpression(negation).toRelationalAtomExpression();
+		}
+		else {
+			auxVariable = new RelationalAtomExpression(this.createAuxVariable());
+			this.addToSubExpressions(negation, auxVariable.toArithmeticExpression());
+		}
+		
+		MinionAtom auxVar = toMinion(auxVariable.toArithmeticExpression());
+		
+		if(!(negation.getArgument() instanceof AtomExpression))
+			throw new MinionException("Cannot tailor negation "+negation
+					+" to Minion because the argument is not flattened to a variable.");
+		
+		MinionAtom argument = (MinionAtom) toMinion(negation.getArgument());
+		
+		if(negation.isGonnaBeFlattenedToVariable()) {
+			this.minionModel.addConstraint(new DiseqConstraint(auxVar, argument));
+			return auxVar;
+		}
+				
+		return new DiseqConstraint(auxVar, argument);
+	}
 	
+	
+	/**
+	 * Tailors the absolute constraint 
+	 * | argument | = result to Minion
+	 * 
+	 * @param constraint
+	 * @return
+	 * @throws MinionException
+	 */
+	private MinionConstraint toMinion(AbsoluteConstraint constraint) 
+	throws MinionException {
+	
+		MinionAtom argument,result;
+		
+		if(constraint.getArgument() instanceof ArithmeticAtomExpression) {
+			argument = toMinion((ArithmeticAtomExpression) constraint.getArgument());
+		}
+		else throw new MinionException("Flattening error. Cannot tailor argument '"+constraint.getArgument()+
+				"'  of absolute value constraint '"+constraint+"' when it is not a variable/atom expression.");
+		
+		if(constraint.getResult() instanceof ArithmeticAtomExpression) {
+			result = toMinion((ArithmeticAtomExpression) constraint.getResult());
+		}
+		else throw new MinionException("Flattening error. Cannot tailor result '"+constraint.getResult()+
+				"'  of absolute value constraint '"+constraint+"' when it is not a variable/atom expression.");
+		
+		return new MinionAbsoluteValue(argument, result);
+	}
 	/**
 	 * Translate a sum constraint to Minion. A sum constraint is a collection
 	 * of positive and negative arguments that are added up and in a relation
@@ -1616,6 +1737,15 @@ public class MinionTailor {
 		
 	}
 	
+	private Variable createAuxVariable() {
+		
+		SingleVariable variable = new SingleVariable(this.MINION_AUXVAR_NAME+this.noMinionAuxVars++, new BoolDomain());
+		this.minionModel.addAuxiliaryVariable(variable);
+		return variable;
+		
+	}
+	
+	
 	
 	/**
 	 * Return the String representation of the Atomic arithmetic expression.
@@ -1753,4 +1883,8 @@ public class MinionTailor {
 		
 	}
 	
+	private void writeTimeInfo(String info) {
+		if(this.settings.giveTranslationTimeInfo())
+			System.out.println(info);
+	}
 }

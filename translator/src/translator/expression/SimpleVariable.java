@@ -35,7 +35,7 @@ public class SimpleVariable implements Variable {
 	}
 	
 	public int[] getDomain() {
-		System.out.println("Getting domain of SimgleVariable :"+this);
+		//System.out.println("Getting domain of SimpleVariable :"+this);
 		return new int[] {this.lb,
 						  this.ub } ;
 		
@@ -51,6 +51,70 @@ public class SimpleVariable implements Variable {
 	}
 
 	public Expression insertDomainForVariable(Domain domain, String variableName) {
+		
+		if(this.variableName.equals(variableName)) {
+			
+			//System.out.println("Inserting domain '"+domain+"' for variable "+variableName+" in variable "+this);
+			
+			// We need to pack the variable as a RelationalAtom or Arithmetic Atom because 
+			// during parsing we only create Variable types, which are not feasible standalone...
+			if(domain instanceof BoolDomain) {
+				return new RelationalAtomExpression(new SingleVariable(this.variableName, domain));
+			}
+			
+			else if(domain instanceof ArrayDomain)  {
+				ArrayDomain arrayDomain = (ArrayDomain) domain;
+				Domain[] indexDomains = arrayDomain.getIndexDomains();
+				BasicDomain[] basicDomains = new BasicDomain[arrayDomain.getIndexDomains().length];
+				
+				for(int i=0; i<basicDomains.length; i++) {
+					
+					try {
+						if(indexDomains[i] instanceof BasicDomain)
+							basicDomains[i] = (BasicDomain) indexDomains[i];
+						else throw new Exception("Infeasible array domain: "+domain+". Cannot use domain '"+indexDomains[i]+
+								"' as an index domain. Expected a range or identifier.");
+						} catch (Exception e) {
+							e.printStackTrace(System.out);
+							System.exit(1);
+					}
+						
+				}
+				
+				return new SimpleArray(this.variableName,
+										basicDomains,
+										arrayDomain.getBaseDomain());
+			}
+			
+			else if(domain instanceof ConstantArrayDomain) {
+				ConstantArrayDomain arrayDomain = (ConstantArrayDomain) domain;
+				Domain[] indexDomains = arrayDomain.getIndexDomains();
+				BasicDomain[] basicDomains = new BasicDomain[arrayDomain.getIndexDomains().length];
+				
+				for(int i=0; i<basicDomains.length; i++) {
+					
+					try {
+						if(indexDomains[i] instanceof BasicDomain)
+							basicDomains[i] = (BasicDomain) indexDomains[i];
+						else throw new Exception("Infeasible array domain: "+domain+". Cannot use domain '"+indexDomains[i]+
+								"' as an index domain. Expected a range or identifier.");
+						} catch (Exception e) {
+							e.printStackTrace(System.out);
+							System.exit(1);
+					}
+						
+				}
+				
+				return new SimpleArray(this.variableName,
+										basicDomains,
+										arrayDomain.getBaseDomain());
+			}
+			
+			
+			else 
+				return new ArithmeticAtomExpression(new SingleVariable(this.variableName, domain));
+		}
+		
 		return this;
 	}
 
@@ -62,7 +126,16 @@ public class SimpleVariable implements Variable {
 		return this;
 	}
 
-
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		if(this.variableName.equals(variableName)) {
+			return expression;
+		}
+		//this = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
+	
 	public Expression replaceVariableName(String oldVariableName, String newVariableName) {
 		
 		if(this.variableName.equals(oldVariableName))

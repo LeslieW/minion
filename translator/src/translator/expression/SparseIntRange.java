@@ -37,6 +37,12 @@ public class SparseIntRange implements IntRange {
 		return new SparseIntRange(newSparseElements);
 	}
 
+	public Expression[] getLowerAndUpperBound() {
+		return new Expression[] {new ArithmeticAtomExpression(this.sparseElements[0]),
+								 new ArithmeticAtomExpression(this.sparseElements[this.sparseElements.length-1])} ;
+		
+	}
+	
 	public Domain evaluate() {
 		return this;
 	}
@@ -72,6 +78,14 @@ public class SparseIntRange implements IntRange {
 	
 	
 	public Domain insertValueForVariable(int value, String variableName) {
+		return this;
+	}
+	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		return this;
+	}
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
 		return this;
 	}
 	

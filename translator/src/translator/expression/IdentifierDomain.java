@@ -38,6 +38,19 @@ public class IdentifierDomain implements BasicDomain {
 		return this;
 	}
 	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		return this;
+	}
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		
+		if(variableName.equals(this.domainName)) {
+			return newDomain;
+		}
+		
+		return this;
+	}
+	
 	public char isSmallerThanSameType(BasicDomain d) {
 		
 		IdentifierDomain otherDomain = (IdentifierDomain) d;

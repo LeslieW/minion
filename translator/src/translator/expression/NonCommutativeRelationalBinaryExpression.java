@@ -73,7 +73,7 @@ public class NonCommutativeRelationalBinaryExpression implements
 		case LEX_GREATER: operator = "lex>"; break;	
 		}
 		
-		return this.leftArgument+operator+this.rightArgument;
+		return "("+this.leftArgument+")"+operator+"("+this.rightArgument+")";
 	}
 	
 	public int[] getDomain() {
@@ -110,6 +110,7 @@ public class NonCommutativeRelationalBinaryExpression implements
 		this.leftArgument =  this.leftArgument.evaluate();
 		this.rightArgument = this.rightArgument.evaluate();
 		
+		//System.out.println("evaluating non-comm. rel. expr "+this);
 		
 		if(this.type == IF) {
 			if(leftArgument.getType() == BOOL && rightArgument.getType() == BOOL) {
@@ -299,9 +300,16 @@ public class NonCommutativeRelationalBinaryExpression implements
 	}
 	
 	public Expression insertValueForVariable(boolean value, String variableName) {
-		System.out.println("Gonna insert "+value+" for "+variableName+" in left expression:"+leftArgument+" with type: "+leftArgument.getType());
+		//System.out.println("Gonna insert "+value+" for "+variableName+" in left expression:"+leftArgument+" with type: "+leftArgument.getType());
 		this.leftArgument = this.leftArgument.insertValueForVariable(value, variableName);
 		this.rightArgument = this.rightArgument.insertValueForVariable(value, variableName);
+		return this;
+	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		this.leftArgument = this.leftArgument.replaceVariableWithExpression(variableName, expression);
+		this.rightArgument = this.rightArgument.replaceVariableWithExpression(variableName, expression);
+		
 		return this;
 	}
 	

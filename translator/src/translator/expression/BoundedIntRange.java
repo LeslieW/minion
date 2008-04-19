@@ -31,10 +31,16 @@ public class BoundedIntRange implements IntRange {
 		return new BoundedIntRange(this.lowerBound, 
 				                   this.upperBound);
 	}
+	
+	public Expression[] getLowerAndUpperBound() {
+		return new Expression[] {new ArithmeticAtomExpression(this.lowerBound),
+								 new ArithmeticAtomExpression(this.upperBound)} ;
+		
+	}
 
 	public Domain evaluate() {
 		if(lowerBound == upperBound) {
-			return new SparseIntRange(new int[] {lowerBound} );
+			return new SingleIntRange(lowerBound );
 		}
 		else return this;
 	}
@@ -60,6 +66,13 @@ public class BoundedIntRange implements IntRange {
 		return this;
 	}
 	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		return this;
+	}	
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		return this;
+	}
 	
 	public char isSmallerThanSameType(BasicDomain d) {
 		

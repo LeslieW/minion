@@ -8,6 +8,7 @@ import translator.expression.Domain;
 import translator.expression.Expression;
 import translator.expression.Variable;
 import translator.expression.ConstantArray;
+import translator.expression.Objective;
 
 public class NormalisedModel {
 
@@ -161,8 +162,8 @@ public class NormalisedModel {
 	}
 	
 	public void setObjectiveExpression(Expression objExpression) {
-		if(this.objective.objective != null)
-			this.objective.objective = objExpression;
+		if(this.objective.getObjectiveExpression() != null)
+			this.objective.setObjectiveExpression(objExpression);
 	}
 	
 	public void setSubExpressions(HashMap<String, ArithmeticAtomExpression> subexpressions) {
@@ -202,15 +203,15 @@ public class NormalisedModel {
 	}
 	
 	public Expression getObjectiveExpression() {
-		return this.objective.objective;
+		return this.objective.getObjectiveExpression();
 	}
 	
 	public boolean isObjectiveMaximising() {
-		return this.objective.maximise;
+		return this.objective.isMaximise();
 	}
 	
 	public void setFlattenedObjectiveExpression(Expression objective) {
-		this.objective.objective = objective;
+		this.objective.setObjectiveExpression(objective);
 	}
 	
 	public ArrayList<String> getDecisionVariablesNames() {

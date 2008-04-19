@@ -30,6 +30,10 @@ public class BoundedExpressionRange implements ExpressionRange {
 				                          this.upperBound.copy());
 	}
 
+	public Expression[] getLowerAndUpperBound() {
+		return new Expression[] {this.lowerBound, this.upperBound };
+	}
+	
 	public Domain evaluate() {
 		
 		this.lowerBound = this.lowerBound.reduceExpressionTree().evaluate();
@@ -80,6 +84,27 @@ public class BoundedExpressionRange implements ExpressionRange {
 					                   );
 		}
 		
+		return this;
+	}
+	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		
+		//System.out.println("Inserting value for variable");
+		
+		this.lowerBound = this.lowerBound.insertValueForVariable(value, variableName);
+		this.upperBound = this.upperBound.insertValueForVariable(value, variableName);
+		
+		if(this.lowerBound.getType() == Expression.INT && 
+				this.upperBound.getType() == Expression.INT) {
+			return new BoundedIntRange(( (ArithmeticAtomExpression) this.lowerBound).getConstant(),
+				  	                   ( (ArithmeticAtomExpression) this.upperBound).getConstant() 
+					                   );
+		}
+		
+		return this;
+	}
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
 		return this;
 	}
 	

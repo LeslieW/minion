@@ -18,6 +18,14 @@ public class ConstantVector implements ConstantArray {
 		this.elements = elements;
 	}
 	
+	public ConstantVector(String arrayName,
+						  Integer[] values) {
+		this.arrayName = arrayName;
+		this.elements = new int[values.length];
+		for(int i=0; i<this.elements.length; i++)
+			elements[i] = (int) values[i];
+	}
+	
 	
 	// =========== INHERITED METHIODS =================
 	
@@ -25,6 +33,10 @@ public class ConstantVector implements ConstantArray {
 		return this.arrayName;
 	}
 
+	public int getDimension() {
+		return 1;
+	}
+	
 	public Expression copy() {
 		int[] copiedElements = new int[this.elements.length];
 		for(int i=0; i<copiedElements.length; i++)
@@ -55,6 +67,10 @@ public class ConstantVector implements ConstantArray {
 		return this;
 	}
 
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		return this;	
+	}
+	
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;
 	}

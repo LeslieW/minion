@@ -88,6 +88,15 @@ public class IndexedArray implements SingleArray {
 		
 		return this;
 	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		// TODO!
+		//this.baseDomain = this.baseDomain.insertValueForVariable(value, variableName);
+		
+		int f; // do the same for domains!
+		
+		return this;	
+	}
 
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeFlattenedToVariable;

@@ -8,7 +8,7 @@ import translator.expression.BoolDomain;
 import translator.expression.Expression;
 import translator.expression.Variable;
 import translator.expression.ConstantArray;
-import translator.normaliser.Objective;
+import translator.expression.Objective;
 import translator.normaliser.NormalisedModel;
 
 public class EssencePModel {
@@ -79,7 +79,7 @@ public class EssencePModel {
 		return new NormalisedModel(this.decisionVariables,
 				                   this.decisionVariablesNames,
 				                   this.constraintList,
-				                   new translator.normaliser.Objective());
+				                   new Objective());
 		 /*return new NormalisedModel(this.decisionVariables,
 									  this.decisionVariablesNames,
 									  this.constraintList,

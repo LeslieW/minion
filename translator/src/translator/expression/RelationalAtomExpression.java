@@ -141,9 +141,9 @@ public class RelationalAtomExpression implements
 	public Expression insertValueForVariable(boolean value, String variableName) {
 		
 		if(this.variable != null) {
-			System.out.println("Inserting "+value+" for constant "+variableName+" in "+this);	
+			//System.out.println("Inserting "+value+" for constant "+variableName+" in "+this);	
 			if(this.variable instanceof SingleVariable) {
-				System.out.println("Inserting "+value+" for constant "+variableName+" in "+this);	
+				//System.out.println("Inserting "+value+" for constant "+variableName+" in "+this);	
 				Expression e = this.variable.insertValueForVariable(value,variableName);
 				if(e.getType() == BOOL)
 					return (RelationalAtomExpression) e;
@@ -157,6 +157,19 @@ public class RelationalAtomExpression implements
 			}
 			
 		}
+		return this;
+	}
+	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		if(this.variable != null) {
+			Expression e = this.variable.replaceVariableWithExpression(variableName, expression);
+			if(!(e instanceof Variable))
+				return e;
+			else this.variable = (Variable) e;
+			
+		}
+		//this = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
 		return this;
 	}
 	

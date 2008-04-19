@@ -90,6 +90,11 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 		return this;
 	}
 	
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {	
+		this.argument = this.argument.replaceVariableWithExpression(variableName, expression);
+		return this;
+	}
+	
 	public boolean isNested() {
 		return isNested;
 	}

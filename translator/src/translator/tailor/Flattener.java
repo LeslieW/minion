@@ -11,8 +11,8 @@ public class Flattener {
 
 
 	public final int CONSTANT_ARRAY_OFFSET_FROM_ZERO = 1;
-	
 	public final String AUXVARIABLE_NAME = "aux";
+	
 	protected int noAuxVariables;
 	
 	TranslationSettings settings;
@@ -170,7 +170,7 @@ public class Flattener {
 		else if(expression instanceof Array)
 			return expression;  // TODO: here we will need to flatten in case the target solver does not support arrays
 		
-		else throw new TailorException("Unknown expression type (neither relational nor arithmetic):"+expression);
+		else throw new TailorException("Unknown expression type '"+expression.getType()+"' (neither relational nor arithmetic):"+expression);
 	}
 	
 	/**
@@ -251,15 +251,20 @@ public class Flattener {
 			if(table.isGonnaBeFlattenedToVariable()) {
 				if( this.targetSolver.supportsReificationOf(Expression.TABLE_CONSTRAINT)) {
 				
-					return reifyConstraint(new TableConstraint(flattenedVars,
-							                                    table.getTupleList()));
+					TableConstraint flatTable = new  TableConstraint(flattenedVars, table.getTupleList());
+					flatTable.setToConflictingTableConstraint(table.isConflictingTableConstraint());
+					return reifyConstraint(flatTable);
 					
 				}
 				else throw new TailorException("Cannot tailor TABLECONSTRAINT '"+table+"' to "+targetSolver.getSolverName()+":\n"+
 						"The solver does not support reification of tables.");
 			}
 			
-			else return new TableConstraint(flattenedVars, table.getTupleList());
+			else { 
+				TableConstraint flatTable = new  TableConstraint(flattenedVars, table.getTupleList());
+				flatTable.setToConflictingTableConstraint(table.isConflictingTableConstraint());
+				return flatTable;
+			}
 			
 		}
 		else throw new TailorException("Cannot tailor TABLE constraint: it is not supported by "+this.targetSolver.getSolverName());
@@ -379,6 +384,7 @@ public class Flattener {
 	Expression rightExpression = expression.getRightArgument();
 	
 	
+	//System.out.println("FLATTENING non-commutative expression "+expression);
 	
 	// ----------- if the target solver allows nested constraints, then return them as they are --------- 
 	if(this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
@@ -537,13 +543,13 @@ public class Flattener {
 	rightExpression.willBeFlattenedToVariable(true);
 	
 	
-	//System.out.println("GONNA flatten left expression: "+leftExpression+" and right expression:"+rightExpression+" with op:"+expression.getOperator());
+	//System.out.println("Gonna flatten left expression: "+leftExpression+" and right expression:"+rightExpression+" with op:"+expression.getOperator());
 	
 	leftExpression = flattenExpression(leftExpression);
 	rightExpression = flattenExpression(rightExpression);
 	
 	
-	//System.out.println("Flattened left expression: "+leftExpression+" and right expression:"+rightExpression+" with op:"+expression.getOperator());
+	//System.out.println("FLATTENED left expression: "+leftExpression+" and right expression:"+rightExpression+" with op:"+expression.getOperator());
 	// BOOL => E
 	if(leftExpression.getType() == Expression.BOOL && expression.getOperator() == Expression.IF) {
 		if(!((RelationalAtomExpression) leftExpression).getBool())
@@ -652,6 +658,10 @@ public class Flattener {
 				rightExpression.willBeFlattenedToVariable(true);
 			}
 			
+			// just testing this... 
+			if(rightExpression instanceof QuantifiedSum)
+				rightExpression.willBeFlattenedToVariable(false);
+			
 			rightExpression = flattenExpression(rightExpression);
 		}
 		
@@ -663,6 +673,9 @@ public class Flattener {
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 				leftExpression.willBeFlattenedToVariable(true);
 			}
+			
+			if(leftExpression instanceof QuantifiedSum)
+				leftExpression.willBeFlattenedToVariable(false);
 			
 			leftExpression = flattenExpression(leftExpression);
 		}
@@ -695,6 +708,7 @@ public class Flattener {
 			else return partWiseSumConstraint;
 		}
 		else if(leftExpression instanceof Sum) {
+			//System.out.println("We have a sum on the left hand side\n: "+this);
 			leftExpression.reduceExpressionTree();
 			Sum lSum = (Sum) leftExpression;
 			Sum leftSum = (Sum) lSum.copy();
@@ -868,11 +882,211 @@ public class Flattener {
 		}
 		
 	
+		// direct absolute value
+		if(rightExpression instanceof AbsoluteValue && expression.getOperator() == Expression.EQ) {
+			
+			Expression argument = ((AbsoluteValue) rightExpression).getArgument();
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT)
+					|| expression.isGonnaBeFlattenedToVariable())
+				leftExpression.willBeFlattenedToVariable(true);
+			
+			
+			if(hasCommonSubExpression(leftExpression))
+				leftExpression = getCommonSubExpression(leftExpression);
+			
+			else {
+				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+				leftExpression = flattenExpression(leftExpression);
+				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
+				addToSubExpressions(rightExpression, leftExpression);
+			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+			}
+			
+			
+			// check if the solver supports variables only as result of absolute value
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT))
+				argument.willBeFlattenedToVariable(true);
+			
+			argument = flattenExpression(argument);
+			
+			// add subexpression after flattening
+			if(!hasCommonSubExpression(argument)) {
+				addToSubExpressions(argument, leftExpression);
+			}
+			
+			AbsoluteConstraint absConstraint = new AbsoluteConstraint(argument, leftExpression);
+			
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				this.constraintBuffer.add(absConstraint);
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
+				return leftExpression;
+			}
+			else  {
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
+				return absConstraint;
+			}
+		}
+		else if(leftExpression instanceof AbsoluteValue && expression.getOperator() == Expression.EQ) {
+		
+			Expression argument = ((AbsoluteValue) leftExpression).getArgument();
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT)
+					|| expression.isGonnaBeFlattenedToVariable())
+				rightExpression.willBeFlattenedToVariable(true);
+			rightExpression = flattenExpression(rightExpression);
+			
+			if(!hasCommonSubExpression(leftExpression)) {
+				addToSubExpressions(leftExpression, rightExpression);
+			}
+			
+			// check if the solver supports variables only as result of absolute value
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT))
+				argument.willBeFlattenedToVariable(true);
+			
+			argument = flattenExpression(argument);
+			
+			// add subexpression after flattening
+			if(!hasCommonSubExpression(argument)) {
+				addToSubExpressions(argument, rightExpression);
+			}
+			
+			AbsoluteConstraint absConstraint = new AbsoluteConstraint(argument, rightExpression);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				this.constraintBuffer.add(absConstraint);
+				return rightExpression;
+			}
+			else return absConstraint;
+			
+		}
+		
 		
 		//3. Detect element constraints
-		if(!this.targetSolver.supportsVariableArrayIndexing()) { 
-			if(leftExpression.getType() == Expression.INT_ARRAY_VAR ||
-				leftExpression.getType() == Expression.BOOL_ARRAY_VAR) {
+		if(!this.targetSolver.supportsVariableArrayIndexing()) {
+			if( (rightExpression.getType() == Expression.INT_ARRAY_VAR ||
+					rightExpression.getType() == Expression.BOOL_ARRAY_VAR)
+					 ) {
+				
+					if(rightExpression instanceof ArithmeticAtomExpression) {
+						
+						ArithmeticAtomExpression rightAtomExpr = ((ArithmeticAtomExpression) rightExpression);
+						
+						if(rightAtomExpr.getVariable() instanceof ArrayVariable) {
+						ArrayVariable arrayVar = (ArrayVariable) rightAtomExpr.getVariable();
+						
+						
+						Expression[] indices = arrayVar.getExpressionIndices();
+						
+						if(indices != null) {
+							
+							int[] intIndices = new int[indices.length];
+							boolean allIndicesAreInteger = true;
+							
+							for(int i=0; i<indices.length; i++) {
+								indices[i] = flattenExpression(indices[i]);
+								if(indices[i].getType() == Expression.INT) {
+									intIndices[i] = ((ArithmeticAtomExpression) indices[i]).getConstant();
+								}
+								else allIndicesAreInteger = false;
+							}
+							
+							if(allIndicesAreInteger) {
+								arrayVar = new ArrayVariable(arrayVar.getArrayNameOnly(),
+										                     intIndices,
+										                     arrayVar.getBaseDomain());
+								rightExpression = new ArithmeticAtomExpression(arrayVar);
+							}
+							
+						}
+						
+						
+						if(this.normalisedModel.constantArrays.containsKey(arrayVar.getArrayNameOnly())) {
+							rightExpression = flattenArithmeticAtomExpression((ArithmeticAtomExpression) rightExpression);
+					    }
+						else if(arrayVar.isIndexedBySomethingNotConstant()) {
+
+								arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
+								ElementConstraint elementConstraint = flattenToPartwiseElementConstraint(rightExpression.copy());
+							
+								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+									leftExpression.willBeFlattenedToVariable(true);
+								leftExpression = flattenExpression(leftExpression);
+							
+								addToSubExpressions(rightExpression, leftExpression);
+								elementConstraint.setResultExpression(leftExpression);
+								if(expression.isGonnaBeFlattenedToVariable()) {
+									this.constraintBuffer.add(elementConstraint);
+									return leftExpression;
+								}
+								else return elementConstraint;
+							
+						}
+						} // else : we have a SimpleArrayVariable in an arithmetic atom expression
+					}
+					else if(rightExpression instanceof RelationalAtomExpression) {
+						if(( (ArrayVariable) ((RelationalAtomExpression) rightExpression).getVariable()).isIndexedBySomethingNotConstant()) {
+						
+							ArrayVariable arrayVar = (ArrayVariable) ((RelationalAtomExpression) rightExpression).getVariable();
+							
+							Expression[] indices = arrayVar.getExpressionIndices();
+							
+							if(indices != null) {
+								
+								int[] intIndices = new int[indices.length];
+								boolean allIndicesAreInteger = true;
+								
+								for(int i=0; i<indices.length; i++) {
+									indices[i] = flattenExpression(indices[i]);
+									if(indices[i].getType() == Expression.INT) {
+										intIndices[i] = ((ArithmeticAtomExpression) indices[i]).getConstant();
+									}
+									else allIndicesAreInteger = false;
+								}
+								
+								if(allIndicesAreInteger) {
+									arrayVar = new ArrayVariable(arrayVar.getArrayNameOnly(),
+											                     intIndices,
+											                     arrayVar.getBaseDomain());
+									rightExpression = new RelationalAtomExpression(arrayVar);
+								}
+								
+							}
+							
+							if(this.normalisedModel.constantArrays.containsKey(arrayVar.getArrayNameOnly())) {
+								rightExpression = flattenRelationalAtomExpression((RelationalAtomExpression) rightExpression);
+							}
+							else if(arrayVar.isIndexedBySomethingNotConstant()) {
+						 
+									arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
+									ElementConstraint elementConstraint = flattenToPartwiseElementConstraint(rightExpression.copy());
+							
+									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+										leftExpression.willBeFlattenedToVariable(true);
+									leftExpression = flattenExpression(leftExpression);
+							
+									addToSubExpressions(rightExpression, leftExpression);
+									elementConstraint.setResultExpression(leftExpression);
+									if(expression.isGonnaBeFlattenedToVariable()) {
+										this.constraintBuffer.add(elementConstraint);
+										return leftExpression;
+									}
+									else return elementConstraint;
+							
+								
+							}
+						}
+					}
+				
+				}	
+			}
+		
+		
+			else if((leftExpression.getType() == Expression.INT_ARRAY_VAR ||
+				leftExpression.getType() == Expression.BOOL_ARRAY_VAR) 
+				&& !(rightExpression instanceof SimpleArrayVariable)) {
 		
 				if(leftExpression instanceof ArithmeticAtomExpression) {
 					
@@ -986,116 +1200,7 @@ public class Flattener {
 				
 			}
 		
-			if(rightExpression.getType() == Expression.INT_ARRAY_VAR ||
-				rightExpression.getType() == Expression.BOOL_ARRAY_VAR) {
 			
-				if(rightExpression instanceof ArithmeticAtomExpression) {
-					
-					ArrayVariable arrayVar = (ArrayVariable) ((ArithmeticAtomExpression) rightExpression).getVariable();
-					
-					Expression[] indices = arrayVar.getExpressionIndices();
-					
-					if(indices != null) {
-						
-						int[] intIndices = new int[indices.length];
-						boolean allIndicesAreInteger = true;
-						
-						for(int i=0; i<indices.length; i++) {
-							indices[i] = flattenExpression(indices[i]);
-							if(indices[i].getType() == Expression.INT) {
-								intIndices[i] = ((ArithmeticAtomExpression) indices[i]).getConstant();
-							}
-							else allIndicesAreInteger = false;
-						}
-						
-						if(allIndicesAreInteger) {
-							arrayVar = new ArrayVariable(arrayVar.getArrayNameOnly(),
-									                     intIndices,
-									                     arrayVar.getBaseDomain());
-							rightExpression = new ArithmeticAtomExpression(arrayVar);
-						}
-						
-					}
-					
-					
-					if(this.normalisedModel.constantArrays.containsKey(arrayVar.getArrayNameOnly())) {
-						rightExpression = flattenArithmeticAtomExpression((ArithmeticAtomExpression) rightExpression);
-				    }
-					else if(arrayVar.isIndexedBySomethingNotConstant()) {
-
-							arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
-							ElementConstraint elementConstraint = flattenToPartwiseElementConstraint(rightExpression.copy());
-						
-							if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
-								leftExpression.willBeFlattenedToVariable(true);
-							leftExpression = flattenExpression(leftExpression);
-						
-							addToSubExpressions(rightExpression, leftExpression);
-							elementConstraint.setResultExpression(leftExpression);
-							if(expression.isGonnaBeFlattenedToVariable()) {
-								this.constraintBuffer.add(elementConstraint);
-								return leftExpression;
-							}
-							else return elementConstraint;
-						
-					}	
-				}
-				else if(rightExpression instanceof RelationalAtomExpression) {
-					if(( (ArrayVariable) ((RelationalAtomExpression) rightExpression).getVariable()).isIndexedBySomethingNotConstant()) {
-					
-						ArrayVariable arrayVar = (ArrayVariable) ((RelationalAtomExpression) rightExpression).getVariable();
-						
-						Expression[] indices = arrayVar.getExpressionIndices();
-						
-						if(indices != null) {
-							
-							int[] intIndices = new int[indices.length];
-							boolean allIndicesAreInteger = true;
-							
-							for(int i=0; i<indices.length; i++) {
-								indices[i] = flattenExpression(indices[i]);
-								if(indices[i].getType() == Expression.INT) {
-									intIndices[i] = ((ArithmeticAtomExpression) indices[i]).getConstant();
-								}
-								else allIndicesAreInteger = false;
-							}
-							
-							if(allIndicesAreInteger) {
-								arrayVar = new ArrayVariable(arrayVar.getArrayNameOnly(),
-										                     intIndices,
-										                     arrayVar.getBaseDomain());
-								rightExpression = new RelationalAtomExpression(arrayVar);
-							}
-							
-						}
-						
-						if(this.normalisedModel.constantArrays.containsKey(arrayVar.getArrayNameOnly())) {
-							rightExpression = flattenRelationalAtomExpression((RelationalAtomExpression) rightExpression);
-						}
-						else if(arrayVar.isIndexedBySomethingNotConstant()) {
-					 
-								arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
-								ElementConstraint elementConstraint = flattenToPartwiseElementConstraint(rightExpression.copy());
-						
-								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
-									leftExpression.willBeFlattenedToVariable(true);
-								leftExpression = flattenExpression(leftExpression);
-						
-								addToSubExpressions(rightExpression, leftExpression);
-								elementConstraint.setResultExpression(leftExpression);
-								if(expression.isGonnaBeFlattenedToVariable()) {
-									this.constraintBuffer.add(elementConstraint);
-									return leftExpression;
-								}
-								else return elementConstraint;
-						
-							
-						}
-					}
-				}
-			
-			}	
-		}
 		
 		//4. just flatten the stuff dependeing on the implementation of the corresponding constraint
 		//    in the target solver
@@ -1469,18 +1574,51 @@ public class Flattener {
 	private Expression flattenUnaryRelationalExpression(UnaryRelationalExpression expression) 
 		throws TailorException,Exception {
 		
-		// first flatten the argument
-		Expression argument = flattenExpression(expression.getArgument());
-		
-		
-		// then continue to flatten the whole expression
+		Expression argument = expression.getArgument();
+	
+		/*  NEGATION  */
 		if(expression.getType() == Expression.NEGATION) {
-			if(this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION))
-				return new Negation(argument);
-			else {
-			   return reifyConstraint(new Negation(argument));
-			}
-		}
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION)) 
+				argument.willBeFlattenedToVariable(true);
+			argument = flattenExpression(argument);
+			
+			// we have to flatten !E to an aux variable: aux != E
+			if(expression.isGonnaBeFlattenedToVariable()) {	
+				ArithmeticAtomExpression auxVariable = null;
+				
+				// if we have a common subexpression, use the corresponding variable
+				if(hasCommonSubExpression(expression)) 
+					auxVariable = getCommonSubExpression(expression);
+					
+				else if(hasEqualSubExpression(expression)) {
+					auxVariable = getEqualSubExpression(expression);
+					addToSubExpressions(expression, auxVariable);
+		
+					// add the flattened constraint to the constraint buffer
+					this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(argument,
+																					   Expression.NEQ,
+							                                                           auxVariable.toRelationalAtomExpression()));
+				}
+				// if we have no common subexpression, create a new auxiliary variable
+				// and add the constraint to the list of subexpressions
+				else  {
+					auxVariable = new ArithmeticAtomExpression(createAuxVariable(0, 1));
+					addToSubExpressions(expression, auxVariable);
+				    
+					// add the flattened constraint to the constraint buffer
+					this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(argument,
+							   															Expression.NEQ,
+							   															auxVariable.toRelationalAtomExpression()));
+				}
+				
+				return auxVariable.toRelationalAtomExpression();
+			} // end if: we need to flatten to a variable
+			else return new Negation(argument);	
+		    
+			
+		} // end: if(negation)
+		
+		
 		else if(expression.getType() == Expression.ALLDIFFERENT) {
 			if(!(argument instanceof Array)) 
 				throw new TailorException("Internal error: flattening of argument of alldifferent, '"+argument+
@@ -1616,14 +1754,15 @@ public class Flattener {
 			return quantification;
 		
 		
-		//System.out.println("Gonna flatten the quantification:"+quantification+" which will be flattened to a variable? "+quantification.isGonnaBeFlattenedToVariable());
 		
 		// ----- 1. get the domain over which the quantification ranges ------------
 		Domain bindingDomain = quantification.getQuantifiedDomain();
 		int domainType = bindingDomain.getType();
+		//System.out.println("Gonna flatten the quantification:"+quantification+" with domain type:"+domainType);
 		if(domainType != Domain.BOOL &&
 			domainType!= Domain.INT_BOUNDS &&
-			  domainType != Domain.INT_SPARSE)
+			  domainType != Domain.INT_SPARSE &&
+			     domainType != Domain.SINGLE_INT)
 			throw new TailorException("Cannot unfold quantified expression '"+quantification
 					+"'. The binding domain is not entirely constant:"+bindingDomain);
 		
@@ -1633,6 +1772,9 @@ public class Flattener {
 		
 		else if(domainType == Domain.INT_BOUNDS) 
 			domainElements = ((BoundedIntRange) bindingDomain).getFullDomain();
+		
+		else if(domainType == Domain.SINGLE_INT)
+			domainElements = ((SingleIntRange) bindingDomain).getFullDomain();
 		
 		else domainElements = ((SparseIntRange) bindingDomain).getFullDomain();
 		
@@ -1654,7 +1796,10 @@ public class Flattener {
 		for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
 			Expression unfoldedExpression = unfoldedExpressions.remove(i);
 			unfoldedExpression = this.insertConstantArraysInExpression(unfoldedExpression);
+			//System.out.println("Unfolded expression before evaluation:"+unfoldedExpression);
+			unfoldedExpression.orderExpression();
 			unfoldedExpression = unfoldedExpression.evaluate();
+			//System.out.println("Unfolded expression after evaluation:"+unfoldedExpression);
 			unfoldedExpression = unfoldedExpression.reduceExpressionTree();
 			unfoldedExpressions.add(i,unfoldedExpression);
 		}
@@ -1662,6 +1807,14 @@ public class Flattener {
 	
 		// universal quantification 
 		if(quantification.getType() == Expression.FORALL) {
+			if(unfoldedExpressions.size() == 1 ) {
+				Expression e = unfoldedExpressions.remove(0);
+				if(quantification.isGonnaBeFlattenedToVariable())
+					e.willBeFlattenedToVariable(true);
+				
+				return flattenExpression(e);
+			}
+			
 			Conjunction conjunction = new Conjunction(unfoldedExpressions);
 			conjunction.reduceExpressionTree();
 			
@@ -1677,12 +1830,25 @@ public class Flattener {
 			if(quantification.isGonnaBeFlattenedToVariable())
 				conjunction.willBeFlattenedToVariable(true);
 			
+			if(conjunction.getArguments().size() == 1)
+				return flattenExpression(conjunction.getArguments().get(0));
+			
 			return flattenConjunction(conjunction);
 			
 		}
 		// existential quantification
 		else {
+			if(unfoldedExpressions.size() == 1 ) {
+				Expression e = unfoldedExpressions.remove(0);
+				if(quantification.isGonnaBeFlattenedToVariable())
+					e.willBeFlattenedToVariable(true);
+				
+				return flattenExpression(e);
+			}
+				
+			
 			Disjunction disjunction = new Disjunction(unfoldedExpressions);
+			//System.out.println("got disjunction: "+disjunction);
 			disjunction.reduceExpressionTree();
 			
 			if(quantification.isGonnaBeFlattenedToVariable())
@@ -1692,6 +1858,11 @@ public class Flattener {
 					&& quantification.isGonnaBeFlattenedToVariable())
 				for(int i=disjunction.getArguments().size()-1; i>=0; i--) 
 					disjunction.getArguments().get(i).willBeFlattenedToVariable(true);
+			
+			//System.out.println("got disjunction: "+disjunction);
+			
+			if(disjunction.getArguments().size() == 1)
+				return flattenExpression(disjunction.getArguments().get(0));
 			
 			return flattenDisjunction(disjunction);
 		}
@@ -2270,6 +2441,8 @@ public class Flattener {
 					this.addToSubExpressions(uminusExpr, aux);
 				}
 				
+				
+				
 				this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(aux, Expression.EQ, uminusExpr));
 				return aux;
 			} 
@@ -2282,17 +2455,18 @@ public class Flattener {
 		else if(expression instanceof AbsoluteValue) {
 		
 			if(expression.isGonnaBeFlattenedToVariable()) {
-				AbsoluteValue absValue = new AbsoluteValue(argument);
 				ArithmeticAtomExpression aux;
 				
-				if(hasCommonSubExpression(absValue))
-					aux = getCommonSubExpression(absValue);
+				if(hasCommonSubExpression(expression))
+					return getCommonSubExpression(expression);
 				else { 
-					aux = new ArithmeticAtomExpression(this.createAuxVariable(absValue.getDomain()[0], absValue.getDomain()[1]));
-					this.addToSubExpressions(absValue, aux);
-				}
+					aux = new ArithmeticAtomExpression(this.createAuxVariable(expression.getDomain()[0], 
+																	          expression.getDomain()[1]));
+					this.addToSubExpressions(expression, aux);
+				}	
 				
-				this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(aux, Expression.EQ, absValue));
+				this.constraintBuffer.add(new AbsoluteConstraint(argument, 
+																  aux));
 				return aux;
 			} 
 			
@@ -2321,9 +2495,11 @@ public class Flattener {
 				return getCommonSubExpression(atom);	
 		}
 		
+		//System.out.println("Flattening atom:"+atom+" with type:"+atom.getType());
 		
 		if(atom.getType() == Expression.INT_ARRAY_VAR) {
 			Variable variable = atom.getVariable();
+			variable = (Variable) variable.evaluate();
 			
 			
 			if(variable.getType() == Expression.ARRAY_VARIABLE) {
@@ -2332,8 +2508,11 @@ public class Flattener {
 				
 				
 				
-				//System.out.println("constant arrays: "+this.normalisedModel.constantArrays);
-				//System.out.println("The array element '"+atom+"' is a constant array?? with name:"+arrayVariable.getArrayNameOnly());
+				
+					//System.out.println("constant arrays: "+this.normalisedModel.constantArrays);
+					//System.out.println("The array element '"+atom+"' is a constant array?"+
+					//		this.normalisedModel.constantArrays.containsKey( arrayVariable.getArrayNameOnly() )
+					//		+"\n with name:"+arrayVariable.getArrayNameOnly());
 				
 				// ---------- if this is a constant variable --------------------------------------------------------
 				if(this.normalisedModel.constantArrays.containsKey( arrayVariable.getArrayNameOnly() )) {
@@ -2514,7 +2693,13 @@ public class Flattener {
 								if(domain instanceof ConstantArrayDomain) {
 								    //	 creating m[row,..]   (indexedArray)
 									BasicDomain[] arrayIndices = new BasicDomain[2];
-									arrayIndices[0] = new SingleIntRange(row);
+									
+									//Domain varDomain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
+									//if(!(varDomain instanceof ConstantArrayDomain))
+									//	throw new TailorException("Cannot flatten expression '"+atom+"' because I cannot compute the domain offset from zero of domain:"+domain);
+									//int offsetFromZero = ((ConstantArrayDomain) varDomain).getOffsetFromZeroAt(0);
+									
+									arrayIndices[0] = new SingleIntRange(row); //-offsetFromZero);
 									arrayIndices[1] = ((ConstantArrayDomain) domain).getIndexDomains()[1]; 
 									IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 											                                     arrayIndices,
@@ -2570,8 +2755,14 @@ public class Flattener {
 								if(domain instanceof ConstantArrayDomain) {
 								    //	 creating m[row,..]   (indexedArray)
 									BasicDomain[] arrayIndices = new BasicDomain[2];
+									//Domain varDomain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
+									//if(!(varDomain instanceof ConstantArrayDomain))
+									//	throw new TailorException("Cannot flatten expression '"+atom
+									//			+"' because I cannot compute the domain offset from zero of domain:"+domain);
+									//int offsetFromZero = ((ConstantArrayDomain) varDomain).getOffsetFromZeroAt(1);
+							
 									arrayIndices[0] = ((ConstantArrayDomain) domain).getIndexDomains()[0]; 
-									arrayIndices[1] = new SingleIntRange(col);
+									arrayIndices[1] = new SingleIntRange(col); //-offsetFromZero);
 									IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 											                                     arrayIndices,
 											                                     ((ConstantArrayDomain) domain).getBaseDomain());
@@ -2593,10 +2784,14 @@ public class Flattener {
 										addToSubExpressions(atom,auxVariable);
 									}
 									
+									//System.out.println("have an atom expression: "+atom+" with INT col:"+col+" and row:"+rowIndexExpression);
+									
 									// prepare  index expression
 									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
-										rowIndexExpression.willBeFlattenedToVariable(true);
+										rowIndexExpression.willBeFlattenedToVariable(true);									
 									rowIndexExpression = flattenExpression(rowIndexExpression);
+									
+									//System.out.println("have an atom expression: "+atom+" with INT col:"+col+" and flattened row:"+rowIndexExpression);
 									
 									// return element constraint
 									if(atom.isGonnaBeFlattenedToVariable()) {
@@ -3270,7 +3465,7 @@ public class Flattener {
 		if(constraint instanceof RelationalAtomExpression) return (RelationalAtomExpression)  constraint;
 		
 		//reify(FALSE = atom) --> atom != aux, return aux     reify(TRUE = atom) --> return atom
-		if(false) {
+		/*
 		if(constraint instanceof CommutativeBinaryRelationalExpression) {
 			CommutativeBinaryRelationalExpression binExp = (CommutativeBinaryRelationalExpression) constraint;
 			if((binExp.getOperator() == Expression.EQ || binExp.getOperator() == Expression.IFF) 
@@ -3295,8 +3490,8 @@ public class Flattener {
 				}
 			}
 					
-		}
-		}
+		} */
+		
 		
 		if(!this.targetSolver.supportsReificationOf(constraint.getType()))
 			throw new TailorException

@@ -220,6 +220,18 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		for(int i=0; i<this.positiveArguments.length; i++) {
+			this.positiveArguments[i] =  this.positiveArguments[i].replaceVariableWithExpression(variableName, expression);
+		}
+		for(int i=0; i<this.negativeArguments.length; i++) {
+			this.negativeArguments[i] = this.negativeArguments[i].replaceVariableWithExpression(variableName, expression);
+		}
+		return this;
+	}
+	
+	
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}

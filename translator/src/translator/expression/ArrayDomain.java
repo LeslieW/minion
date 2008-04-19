@@ -1,6 +1,8 @@
 package translator.expression;
 
-public class ArrayDomain implements Domain {
+import java.util.ArrayList;
+
+public class ArrayDomain implements MatrixDomain {
 
 	/** the domain each array element is ranging over */
 	private Domain baseDomain;
@@ -18,7 +20,18 @@ public class ArrayDomain implements Domain {
 		this.indexDomains = dimensionDomains;
 	
 	}
-			           
+			  
+	
+	public ArrayDomain(Domain baseDomain,
+					   ArrayList<Domain> indexDomains) {
+		
+		this.baseDomain = baseDomain;
+		this.indexDomains = new Domain[indexDomains.size()];
+		
+		for(int i=this.indexDomains.length-1; i>=0; i--)
+			this.indexDomains[i] = indexDomains.remove(i);
+	}
+	
 	// =========== INHERITED METHODS ============================
 	
 	public Domain copy() {
@@ -66,9 +79,42 @@ public class ArrayDomain implements Domain {
 		
 		return this;
 	}
+	
+	public Domain insertValueForVariable(boolean value, String variableName) {
+		this.baseDomain = this.baseDomain.insertValueForVariable(value, variableName);
+		
+		for(int i=0; i<this.indexDomains.length; i++)
+			this.indexDomains[i] = this.indexDomains[i].insertValueForVariable(value, variableName);
+		
+		return this;
+	}
 
 	public boolean isConstantDomain() {
 		return this.baseDomain.isConstantDomain();
+	}
+	
+	public Domain replaceVariableWithDomain(String variableName, Domain newDomain) {
+		
+		this.baseDomain = this.baseDomain.replaceVariableWithDomain(variableName, newDomain);
+		this.baseDomain = this.baseDomain.evaluate();
+		boolean allDomainsAreConstant = (baseDomain instanceof ConstantDomain);
+		
+		for(int i=0; i<this.indexDomains.length; i++) {
+			indexDomains[i] = indexDomains[i].replaceVariableWithDomain(variableName, newDomain);
+			indexDomains[i] = indexDomains[i].evaluate();
+			allDomainsAreConstant = allDomainsAreConstant && (indexDomains[i] instanceof ConstantDomain);
+		}
+		
+		if(allDomainsAreConstant) {
+			ConstantDomain[] constantIndices = new ConstantDomain[this.indexDomains.length];
+			for(int i=0; i<constantIndices.length; i++)
+				constantIndices[i] = (ConstantDomain) indexDomains[i];
+			
+			return new ConstantArrayDomain(constantIndices,
+										   (ConstantDomain) baseDomain);
+		}
+		
+		return this;
 	}
 
 	public String toString() {

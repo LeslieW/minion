@@ -1,8 +1,10 @@
 package translator.expression;
 
+import java.util.ArrayList;
 
 /**
- * Preliminary representation of the table constraint. 
+ * Preliminary representation of the table constraint. Will be extended as soon as 
+ * there is a tuple-type  
  * 
  * @author angee
  *
@@ -27,6 +29,20 @@ public class TableConstraint implements RelationalExpression {
 	}
 	
 	
+	public TableConstraint(ArrayList<Variable> idents,
+			               ArrayList<ConstantTuple> tuples) {
+		
+		this.variableList = new Variable[idents.size()];
+		for(int i=idents.size()-1; i>= 0; i--)
+			variableList[i] = idents.remove(i);
+		
+		this.tupleList = new ConstantTuple[tuples.size()];
+		for(int i=tuples.size()-1; i>=0; i--)
+			tupleList[i] = tuples.remove(i);
+	}
+	
+	// ======== INHERITED METHODS =======================
+	
 	public Expression copy() {
 		Variable[] copiedIdentifiers = new Variable[this.variableList.length];
 		for(int i=0; i<this.variableList.length; i++)
@@ -36,8 +52,10 @@ public class TableConstraint implements RelationalExpression {
 		for(int i=0; i<this.tupleList.length; i++)
 			copiedTuples[i] = this.tupleList[i].copy();
 		
-		return new TableConstraint(copiedIdentifiers,
+		TableConstraint table =  new TableConstraint(copiedIdentifiers,
 				                   copiedTuples);
+		table.setToConflictingTableConstraint(this.isConflictingTable);
+		return table;
 	}
 
 	public Expression evaluate() {
@@ -69,6 +87,26 @@ public class TableConstraint implements RelationalExpression {
 		return this;
 	}
 
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+		
+		for(int i=0; i<this.variableList.length; i++) {
+			Expression e = this.variableList[i].replaceVariableWithExpression(variableName, expression);
+			if(e instanceof Variable) 
+				this.variableList[i] = (Variable) e;
+			
+			else {
+				try {
+					throw new Exception("Replacing variable '"+variableName+"' with infeasible expression '"+expression+
+							"' that modifies table-constraint-array into:"+e+". Expected variable type.");
+				} catch (Exception exc) {
+					exc.printStackTrace(System.out);
+					System.exit(1);
+				}
+			}
+		}
+		return this;
+	}
+	
 	public boolean isNested() {
 		return this.isNested;
 	}
