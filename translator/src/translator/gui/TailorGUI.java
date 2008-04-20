@@ -144,8 +144,8 @@ public class TailorGUI extends javax.swing.JFrame {
     
     private void setColors() {
     	
-    	java.awt.Color lightGreenish = new java.awt.Color(211,245,177);
-		java.awt.Color lightBlueish = new java.awt.Color(220,220,245);
+    	// Color lightGreenish = new java.awt.Color(211,245,177);
+		Color lightBlueish = new java.awt.Color(220,220,245);
     	
 		
 		
@@ -319,7 +319,7 @@ public class TailorGUI extends javax.swing.JFrame {
         problemInputPanel.add(problemInputScrollPane, gridBagConstraints);
 
         problemButtonPanel.setPreferredSize(new java.awt.Dimension(390, 130));
-        problemButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 10, 0));
+        problemButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
 
         saveProblemButton.setText("save");
         saveProblemButton.setActionCommand(SAVE_PROBLEM);
@@ -413,7 +413,7 @@ public class TailorGUI extends javax.swing.JFrame {
         parameterInputPanel.add(parameterInputScrollPane, gridBagConstraints);
 
         //parameterButtonPanel.setLayout(new java.awt.GridLayout(1, 0));
-        parameterButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 10, 0));
+        parameterButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
         
         saveParameterButton.setText("save");
         saveParameterButton.setActionCommand(SAVE_PARAMETER);
@@ -532,7 +532,7 @@ public class TailorGUI extends javax.swing.JFrame {
         jPanel1.add(outputScrollPane, gridBagConstraints);
 
         //outputButtonPanel.setLayout(new java.awt.GridLayout(1, 0));
-        outputButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 10, 0));
+        outputButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
 
         saveOutputButton.setText("save");
         saveOutputButton.setActionCommand(this.SAVE_OUTPUT);
@@ -610,8 +610,55 @@ public class TailorGUI extends javax.swing.JFrame {
     private void initMenuBar() {
     	settingsMenu.setText("Settings");
         menuBar.add(settingsMenu);
+     
+        // path to Minion
+        JMenuItem setPathToMinion = new JMenuItem("Set Path to Minion ...");
+        setPathToMinion.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           changePath();   
+			  }
+			});
+        settingsMenu.add(setPathToMinion);
+        //settingsMenu.addSeparator();
         
-        // skin selection (just for fun)
+        
+        
+        // translation settings
+        JMenu translationSettings = new JMenu("Translation");
+        JMenuItem cseDetection = new JCheckBoxMenuItem("Basic Common Subexpression Exploition");
+        JMenuItem ecseDetection = new JCheckBoxMenuItem("Derived Common Subexpressions' Exploition");
+        JMenuItem directVarReusage = new JCheckBoxMenuItem("Directly reuse variables");
+        cseDetection.setSelected(this.settings.useCommonSubExpressions());
+        ecseDetection.setSelected(this.settings.useEqualCommonSubExpressions());
+        directVarReusage.setSelected(this.settings.applyDirectVariableReusage());
+        cseDetection.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          settings.setUseCommonSubExpressions(item.isSelected());
+			  }
+			});
+        ecseDetection.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          settings.setUseExplicitCommonSubExpressions(item.isSelected());
+			  }
+			});
+        directVarReusage.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          settings.setApplyDirectVariableReusage(item.isSelected());
+			  }
+			});
+        
+        translationSettings.add(cseDetection);
+        translationSettings.add(ecseDetection);
+        translationSettings.add(directVarReusage);
+        settingsMenu.add(translationSettings);
+        
+        
+        
+        
+        //      skin selection (just for fun)
         JMenu skinSubMenu = new JMenu("Skin Selection");
         ButtonGroup skinButtonGroup = new ButtonGroup();
         JMenuItem classicSkinSelection = new JRadioButtonMenuItem(getSkinName(this.CLASSIC_SKIN));
@@ -651,25 +698,7 @@ public class TailorGUI extends javax.swing.JFrame {
         skinSubMenu.add(nightOwlSkinSelection);
         skinSubMenu.add(colorBlindSkinSelection);
         settingsMenu.add(skinSubMenu);
-        settingsMenu.addSeparator();
-        
-        // path to Minion
-        JMenuItem setPathToMinion = new JMenuItem("Set Path to Minion ...");
-        setPathToMinion.addActionListener(new java.awt.event.ActionListener() {
-			  public void actionPerformed (ActionEvent e) {
-		           changePath();   
-			  }
-			});
-        settingsMenu.add(setPathToMinion);
-        settingsMenu.addSeparator();
-        
-        // translation settings
-        JMenu translationSettings = new JMenu("Translation");
-        JMenuItem cseDetection = new JCheckBoxMenuItem("Common Subexpression Exploition");
-        cseDetection.setSelected(this.settings.useCommonSubExpressions());
-        translationSettings.add(cseDetection);
-        settingsMenu.add(translationSettings);
-        
+        //settingsMenu.addSeparator();
         
         // Help Menu
         helpMenu.setText("Help");
