@@ -85,7 +85,9 @@ public class Flattener {
 			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
 			for(int j=flatExpression.size()-1; j>=0; j--) {
 				Expression constraint = flatExpression.remove(j);
-				//constraint = constraint.evaluate();
+				//System.out.println("Evaluating constraint: "+constraint);
+				constraint = constraint.evaluate();
+				//System.out.println("Evaluated constraint: "+constraint+ " of type :"+constraint.getClass());
 				// detect and remove pure TRUE statements
 				if(constraint.getType() == Expression.BOOL) {
 					if(!((RelationalAtomExpression) constraint).getBool())
@@ -120,7 +122,7 @@ public class Flattener {
 		//System.out.println("Common subexpressions:\n"+this.subExpressions);
 		//System.out.println("Constraints:"+flattenedConstraints);
 		//for(int i=0; i <flattenedConstraints.size(); i++)
-			//System.out.println("Constraint: "+flattenedConstraints.get(i)+" will be reified? "+flattenedConstraints.get(i).isGonnaBeFlattenedToVariable());
+		//	System.out.println("Constraint: "+flattenedConstraints.get(i)+" will be reified? "+flattenedConstraints.get(i).isGonnaBeFlattenedToVariable());
 	
 		return this.normalisedModel;
 		
@@ -1316,7 +1318,14 @@ public class Flattener {
 		ArrayList<Expression> negativeElements = new ArrayList<Expression>();
 		
 		for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
-			Expression expression = unfoldedExpressions.remove(i);
+			Expression expression = unfoldedExpressions.remove(i).evaluate();
+			
+			//if(expression.getType() == Expression.INT) {
+			//	if(((ArithmeticAtomExpression) expression).getConstant() != 0) {
+			//		positiveElements.add(expression);
+			//	}
+			//}
+			
 			//if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.SUM)) 
 			//	expression.willBeFlattenedToVariable(true);
 			

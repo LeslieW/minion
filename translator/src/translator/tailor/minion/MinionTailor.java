@@ -1215,6 +1215,8 @@ public class MinionTailor {
 	private MinionConstraint toMinionWeakWeightedSumConstraint(SumConstraint sumConstraint) 
 		throws MinionException {
 		
+		//System.out.println("tailoring sumconstraint to minion:"+sumConstraint);
+		
 		Expression[] positiveArguments = sumConstraint.getPositiveArguments();
 		Expression[] negativeArguments = sumConstraint.getNegativeArguments();
 		
@@ -1263,10 +1265,11 @@ public class MinionTailor {
 			
 			for(int i=0; i<positiveArguments.length; i++) {
 				Expression argument = positiveArguments[i];
+				argument.orderExpression();
+				argument = argument.evaluate();
 				
 				if(argument instanceof Multiplication) {
-					argument.orderExpression();
-					argument.evaluate();
+			
 					Multiplication product = (Multiplication) argument;
 					
 					if(product.getArguments().size() > 2) 

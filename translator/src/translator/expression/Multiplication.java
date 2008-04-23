@@ -180,6 +180,8 @@ public class Multiplication extends NaryArithmeticExpression {
 		else if(newConstant == 1) {
 			if(this.arguments.size() == 0)
 				return new ArithmeticAtomExpression(1);
+			else if(this.arguments.size() == 1)
+				return arguments.get(0);
 			return this; // don't add it to the list since it is the identity
 		}
 		else {

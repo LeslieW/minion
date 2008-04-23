@@ -653,7 +653,7 @@ public class MinionModel {
 					endlinePosition++;
 				}
 				String solution = solverOutputString.substring(5, endlinePosition-1);
-				solutionString = solutionString.concat("variable "+variableName+" is "+solution+", \n");
+				solutionString = solutionString.concat("variable "+variableName+" is "+solution+", \n\n");
 				//System.out.println("And this is the solution string:"+solutionString);
 				solverOutputString = solverOutputString.delete(0, endlinePosition);
 			}
@@ -684,7 +684,7 @@ public class MinionModel {
 						intList = intList.concat(number+", ");
 					}
 					intList = intList.substring(0, intList.length()-2);
-					solutionString = solutionString.concat("variable "+variableName+" is ["+intList+"],\n");
+					solutionString = solutionString.concat("variable "+variableName+" is ["+intList+"],\n\n");
 					solverOutputString = solverOutputString.delete(0, endlinePosition);
 				}
 				
@@ -696,7 +696,7 @@ public class MinionModel {
 					}*/
 					int amountOfRows = indexDomains[0].getRange()[1]-indexDomains[0].getRange()[0] + 1;
 					
-					String matrixString = "[ ";
+					String matrixString = "\n\t[ ";
 					for(int row=0;row<amountOfRows; row++) {
 						boolean first = true;
 						String intList = "";
@@ -725,19 +725,66 @@ public class MinionModel {
 							pos++;
 						}
 						if(row >= 1)
-							matrixString = matrixString.concat(",\n\t["+intList+"]");
+							matrixString = matrixString.concat(",\n\t  ["+intList+"]");
 						else matrixString = matrixString.concat("["+intList+"]");
 						solverOutputString = solverOutputString.delete(0, pos);
 					}
-					matrixString = matrixString.concat(" ],\n");
+					matrixString = matrixString.concat(" ],\n\n");
 					solutionString = solutionString+"variable "+variableName+" is "+matrixString;
 				}
+				
+				// 3-dimensional variable
 				else if(indexDomains.length == 3) {
 					int endlinePosition = 6;
-					while(solverOutputString.charAt(endlinePosition) != '\n' &&
-							solverOutputString.charAt(endlinePosition) != '\r' ) {
-						endlinePosition++;
+					
+					int amountOfPlanes = indexDomains[0].getRange()[1]-indexDomains[0].getRange()[0]+ 1;
+					int amountOfRows = indexDomains[1].getRange()[1]-indexDomains[1].getRange()[0]+ 1;
+					
+					StringBuffer cubeString = new StringBuffer("[   ");
+					
+					for(int plane =0; plane<amountOfPlanes; plane++) {
+						
+						StringBuffer matrixString = new StringBuffer("[");
+						
+						for(int row=0;row<amountOfRows; row++) {
+							boolean first = true;
+							StringBuffer intList = new StringBuffer("");
+			
+							int pos = 6;
+							
+							while(solverOutputString.charAt(pos) != '\n' &&
+									solverOutputString.charAt(pos) != '\r' ) {
+								StringBuffer integer = new StringBuffer("");
+								//System.out.println("This the current solver output: "+solverOutputString+"\n=======================\n");
+								
+								
+								while( solverOutputString.charAt(pos) != ' ' ) {
+									integer.append(solverOutputString.charAt(pos));
+									pos++;
+								}
+							
+								if(first)
+									intList = integer;
+								else intList.append(", "+integer);
+							
+								first = false;
+								
+								
+							
+								pos++;
+							}
+							if(row >= 1)
+								matrixString.append(",\n\t ["+intList+"]");
+							else matrixString.append("["+intList+"]");
+							solverOutputString = solverOutputString.delete(0, pos);
+						}
+					matrixString.append(" ],");
+						
+					cubeString.append("\n\t"+matrixString+"\n");	
+					
 					}
+					cubeString.append(" ]");
+					solutionString = solutionString+"variable "+variableName+" is "+cubeString+"\n\n";
 					
 					
 					

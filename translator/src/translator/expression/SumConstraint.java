@@ -156,11 +156,64 @@ public class SumConstraint implements GlobalConstraint {
 	}
 
 	public Expression evaluate() {
-		for(int i=0; i<this.positiveArguments.length; i++)
-			this.positiveArguments[i] = this.positiveArguments[i].evaluate();
 		
-		for(int i=0; i<this.negativeArguments.length; i++)
+		int noZeros = 0;
+		
+		for(int i=0; i<this.positiveArguments.length; i++) {
+			this.positiveArguments[i] = this.positiveArguments[i].evaluate();
+			if(positiveArguments[i].getType() == INT) {
+				if(((ArithmeticAtomExpression) positiveArguments[i]).getConstant() == 0)
+					noZeros++;
+			}
+		}	
+			
+		if(noZeros > 0) {
+			Expression[] newPositiveArgs = new Expression[this.positiveArguments.length - noZeros];
+			int j = 0;
+			for(int i=0; i<this.positiveArguments.length; i++) {
+				if(this.positiveArguments[i].getType() == INT) {
+					if(((ArithmeticAtomExpression) positiveArguments[i]).getConstant() != 0) {
+						newPositiveArgs[j] = this.positiveArguments[i];
+						j++;
+					}
+				}
+				else {
+					newPositiveArgs[j] = this.positiveArguments[i];
+					j++;
+				}
+			}
+			this.positiveArguments = newPositiveArgs;
+		}
+		
+		
+		noZeros = 0;
+		
+		for(int i=0; i<this.negativeArguments.length; i++) {
 			this.negativeArguments[i] = this.negativeArguments[i].evaluate();
+			if(negativeArguments[i].getType() == INT) {
+				if(((ArithmeticAtomExpression) negativeArguments[i]).getConstant() == 0)
+					noZeros++;
+			}
+		}
+		
+		// if there is a zero as argument of the sum
+		if(noZeros > 0) {
+			Expression[] newNegativeArgs = new Expression[this.negativeArguments.length - noZeros];
+			int j = 0;
+			for(int i=0; i<this.negativeArguments.length; i++) {
+				if(this.negativeArguments[i].getType() == INT) {
+					if(((ArithmeticAtomExpression) negativeArguments[i]).getConstant() != 0) {
+						newNegativeArgs[j] = this.negativeArguments[i];
+						j++;
+					}
+				}
+				else {
+					newNegativeArgs[j] = this.negativeArguments[i];
+					j++;
+				}
+			}
+			this.negativeArguments = newNegativeArgs;
+		}
 		
 		this.result = this.result.evaluate();
 		return this;

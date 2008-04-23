@@ -231,13 +231,27 @@ public class Sum extends NaryArithmeticExpression {
 		ArrayList<Integer> positiveConstants = new ArrayList<Integer>();
 		ArrayList<Integer> negativeConstants = new ArrayList<Integer>();
 		
+		//System.out.println("Before evaluating sum :"+this);
 	
 		/** 1. first evaluate every argument (positive and negative) */
-		for(int i=0; i<this.positiveArguments.size(); i++) 
-			positiveArguments.add(i, positiveArguments.remove(i).evaluate());
-		for(int i=0; i<this.negativeArguments.size(); i++) 
-			negativeArguments.add(i, negativeArguments.remove(i).evaluate());
-	
+		for(int i=this.positiveArguments.size()-1; i>=0; i--) {
+			//System.out.println("Before evaluating argument "+positiveArguments.get(i));
+			Expression e = positiveArguments.remove(i).evaluate();
+			//System.out.println("After evaluating argument "+e);
+			if(e.getType() == INT) {
+				if(((ArithmeticAtomExpression) e).getConstant() != 0)
+					this.positiveArguments.add(i,e);
+			}
+			else this.positiveArguments.add(i,e);
+		}
+		for(int i=this.negativeArguments.size()-1; i>=0; i--) {
+			Expression e = negativeArguments.remove(i).evaluate();
+			if(e.getType() == INT) {
+				if(((ArithmeticAtomExpression) e).getConstant() != 0)
+					this.negativeArguments.add(i,e);
+			}
+			else this.negativeArguments.add(i,e);
+		}
 			
 		/** 2. then look for constants in the arguments and collect them
 		// (start loop from the tail of the list, because we are removing elements) */
@@ -274,7 +288,7 @@ public class Sum extends NaryArithmeticExpression {
 		
 		/** 4. merge the resulting new constant with the rest of the sum  */
 		
-     
+		//System.out.println("After evaluating sum :"+this);
 		
 		if(this.positiveArguments.size() == 0 && this.negativeArguments.size() == 0)
 			return new ArithmeticAtomExpression(newConstant);
