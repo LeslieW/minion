@@ -1962,7 +1962,57 @@ public class Flattener {
 		if(expression instanceof Multiplication)
 			return flattenMultiplication((Multiplication) expression);
 		
+		if(expression instanceof NonCommutativeArithmeticBinaryExpression) {
+			return flattenNonCommArithm((NonCommutativeArithmeticBinaryExpression) expression);
+		}
+		
 		return expression;
+	}
+	
+	
+	/**
+	 * Flattens a non-linear expression to the target solver.
+	 * 
+	 * @param e
+	 * @return
+	 * @throws TailorException
+	 * @throws Exception
+	 */
+	private Expression flattenNonCommArithm(NonCommutativeArithmeticBinaryExpression e)
+		throws TailorException, Exception {
+		
+		//System.out.println("1 Expression 's type:"+e.getType()+" of "+e.toString()+" and class:"+e.getClass());
+		
+		Expression leftArgument = e.getLeftArgument();
+		Expression rightArgument = e.getRightArgument();
+		
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(e.getType())) {
+			leftArgument.willBeFlattenedToVariable(true);
+			rightArgument.willBeFlattenedToVariable(true);
+		}
+		
+		Expression aux;
+		
+		if(this.hasCommonSubExpression(e)) {
+			aux = this.getCommonSubExpression(e);
+			return aux;
+		}
+		
+		aux = new ArithmeticAtomExpression(this.createAuxVariable(e.getDomain()[0], e.getDomain()[1]));
+		this.addToSubExpressions(e, aux);
+		
+		//System.out.println("Expression 's type:"+e.getType()+" of "+e.toString()+" and class:"+e.getClass());
+		
+		leftArgument = flattenExpression(leftArgument);
+		rightArgument = flattenExpression(rightArgument);
+		
+		BinaryNonLinearConstraint nonLinConstraint = new BinaryNonLinearConstraint(leftArgument,
+																					e.getType(),
+																					rightArgument,
+																					aux);
+		//System.out.println("Constructed new constraint "+nonLinConstraint+" from "+e+" with type:"+e.getType());
+		this.constraintBuffer.add(nonLinConstraint);
+		return aux;
 	}
 	
 	

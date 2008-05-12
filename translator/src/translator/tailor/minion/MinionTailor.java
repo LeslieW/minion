@@ -287,6 +287,9 @@ public class MinionTailor {
 		if(constraint instanceof Negation)
 			return toMinion((Negation) constraint);
 		
+		if(constraint instanceof BinaryNonLinearConstraint)
+			return toMinion((BinaryNonLinearConstraint) constraint);
+		
 		throw new MinionException("Cannot tailor expression of type "+constraint.getClass()+" to Minion yet:"+constraint);
 	}
 	
@@ -1030,6 +1033,43 @@ public class MinionTailor {
 		
 	}
 	
+	
+	private MinionConstraint toMinion(BinaryNonLinearConstraint nlConstraint)
+		throws MinionException {
+		
+		//System.out.println("Mapping nl constraint "+nlConstraint+" with operator:"+nlConstraint.getType());
+		
+		Expression left = nlConstraint.getLeftArgument();
+		Expression right = nlConstraint.getRightArgument();
+		Expression res = nlConstraint.getResult();
+		
+		if(!(left instanceof ArithmeticAtomExpression)) 
+			throw new MinionException("Error in flattening: expected an arithmetic atomic expression instead of '"+left+
+					"' in constraint:"+nlConstraint);
+		
+		if(!(right instanceof ArithmeticAtomExpression)) 
+			throw new MinionException("Error in flattening: expected an arithmetic atomic expression instead of '"+right+
+					"' in constraint:"+nlConstraint);
+		
+		if(!(res instanceof ArithmeticAtomExpression)) 
+			throw new MinionException("Error in flattening: expected an arithmetic atomic expression instead of '"+res+
+					"' in constraint:"+nlConstraint);
+		
+		MinionAtom leftArg = this.toMinion((ArithmeticAtomExpression) left);
+		MinionAtom rightArg = this.toMinion((ArithmeticAtomExpression) right);
+		MinionAtom result = this.toMinion((ArithmeticAtomExpression) res);
+		
+		if(nlConstraint.getType() == Expression.MOD)
+			return new Modulo(leftArg, rightArg,result);
+		
+		else if(nlConstraint.getType() == Expression.POWER)
+			return new Power(leftArg, rightArg, result);
+		
+		else if(nlConstraint.getType() == Expression.DIV)
+			return new Division(leftArg, rightArg, result);
+		
+		throw new MinionException("Cannot translate constraint "+nlConstraint);
+	}
 	
 	/**
 	 * Tailor a strong inequality (involving <,>,!=) to a Minion sum constraint.

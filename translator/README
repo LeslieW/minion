@@ -32,15 +32,15 @@ Content:
 ----------------------------------
 
 The translator is packed in an executable .jar file, translator.jar, so you will need
-Java Sun's JDK[6]. To execute translator.jar changeto the translator's
+Java Sun's JDK[6]. To execute translator.jar change to the translator's
 root directory and type
 
-java -jar translator.jar
+java -jar tailor.jar
 
-which will start the graphical version of the translator. For the
-command line version type 
+which will start the graphical version of the translator. Please note, that the graphical
+version can only translate Essence' at the moment. For the command line version type 
 
-java -jar translator.jar -help
+java -jar tailor.jar -help
 
 for further details.
 

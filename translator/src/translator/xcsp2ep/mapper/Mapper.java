@@ -44,17 +44,20 @@ public class Mapper {
 		
 		// map the constraints
 		ArrayList<Expression> constraints = mapConstraints(xcspInstance);
+		//System.out.println("Mapped constraints to:"+constraints);
 		
 		// normalise (evaluate and order) constraints
 		for(int i=0; i<constraints.size(); i++) {
 			Expression e = constraints.remove(i);
 			e.orderExpression();
+			Expression buffer = e.copy();
 			e = e.evaluate();
 			e = e.reduceExpressionTree();
 			e.orderExpression();
 			if(e.getType() == Expression.BOOL) {
 				 if(! ( (RelationalAtomExpression) e).getBool()) {
-					 throw new MapperException("Instance is not satisfiable:\n"+xcspInstance);
+					 throw new MapperException("Instance is not satisfiable:\n"+
+							 "Evaluated a constraint "+buffer+" to false in instance:\n"+xcspInstance);
 				 }
 				// else throw constraint away
 			}

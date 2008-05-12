@@ -219,21 +219,21 @@ integerExpression ::= 	  INTEGER:i
           				                                 );   :}
           				
           				| DIV  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
-          				  {: RESULT = new NonCommutativeRelationalBinaryExpression
+          				  {: RESULT = new NonCommutativeArithmeticBinaryExpression
                                              ( (Expression) e1,
                                                 Expression.DIV,
                         	                   (Expression) e2
                         	                  ); :}   
           				
           				| MOD  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
-          				{: RESULT = new NonCommutativeRelationalBinaryExpression
+          				{: RESULT = new NonCommutativeArithmeticBinaryExpression
                                              ( (Expression) e1,
                                                 Expression.MOD,
                         	                   (Expression) e2
                         	                  ); :} 
           				
           				| POW  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
-          				{: RESULT = new NonCommutativeRelationalBinaryExpression
+          				{: RESULT = new NonCommutativeArithmeticBinaryExpression
                                              ( (Expression) e1,
                                                 Expression.POWER,
                         	                   (Expression) e2

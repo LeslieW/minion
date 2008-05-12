@@ -24,7 +24,7 @@ public class XCSPInstance {
 
 	private Document document;
 	private String type;
-	private String format;
+	private String format = "XCSP 2.0";
 	private int maxConstraintArity;
 
 	private Map<String, PDomain> mapOfDomains;

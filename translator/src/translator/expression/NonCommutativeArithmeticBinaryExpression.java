@@ -1,5 +1,6 @@
 package translator.expression;
 
+import java.util.ArrayList;
 
 /**
  * Represents arithmetic binary expressions that are composed by an 
@@ -37,40 +38,74 @@ public class NonCommutativeArithmeticBinaryExpression implements
 	//============== Interfaced Methods ==================
 	
 	public Expression getLeftArgument() {
-		return this.getLeftArgument();
+		return this.leftArgument;
 	}
 
 	public Expression getRightArgument() {
-		return this.getRightArgument();
+		return this.rightArgument;
 	}
 
 	public int[] getDomain() {
 	
-/*		ArrayList<Integer> rightBounds = this.rightArgument.getDomain();
- 		
-		int left_lb = leftBounds.get(0);
-		int right_lb = rightBounds.get(0);
+		//ArrayList<Integer> rightBounds = this.rightArgument.getDomain();
+		//ArrayList<Integer> leftBounds = this.rightArgument.getDomain();
 		
-		int left_ub = leftBounds.get(leftBounds.size()-1);
-		int right_ub = rightBounds.get(rightBounds.size()-1);
+		int[] rightBounds = this.rightArgument.getDomain();
+ 		int[] leftBounds = this.leftArgument.getDomain();
+		
+		int left_lb = leftBounds[0];
+		int right_lb = rightBounds[0];
+		
+		int left_ub = leftBounds[1];
+		int right_ub = rightBounds[1];
+		
+		
+		int lb = LOWER_BOUND; 
+		int ub = UPPER_BOUND;
 		
 		switch(this.type) {
 		
 		case DIV:
+			if(left_lb >=0 && right_lb >= 0)
+				lb = 1;
+			else 
+				lb = (left_ub > right_ub) ? -left_ub : -right_ub;
 			
+		
+			if(left_ub >= 0 && right_ub >= 0)
+				ub = left_ub/right_lb;
+			else ub = (left_ub > right_ub) ? left_ub : right_ub;
+			break;
 			
 		case POWER:
+			lb = 0;
+			ub = 1;
+			if(right_ub > 0) {
+				for(int i=0; i<right_ub; i++)
+					ub = ub*left_ub;
+			}
+			else {
+				ub = left_ub;
+			}
+			break;
 			
 		
-		}*/
+		case MOD:
+			lb = 0;
+			ub = right_ub-1;
+			
+		}
+		
+		
 		
 		// TODO: enhance the bounds! The bounds could be smaller!
-		return new int[] {LOWER_BOUND, UPPER_BOUND};
+		return new int[] {lb, ub};
 	}
 
 	public Expression copy() {
+		int op = type;
 		return new NonCommutativeArithmeticBinaryExpression(this.leftArgument.copy(),
-													  this.type,
+													  op,
 													  this.rightArgument.copy());
 	}
 
@@ -89,11 +124,12 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		
 		switch(this.type) {
 		
-		case DIV: operator = "/";
-		case POWER: operator = "^";
-		case MINUS: operator ="-";
-		case PLUS: operator ="+";
-		case MULT: operator="*";
+		case DIV: operator = "/"; break;
+		case POWER: operator = "^"; break;
+		case MINUS: operator ="-"; break;
+		case PLUS: operator ="+"; break;
+		case MULT: operator="*"; break;
+		case MOD: operator ="%";break;
 		
 		}
 		return this.leftArgument+operator+this.rightArgument;
@@ -130,14 +166,35 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		
 		
 		if(leftArgument.getType() == INT && rightArgument.getType() == INT) {
-			
-			int constant = (this.type == DIV) ?
+      		
+      			int left = ((ArithmeticAtomExpression) this.leftArgument).getConstant();
+      			int right = ((ArithmeticAtomExpression) this.rightArgument).getConstant();
+      			int result;
+      			
+      			if(this.type == MOD) 
+		             result = left % right;
+      			
+      			else if(this.type == POWER) {
+      				result = 1;
+      				for(int i=1; i<=right; i++)
+      					result = result*left;
+      			}
+      			
+      			else if(this.type == DIV) {
+      				result = left / right;
+      			}
+      			
+      			else return this;
+			/* int constant = (this.type == DIV) ?
 					     ((ArithmeticAtomExpression) leftArgument).getConstant() / 
 			                     ((ArithmeticAtomExpression) rightArgument).getConstant() 
 			                     :
 						 power(((ArithmeticAtomExpression) leftArgument).getConstant(), 
-				                     ((ArithmeticAtomExpression) rightArgument).getConstant()); 			                    	 
-			return new ArithmeticAtomExpression(constant);
+				                     ((ArithmeticAtomExpression) rightArgument).getConstant()); 		
+			   */                  
+			                     
+                  
+			return new ArithmeticAtomExpression(result);
 		}
 		else return this;
 	}
@@ -223,7 +280,12 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return result;
 	}
 	
+	
 	public int getOperator() {
+		
+		if(this.type == MOD)
+			return MOD;
+		
 		return this.type;
 	}
 	
