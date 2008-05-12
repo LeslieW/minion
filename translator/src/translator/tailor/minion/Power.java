@@ -18,7 +18,7 @@ public class Power implements MinionConstraint {
 	
 	
 	public String toString() {
-		return "power("+leftArgument+", "+rightArgument+", "+result+")";
+		return "pow("+leftArgument+", "+rightArgument+", "+result+")";
 	}
 	
 }
