@@ -13,6 +13,7 @@ public interface Expression {
 	public final int LOWER_BOUND = -100000;
 	
 	// RelationalAtomExpression.java
+	public final int FALSE = -1;
 	public final int BOOL = 0;
 	public final int BOOL_VARIABLE = 5;
 	public final int BOOL_ARRAY_VAR = 6;

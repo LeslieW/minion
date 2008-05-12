@@ -63,7 +63,14 @@ public class MinionTailor {
 		// 2. tailor the constraints
 		for(int i=this.normalisedModel.getConstraints().size()-1; i>=0; i--) {
 			//System.out.println("Tailoring constraint:"+normalisedModel.getConstraints().get(i));
-			minionModel.addConstraint(toMinion(this.normalisedModel.getConstraints().remove(i)));
+			Expression constraint = this.normalisedModel.getConstraints().remove(i);
+			if(constraint.getType() == Expression.BOOL) {
+				if(!((RelationalAtomExpression) constraint).getBool()) {
+					minionModel.addConstraint(new False());
+					System.out.println("WARNING: Instance is not satisfiable.");
+				}
+			}
+			else minionModel.addConstraint(toMinion(constraint));
 		}
 		
 		this.minionModel.setAmountOfUsedCommonSubExpressions(this.usedCommonSubExpressions);
