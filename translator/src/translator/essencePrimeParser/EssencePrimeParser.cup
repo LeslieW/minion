@@ -690,7 +690,7 @@ index_list ::=   index:i
 atom_expression ::= deref_expression:deref
                      {: RESULT = deref; :} 
 
-                   | IDENTIFIER:id
+                   |  IDENTIFIER:id
 				     {: RESULT = new SimpleVariable(new String(id)); :}
 ;
 
@@ -812,9 +812,8 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 					{: RESULT = new AllDifferent( (Expression) e); :}
 
 			       | ALLDIFF LPAREN variable_array:va RPAREN 
-			        {: RESULT = new AllDifferent( (VariableArray) va); 
-			         :}
-
+			        {: RESULT = new AllDifferent( (VariableArray) va); :}
+			        
 			  	   | MIN LPAREN variable_array:va RPAREN
 					{: 
 					  boolean isMaximum = false;
@@ -1008,6 +1007,11 @@ variable_array ::=  LBRACK atom_list:list  RBRACK
                     	RESULT = new VariableArray( (ArrayList<AtomExpression>) list);  
                     
                     :} 
+                   /* | LBRACK expression_list:list RBRACK
+                    {:  
+                    	RESULT = new VariableArray( (ArrayList<AtomExpression>) list);  
+                    
+                    :}   // TEST ONLY!!! */
 ;                    
                     
 

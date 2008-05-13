@@ -128,10 +128,15 @@ public class AllDifferent implements UnaryRelationalExpression {
 	}
 	
 	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable) {
+		
+		//System.out.println("GONNA replace variable "+oldVariable+" with new variable "+newVariable+" in alldiff:"+this);
+		
 		if(argument != null)
 			this.argument = (Array) this.argument.replaceVariableWith(oldVariable, newVariable);
 		else 
 			this.expression = this.expression.replaceVariableWith(oldVariable, newVariable);
+		
+		//System.out.println("Replaced variable "+oldVariable+" with new variable "+newVariable+" and updated alldiff:"+this);
 		return this;
 	}
 

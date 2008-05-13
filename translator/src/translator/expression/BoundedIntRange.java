@@ -17,6 +17,10 @@ public class BoundedIntRange implements IntRange {
 	//=========== INHERITED METHODS ====================
 	
 	public int[] getFullDomain() {
+		
+		if(this.upperBound < this.lowerBound)
+			return new int[0];
+		
 		int[] fullDomain = new int[(this.upperBound-this.lowerBound)+1];
 		for(int i=0; i<fullDomain.length; i++)
 			fullDomain[i] = this.lowerBound+i;

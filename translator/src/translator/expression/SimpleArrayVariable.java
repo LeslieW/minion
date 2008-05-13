@@ -6,11 +6,13 @@ import java.util.ArrayList;
  * This class represents array variables when they are parsed since we do not 
  * know their underlying domain yet 
  * 
+ * Implements AtomExpression for parser reasons (VariableArray)
+ * 
  * @author andrea
  *
  */
 
-public class SimpleArrayVariable implements Variable {
+public class SimpleArrayVariable implements Variable, AtomExpression {
 
 	private String arrayName;
 	private ArrayList<Domain> indices;

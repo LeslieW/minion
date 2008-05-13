@@ -331,11 +331,13 @@ public class Translator {
 			}
 			
 			// ---- 2. then normalise the essence' problem model
+			//System.out.println("Problem spec after parsing:"+this.problemSpecification);
 			startTime = System.currentTimeMillis();
 			Normaliser normaliser = new Normaliser();
 			this.normalisedModel = normaliser.normalise(this.problemSpecification,
 					                                    this.parameterSpecification,
 					                                    NormaliserSpecification.NORMALISE_FULL);
+			//System.out.println("Problem spec after normalisation:"+normalisedModel);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Normalisation Time: "+(stopTime - startTime)/1000.0+"sec");

@@ -60,6 +60,7 @@ public class Normaliser implements NormaliserSpecification {
 		// get all the decision variable and parameter declarations => written into 
 		// member hashmaps and arraylists 
 		ArrayList<GeneralDeclaration> remainingDeclarations = readDeclarations(problemClass.getDeclarations());
+		//System.out.println("Decision variable declarations:"+this.decisionVariablesNames);
 		
 		// merge parameter definitions from parameter file to problem file (putting parameter definitions first)
 		ArrayList<GeneralDeclaration> parameterDefinitions = parameterFile.getDeclarations();
@@ -191,7 +192,7 @@ public class Normaliser implements NormaliserSpecification {
 				ArrayList<String> variableNames = declaration.getNames();
 				for(int j=variableNames.size()-1; j>= 0; j--) {
 					this.decisionVariables.put(variableNames.get(j), declaration.getDomain());
-					this.decisionVariablesNames.add(variableNames.remove(j));
+					this.decisionVariablesNames.add(0,variableNames.remove(j));
 				}
 			}
 			
@@ -202,7 +203,7 @@ public class Normaliser implements NormaliserSpecification {
 				ArrayList<String> parameterNames = parameterDecl.getNames();
 				for(int j=parameterNames.size()-1; j>= 0; j--) {
 					this.parameters.put(parameterNames.get(j), parameterDecl.getDomain());
-					this.parameterNames.add(parameterNames.get(j));	
+					this.parameterNames.add(0,parameterNames.get(j));	
 				}
 				/* check if there are any domain declarations  */ 
 				if(parameterDecl.getDomain() != null) {

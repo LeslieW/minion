@@ -648,7 +648,7 @@ public class MinionTailor {
 					variables[i].willBeFlattenedToVariable(true);
 					minionVariables[i] = (MinionAtom) toMinion((ArithmeticAtomExpression) variables[i]);
 				}
-				else throw new MinionException("Unfeasible type '"+variables[i]+"' in VariableArray: "+varArray);
+				else throw new MinionException("Unfeasible variable '"+variables[i]+"' with type "+variables[i].getClass()+" in VariableArray: "+varArray);
 			}
 			
 			return new MinionVariableArray(minionVariables);

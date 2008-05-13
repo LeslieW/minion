@@ -1,6 +1,13 @@
 package translator.expression;
 
-public class SimpleVariable implements Variable {
+/**
+ * Implements AtomExpression for parser reasons
+ * 
+ * @author andrea
+ *
+ */
+
+public class SimpleVariable implements Variable, AtomExpression {
 
 	private String variableName;
 	private boolean isSearchVariable;
