@@ -92,6 +92,10 @@ public interface TargetSolver {
 	public final int NARY_SUMGREATER_CONSTRAINT = 86;
 	public final int BINARY_SUMLESS_CONSTRAINT = 87;
 	public final int NARY_SUMLESS_CONSTRAINT = 88;
+	public final int BINARY_MIN_CONSTRAINT = 89;
+	public final int NARY_MIN_CONSTRAINT = 90;
+	public final int BINARY_MAX_CONSTRAINT = 89;
+	public final int NARY_MAX_CONSTRAINT = 90;
 	
 	//---- nesting of constraints as arguments in other constraints -------
 	public final int CONSTRAINT_NESTED_IN_NEGATION = 100;
@@ -125,8 +129,11 @@ public interface TargetSolver {
 	public final int CONSTRAINT_NESTED_IN_UNARY_MINUS = 127;
 	public final int CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT = 128;
 	public final int CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT = 129;
+	public final int CONSTRAINT_NESTED_IN_MIN = 130;
+	public final int CONSTRAINT_NESTED_IN_MAX = 131;
 	
 	// ----- reification of constraints ----------------
+
 	public final int REIFIED_IF = 277;
 	public final int REIFIED_LEQ = 278;
 	public final int REIFIED_GEQ = 279;
@@ -163,7 +170,9 @@ public interface TargetSolver {
 	public final int REIFIED_ATLEAST = 260;
 	public final int REIFIED_OCCURRENCE = 261;
 	public final int REIFIED_TABLE = 262;
-	
+	public final int REIFIED_MIN = 263;
+	public final int REIFIED_MAX = 264;
+	public final int REIFIED_IFF = 265;
 	
 	
 	

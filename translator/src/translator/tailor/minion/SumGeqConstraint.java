@@ -20,7 +20,7 @@ public class SumGeqConstraint implements MinionConstraint {
 		this.arguments = arguments;
 		this.result = result;
 		this.isWatched = isWatched;
-}
+	}
 	
 	public String toString() {
 		String s = (isWatched) ? 
@@ -34,5 +34,7 @@ public class SumGeqConstraint implements MinionConstraint {
 		return s+"], "+this.result+")";
 	}
 	
-	
+	public void setIsWatchedSum(boolean turnOn) {
+		this.isWatched = turnOn;
+	}
 }

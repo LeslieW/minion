@@ -30,6 +30,7 @@ public class TranslationSettings {
 	boolean giveTranslationTimeInfo;
 	boolean  giveTranslationInfo;
 	boolean debugMode; // print stack trace when exceptions are thrown etc
+	boolean writeTimeInfoIntoFile;
 	String pathToMinion;
 	// the variables whose solutions have been printed by the target solver
 	String[] printedVariables;
@@ -54,6 +55,7 @@ public class TranslationSettings {
 		this.essenceP_outputFileName = "out.eprime";
 		this.modelName = DEFAULT_MODEL_NAME;
 		this.debugMode = false;
+		this.writeTimeInfoIntoFile = true;
 	}
 	
 	public TranslationSettings(TargetSolver solver) {	
@@ -69,6 +71,7 @@ public class TranslationSettings {
 		this.pathToMinion = readPathToMinion();
 		this.essenceP_outputFileName = "out.eprime";
 		this.debugMode = false;
+		this.writeTimeInfoIntoFile = false;
 	}
 	
 	
@@ -225,5 +228,13 @@ public class TranslationSettings {
 	
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
+	}
+	
+	public boolean getPrintTranslationTimeIntoFile() {
+		return this.writeTimeInfoIntoFile;
+	}
+	
+	public void setPrintTranslationTimeIntoFile(boolean turnOn) {
+		this.writeTimeInfoIntoFile = turnOn;
 	}
 }

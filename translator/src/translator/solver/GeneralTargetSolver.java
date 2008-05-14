@@ -195,6 +195,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		
 		case Expression.TABLE_CONSTRAINT:
 			return this.featureMap.get(TargetSolver.SUPPORTS_TABLE);
+			
+		case Expression.MIN:
+			return this.featureMap.get(TargetSolver.BINARY_MIN_CONSTRAINT);
+			
+		case Expression.MAX:
+			return this.featureMap.get(TargetSolver.BINARY_MAX_CONSTRAINT);
 		}
 		
 		
@@ -211,6 +217,9 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		
 		case Expression.IF:
 			return this.featureMap.get(new Integer(REIFIED_IF));
+			
+		case Expression.IFF:
+			return this.featureMap.get(new Integer(REIFIED_IFF));
 			
 		case Expression.LEQ:
 			return this.featureMap.get(new Integer(REIFIED_LEQ));
@@ -313,7 +322,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.NEGATION:
 			return this.featureMap.get(TargetSolver.REIFIED_NEGATION);
+		
+		case Expression.MIN:
+			return this.featureMap.get(TargetSolver.REIFIED_MIN);
 			
+		case Expression.MAX:
+			return this.featureMap.get(TargetSolver.REIFIED_MAX);
 		}
 		
 		return false;
@@ -414,6 +428,11 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		case Expression.AND:
 			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_CONJUNCTION));
 		
+		case Expression.MIN:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_MIN));
+			
+		case Expression.MAX:
+			return this.featureMap.get(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_MAX));
 		}
 		
 		return false;

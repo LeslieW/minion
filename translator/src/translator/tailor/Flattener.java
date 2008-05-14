@@ -2069,7 +2069,7 @@ public class Flattener {
 				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().get(0),
 																								binaryMultiplication.getArguments().get(1)}, 
 																								auxVariable);
-				System.out.println("We have flattened the multiplication:"+multiplication+" to product constraint"+productConstraint);
+				//System.out.println("We have flattened the multiplication:"+multiplication+" to product constraint"+productConstraint);
 				this.constraintBuffer.add(productConstraint);
 				return auxVariable;
 				
@@ -2305,15 +2305,20 @@ public class Flattener {
 			Expression[] positiveArguments = new Expression[sum.getPositiveArguments().size()];
 			Expression[] negativeArguments = new Expression[sum.getNegativeArguments().size()];
 			
+			boolean flattenToVariable = !(this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NARY_SUMEQ_CONSTRAINT));
 			
 				for(int i=sum.getPositiveArguments().size()-1; i>=0; i--) {
-					//System.out.println("sum arguments of sum that will be part of SumConstraint:"+sum.getPositiveArguments().get(i));
-					positiveArguments[i] = flattenExpression(sum.getPositiveArguments().get(i));
+					//System.out.println("Matching "+auxVariables.get(i).getVariableName()+" to "+variableName);
+					Expression argument = sum.getPositiveArguments().get(i);
+					argument.willBeFlattenedToVariable(flattenToVariable);
+					positiveArguments[i] = flattenExpression(argument);
 					//System.out.println("sum arguments AFTER flattening of sum that will be part of SumConstraint:"+positiveArguments[i]);
 				}
 			
 				for(int i=sum.getNegativeArguments().size()-1; i>=0; i--) {
-					negativeArguments[i] = flattenExpression(sum.getNegativeArguments().get(i));
+					Expression argument = sum.getNegativeArguments().get(i);
+					argument.willBeFlattenedToVariable(flattenToVariable);
+					negativeArguments[i] = flattenExpression(argument);
 				}
 			
 			// 2. create a sum constraint with them 
@@ -2534,6 +2539,37 @@ public class Flattener {
 				return new AbsoluteValue(argument);
 		}
 			
+		
+		else if(expression instanceof Minimum) {
+			
+			Minimum e = (Minimum) expression;
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				ArithmeticAtomExpression aux;
+				
+				if(hasCommonSubExpression(expression))
+					return getCommonSubExpression(expression);
+				else { 
+					aux = new ArithmeticAtomExpression(this.createAuxVariable(expression.getDomain()[0], 
+																	          expression.getDomain()[1]));
+					this.addToSubExpressions(expression, aux);
+				}	
+				
+				if(argument instanceof Array) {				
+					this.constraintBuffer.add(new MinimumConstraint((Array) argument, 
+					  											     aux,
+																     e.isMaximum()));
+				}
+				else throw new TailorException("Internal error. Flattened array to "+argument+
+						" that is not of type array but:"+argument.getClass().getName());
+				
+				return aux;
+				
+				
+			}
+			else return new Minimum(argument,e.isMaximum());
+		}
+		
 		else throw new TailorException("Unknown unary arithmetic constraint:"+expression);
 	}
 	

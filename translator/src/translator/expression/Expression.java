@@ -11,6 +11,8 @@ public interface Expression {
 	
 	public final int UPPER_BOUND = 100000;
 	public final int LOWER_BOUND = -100000;
+	public final int UPPER_BOUND_MAX = 1073741000;
+	public final int LOWER_BOUND_MAX = -1073741000;
 	
 	// RelationalAtomExpression.java
 	public final int FALSE = -1;
@@ -128,6 +130,8 @@ public interface Expression {
 	public final int BINARY_SUMGEQ_CONSTRAINT = 275;
 	public final int BINARY_PRODUCT_CONSTRAINT = 280;
 	public final int ABSOLUTE_CONSTRAINT = 281;
+	public final int MIN_CONSTRAINT = 282;
+	public final int MAX_CONSTRAINT = 283;
 	
 	// other implicit operations
 	public final int ARRAY_INDEXING = 300;

@@ -92,8 +92,10 @@ public class Normaliser implements NormaliserSpecification {
 		// orderExpressions
 		constraints = orderConstraints(constraints);
 		
+		//System.out.println("Constraints BEFORE evaluation:"+constraints);
 		// evaluate them
 		constraints = evaluateConstraints(constraints);
+		//System.out.println("Constraints AFTER evaluation:"+constraints);
 		
 		// reduce Expressions
 		constraints = reduceExpressions(constraints);
@@ -104,7 +106,8 @@ public class Normaliser implements NormaliserSpecification {
 		// order again
 		constraints = orderConstraints(constraints);
 		
-
+		//System.out.println("Constraints after normalisation:"+constraints);
+		
 		Objective objective = (Objective) constraints.remove(0);
 		
 		if(this.constantArrayNames.size() ==0)

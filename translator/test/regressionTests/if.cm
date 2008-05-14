@@ -1,4 +1,3 @@
 ESSENCE' 1.0
 find x:bool , y:bool, z:bool, t:bool
-such that t /\ z = x /\ y
- 
+such that t => z = x => y 

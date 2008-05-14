@@ -36,6 +36,7 @@ public class Translate {
 	public static final String NO_INFO = "silent"; // silent -> no verbose info
 	public static final String DIRECT_VAR_REUSE = "dvr";
 	public static final String DEBUG_MODE = "debug";
+	public static final String TIME_INFO_FILE = "tf"; // don't write translation time into file
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -46,7 +47,7 @@ public class Translate {
 	 */
 	public static void main(String[] args) {
 	
-		printWelcomeMessage();
+		
 		
 		if(args.length == 0) {
 			//printHelpMessage();
@@ -62,6 +63,8 @@ public class Translate {
 			if(args[i].startsWith("-")) {
 				
 				if(args[i].equalsIgnoreCase("-"+HELP) || args[i].equalsIgnoreCase("-h")) {
+					//if(settings.giveTranslationInfo)
+					printWelcomeMessage();
 					printHelpMessage();
 					System.exit(0);
 				}
@@ -77,6 +80,10 @@ public class Translate {
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
 					settings.setGiveTranslationTimeInfo(false);
 					giveTimeInfo = false;
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+TIME_INFO_FILE)) {
+					settings.setPrintTranslationTimeIntoFile(false);
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+NO_INFO) || args[i].equalsIgnoreCase("-s")) {
@@ -142,6 +149,7 @@ public class Translate {
 				
 				else {
 					System.out.println("Sorry, did not understand the flag '"+args[i]+"'\n");
+					printWelcomeMessage();
 					printHelpMessage();
 					System.exit(1);
 				}
@@ -187,6 +195,9 @@ public class Translate {
 		
 		try {
 			
+			if(settings.giveTranslationInfo)
+				printWelcomeMessage();
+			
 			settings = readModelName(filename, settings);
 			giveTimeInfo = settings.giveTranslationTimeInfo;
 			writeInfo("\nTranslating "+filename);
@@ -210,7 +221,8 @@ public class Translate {
 			
 			
 			double translationTime = (stopTime - startTime) / 1000.0;
-			solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
+			if(settings.getPrintTranslationTimeIntoFile())
+				solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
 			
 			File outputFile = writeStringIntoFile(filename+"."+settings.targetSolver.getSolverInputExtension(),
 					                              solverInstance);
@@ -236,6 +248,9 @@ public class Translate {
 	
 	private static void translate(String problemFileName, String parameterFileName, TranslationSettings settings) {
 		try {
+			if(settings.giveTranslationInfo)
+				printWelcomeMessage();
+			
 			settings = readModelName(parameterFileName, settings);
 			giveTimeInfo = settings.giveTranslationTimeInfo;
 			writeInfo("\nTranslating "+problemFileName+" with "+parameterFileName);
@@ -261,7 +276,9 @@ public class Translate {
 			long stopTime = System.currentTimeMillis();
 			
 			double translationTime = (stopTime - startTime) / 1000.0;
-			solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
+			
+			if(settings.getPrintTranslationTimeIntoFile())
+				solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
 			
 			File outputFile = writeStringIntoFile(parameterFileName+"."+settings.targetSolver.getSolverInputExtension(),
 												  solverInstance);
@@ -288,6 +305,9 @@ public class Translate {
 	private static void translateXCSP(String inputFileName, String outputFileName, TranslationSettings settings) {
 		
 		try {
+			if(settings.giveTranslationInfo)
+				printWelcomeMessage();
+			
 			giveTimeInfo = settings.giveTranslationTimeInfo;
 			writeInfo("\nTranslating XCSP file '"+inputFileName+"'");
 			long startTime = System.currentTimeMillis();
@@ -306,7 +326,9 @@ public class Translate {
 			long stopTime = System.currentTimeMillis();
 			
 			double translationTime = (stopTime - startTime) / 1000.0;
-			minionString = "# Translation Time: "+translationTime+"\n"+minionString;
+			
+			if(settings.getPrintTranslationTimeIntoFile())
+				minionString = "# Translation Time: "+translationTime+"\n"+minionString;
 			
 			File outputFile = writeStringIntoFile(outputFileName, minionString);
 			writeInfo("Translated '"+inputFileName+
@@ -370,6 +392,9 @@ public class Translate {
 		System.out.println("-"+DEBUG_MODE);
 		System.out.println("\tDebug mode. Prints stack trace when exception is thrown.");
 		System.out.println("\tDefault: off.");
+		System.out.println("-"+TIME_INFO_FILE);
+		System.out.println("\tDon't write translation time into the output file.");
+		System.out.println("\tDefault: on.");
 		System.out.println("-"+DIRECT_VAR_REUSE);
 		System.out.println("\tTranslate with directly reusing variables (e.g. in x=y, replacing x with y).");
 		System.out.println("\tDefault: off (not stable yet)");

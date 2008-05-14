@@ -88,7 +88,14 @@ public class Multiplication extends NaryArithmeticExpression {
 			}
 		}
 		
-		//System.out.println("FINISHED ADAPTION> lb:"+lowerBound+" and ub:"+upperBound+", after taking care of -,0 etc");
+		
+		
+		// we had an overflow on the upper bounds
+		if(upperBound < lowerBound) {
+			upperBound = UPPER_BOUND_MAX;
+		}
+		
+		//System.out.println("FINISHED computing lb:"+lowerBound+" and ub:"+upperBound+" of multiplication:"+this);
 		return new int[] {lowerBound, upperBound};
 	}
 

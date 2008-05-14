@@ -25,6 +25,7 @@ public class MinionModel {
 	ArrayList<String> decisionVariablesNames;
 	ArrayList<String> variableAliases;
 	ArrayList<Variable> auxVariables;
+	HashMap<String, Domain> auxVarDomains;
 	Minion solverSettings;
 	int usedCommonSubExpressions;
 	int usedInferredEqualSubExpressions;
@@ -46,6 +47,17 @@ public class MinionModel {
 		this.decisionVariables = decisionVariables;
 		this.decisionVariablesNames = decisionVariablesNames;
 		this.auxVariables = auxVariables;
+		this.auxVarDomains = new HashMap<String, Domain>();
+		for(int i=0; i<this.auxVariables.size(); i++) {
+			Variable auxVar = auxVariables.get(i);
+			int[] bounds = auxVar.getDomain();
+			if(bounds[0] == 0 && bounds[1] == 1)
+				this.auxVarDomains.put(auxVar.getVariableName(), 
+						               new BoolDomain());
+			else this.auxVarDomains.put(auxVar.getVariableName(), 
+					                    new BoundedIntRange(bounds[0], bounds[1]));
+		}
+		
 		this.solverSettings = solverFeatures;
 		this.usedCommonSubExpressions = 0;
 		this.usedInferredEqualSubExpressions = 0;
@@ -515,6 +527,12 @@ public class MinionModel {
 	
 	protected void addAuxiliaryVariable(Variable auxVariable) {
 		this.auxVariables.add(auxVariable);
+		int[] bounds = auxVariable.getDomain();
+		if(bounds[0] == 0 && bounds[1] == 1)
+			this.auxVarDomains.put(auxVariable.getVariableName(), 
+					               new BoolDomain());
+		else this.auxVarDomains.put(auxVariable.getVariableName(), 
+				                    new BoundedIntRange(bounds[0], bounds[1]));
 	}
 	
 	
@@ -522,16 +540,23 @@ public class MinionModel {
 		
 		if(this.decisionVariables.containsKey(variableName)) {
 			Domain domain = this.decisionVariables.get(variableName);
+			if(domain instanceof ArrayDomain) {
+				Domain baseDomain = ((ArrayDomain) domain).getBaseDomain();
+				return (baseDomain instanceof BoolDomain);
+			}
+			else if(domain instanceof ConstantArrayDomain) {
+				Domain baseDomain = ((ConstantArrayDomain) domain).getBaseDomain();
+				return (baseDomain instanceof BoolDomain);
+			}
 			return (domain instanceof BoolDomain);
 		}
 		else {
-			for(int i=0; i<this.auxVariables.size(); i++) {
-				if(this.auxVariables.get(i).getVariableName().equals(variableName)) {
-					int[] bounds = auxVariables.get(i).getDomain();
-					return (bounds[0] == 0 && bounds[1] == 1);
-						
+			//for(int i=0; i<this.auxVariables.size(); i++) {
+				if(this.auxVarDomains.containsKey(variableName)) {
+					Domain domain = auxVarDomains.get(variableName);
+					return (domain instanceof BoolDomain);	
 				}
-			}
+			//}
 				
 			
 		}

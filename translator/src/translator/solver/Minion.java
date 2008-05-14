@@ -64,6 +64,9 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.NARY_SUMLEQ_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMGREATER_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMLESS_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.NARY_MIN_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.NARY_MAX_CONSTRAINT), new Boolean(true));
+		
 		featureMap.put(new Integer(TargetSolver.BINARY_PRODUCT_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.BINARY_SUMEQ_CONSTRAINT), new Boolean(true)); // this is wrong but for testing set to this value
 		featureMap.put(new Integer(TargetSolver.BINARY_SUMNEQ_CONSTRAINT), new Boolean(true));
@@ -71,6 +74,8 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.BINARY_SUMGEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.BINARY_SUMGREATER_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.BINARY_SUMLESS_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.BINARY_MIN_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.BINARY_MAX_CONSTRAINT), new Boolean(true));
 	
 		// nesting of constraints in other constraints
 		// (set to true, if the constraint allows other constraints nested
@@ -105,10 +110,13 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMGREATER_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_BINARY_SUMLESS_CONSTRAINT), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_MIN), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.CONSTRAINT_NESTED_IN_MAX), new Boolean(false));
 		
 		// are the following constraints reifiable
 		featureMap.put(new Integer(REIFIED_ALLDIFFERENT), new Boolean(false));
 		featureMap.put(new Integer(REIFIED_IF), new Boolean(true));
+		featureMap.put(new Integer(REIFIED_IFF), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_LEQ), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_EQ), new Boolean(true));
 		featureMap.put(new Integer(REIFIED_NEQ), new Boolean(true));
@@ -141,6 +149,8 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.REIFIED_OCCURRENCE), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_TABLE), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_NEGATION), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.REIFIED_MIN), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_MAX), new Boolean(false));
 		
 		// variables
 		featureMap.put(new Integer(SPARSE_VARIABLES),new Boolean(true));

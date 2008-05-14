@@ -61,8 +61,9 @@ public class Minimum implements UnaryArithmeticExpression {
 	}
 
 	public int[] getDomain() {
-		int f; // TODO!
-		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND} ;
+		if(this.argument != null)
+			return this.argument.getDomain();
+		else return this.expression.getDomain();
 	}
 
 	public int getType() {
@@ -159,6 +160,18 @@ public class Minimum implements UnaryArithmeticExpression {
 	public void willBeFlattenedToVariable(boolean reified) {
 		this.willBeFlattened = reified;
 
+	}
+	
+	public String toString() {
+		StringBuffer s = new StringBuffer((this.isMaximum) ? "max(" : "min(");
+		s.append(argument+")");
+		return s.toString();
+	}
+	
+	// =============== ADDITIONAL METHODS ========================
+	
+	public boolean isMaximum() {
+		return this.isMaximum;
 	}
 
 }

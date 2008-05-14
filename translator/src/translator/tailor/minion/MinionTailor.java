@@ -297,9 +297,35 @@ public class MinionTailor {
 		if(constraint instanceof BinaryNonLinearConstraint)
 			return toMinion((BinaryNonLinearConstraint) constraint);
 		
+		if(constraint instanceof MinimumConstraint)
+			return toMinion(( MinimumConstraint) constraint);
+		
 		throw new MinionException("Cannot tailor expression of type "+constraint.getClass()+" to Minion yet:"+constraint);
 	}
 	
+	
+/**
+ * Maps a minimum/maximum constraint to Minion.
+ * 
+ * @param constraint
+ * @return
+ * @throws MinionException
+ */	
+	private MinionConstraint toMinion(MinimumConstraint constraint) 
+		throws MinionException {
+		
+		MinionArray arguments = toMinionArray(constraint.getArguments());
+		Expression resultExpression = constraint.getResult();
+		if(resultExpression instanceof ArithmeticAtomExpression) {
+			MinionAtom result = toMinion((ArithmeticAtomExpression) resultExpression);
+			return new Minimum(arguments,
+							   result,
+							   !constraint.isMaximum());
+		}
+		else throw new MinionException("Illegal minimum constraint: "+constraint+
+				". The result '"+resultExpression+"' is not an atomic expression.");
+		
+	}
 	
 	/**
 	 * Tailors table constraints to Minion.
@@ -1483,20 +1509,24 @@ public class MinionTailor {
 		Expression resultExpression = sumConstraint.getResult();
 	
 		// we need this to determine if we can apply the watched literal constraint
-		boolean areBooleanArguments = true && (resultExpression.getType() == Expression.BOOL ||
+		boolean areBooleanArguments = (resultExpression.getType() == Expression.BOOL ||
 				                                resultExpression.getType() == Expression.INT);
 		
 		MinionAtom[] arguments = new MinionAtom[positiveArgs.length];
 	
+		
 		for(int i=0; i<positiveArgs.length; i++) {
 			positiveArgs[i].willBeFlattenedToVariable(true);
 			arguments[i] = (MinionAtom) toMinion(positiveArgs[i]);
 			if(areBooleanArguments) {
 				if(!this.minionModel.variableHasBooleanDomain(arguments[i].getVariableName())) {
-					areBooleanArguments = false && areBooleanArguments;
+					//System.out.println("The variable "+arguments[i]+" in the sum constraint "+sumConstraint+" has NO bool domain ");
+					areBooleanArguments = false;
 				}
 			}
 		}
+		
+		//System.out.println("Every variable in the sum constraint "+sumConstraint+" has a boolean domain? "+areBooleanArguments);
 		
 		resultExpression.willBeFlattenedToVariable(true);
 		MinionAtom result = (MinionAtom) toMinion(resultExpression);

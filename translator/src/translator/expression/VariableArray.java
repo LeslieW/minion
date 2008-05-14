@@ -58,6 +58,24 @@ public class VariableArray implements SingleArray {
 	}
 
 	public int[] getDomain() {
+		
+		int lb,ub;
+		if(this.variables.length > 0) {
+			lb = variables[0].getDomain()[0];
+			ub = variables[0].getDomain()[1];
+			
+			// get the smallest lb and the highest ub
+			for(int i=1; i<this.variables.length; i++) {
+				int newLb = this.variables[i].getDomain()[0];
+				int newUb = this.variables[i].getDomain()[1];
+				if(lb > newLb)
+					lb = newLb;
+				if(ub < newUb)
+					ub = newUb;
+			}
+			return new int[] {lb, ub};
+		}
+		
 		// TODO: return the greatest common domain of the variables
 		return new int[] {Expression.LOWER_BOUND, Expression.UPPER_BOUND};
 	}
