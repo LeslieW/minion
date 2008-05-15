@@ -75,7 +75,7 @@ public class AbsoluteConstraint implements GlobalConstraint {
 		return Expression.ABSOLUTE_CONSTRAINT;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.argument = this.argument.insertDomainForVariable(domain, variableName);
 		this.result = this.result.insertDomainForVariable(domain, variableName);
 		return this;

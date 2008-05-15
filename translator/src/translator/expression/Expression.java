@@ -271,8 +271,9 @@ public interface Expression {
 	 * @param domain
 	 * @param variableName
 	 * @return
+	 * @throws Exception TODO
 	 */
-	public Expression insertDomainForVariable(Domain domain, String variableName);
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception;
 	
 	/**
 	 * Gives information if the expression is a subexpression. By default, all

@@ -128,7 +128,7 @@ public class ConstantMatrix implements ConstantArray {
 
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variable) {
+	public Expression insertDomainForVariable(Domain domain, String variable) throws Exception {
 		return this;
 	}
 	

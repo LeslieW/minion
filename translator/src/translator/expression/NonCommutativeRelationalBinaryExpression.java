@@ -386,7 +386,7 @@ public class NonCommutativeRelationalBinaryExpression implements
 	}
 	
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.leftArgument = this.leftArgument.insertDomainForVariable(domain, variableName);
 		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
 		return this;

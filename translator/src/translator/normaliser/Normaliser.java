@@ -240,7 +240,7 @@ public class Normaliser implements NormaliserSpecification {
 	 */
 	private ArrayList<Expression> insertParameters(ArrayList<GeneralDeclaration> definitions,
 														   ArrayList<Expression> constraints) 
-		throws NormaliserException {
+		throws NormaliserException,Exception {
 		
 		// buffers for insertion
 		HashMap<String, Expression> expressionParameters = new HashMap<String, Expression>();
@@ -568,7 +568,7 @@ public class Normaliser implements NormaliserSpecification {
 	private ArrayList<Expression> insertDomainForVariable(Domain domain,
 			                                              String variableName,
 			                                              ArrayList<Expression> constraints)
-			                                      	throws NormaliserException {
+			                                      	throws NormaliserException, Exception {
 		
 		for(int i=0; i<constraints.size(); i++) {
 			Expression constraint = constraints.remove(i);
@@ -851,7 +851,7 @@ public class Normaliser implements NormaliserSpecification {
 	
 	
 	private ArrayList<Expression> updateExpressionTypes(ArrayList<Expression> constraints)
-		throws NormaliserException {
+		throws NormaliserException,Exception {
 		
 		// iterate over all decision variables
 		for(int j=0; j<this.decisionVariablesNames.size(); j++) {

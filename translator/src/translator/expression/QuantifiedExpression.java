@@ -227,7 +227,7 @@ public class QuantifiedExpression implements RelationalExpression {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		if(this.domain instanceof IdentifierDomain) {
 			String domainName = ((IdentifierDomain) this.domain).getDomainName();

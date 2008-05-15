@@ -141,7 +141,7 @@ public class ComposedArray implements Array {
 
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		return this;
 	}

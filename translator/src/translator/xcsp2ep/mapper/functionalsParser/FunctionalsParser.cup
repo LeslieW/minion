@@ -216,7 +216,7 @@ integerExpression ::= 	  INTEGER:i
           				| MUL  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
           				  {: RESULT = new Multiplication( new Expression[] { (Expression) e1,
           				                                                     (Expression) e2 }
-          				                                 );   :}
+          				                                  );   :}
           				
           				| DIV  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
           				  {: RESULT = new NonCommutativeArithmeticBinaryExpression
@@ -240,18 +240,69 @@ integerExpression ::= 	  INTEGER:i
                         	                  ); :} 
           				
           				| MIN  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
-	                    {: RESULT = new CommutativeBinaryRelationalExpression
+	                    {: 
+	                       boolean isMaximum = false;
+          				   AtomExpression leftArgument = null;
+          				   AtomExpression rightArgument = null;
+          				   
+          				   try {
+          				   
+          				   if(e1 instanceof AtomExpression)
+          				    	leftArgument = (AtomExpression) e1;
+          				   else throw new Exception("Cannot translate Minimum Constraint with non-atomic argument:"+e1);
+          				   
+          				   if(e2 instanceof AtomExpression)
+          				   	    rightArgument = (AtomExpression) e2;
+          				   else throw new Exception("Cannot translate Minimum Constraint with non-atomic argument:"+e2);
+          				   
+          				   } catch(Exception e) {
+          				   	  e.printStackTrace(System.out);
+          				   	  System.exit(1);
+          				   }
+          				   
+          				   	
+          				   RESULT = new Minimum
+                                             ( new VariableArray( new AtomExpression[]  { leftArgument,
+                        	                                                              rightArgument } ),
+                        			           isMaximum                   
+                        	                  ); 
+                          :}  
+	                    
+	      
+	                      /* RESULT = new CommutativeBinaryRelationalExpression
                                              ( (Expression) e1,
                                                 Expression.MIN,
                         	                   (Expression) e2
-                        	                  ); :}          				
+                        	                  ); :} */          				
           				
           				| MAX  LPAREN integerExpression:e1 COMMA integerExpression:e2 RPAREN
-          				{: RESULT = new CommutativeBinaryRelationalExpression
-                                             ( (Expression) e1,
-                                                Expression.MAX,
-                        	                   (Expression) e2
-                        	                  ); :}  
+          				{: 
+          				   boolean isMaximum = true;
+          				   AtomExpression leftArgument = null; 
+          				   AtomExpression rightArgument = null;
+          				   
+          				   try {
+          				    
+          				     if(e1 instanceof AtomExpression)
+          				    	leftArgument = (AtomExpression) e1;
+          				     else throw new Exception("Cannot translate Maximum Constraint with non-atomic argument:"+e1);
+          				   
+          				     if(e2 instanceof AtomExpression)
+          				   	    rightArgument = (AtomExpression) e2;
+          				     else throw new Exception("Cannot translate Maximum Constraint with non-atomic argument:"+e2);
+          				   
+          				   } catch(Exception e) {
+          				   	  e.printStackTrace(System.out);
+          				   	  System.exit(1);
+          				   }
+          				   
+          				   	
+          				   RESULT = new Minimum
+                                             ( new VariableArray( new AtomExpression[]  { leftArgument,
+                        	                                                              rightArgument } ),
+                        			           isMaximum                   
+                        	                  ); 
+                          :}  
           				
           				| IF   LPAREN booleanExpression COMMA integerExpression COMMA integerExpression RPAREN
                         {: 

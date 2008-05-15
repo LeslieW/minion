@@ -233,7 +233,7 @@ public class Conjunction extends NaryRelationalExpression {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		for(int i=0; i<this.conjointExpressions.size(); i++)
 			this.conjointExpressions.add(i,this.conjointExpressions.remove(i).insertDomainForVariable(domain, variableName));
 		return this;

@@ -354,7 +354,7 @@ public class ArrayVariable implements Variable {
 	}
 	
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		//System.out.println("Inserting "+domain+" for "+variableName+" in expression "+this+" with domain:"+domain+" and internal domain "+this.domain);
 		

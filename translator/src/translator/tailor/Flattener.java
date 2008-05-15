@@ -143,6 +143,7 @@ public class Flattener {
 		this.constraintBuffer.clear();
 		
         // flatten the constraint
+		constraint.setIsNotNested();
 		Expression topExpression = flattenExpression(constraint);
 		ArrayList<Expression> flattenedSubExpressions = this.constraintBuffer;
 		flattenedSubExpressions.add(topExpression);
@@ -172,7 +173,7 @@ public class Flattener {
 		else if(expression instanceof Array)
 			return expression;  // TODO: here we will need to flatten in case the target solver does not support arrays
 		
-		else throw new TailorException("Unknown expression type '"+expression.getType()+"' (neither relational nor arithmetic):"+expression);
+		else throw new TailorException("Unknown variable/expression: "+expression+" (expression with no domain associated)");
 	}
 	
 	/**
@@ -701,6 +702,9 @@ public class Flattener {
 					                        expression.getOperator(), 
 					                        true); // result Is on left side
 			
+			if(!expression.isNested())
+				partWiseSumConstraint.setIsNotNested();
+			
 			if(expression.getOperator() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable())
 				addToSubExpressions(rSum,result);
 			
@@ -726,7 +730,9 @@ public class Flattener {
 			if(expression.getOperator() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable())
 				addToSubExpressions(lSum,result);
 			
-
+			if(!expression.isNested())
+				partWiseSumConstraint.setIsNotNested();
+			
 			//System.out.println("left expression is sum etc ... and expr "+expression+" will be flattened to variable? "+expression.isGonnaBeFlattenedToVariable());
 			
 			
@@ -756,6 +762,9 @@ public class Flattener {
 					addToSubExpressions(multiplication, rightExpression);
 				
 				productConstraint.setResult(rightExpression);
+				if(!expression.isNested())
+					productConstraint.setIsNotNested();
+				
 				if(expression.isGonnaBeFlattenedToVariable()) {
 					return reifyConstraint(productConstraint);
 				}
@@ -810,6 +819,8 @@ public class Flattener {
 				// expression is NOT nested
 				else {
 					productConstraintRight.setResult(auxVar); // use the same aux var as the product above
+					if(!productConstraintRight.isNested())
+						productConstraint.setIsNotNested();
 					
 					if(!hasCommonSubExpression(multiplicationRight)) 
 						addToSubExpressions(multiplicationRight, auxVar);
@@ -927,6 +938,8 @@ public class Flattener {
 				return leftExpression;
 			}
 			else  {
+				if(!expression.isNested())
+					absConstraint.setIsNotNested();
 				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
 				return absConstraint;
 			}
@@ -956,6 +969,8 @@ public class Flattener {
 			}
 			
 			AbsoluteConstraint absConstraint = new AbsoluteConstraint(argument, rightExpression);
+			if(!expression.isNested())
+				absConstraint.setIsNotNested();
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
 				this.constraintBuffer.add(absConstraint);
@@ -1330,7 +1345,10 @@ public class Flattener {
 			//	expression.willBeFlattenedToVariable(true);
 			
 			//expression = flattenExpression(expression);
-				
+			
+			//if(!quantifiedSum.isNested())
+			//	expression.setIsNotNested();
+			
 			if(expression instanceof UnaryMinus) 
 				negativeElements.add(( (UnaryMinus) expression).getArgument());
 			else positiveElements.add(expression);
@@ -1345,6 +1363,9 @@ public class Flattener {
 		reducedSum = reducedSum.reduceExpressionTree();
 		reducedSum.orderExpression();
 	
+		if(!quantifiedSum.isNested()) 
+			reducedSum.setIsNotNested();
+		
 		if(quantifiedSum.isGonnaBeFlattenedToVariable())
 			reducedSum.willBeFlattenedToVariable(true);
 		
@@ -1464,9 +1485,13 @@ public class Flattener {
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
 		for(int i=arguments.size()-1; i>=0; i--) {
+			
 			if(conjunction.isGonnaBeFlattenedToVariable() &&
 				!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.AND))
 				arguments.get(i).willBeFlattenedToVariable(true);
+			
+			if(!conjunction.isNested())
+				arguments.get(i).setIsNotNested();
 			
 			Expression argument = flattenExpression(arguments.remove(i)); //.evaluate();
 			
@@ -1810,6 +1835,10 @@ public class Flattener {
 			unfoldedExpression = unfoldedExpression.evaluate();
 			//System.out.println("Unfolded expression after evaluation:"+unfoldedExpression);
 			unfoldedExpression = unfoldedExpression.reduceExpressionTree();
+			
+			if(!quantification.isNested())
+				unfoldedExpression.setIsNotNested();
+			
 			unfoldedExpressions.add(i,unfoldedExpression);
 		}
 		
@@ -1839,6 +1868,10 @@ public class Flattener {
 			if(quantification.isGonnaBeFlattenedToVariable())
 				conjunction.willBeFlattenedToVariable(true);
 			
+			if(!quantification.isNested()) 
+				conjunction.setIsNotNested();
+	
+			
 			if(conjunction.getArguments().size() == 1)
 				return flattenExpression(conjunction.getArguments().get(0));
 			
@@ -1852,6 +1885,9 @@ public class Flattener {
 				if(quantification.isGonnaBeFlattenedToVariable())
 					e.willBeFlattenedToVariable(true);
 				
+				if(!quantification.isNested())
+					e.setIsNotNested();
+				
 				return flattenExpression(e);
 			}
 				
@@ -1862,6 +1898,9 @@ public class Flattener {
 			
 			if(quantification.isGonnaBeFlattenedToVariable())
 				disjunction.willBeFlattenedToVariable(true);
+			
+			if(!quantification.isNested())
+				disjunction.setIsNotNested();
 			
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.OR)
 					&& quantification.isGonnaBeFlattenedToVariable())
@@ -2310,14 +2349,47 @@ public class Flattener {
 				for(int i=sum.getPositiveArguments().size()-1; i>=0; i--) {
 					//System.out.println("Matching "+auxVariables.get(i).getVariableName()+" to "+variableName);
 					Expression argument = sum.getPositiveArguments().get(i);
-					argument.willBeFlattenedToVariable(flattenToVariable);
+					
+					// only flatten argument if it is non-linear - if the argument is x*Constant, then
+					// we can leave it and translate the rest to a weighted sum
+					if(argument instanceof Multiplication) {
+						Multiplication mult = (Multiplication) argument;
+						if(mult.isNonLinearMultiplication())
+							argument.willBeFlattenedToVariable(flattenToVariable);
+						// else do nothing
+					}
+					/*else if(argument instanceof UnaryMinus) {
+						UnaryMinus uminus = (UnaryMinus) argument;
+						if(uminus.getArgument() instanceof Multiplication) {
+							Multiplication mult = (Multiplication) argument;
+							if(mult.isNonLinearMultiplication())
+								argument.willBeFlattenedToVariable(flattenToVariable);
+						}
+						else argument.willBeFlattenedToVariable(flattenToVariable);
+					}*/
+					else {
+						argument.willBeFlattenedToVariable(flattenToVariable);
+					}
+					
 					positiveArguments[i] = flattenExpression(argument);
+					
 					//System.out.println("sum arguments AFTER flattening of sum that will be part of SumConstraint:"+positiveArguments[i]);
 				}
 			
 				for(int i=sum.getNegativeArguments().size()-1; i>=0; i--) {
 					Expression argument = sum.getNegativeArguments().get(i);
-					argument.willBeFlattenedToVariable(flattenToVariable);
+					
+					// only flatten argument if it is non-linear - if the argument is x*Constant, then
+					// we can leave it and translate the rest to a weighted sum
+					if(argument instanceof Multiplication) {
+						Multiplication mult = (Multiplication) argument;
+						if(mult.isNonLinearMultiplication())
+							argument.willBeFlattenedToVariable(flattenToVariable);
+						// else do nothing
+					}
+					else 
+						argument.willBeFlattenedToVariable(flattenToVariable);
+					
 					negativeArguments[i] = flattenExpression(argument);
 				}
 			

@@ -184,6 +184,29 @@ public class TableConstraint implements RelationalExpression {
 		return s+"] )";
 	}
 	
+	
+	public StringBuffer toStringBuffer() {
+		
+		String conflicting = (this.isConflictingTable) ? "Conflict" : "";
+		
+		StringBuffer s = new StringBuffer("table"+conflicting+"( [");
+		
+		if(this.variableList.length >= 1)
+			s.append(variableList[0].toString());
+		for(int i=1; i<this.variableList.length; i++)
+			s.append(","+this.variableList[i].toString());
+		
+		s.append("], [");
+		
+		if(this.tupleList.length >= 1)
+			s.append(tupleList[0].toString());
+		for(int i=1; i<this.tupleList.length; i++)
+			s.append(", "+this.tupleList[i]);
+		
+		 s.append("] )");
+		 return s;
+	}
+	
 	public boolean isGonnaBeFlattenedToVariable() {
 		return this.willBeReified;
 	}
@@ -196,7 +219,7 @@ public class TableConstraint implements RelationalExpression {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		return this;
 	}
 	

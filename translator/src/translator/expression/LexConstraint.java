@@ -47,7 +47,7 @@ public class LexConstraint implements RelationalExpression {
 		return this.operator;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.leftArray = this.leftArray.insertDomainForVariable(domain, variableName);
 		this.rightArray =  this.rightArray.insertDomainForVariable(domain, variableName);
 		return this;

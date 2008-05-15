@@ -10,31 +10,30 @@ given n : int(1..1000)
 letting nDomain be domain int(0..n-1)
 
 find quasiGroup : matrix indexed by [nDomain, nDomain] of nDomain
-find quasiGroupColumns : matrix indexed by [nDomain, nDomain] of nDomain
 
 such that 
      
-     $ assign the "reflected" quasigroup to qGColumns to access its columns
-     forall row,col : nDomain .
-         quasiGroupColumns[col,row] = quasiGroup[row,col],
-
      $ All rows have to be different
      forall row : nDomain . 
-          allDifferent(quasiGroup[row]),
+          allDifferent(quasiGroup[row,..]),
 
      $ All columns have to be different	       
      forall col : nDomain . 
-          allDifferent(quasiGroupColumns[col]),
+          allDifferent(quasiGroup[..,col]),
 
      $ ((i*j)*j)*j = a
      forall i : nDomain .
           forall j : nDomain .	
-	        quasiGroup[quasigroup[quasiGroup[i,j],j],j] = i,
+	        quasiGroup[quasiGroup[quasiGroup[i,j],j],j] = i,
+
+     $ Idempotency
+     forall i : nDomain . 
+          (quasiGroup[i,i] = i), 
 
      $ Implied (from Colton,Miguel 01)
      forall i : nDomain .
        forall j : nDomain .
-         (quasigroup[i,j]=i) <-> (quasigroup[j,i]=i),
+         (quasiGroup[i,j]=i) <=> (quasiGroup[j,i]=i),
 
      $ Symmetry-breaking constraints	
      forall i : nDomain .

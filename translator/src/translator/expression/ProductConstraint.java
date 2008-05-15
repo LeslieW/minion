@@ -199,7 +199,7 @@ public class ProductConstraint implements GlobalConstraint {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		for(int i=0; i<this.arguments.length; i++)
 			this.arguments[i] = this.arguments[i].insertDomainForVariable(domain, variableName);

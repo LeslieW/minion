@@ -270,7 +270,7 @@ public Expression replaceVariableWithExpression(String variableName, Expression 
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		for(int i=0; i<this.arguments.size(); i++)
 			this.arguments.add(i,this.arguments.remove(i).insertDomainForVariable(domain, variableName));
 		return this;
@@ -294,5 +294,21 @@ public Expression replaceVariableWithExpression(String variableName, Expression 
 	
 	public void setWillBeConverteredToProductConstraint(boolean turnOn) {
 		this.convertToProductConstraint = turnOn;
+	}
+	
+	
+	public boolean isNonLinearMultiplication() {
+		
+		int variableCount = 0;
+		
+		for(int i=0; i<this.arguments.size(); i++) {
+			Expression argument = arguments.get(i);
+			if(argument.getType() != Expression.INT && 
+					argument.getType() != Expression.BOOL)
+				variableCount++;
+		}
+		
+		// the multiplication is non-linear if we have more than one variable
+		return(variableCount > 1);
 	}
 }

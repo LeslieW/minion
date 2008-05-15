@@ -41,7 +41,7 @@ public class MinimumConstraint implements RelationalExpression {
 		return this.isMaximum ? MAX_CONSTRAINT : MIN_CONSTRAINT;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		this.arguments = (Array) this.arguments.insertDomainForVariable(domain, variableName);
 		this.result = this.arguments.insertDomainForVariable(domain, variableName);

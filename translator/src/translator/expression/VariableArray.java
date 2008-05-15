@@ -84,7 +84,7 @@ public class VariableArray implements SingleArray {
 		return Expression.VARIABLE_ARRAY;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		for(int i=0; i<this.variables.length; i++)
 			variables[i] = (AtomExpression) variables[i].insertDomainForVariable(domain, variableName);
 		

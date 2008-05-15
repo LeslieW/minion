@@ -119,7 +119,7 @@ public class AllDifferent implements UnaryRelationalExpression {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		if(argument != null)
 			this.argument = (Array) this.argument.insertDomainForVariable(domain, variableName);
 		else 

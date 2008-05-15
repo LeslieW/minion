@@ -453,7 +453,7 @@ public class Sum extends NaryArithmeticExpression {
 	
 	
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		//System.out.println("Inserting domain "+domain+" for variable "+variableName+" in expression "+this);
 		

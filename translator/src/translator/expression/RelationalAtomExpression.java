@@ -193,7 +193,7 @@ public class RelationalAtomExpression implements
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		return this;
 	}
 	

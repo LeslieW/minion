@@ -49,7 +49,7 @@ public class Objective implements Expression {
 		return Expression.OBJECTIVE;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		if(objective != null)
 			this.objective = this.objective.insertDomainForVariable(domain, variableName);

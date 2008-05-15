@@ -275,6 +275,45 @@ public class NormalisedModel {
 		return s.toString();
 	}
 	
+public StringBuffer toStringBuffer() {
+		
+		// header
+		StringBuffer s = new StringBuffer("ESSENCE' 1.0\n\n");
+		
+	
+		// decision variables
+		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
+			String variableName = decisionVariablesNames.get(i);
+			s.append("find\t"+variableName+"\t: "+this.decisionVariables.get(variableName)+"\n");
+		}
+		
+		
+		s.append("\n\n");
+		// auxiliary variables
+		for(int i=0; i<this.auxiliaryVariables.size(); i++) {
+			Variable auxVar = auxiliaryVariables.get(i);
+			if(i%5 ==0) s.append("\n$");
+			s.append("  "+auxVar+" : {"+auxVar.getDomain()[0]+", "+auxVar.getDomain()[1]+"}  ");
+		}
+		s.append("$\n"+printStatistics());
+		
+		
+		// objective
+		s.append("\n"+this.objective.toString()+"\n\n");
+		
+		// constraints
+		s.append("such that\n");
+		
+		if(this.constraintList.size() == 0)
+			return s;
+		
+		for(int i=0; i<this.constraintList.size()-1; i++)
+			s.append("\t"+constraintList.get(i)+",\n\n");
+		s.append("\t"+constraintList.get(constraintList.size()-1)+"\n");
+		
+		return s;
+	}
+	
 	
 	private String printStatistics() {
 		String s = "\n$ Statistical data about translation\n";

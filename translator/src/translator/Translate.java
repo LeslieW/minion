@@ -74,7 +74,9 @@ public class Translate {
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+NO_COMMON_EXPLICIT_SUBEXPRS)) {
-					settings.setUseExplicitCommonSubExpressions(false);			
+					settings.setUseExplicitCommonSubExpressions(false);	
+					settings.useEqualSubExpressions = false;
+					settings.useExplicitCommonSubExpressions = false;
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
@@ -95,7 +97,7 @@ public class Translate {
 				
 				
 				else if(args[i].equalsIgnoreCase("-"+DIRECT_VAR_REUSE)) {
-					settings.setApplyDirectVariableReusage(true);
+					settings.setApplyDirectVariableReusage(false);
 				}
 
 				//else if(args[i].equalsIgnoreCase("-"+GECODE_TRANSLATION) || args[i].equalsIgnoreCase("-g")) {
@@ -396,8 +398,8 @@ public class Translate {
 		System.out.println("\tDon't write translation time into the output file.");
 		System.out.println("\tDefault: on.");
 		System.out.println("-"+DIRECT_VAR_REUSE);
-		System.out.println("\tTranslate with directly reusing variables (e.g. in x=y, replacing x with y).");
-		System.out.println("\tDefault: off (not stable yet)");
+		System.out.println("\tTranslate without directly reusing variables (e.g. in x=y, replacing x with y).");
+		System.out.println("\tDefault: on");
 	}
 	
 	

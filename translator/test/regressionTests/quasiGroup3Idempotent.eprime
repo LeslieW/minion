@@ -13,48 +13,46 @@ find quasiGroup : matrix indexed by [nDomain, nDomain] of nDomain
 find qgDiagonal : matrix indexed by [nDomain] of nDomain
 
 such that 
-     
-   
      $ accessor for diagonal
      forall i : nDomain .
-         qgDiagonal[i] = quasiGroup[i,i],
+         qgDiagonal[i] = quasiGroup[i,i] ,
 
      $ All rows have to be different
-     forall row : nDomain . 
-          allDifferent(quasiGroup[row,..]),
+    forall row : nDomain . 
+          allDifferent(quasiGroup[row,..]) ,
 
      $ All columns have to be different	       
      forall col : nDomain . 
           allDifferent(quasiGroup[..,col]),
 
-     $ (j*i)*(i*j) = i
+    $  (j*i)*(i*j) = i
      forall i : nDomain .
-          forall j : nDomain .	
-	        quasiGroup[quasiGroup[i,j],quasiGroup[j,i]] = i,
+         forall j : nDomain .	
+	        quasiGroup[quasiGroup[i,j],quasiGroup[j,i]] = i $,
 
      $ Idempotency
-     forall i : nDomain . 
-          (quasiGroup[i,i] = i), 
+     $forall i : nDomain . 
+     $     (quasiGroup[i,i] = i), 
 
      $ Implied (from Colton,Miguel 01)
      $ All-diff diagonal
-     allDifferent(qgDiagonal),
+ $    allDifferent(qgDiagonal) $,
 
      $ anti-Abelian
-     forall i : nDomain .
-       forall j : nDomain .
-         (i != j) =>
-         (quasiGroup[i,j] != quasiGroup[j,i]),
+    $ forall i : nDomain .
+    $   forall j : nDomain .
+    $     (i != j) =>
+    $     (quasiGroup[i,j] != quasiGroup[j,i]),
 
      $ if (i*i)=j then (j*j) = i
-     forall i : nDomain .
-       forall j : nDomain .
-         (quasiGroup[i,i]=j) => (quasiGroup[j,j]=i),
+     $forall i : nDomain .
+     $  forall j : nDomain .
+     $    (quasiGroup[i,i]=j) => (quasiGroup[j,j]=i),
 
 
      $ Symmetry-breaking constraints	
-     forall i : nDomain .
-           quasiGroup[i,n-1] + 2 >= i
+     $forall i : nDomain .
+     $      quasiGroup[i,n-1] + 2 >= i
 
 
 

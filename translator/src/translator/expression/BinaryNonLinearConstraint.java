@@ -101,7 +101,7 @@ public class BinaryNonLinearConstraint implements RelationalExpression {
 		return this.operator;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		this.leftArgument = this.leftArgument.insertDomainForVariable(domain, variableName);
 		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
@@ -195,6 +195,7 @@ public class BinaryNonLinearConstraint implements RelationalExpression {
 			s.append("%");
 		else if(this.operator == DIV)
 			s.append("/");
+		
 		
 		s.append(this.rightArgument+" = "+this.result);
 		return s.toString();

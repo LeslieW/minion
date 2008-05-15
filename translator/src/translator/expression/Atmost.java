@@ -197,7 +197,7 @@ public class Atmost implements GlobalConstraint {
 					Expression.ATLEAST_CONSTRAINT;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		if(array != null)
 			this.array = (Array) this.array.insertDomainForVariable(domain, variableName);
 		

@@ -131,7 +131,7 @@ public class Reification implements RelationalExpression {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.reifiedExpression = this.reifiedExpression.insertDomainForVariable(domain, variableName);
 		return this;
 	}

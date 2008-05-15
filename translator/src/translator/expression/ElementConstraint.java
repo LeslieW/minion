@@ -164,7 +164,7 @@ public class ElementConstraint implements GlobalConstraint {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.index = this.index.insertDomainForVariable(domain, variableName);
 		this.value = this.value.insertDomainForVariable(domain, variableName);
 		this.variableArray = this.variableArray.insertDomainForVariable(domain, variableName);

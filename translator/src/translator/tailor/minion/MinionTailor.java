@@ -1210,8 +1210,12 @@ public class MinionTailor {
 		//System.out.println("Tailoring a weak sumConstraint "+sumConstraint+" that needs to be reified? "+sumConstraint.isGonnaBeFlattenedToVariable());
 		// ---------------- we have to reify the sum!! --------------------------------------
 		// // don't use watched or weighted sum then!
-		if(sumConstraint.isGonnaBeFlattenedToVariable() && negativeArgs.length ==0) {
+		if(sumConstraint.isGonnaBeFlattenedToVariable()) {
 	
+			
+			if(negativeArgs.length > 0)
+				throw new MinionException("Cannot tailor sumConstraint to Minion, because weighted sums are not reifiable:"+sumConstraint);
+			
 			//System.out.println("Tailoring a weak sumConstraint that needs to be reified:"+sumConstraint);
 			
 			MinionAtom[] arguments = new MinionAtom[positiveArgs.length+negativeArgs.length];
@@ -1534,7 +1538,7 @@ public class MinionTailor {
 		
 		if(operator == Expression.LEQ) {
 			if(this.minionModel.solverSettings.useWatchedSum()) {
-				if(areBooleanArguments) {
+				if(areBooleanArguments && !sumConstraint.isNested()) { // if it is nested, we cannot use watched
 					return new SumLeqConstraint(arguments, result, true);
 				}
 				else return new SumLeqConstraint(arguments, result, false);
@@ -1544,7 +1548,7 @@ public class MinionTailor {
 		
 		else if(operator == Expression.GEQ) {
 			if(this.minionModel.solverSettings.useWatchedSum()) {
-				if(areBooleanArguments) {
+				if(areBooleanArguments && !sumConstraint.isNested()) {
 					return new SumGeqConstraint(arguments, result, true);
 				}
 				else return new SumGeqConstraint(arguments, result, false);
@@ -1554,7 +1558,7 @@ public class MinionTailor {
 		
 		else if(operator == Expression.EQ) {
 			if(this.minionModel.solverSettings.useWatchedSum()) {
-				if(areBooleanArguments) {
+				if(areBooleanArguments && !sumConstraint.isNested()) {
 					this.minionModel.addConstraint(new SumLeqConstraint(arguments, result, true));
 					return new SumGeqConstraint(arguments, result, true);
 				}

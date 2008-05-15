@@ -70,7 +70,7 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 		return Expression.SIMPLE_ARRAY_VARIABLE;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		//System.out.println("Inserting domain '"+domain+"' for variable "+variableName+" in variable "+this);
 		
@@ -85,7 +85,7 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 		}
 		
 		
-		try {
+		//try {
 			
 		if(this.arrayName.equals(variableName)) {
 			
@@ -238,10 +238,10 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 			}
 		}
 		
-		} catch(Exception e) {
+		/*} catch(Exception e) {
 			e.printStackTrace(System.out);
 			System.exit(1);
-		}
+		}*/
 		
 		
 		//System.out.println("I left the simpleArrayVariable as it is: "+this);

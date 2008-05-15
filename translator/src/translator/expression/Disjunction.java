@@ -218,7 +218,7 @@ public Expression replaceVariableWithExpression(String variableName, Expression 
 	}
 	
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		for(int i=0; i<this.disjointExpressions.size(); i++)
 			this.disjointExpressions.add(i,this.disjointExpressions.remove(i).insertDomainForVariable(domain, variableName));
 		return this;

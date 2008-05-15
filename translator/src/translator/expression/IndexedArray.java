@@ -166,7 +166,7 @@ public class IndexedArray implements SingleArray {
 	}
 	
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		if(this.baseDomain instanceof IdentifierDomain) {
 			String domainName = ((IdentifierDomain) baseDomain).getDomainName();

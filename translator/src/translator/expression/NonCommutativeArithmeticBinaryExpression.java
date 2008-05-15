@@ -130,6 +130,10 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		case PLUS: operator ="+"; break;
 		case MULT: operator="*"; break;
 		case MOD: operator ="%";break;
+		case MAX: operator = "max";
+				return operator+"(["+leftArgument+","+rightArgument+"])";
+		case MIN: operator = "min";
+			return operator+"(["+leftArgument+","+rightArgument+"])";
 		
 		}
 		return this.leftArgument+operator+this.rightArgument;
@@ -249,7 +253,7 @@ public class NonCommutativeArithmeticBinaryExpression implements
 	}
 	
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.leftArgument = this.leftArgument.insertDomainForVariable(domain, variableName);
 		this.rightArgument = this.rightArgument.insertDomainForVariable(domain, variableName);
 		return this;

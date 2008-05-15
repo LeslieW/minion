@@ -214,7 +214,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 		return this;	
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		if(this.variable != null)
 			this.variable.insertDomainForVariable(domain, variableName);
 		return this;

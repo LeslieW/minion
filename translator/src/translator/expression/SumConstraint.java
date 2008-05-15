@@ -510,7 +510,7 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		for(int i=0; i<this.positiveArguments.length; i++)
 			this.positiveArguments[i] = this.positiveArguments[i].insertDomainForVariable(domain, variableName);
 		for(int i=0; i<this.negativeArguments.length; i++)

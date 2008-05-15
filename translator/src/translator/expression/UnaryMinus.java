@@ -116,7 +116,7 @@ public class UnaryMinus implements UnaryArithmeticExpression {
 		return this;
 	}
 	
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		this.argument = this.argument.insertDomainForVariable(domain, variableName);
 		return this;
 	}

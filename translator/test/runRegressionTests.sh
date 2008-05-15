@@ -9,7 +9,7 @@ TEST_DIR=test/regressionTests
 cd ..
 for X in `ls ${TEST_DIR}/*.cm`;
   do
-  java -jar tailor.jar -tf -silent $X 
+  java -jar tailor.jar  -tf -silent $X 
   Difference=`diff "${X}.minion" "${X}.minion.expected"`
   
   if [ "$Difference" != "" ]; then
@@ -31,7 +31,7 @@ parameters=`ls ${X}*.param`
 if [ "$parameters" != "" ]; then 
     for Y in `ls ${X}*.param` 
       do
-      java -jar tailor.jar -tf -silent $X $Y 
+      java -jar tailor.jar  -tf -silent $X $Y 
       Difference=`diff "${Y}.minion" "${Y}.minion.expected"`
       if [ "$Difference" != "" ]; then
 	  echo "ERROR in translating ${Y}"

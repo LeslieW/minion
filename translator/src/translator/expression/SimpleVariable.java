@@ -57,7 +57,7 @@ public class SimpleVariable implements Variable, AtomExpression {
 		return Expression.SIMPLE_VARIABLE;
 	}
 
-	public Expression insertDomainForVariable(Domain domain, String variableName) {
+	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
 		
 		if(this.variableName.equals(variableName)) {
 			
