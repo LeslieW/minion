@@ -4,7 +4,23 @@
 # Andrea Rendl
 
 TEST_DIR=test/regressionTests
-XCSP_DIR="${TESTDIR}/xcsp"
+XCSP_DIR=test/regressionTests/xcsp
+
+
+# test the XCSP instances
+cd ..
+for X in `ls ${XCSP_DIR}/*.xml`;
+  do	
+  java -Xms128m -Xmx512m -jar tailor.jar -tf -silent -xcsp $X
+  Difference=`diff "${X}.minion" "${X}.minion.expected"`  
+  if [ "$Difference" != "" ]; then
+      echo "ERROR in translating ${X}"
+  else
+      echo "OK: translating ${X}"
+      rm ${X}.minion
+  fi
+done
+cd test/
 
 # Start with the .cm files
 cd ..
@@ -63,16 +79,4 @@ done
 cd test
 
 
-# test the XCSP instances
-cd ..
-for X `ls ${XCSP_DIR}/*.xml`;
-  do	
-  java  -Xms128m -Xmx512 -jar tailor.jar -tf -silent -xcsp $X
-  Difference=`diff "${X}.minion" "${X}.minion.expected"`  
-  if [ "$Difference" != "" ]; then
-      echo "ERROR in translating ${X}"
-  else
-      echo "OK: translating ${X}"
-      rm ${X}.minion
-  fi
-done
+
