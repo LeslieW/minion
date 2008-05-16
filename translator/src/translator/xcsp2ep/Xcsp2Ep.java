@@ -34,6 +34,7 @@ public class Xcsp2Ep{
 		WRITE_TIME_STATS = settings.giveTranslationTimeInfo();
 		PRINT_INFO = settings.giveTranslationInfo();
 		OUTPUT_FILE_NAME = settings.getEssencePrimeOutputFileName();
+		this.settings = settings;
 	}
 	
 	public Xcsp2Ep() {
@@ -124,12 +125,14 @@ public class Xcsp2Ep{
 		time = (stopTime - startTime) / 1000.0;
 		
 		writeTimeInfo("Time for Mapping XCSP to Essence': "+time+"sec");
-		writeStringIntoFileNonStatic(fileName+".eprime", essencePmodel.toString());
-		startTime = stopTime;
-		stopTime = System.currentTimeMillis();
-		time = (stopTime - startTime) / 1000.0;
-		writeInfo("Written Essence' model into file: "+fileName+".eprime");
-		writeTimeInfo("Writing time:"+time+"sec");
+		if(this.settings.getWriteEssencePrimeModelIntoFile()) {
+			writeStringIntoFileNonStatic(fileName+".eprime", essencePmodel.toString());
+			startTime = stopTime;
+			stopTime = System.currentTimeMillis();
+			time = (stopTime - startTime) / 1000.0;
+			writeInfo("Written Essence' model into file: "+fileName+".eprime");
+			writeTimeInfo("Writing time:"+time+"sec");
+		}
 		
 		return essencePmodel.mapToNormalisedModel();
 	}

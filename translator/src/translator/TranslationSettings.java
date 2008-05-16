@@ -31,6 +31,7 @@ public class TranslationSettings {
 	boolean  giveTranslationInfo;
 	boolean debugMode; // print stack trace when exceptions are thrown etc
 	boolean writeTimeInfoIntoFile;
+	boolean writeEssencePIntoFile; // for xcsp conversion
 	String pathToMinion;
 	// the variables whose solutions have been printed by the target solver
 	String[] printedVariables;
@@ -56,6 +57,7 @@ public class TranslationSettings {
 		this.modelName = DEFAULT_MODEL_NAME;
 		this.debugMode = false;
 		this.writeTimeInfoIntoFile = true;
+		this.writeEssencePIntoFile = false;
 	}
 	
 	public TranslationSettings(TargetSolver solver) {	
@@ -72,6 +74,7 @@ public class TranslationSettings {
 		this.essenceP_outputFileName = "out.eprime";
 		this.debugMode = false;
 		this.writeTimeInfoIntoFile = true;
+		this.writeEssencePIntoFile = false;
 	}
 	
 	
@@ -236,5 +239,13 @@ public class TranslationSettings {
 	
 	public void setPrintTranslationTimeIntoFile(boolean turnOn) {
 		this.writeTimeInfoIntoFile = turnOn;
+	}
+	
+	public boolean getWriteEssencePrimeModelIntoFile() {
+		return this.writeEssencePIntoFile;
+	}
+	
+	public void setWriteEssencePrimeModelIntoFile(boolean turnOn) {
+		this.writeEssencePIntoFile = turnOn;
 	}
 }

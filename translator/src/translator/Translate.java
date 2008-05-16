@@ -34,9 +34,10 @@ public class Translate {
 	public static final String NO_COMMON_EXPLICIT_SUBEXPRS = "no-ecse";
 	public static final String TIME_OFF = "no-time"; // don't display time statistics
 	public static final String NO_INFO = "silent"; // silent -> no verbose info
-	public static final String DIRECT_VAR_REUSE = "dvr";
+	public static final String NO_DIRECT_VAR_REUSE = "no-dvr";
 	public static final String DEBUG_MODE = "debug";
 	public static final String TIME_INFO_FILE = "tf"; // don't write translation time into file
+	public static final String WRITE_EP_MODEL_TO_FILE = "out-ep"; // write the Essence' model into a file
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -79,6 +80,10 @@ public class Translate {
 					settings.useExplicitCommonSubExpressions = false;
 				}
 				
+				else if(args[i].equalsIgnoreCase("-"+WRITE_EP_MODEL_TO_FILE)) {
+					settings.setWriteEssencePrimeModelIntoFile(true);
+				}
+				
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
 					settings.setGiveTranslationTimeInfo(false);
 					giveTimeInfo = false;
@@ -96,7 +101,7 @@ public class Translate {
 				}
 				
 				
-				else if(args[i].equalsIgnoreCase("-"+DIRECT_VAR_REUSE)) {
+				else if(args[i].equalsIgnoreCase("-"+NO_DIRECT_VAR_REUSE)) {
 					settings.setApplyDirectVariableReusage(false);
 				}
 
@@ -150,9 +155,9 @@ public class Translate {
 				}
 				
 				else {
-					System.out.println("Sorry, did not understand the flag '"+args[i]+"'\n");
 					printWelcomeMessage();
-					printHelpMessage();
+					System.out.println("Sorry, did not understand the flag '"+args[i]+"'\n");
+					//printHelpMessage();
 					System.exit(1);
 				}
 				
@@ -367,11 +372,12 @@ public class Translate {
 		
 		System.out.println("-"+XCSP_CONVERSION+" filename.xml");
 		System.out.println("\tTranslates the XCSP file 'filename.xml' to Minion input format.");
-		System.out.println("\tThe generated Minion file is written into 'filename.xml.minion'\n");
-		System.out.println("\tPlease make sure that '-xcsp' is the last flag you set.");
+		System.out.println("\tThe generated Minion file is written into 'filename.xml.minion'");
+		System.out.println("\tPlease make sure that '-xcsp' is the last flag you set.\n");
 		System.out.println("-"+XCSP_CONVERSION+" input.xml output.minion");
 		System.out.println("\tTranslates the XCSP file 'input.xml' to Minion input format.");
-		System.out.println("\tThe generated Minion file is written into 'output.minion'\n");
+		System.out.println("\tThe generated Minion file is written into 'output.minion'");
+		System.out.println("\tPlease make sure that '-xcsp' is the last flag you set.\n");
 		
 		System.out.println("\nAvailable flags:");
 		System.out.println("-"+HELP+" or -h\n\tprints this help message");
@@ -380,10 +386,13 @@ public class Translate {
 		//System.out.println("-"+GECODE_TRANSLATION+" or -g");
 		//System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
 		System.out.println("-"+NO_COMMON_SUBEXPRS);
-		System.out.println("\tTurn off reusing equivalent auxiliary variables (exploiting common subexpressions).");
+		System.out.println("\tTurn off eliminating common subexpressions during flattening.");
+		System.out.println("\tDefault: on");
+		System.out.println("-"+NO_DIRECT_VAR_REUSE);
+		System.out.println("\tTurn off directly reusing variables (e.g. in x=y, replacing x with y).");
 		System.out.println("\tDefault: on");
 		System.out.println("-"+NO_COMMON_EXPLICIT_SUBEXPRS);
-		System.out.println("\tTurn off inferring equivalent expressions (which saves auxiliary variables)");
+		System.out.println("\tTurn off eliminating complex common subexpressions.");
 		System.out.println("\tDefault: on");
 		System.out.println("-"+TIME_OFF);
 		System.out.println("\tDon't display time statistics");
@@ -397,9 +406,10 @@ public class Translate {
 		System.out.println("-"+TIME_INFO_FILE);
 		System.out.println("\tDon't write translation time into the output file.");
 		System.out.println("\tDefault: on.");
-		System.out.println("-"+DIRECT_VAR_REUSE);
-		System.out.println("\tTranslate without directly reusing variables (e.g. in x=y, replacing x with y).");
-		System.out.println("\tDefault: on");
+		System.out.println("-"+WRITE_EP_MODEL_TO_FILE);
+		System.out.println("\tWrite the generated Essence' model into a file.");
+		System.out.println("\tDefault: off");
+
 	}
 	
 	
