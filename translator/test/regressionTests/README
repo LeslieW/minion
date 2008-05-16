@@ -53,6 +53,39 @@ sonet_problem.eprime		SONET Problem
 
 
 
+
+
+
+XCSP System Tests (int xcsp/ subdirectory)
+   these tests are run with the -xcsp flag and additional memory for the 
+   Java virtual machine
+---------------------------------------------------------------------------
+Graph Colouring (hos)		diseq
+ash608GPIA-4.xml		
+ash331GPIA-3.xml		(unsat)
+abb313GPIA-5.xml		(unsat)
+
+Queens Problem			abs, weighted sum
+queens-10.xml			10-Queens Problem instance 
+queens-50.xml			50-Queens Problem instance
+
+Knights Tour Problem		abs, modulo, weighted sum, sum, diseq
+knights-10-5.xml		(unsat) non-linear constraints
+knights-20-9.xml		(unsat)
+
+Renault Megane Config Problem	large table constraints
+renault--mgd_ext.xml
+renault_ext.xml
+
+Primes				weighted sum
+primes10-20			(sat)
+primes10-40			(sat)
+primes10-60			(sat)
+primes10-80			(sat)
+
+
+
+
 Flattening Tests
 ---------------------------------------------------------------------------
 add.eprime			flattening of sums: a + b = c + d
@@ -64,3 +97,14 @@ or.eprime			flattening of   \/: a \/ b = c \/ d
 
 
 
+
+
+Semantic Tests
+---------------------------------------------------------------------------
+revForallRange.eprime		tests if a universal quantification over 
+				and empty range, such as int(10..1)
+				produces a valid outcome (ie.true)
+revExistsRange.eprime		tests if a existential quantification over 
+				and empty range, such as int(10..1)
+				produces a valid outcome (ie.false)
+				

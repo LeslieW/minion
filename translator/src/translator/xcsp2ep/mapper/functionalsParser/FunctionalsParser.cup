@@ -84,7 +84,7 @@ action code {:
 terminal	   	ABS, ADD, AND, DIV, EQ;
 terminal 		FALSE, GE, GT, IF, IFF, LE, LT;
 terminal 		MAX, MIN, MOD, MUL, NE, NEG, NOT;
-terminal 		OR, POW, SUB, TRUE, XOR;	 
+terminal 		OR, POW, SUB, TRUE, UMINUS, XOR;	 
 
 
 /* separators  */
@@ -192,8 +192,15 @@ booleanExpression ::=     	FALSE {: RESULT = new RelationalAtomExpression(false)
                         
 integerExpression ::= 	  INTEGER:i 
 						  {: RESULT = new ArithmeticAtomExpression(i); :}
+						  
+						| UMINUS INTEGER:i
+						  {: RESULT = new ArithmeticAtomExpression(-i); :} 
+						  
           				| IDENTIFIER:varName 
           				  {:  RESULT = new ArithmeticAtomExpression(new SimpleVariable(varName)); :}
+          				  
+          				| UMINUS IDENTIFIER:varName
+          				  {:  RESULT = new UnaryMinus(new ArithmeticAtomExpression(new SimpleVariable(varName))); :}  
           				  
           				| NEG  LPAREN integerExpression:e RPAREN
           				  {:  RESULT = new Negation( (Expression) e); :}

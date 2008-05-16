@@ -61,9 +61,10 @@ public class Xcsp2Ep{
 		// parse XCSP instance
 		boolean displayParsedInstance = false;
 		InstanceParser parser = new InstanceParser();
-		parser.loadInstance(inputFile);
+
+		parser.loadInstance(inputFile);	
 		XCSPInstance xcspInstance = parser.parse(displayParsedInstance);
-			
+	
 		// map the XCSP syntax tree to Essence
 		Mapper mapper = new Mapper();
 		EssencePModel essencePmodel = mapper.mapToEssencePrime(xcspInstance);
@@ -86,8 +87,10 @@ public class Xcsp2Ep{
 		boolean displayParsedInstance = false;
 		InstanceParser parser = new InstanceParser();
 		parser.loadInstance(fileName);
+
 		XCSPInstance xcspInstance = parser.parse(displayParsedInstance);
-			
+	
+		
 		// map the XCSP syntax tree to Essence
 		Mapper mapper = new Mapper();
 		EssencePModel essencePmodel = mapper.mapToEssencePrime(xcspInstance);
@@ -109,7 +112,7 @@ public class Xcsp2Ep{
 		
 		InstanceParser parser = new InstanceParser();
 		parser.loadInstance(fileName);
-		XCSPInstance xcspInstance = parser.parse(displayParsedInstance);
+		XCSPInstance xcspInstance = parser.parse(displayParsedInstance);	
 		long stopTime = System.currentTimeMillis();
 		double time = (stopTime - startTime) / 1000.0;
 		writeTimeInfo("XCSP parsing time: "+time+"sec");

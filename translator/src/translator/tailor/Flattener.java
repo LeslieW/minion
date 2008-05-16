@@ -1864,7 +1864,7 @@ public class Flattener {
 				for(int i=conjunction.getArguments().size()-1; i>=0; i--) 
 					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			}
-			
+	 		
 			if(quantification.isGonnaBeFlattenedToVariable())
 				conjunction.willBeFlattenedToVariable(true);
 			

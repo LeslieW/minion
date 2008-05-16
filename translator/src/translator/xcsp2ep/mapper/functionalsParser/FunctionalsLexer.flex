@@ -26,7 +26,7 @@ import java_cup.runtime.*;
   }
 
   private void print_error_msg(String message) {
-     System.out.print("\nLex error:\t"+message+"\n");
+     System.out.print("\nLex error in XCSP functionals parser:\t"+message+"\n");
   }
 
 %}
@@ -80,7 +80,9 @@ Identifier = [:jletter:][:jletterdigit:]*
   ","                           { return getSymbol(sym.COMMA); }
  
 
-
+  /* operators */
+  
+  "-"							{ return getSymbol(sym.UMINUS); }
  
  /* Literals */ 
   {Integer} 		  	{  return getSymbol(sym.INTEGER, new Integer(yytext())); }	 

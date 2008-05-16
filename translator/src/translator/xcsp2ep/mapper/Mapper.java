@@ -56,8 +56,10 @@ public class Mapper {
 			e.orderExpression();
 			if(e.getType() == Expression.BOOL) {
 				 if(! ( (RelationalAtomExpression) e).getBool()) {
-					 throw new MapperException("Instance is not satisfiable:\n"+
-							 "Evaluated a constraint "+buffer+" to false in instance:\n"+xcspInstance);
+					 System.out.println("WARNING: instances is not satisfiable - evaluated "+buffer+" to false.");
+					 constraints.add(e);
+					 //throw new MapperException("Instance is not satisfiable:\n"+
+					//		 "Evaluated a constraint "+buffer+" to false in instance:\n"+xcspInstance);
 				 }
 				// else throw constraint away
 			}
