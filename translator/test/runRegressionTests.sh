@@ -44,7 +44,7 @@ for X in `ls ${TEST_DIR}/*.eprime`
   do
 # if there is a parameter file
 #echo "`ls ${X}*.param`"
-parameters=`ls ${X}*.param`
+parameters=`ls ${X}*.param 2> /dev/null`
 if [ "$parameters" != "" ]; then 
     for Y in `ls ${X}*.param` 
       do

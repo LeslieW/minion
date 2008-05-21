@@ -26,7 +26,13 @@ public class SparseIntRange implements IntRange {
 	}
 
 	public int[] getRange() {
-		return this.sparseElements;
+		if(this.sparseElements.length > 1) {
+			return new int[] {sparseElements[0], 
+							  sparseElements[this.sparseElements.length-1] };
+			
+		}
+		
+		else return new int[] { this.sparseElements[0], sparseElements[0] };
 	}
 
 	public Domain copy() {

@@ -32,8 +32,10 @@ public abstract class PConstraint {
 	public String toString() {
 		String s = "  constraint " + name + " with arity = " + scope.length + ", scope = ";
 		s += scope[0].getName();
-		for (int i = 1; i < scope.length; i++)
-			s += " " + scope[i].getName();
+		for (int i = 1; i < scope.length; i++) {
+			if(scope[i] != null)
+				s += " " + scope[i].getName();
+		}
 		return s;
 	}
 }

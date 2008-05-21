@@ -83,7 +83,15 @@ primes10-40			(sat)
 primes10-60			(sat)
 primes10-80			(sat)
 
-
+Crosswords: 
+lexPuzzle17,11
+ogdHerald15-01,21-06
+ogdPuzzle11,22			(cse)
+wordsPuzzle11,16		(cse)
+ogdVg
+crossword-m1-words05,19		WordsHerald
+heraldUk			(cse)
+uk-puzzle04,11			(cse)
 
 
 Flattening Tests

@@ -23,17 +23,45 @@ public class AbsoluteValue implements UnaryArithmeticExpression {
 	}
 
 	public int[] getDomain() {
+		
+		//System.out.println("Argument is instance of:"+argument.getClass().getSimpleName()+" with type:"+argument.getType());
 		int[] bounds = this.argument.getDomain();
 		
-		int lb = (bounds[0] < 0) ?
-				     bounds[0] + 2*bounds[0] :
-				     bounds[0];
+		//System.out.println("The bounds of the argument of "+this+" are: ("+bounds[0]+".."+bounds[1]+")");
+		
+		int lb = 0;
+		int ub = 0;
+		
+		if(bounds[0] < 0) {
+			lb = 0;
+			if(-bounds[0] > bounds[1]) {
+				ub = -bounds[0];
+			}
+			else ub = bounds[1];
+			//System.out.println("Computed bounds of "+this+": ("+lb+".."+ub+")");
+			return new int[] {lb, ub};
+		}
+		
+		else lb = bounds[0];
+		
+		/* int lb = (bounds[0] < 0) ?
+				    0 : // -bounds[0] :
+		
+				     bounds[0]; */
 				     
-        int ub = (bounds[bounds.length-1] < 0) ?
-			         bounds[bounds.length-1] + 2*bounds[bounds.length-1] :
+		ub = bounds[1];
+        /* ub = (bounds[bounds.length-1] < 0) ?
+			         -bounds[bounds.length-1] :
 			    	 bounds[bounds.length-1];
 			     
-		return new int[] {lb, ub};
+        if(bounds[0] == -bounds[1]) 
+        	lb = 0; */
+			         
+		//System.out.println("Computed bounds of "+this+": ("+lb+".."+ub+")");
+	    //if(lb > ub) 
+	    	//return new int[] {ub,lb};
+	    //else 
+	    return new int[] {lb, ub};
 	}
 
 	public int getType() {

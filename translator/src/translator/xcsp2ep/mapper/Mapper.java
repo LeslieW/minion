@@ -496,72 +496,72 @@ public class Mapper {
 	private int mapOperator(RelationalOperator operator) 
 		throws MapperException {
 		
-		String op = operator.toString();
+		String op = operator.toString(); //operator.toString();
 		
-		if(op.equals(PredicateTokens.ABS))
+		if(op.equalsIgnoreCase(PredicateTokens.ABS))
 			return Expression.ABS;		
 		
-		else if(op.equals(PredicateTokens.ADD))
+		else if(op.equalsIgnoreCase(PredicateTokens.ADD))
 			return Expression.PLUS;
 		
-		else if(op.equals(PredicateTokens.AND))
+		else if(op.equalsIgnoreCase(PredicateTokens.AND))
 			return Expression.AND;
 		
-		else if(op.equals(PredicateTokens.DIV))
+		else if(op.equalsIgnoreCase(PredicateTokens.DIV))
 			return Expression.DIV;
 		
-		else if(op.equals(PredicateTokens.EQ))
+		else if(op.equalsIgnoreCase(PredicateTokens.EQ))
 			return Expression.EQ;
 		
-		else if(op.equals(PredicateTokens.GE))
+		else if(op.equalsIgnoreCase(PredicateTokens.GE))
 			return Expression.GEQ;
 		
-		else if(op.equals(PredicateTokens.GT))
+		else if(op.equalsIgnoreCase(PredicateTokens.GT))
 			return Expression.GREATER;
 		
-		else if(op.equals(PredicateTokens.IF))
+		else if(op.equalsIgnoreCase(PredicateTokens.IF))
 			return Expression.IF;
 		
-		else if(op.equals(PredicateTokens.IFF))
+		else if(op.equalsIgnoreCase(PredicateTokens.IFF))
 			return Expression.IFF;
 		
-		else if(op.equals(PredicateTokens.LE))
+		else if(op.equalsIgnoreCase(PredicateTokens.LE))
 			return Expression.LEQ;
 		
-		else if(op.equals(PredicateTokens.LT))
+		else if(op.equalsIgnoreCase(PredicateTokens.LT))
 			return Expression.LESS;
 		
-		else if(op.equals(PredicateTokens.MAX))
+		else if(op.equalsIgnoreCase(PredicateTokens.MAX))
 			return Expression.MAX;
 		
-		else if(op.equals(PredicateTokens.MIN))
+		else if(op.equalsIgnoreCase(PredicateTokens.MIN))
 			return Expression.MIN;
 		
-		else if(op.equals(PredicateTokens.MOD))
+		else if(op.equalsIgnoreCase(PredicateTokens.MOD))
 			return Expression.MOD;
 		
-		else if(op.equals(PredicateTokens.MUL))
+		else if(op.equalsIgnoreCase(PredicateTokens.MUL))
 			return Expression.MULT;
 		
-		else if(op.equals(PredicateTokens.NE))
+		else if(op.equalsIgnoreCase(PredicateTokens.NE))
 			return Expression.NEQ;
 		
-		else if(op.equals(PredicateTokens.NEG))
+		else if(op.equalsIgnoreCase(PredicateTokens.NEG))
 			return Expression.NEGATION;
 		
-		else if(op.equals(PredicateTokens.NOT))
+		else if(op.equalsIgnoreCase(PredicateTokens.NOT))
 			return Expression.NEGATION;
 		
-		else if(op.equals(PredicateTokens.OR))
+		else if(op.equalsIgnoreCase(PredicateTokens.OR))
 			return Expression.OR;
 		
-		else if(op.equals(PredicateTokens.POW))
+		else if(op.equalsIgnoreCase(PredicateTokens.POW))
 			return Expression.POWER;
 		
-		else if(op.equals(PredicateTokens.SUB))
+		else if(op.equalsIgnoreCase(PredicateTokens.SUB))
 			return Expression.MINUS;
 		
-		else if(op.equals(PredicateTokens.XOR))
+		else if(op.equalsIgnoreCase(PredicateTokens.XOR))
 			return Expression.XOR;
 		
 		else throw new MapperException("Unknown or unsupported operator: "+op);
