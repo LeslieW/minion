@@ -226,7 +226,9 @@ public class Translator {
 	public boolean tailorTo(NormalisedModel model, TargetSolver targetSolver) {
 		
 		this.normalisedModel = model;
-		
+		if(settings.getPropagateSingleIntRanges())
+			normalisedModel.propagateSingleRangeDecisionVariables();
+
 		try {
 			// flattening
 			long startTime = System.currentTimeMillis();
@@ -337,6 +339,9 @@ public class Translator {
 			this.normalisedModel = normaliser.normalise(this.problemSpecification,
 					                                    this.parameterSpecification,
 					                                    NormaliserSpecification.NORMALISE_FULL);
+			if(this.settings.getPropagateSingleIntRanges())
+				this.normalisedModel.propagateSingleRangeDecisionVariables();
+			
 			//System.out.println("Problem spec after normalisation:"+normalisedModel);
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();

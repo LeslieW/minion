@@ -65,6 +65,9 @@ ash608GPIA-4.xml
 ash331GPIA-3.xml		(unsat)
 abb313GPIA-5.xml		(unsat)
 
+Graph Colouring			diseq
+insertion: full, k
+
 Queens Problem			abs, weighted sum
 queens-10.xml			10-Queens Problem instance 
 queens-50.xml			50-Queens Problem instance
@@ -92,6 +95,33 @@ ogdVg
 crossword-m1-words05,19		WordsHerald
 heraldUk			(cse)
 uk-puzzle04,11			(cse)
+
+Frequency Assignement Problem   sparse vars, abs, weighted sum, reif. ineq, prod
+fapp1,4,16,17,18		(cse)
+
+
+Radio Link Frequency Assignement Problem (rlfap)  
+                                sparse vars, abs, weighted sum, reif. ineq 
+scen3,8
+graphs3,11  
+
+
+TimeTabeling			sum, reified diseq (+ single domain propagation)
+patat small			
+patat competition
+
+Black Hole			table constraints (+evaluation (singledomain propagation))
+Black Hole4-7 e,h
+
+
+Quasigroup instances		table constraints on sparse bounds (no support)
+bqwh11,10,26,84
+
+Cril				table constraints
+cril0,6,7
+
+Haystacks
+haystacks11,26			unsat
 
 
 Flattening Tests

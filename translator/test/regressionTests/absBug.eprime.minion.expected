@@ -10,8 +10,8 @@ MINION 3
 # amount of auxiliary variables: 2
 
 **VARIABLES**
-DISCRETE a {16..394}
-DISCRETE b {16..792}
+BOUND a {16..394}
+BOUND b {16..792}
 
 # auxiliary variables
 BOUND aux0 {-776..378}

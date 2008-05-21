@@ -74,8 +74,52 @@ public class TableConstraint implements RelationalExpression {
 	}
 
 	public Expression insertValueForVariable(int value, String variableName) {
-		for(int i=0; i<this.variableList.length; i++)
-			this.variableList[i] = (Variable) this.variableList[i].insertValueForVariable(value, variableName);
+		for(int i=0; i<this.variableList.length; i++) {
+			Expression e = this.variableList[i].insertValueForVariable(value, variableName);
+			if(e instanceof Variable) {
+				this.variableList[i] = (Variable) e;
+			}
+			else {
+				if(e.getType() == INT) {
+					int v = ((ArithmeticAtomExpression) e).getConstant();
+					for(int j=0; j<this.tupleList.length; j++) {
+						ConstantTuple valueTuple = tupleList[j];
+						// if the const value in tuple representing the variable at position i equals the value
+						if(valueTuple.tupleElements[i] == v) {
+							ArrayList<Expression> eqConstraints= new ArrayList<Expression>();
+							for(int k=0; k<variableList.length; k++) {
+								if(k != i) {
+									if(!this.isConflictingTable) {
+										eqConstraints.add(new CommutativeBinaryRelationalExpression(
+											                      new ArithmeticAtomExpression(variableList[k]),
+											                      EQ,
+											                      new ArithmeticAtomExpression(valueTuple.tupleElements[k]))
+									                  );
+									}
+									else {
+										eqConstraints.add(new CommutativeBinaryRelationalExpression(
+							                      new ArithmeticAtomExpression(variableList[k]),
+							                      NEQ,
+							                      new ArithmeticAtomExpression(valueTuple.tupleElements[k]))
+					                  );
+									}
+								}
+							} 
+					
+							return new Conjunction(eqConstraints);
+						
+						}
+						
+					}
+					// if we reach this point, then the constant tuple list did not have the value we inserted the variable for
+					if(!this.isConflictingTable)
+						return new RelationalAtomExpression(false);
+					else 
+						return new RelationalAtomExpression(true);
+				}
+			}
+			//this.variableList[i] = (Variable) this.variableList[i].insertValueForVariable(value, variableName);
+		}
 		
 		return this;
 	}

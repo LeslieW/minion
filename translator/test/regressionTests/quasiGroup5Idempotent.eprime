@@ -37,4 +37,4 @@ such that
 
      $ Symmetry-breaking constraints	
      forall i : nDomain .
-           quasiGroup[i,n-1] + 2 >= i
+           quasiGroup[i,n-1] + 2  >= i

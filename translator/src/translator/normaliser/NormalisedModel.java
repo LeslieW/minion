@@ -9,6 +9,8 @@ import translator.expression.Expression;
 import translator.expression.Variable;
 import translator.expression.ConstantArray;
 import translator.expression.Objective;
+import translator.expression.SingleIntRange;
+import translator.expression.Conjunction;
 
 public class NormalisedModel {
 
@@ -87,7 +89,7 @@ public class NormalisedModel {
 	// =============== METHODS =======================================
 
 
-	protected void evaluateDomains() {
+	public void evaluateDomains() {
 		
 		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
 			Domain d = this.decisionVariables.get(decisionVariablesNames.get(i));
@@ -125,10 +127,47 @@ public class NormalisedModel {
 		return this.auxiliaryVariables.get(this.auxiliaryVariables.size()-1);
 	}
 	
-	public void removeLastAuxiliaryVariable() {
+	/* public void removeLastAuxiliaryVariable() {
 		if(this.auxiliaryVariables.size() > 0)
 			this.auxiliaryVariables.remove(this.auxiliaryVariables.size()-1);
+	}*/
+	
+	public void propagateSingleRangeDecisionVariables() {
+		
+		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
+			String varName = this.decisionVariablesNames.get(i);
+			Domain domain = this.decisionVariables.get(varName);
+			//System.out.println("Testing "+varName+"'s domain for singleIntRanges: "+domain+" with "+domain.getClass());
+			if(domain instanceof SingleIntRange) {
+				//System.out.println("We found a single int range: "+varName+" with "+domain);
+				int value = ((SingleIntRange) domain).getSingleRange();
+				for(int j=0; j<this.constraintList.size(); j++) {
+					Expression constraint = constraintList.remove(j);
+					constraint = constraint.insertValueForVariable(value, varName);
+					//System.out.println("Inserted "+value+" for "+varName+" in constraint: "+constraint);
+					constraint.orderExpression();
+					constraint = constraint.evaluate();
+					constraint = constraint.restructure();
+					if(constraint instanceof Conjunction) {
+						ArrayList<Expression> arguments = ((Conjunction) constraint).getArguments();
+						//System.out.println("Gonna insert the arguments:"+arguments);
+						int nbArgs = arguments.size();
+						for(int k=0; k< nbArgs; k++ ) {
+							//System.out.println("Adding constraint:"+arguments.get(0));
+							this.constraintList.add(j, arguments.remove(0));
+							
+						}
+						j = j + nbArgs - 1;
+						
+					}
+					else constraintList.add(j, constraint);
+				}
+			}
+		}
+		
+		//return false;
 	}
+	
 	
 	public int getAmountOfCommonSubExpressionsUsed() {
 		return this.usedCommonSubExpressions;

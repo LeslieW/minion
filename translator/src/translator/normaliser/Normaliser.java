@@ -28,6 +28,7 @@ public class Normaliser implements NormaliserSpecification {
 	HashMap<String, int[]> constantArrayOffsets;
 	HashMap<String, Domain> parameterDomains;
 	
+	
 	//=========================== CONSTRUCTOR =====================================================================
 	
 	public Normaliser() {
@@ -110,19 +111,24 @@ public class Normaliser implements NormaliserSpecification {
 		
 		Objective objective = (Objective) constraints.remove(0);
 		
+		NormalisedModel normalisedModel;
+		
+		
 		if(this.constantArrayNames.size() ==0)
-			return new NormalisedModel(this.decisionVariables,
+			normalisedModel = new NormalisedModel(this.decisionVariables,
 									   this.decisionVariablesNames,
 									   constraints,
 									   objective);
 		
 		else 
-			return new NormalisedModel(this.decisionVariables,
+			normalisedModel = new NormalisedModel(this.decisionVariables,
 										this.decisionVariablesNames,
 										constraints,
 										this.constantArrays,
 										this.constantArrayOffsets,
 										objective);
+		normalisedModel.evaluateDomains();
+		return normalisedModel;
 	}
 	
 

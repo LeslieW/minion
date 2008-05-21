@@ -22,6 +22,7 @@ public class MinionModel {
 	ArrayList<MinionConstraint> constraintList;
 	HashMap<String, ConstantDomain> decisionVariables;
 	HashMap<String, MinionAtom> equalAtoms;
+	HashMap<String, Boolean> variableIsDiscrete = new HashMap<String, Boolean>();
 	ArrayList<String> decisionVariablesNames;
 	ArrayList<String> variableAliases;
 	ArrayList<Variable> auxVariables;
@@ -434,14 +435,17 @@ public class MinionModel {
 			}
 			
 			else if(domain instanceof BoundedIntRange) {
-				domainString.append("DISCRETE");
 				int[] range = ((BoundedIntRange) domain).getRange();
+				if(range[1] - range[0] > settings.getDiscreteUpperBound())
+					domainString.append("BOUND");
+				else domainString.append("DISCRETE");
 				rangeString.append("{"+range[0]+".."+range[1]+"}");
 			}
 			
 			else if(domain instanceof SingleIntRange) {
-				domainString.append("SPARSEBOUND");
-				rangeString.append("{"+ ( (SingleIntRange) domain).getSingleRange() +"}");
+				//domainString.append("SPARSEBOUND");
+				domainString.append("DISCRETE");
+				rangeString.append("{"+ ( (SingleIntRange) domain).getSingleRange() +".."+( (SingleIntRange) domain).getSingleRange()+"}");
 			}
 			
 			else if(domain instanceof ConstantArrayDomain) {
@@ -460,8 +464,11 @@ public class MinionModel {
 					rangeString.append("}");
 				}
 				else if(baseDomain instanceof BoundedIntRange) {
-					domainString.append("DISCRETE");
 					int[] range = ((BoundedIntRange) baseDomain).getRange();
+					if(range[1] - range[0] > settings.getDiscreteUpperBound())
+						domainString.append("BOUND");
+					else domainString.append("DISCRETE");
+					
 					rangeString.append("{"+range[0]+".."+range[1]+"}");
 				}
 				

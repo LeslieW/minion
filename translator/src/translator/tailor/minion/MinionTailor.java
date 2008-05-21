@@ -24,6 +24,7 @@ public class MinionTailor {
 	Minion solverSettings;
 	HashMap<String, MinionAtom> minionSubExpressions;
 	HashMap<String, ArithmeticAtomExpression> essenceSubExpressions;
+	HashMap<String, Boolean> variableIsDiscrete = new HashMap<String, Boolean>();
 	TranslationSettings settings;
 	
 	// ======== CONSTRUCTOR ==================================
@@ -342,6 +343,7 @@ public class MinionTailor {
 		for(int i=0; i<oldVars.length; i++) {
 			oldVars[i].willBeFlattenedToVariable(true);
 			variables[i] = toMinion(new ArithmeticAtomExpression(oldVars[i]));
+			this.variableIsDiscrete.put(variables[i].getVariableName(), new Boolean(true));
 		}
 		
 		if(table.isGonnaBeFlattenedToVariable()){
@@ -437,6 +439,7 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(ElementConstraint elementConstraint) 
 		throws MinionException {
 		
+		int[] bounds = elementConstraint.getArguments()[0].getDomain();
 		
 		MinionArray indexedArray = toMinionArray((Array) elementConstraint.getArguments()[0]);
 		Expression indexExpression = elementConstraint.getArguments()[1];
@@ -458,15 +461,23 @@ public class MinionTailor {
 		
 		MinionAtom result = (MinionAtom) toMinion(resultExpression);
 		
+		boolean isWatched = true;
+		
+		if(bounds[1] - bounds[0] > settings.getDiscreteUpperBound()) {
+			isWatched = false;
+		}
+		
 		if(elementConstraint.isGonnaBeFlattenedToVariable()) {
 			this.minionModel.constraintList.add(new Element(indexedArray,
 					                                        index,
-					                                        result));
+					                                        result,
+															isWatched));
 			return result;
 		}
 		else return new Element(indexedArray,
 								index,
-								result);
+								result,
+								isWatched);
 	}
 	
 	/**

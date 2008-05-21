@@ -981,6 +981,115 @@ public class Flattener {
 		}
 		
 		
+		
+		// max values
+		if(rightExpression instanceof Minimum && expression.getOperator() == Expression.EQ) {
+			
+			Expression argument = ((Minimum) rightExpression).getArgument();
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN)
+					|| expression.isGonnaBeFlattenedToVariable())
+				leftExpression.willBeFlattenedToVariable(true);
+			
+			
+			if(hasCommonSubExpression(leftExpression))
+				leftExpression = getCommonSubExpression(leftExpression);
+			
+			else {
+				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+				leftExpression = flattenExpression(leftExpression);
+				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
+				addToSubExpressions(rightExpression, leftExpression);
+			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+			}
+			
+			
+			// check if the solver supports variables only as result of absolute value
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
+				argument.willBeFlattenedToVariable(true);
+			
+			argument = flattenExpression(argument);
+			
+			// add subexpression after flattening
+			if(!hasCommonSubExpression(argument)) {
+				addToSubExpressions(argument, leftExpression);
+			}
+			
+			if(!(argument instanceof Array))
+				throw new TailorException("Invalid argument of "+rightExpression+": "+argument+" is not an array.");
+			
+			MinimumConstraint minConstraint = new MinimumConstraint((Array) argument, 
+																	leftExpression, 
+																	((Minimum) rightExpression).isMaximum());
+			
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				this.constraintBuffer.add(minConstraint);
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
+				return leftExpression;
+			}
+			else  {
+				if(!expression.isNested())
+					minConstraint.setIsNotNested();
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
+				return minConstraint;
+			}
+		}
+		else if(leftExpression instanceof Minimum && 
+				expression.getOperator() == Expression.EQ) {
+		
+			Expression argument = ((Minimum) leftExpression).getArgument();
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN)
+					|| expression.isGonnaBeFlattenedToVariable())
+				rightExpression.willBeFlattenedToVariable(true);
+			rightExpression = flattenExpression(rightExpression);
+			
+			if(!hasCommonSubExpression(leftExpression)) {
+				addToSubExpressions(leftExpression, rightExpression);
+			}
+			
+			// check if the solver supports variables only as result of absolute value
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
+				argument.willBeFlattenedToVariable(true);
+			
+			argument = flattenExpression(argument);
+			
+			// add subexpression after flattening
+			if(!hasCommonSubExpression(argument)) {
+				addToSubExpressions(argument, rightExpression);
+			}
+			
+			
+			if(!(argument instanceof Array))
+				throw new TailorException("Invalid argument of "+leftExpression+": "+argument+" is not an array.");
+			
+			MinimumConstraint minConstraint = new MinimumConstraint((Array) argument, 
+																	rightExpression, 
+																	((Minimum) leftExpression).isMaximum());
+			
+			
+			if(!expression.isNested())
+				minConstraint.setIsNotNested();
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				this.constraintBuffer.add(minConstraint);
+				return rightExpression;
+			}
+			else return minConstraint;
+			
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		//3. Detect element constraints
 		if(!this.targetSolver.supportsVariableArrayIndexing()) {
 			if( (rightExpression.getType() == Expression.INT_ARRAY_VAR ||

@@ -38,6 +38,7 @@ public class Translate {
 	public static final String DEBUG_MODE = "debug";
 	public static final String TIME_INFO_FILE = "tf"; // don't write translation time into file
 	public static final String WRITE_EP_MODEL_TO_FILE = "out-ep"; // write the Essence' model into a file
+	public static final String NO_PROPAGATE_SINGLE_DOMAINS = "no-sdp"; // don't propagate single domains, e.g. (1..1)
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -78,6 +79,10 @@ public class Translate {
 					settings.setUseExplicitCommonSubExpressions(false);	
 					settings.useEqualSubExpressions = false;
 					settings.useExplicitCommonSubExpressions = false;
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+NO_PROPAGATE_SINGLE_DOMAINS)) {
+					settings.setPropagateSingleIntRanges(false);
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+WRITE_EP_MODEL_TO_FILE)) {
@@ -393,6 +398,11 @@ public class Translate {
 		System.out.println("\tDefault: on");
 		System.out.println("-"+NO_COMMON_EXPLICIT_SUBEXPRS);
 		System.out.println("\tTurn off eliminating complex common subexpressions.");
+		System.out.println("\tDefault: on");
+		System.out.println("-"+NO_PROPAGATE_SINGLE_DOMAINS);
+		System.out.println("\tTurn off propagating single domains on constraints.");
+		System.out.println("\t(for instance, if variable X ranges over (1..1) then replace every .");
+		System.out.println("\toccurrence of X with 1).");
 		System.out.println("\tDefault: on");
 		System.out.println("-"+TIME_OFF);
 		System.out.println("\tDon't display time statistics");
