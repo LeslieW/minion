@@ -865,7 +865,7 @@ public class MinionTailor {
 		if(conjunction.isGonnaBeFlattenedToVariable()) {
 			return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(arguments.length)));
 		}
-		else return new SumGeqConstraint(arguments, new MinionConstant(arguments.length));
+		else return new SumGeqConstraint(arguments, new MinionConstant(arguments.length), !conjunction.isNested()); // make it a watched sum!
 		
 		
 	}
@@ -901,7 +901,7 @@ public class MinionTailor {
 		if(disjunction.isGonnaBeFlattenedToVariable()) {
 			return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(1)));
 		}
-		else return new SumGeqConstraint(arguments, new MinionConstant(1));
+		else return new SumGeqConstraint(arguments, new MinionConstant(1), !disjunction.isNested()); // make it a watched sum!
 	}
 	
 	

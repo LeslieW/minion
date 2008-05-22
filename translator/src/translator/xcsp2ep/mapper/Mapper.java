@@ -217,6 +217,8 @@ public class Mapper {
 		// parse and map the predicate functional
 		PPredicate predicate = xcspConstraint.getPredicate();
 		Expression predicateExpression = mapFunctional(predicate.getFunctionalExpression());
+		//System.out.println("Mapped functional "+predicate.getFunctionalExpression()+
+		//		"\nof predicate:"+predicate+"\nto: "+predicateExpression);
 		
 		// constraint parameters
 		String[] predicateParameters = predicate.getFormalParameters();

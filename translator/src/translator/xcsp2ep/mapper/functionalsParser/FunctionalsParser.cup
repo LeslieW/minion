@@ -311,16 +311,26 @@ integerExpression ::= 	  INTEGER:i
                         	                  ); 
                           :}  
           				
-          				| IF   LPAREN booleanExpression COMMA integerExpression COMMA integerExpression RPAREN
+          				| IF   LPAREN booleanExpression:e1 COMMA integerExpression:e2 COMMA integerExpression:e3 RPAREN
                         {: 
-                           /* RelationalExpression e1 = 
-                        
-                           RESULT = new CommutativeBinaryRelationalExpression
+                            RelationalExpression first = new NonCommutativeRelationalBinaryExpression
                                              ( (Expression) e1,
-                                                Expression.MAX,
+                                                Expression.IF,
                         	                   (Expression) e2
-                        	                  ); */
-                           RESULT = new ArithmeticAtomExpression(0);	                  
+                        	                  );  
+                        
+                        	RelationalExpression second = new NonCommutativeRelationalBinaryExpression
+                                             ( new Negation((Expression) e1),
+                                                Expression.IF,
+                        	                   (Expression) e3
+                        	                  );
+                        
+                        
+                           RESULT = new Conjunction
+                                             ( new Expression[] {first, second} ); 
+                        	                  
+                        	                  
+                           //RESULT = new ArithmeticAtomExpression(0);	                  
                         	                  
                         	                  :}  
  ;                       

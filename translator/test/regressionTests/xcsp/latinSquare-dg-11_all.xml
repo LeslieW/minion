@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<instance>
+<presentation name="?" maxConstraintArity="11" format="XCSP 2.0"/>
+
+<domains nbDomains="1">
+<domain name="D0" nbValues="11">0..10</domain>
+</domains>
+
+<variables nbVariables="121">
+<variable name="V0" domain="D0"/>
+<variable name="V1" domain="D0"/>
+<variable name="V2" domain="D0"/>
+<variable name="V3" domain="D0"/>
+<variable name="V4" domain="D0"/>
+<variable name="V5" domain="D0"/>
+<variable name="V6" domain="D0"/>
+<variable name="V7" domain="D0"/>
+<variable name="V8" domain="D0"/>
+<variable name="V9" domain="D0"/>
+<variable name="V10" domain="D0"/>
+<variable name="V11" domain="D0"/>
+<variable name="V12" domain="D0"/>
+<variable name="V13" domain="D0"/>
+<variable name="V14" domain="D0"/>
+<variable name="V15" domain="D0"/>
+<variable name="V16" domain="D0"/>
+<variable name="V17" domain="D0"/>
+<variable name="V18" domain="D0"/>
+<variable name="V19" domain="D0"/>
+<variable name="V20" domain="D0"/>
+<variable name="V21" domain="D0"/>
+<variable name="V22" domain="D0"/>
+<variable name="V23" domain="D0"/>
+<variable name="V24" domain="D0"/>
+<variable name="V25" domain="D0"/>
+<variable name="V26" domain="D0"/>
+<variable name="V27" domain="D0"/>
+<variable name="V28" domain="D0"/>
+<variable name="V29" domain="D0"/>
+<variable name="V30" domain="D0"/>
+<variable name="V31" domain="D0"/>
+<variable name="V32" domain="D0"/>
+<variable name="V33" domain="D0"/>
+<variable name="V34" domain="D0"/>
+<variable name="V35" domain="D0"/>
+<variable name="V36" domain="D0"/>
+<variable name="V37" domain="D0"/>
+<variable name="V38" domain="D0"/>
+<variable name="V39" domain="D0"/>
+<variable name="V40" domain="D0"/>
+<variable name="V41" domain="D0"/>
+<variable name="V42" domain="D0"/>
+<variable name="V43" domain="D0"/>
+<variable name="V44" domain="D0"/>
+<variable name="V45" domain="D0"/>
+<variable name="V46" domain="D0"/>
+<variable name="V47" domain="D0"/>
+<variable name="V48" domain="D0"/>
+<variable name="V49" domain="D0"/>
+<variable name="V50" domain="D0"/>
+<variable name="V51" domain="D0"/>
+<variable name="V52" domain="D0"/>
+<variable name="V53" domain="D0"/>
+<variable name="V54" domain="D0"/>
+<variable name="V55" domain="D0"/>
+<variable name="V56" domain="D0"/>
+<variable name="V57" domain="D0"/>
+<variable name="V58" domain="D0"/>
+<variable name="V59" domain="D0"/>
+<variable name="V60" domain="D0"/>
+<variable name="V61" domain="D0"/>
+<variable name="V62" domain="D0"/>
+<variable name="V63" domain="D0"/>
+<variable name="V64" domain="D0"/>
+<variable name="V65" domain="D0"/>
+<variable name="V66" domain="D0"/>
+<variable name="V67" domain="D0"/>
+<variable name="V68" domain="D0"/>
+<variable name="V69" domain="D0"/>
+<variable name="V70" domain="D0"/>
+<variable name="V71" domain="D0"/>
+<variable name="V72" domain="D0"/>
+<variable name="V73" domain="D0"/>
+<variable name="V74" domain="D0"/>
+<variable name="V75" domain="D0"/>
+<variable name="V76" domain="D0"/>
+<variable name="V77" domain="D0"/>
+<variable name="V78" domain="D0"/>
+<variable name="V79" domain="D0"/>
+<variable name="V80" domain="D0"/>
+<variable name="V81" domain="D0"/>
+<variable name="V82" domain="D0"/>
+<variable name="V83" domain="D0"/>
+<variable name="V84" domain="D0"/>
+<variable name="V85" domain="D0"/>
+<variable name="V86" domain="D0"/>
+<variable name="V87" domain="D0"/>
+<variable name="V88" domain="D0"/>
+<variable name="V89" domain="D0"/>
+<variable name="V90" domain="D0"/>
+<variable name="V91" domain="D0"/>
+<variable name="V92" domain="D0"/>
+<variable name="V93" domain="D0"/>
+<variable name="V94" domain="D0"/>
+<variable name="V95" domain="D0"/>
+<variable name="V96" domain="D0"/>
+<variable name="V97" domain="D0"/>
+<variable name="V98" domain="D0"/>
+<variable name="V99" domain="D0"/>
+<variable name="V100" domain="D0"/>
+<variable name="V101" domain="D0"/>
+<variable name="V102" domain="D0"/>
+<variable name="V103" domain="D0"/>
+<variable name="V104" domain="D0"/>
+<variable name="V105" domain="D0"/>
+<variable name="V106" domain="D0"/>
+<variable name="V107" domain="D0"/>
+<variable name="V108" domain="D0"/>
+<variable name="V109" domain="D0"/>
+<variable name="V110" domain="D0"/>
+<variable name="V111" domain="D0"/>
+<variable name="V112" domain="D0"/>
+<variable name="V113" domain="D0"/>
+<variable name="V114" domain="D0"/>
+<variable name="V115" domain="D0"/>
+<variable name="V116" domain="D0"/>
+<variable name="V117" domain="D0"/>
+<variable name="V118" domain="D0"/>
+<variable name="V119" domain="D0"/>
+<variable name="V120" domain="D0"/>
+</variables>
+
+<constraints nbConstraints="44">
+<constraint name="C0" arity="11" scope="V0 V1 V2 V3 V4 V5 V6 V7 V8 V9 V10" reference="global:allDifferent"/>
+<constraint name="C1" arity="11" scope="V11 V12 V13 V14 V15 V16 V17 V18 V19 V20 V21" reference="global:allDifferent"/>
+<constraint name="C2" arity="11" scope="V22 V23 V24 V25 V26 V27 V28 V29 V30 V31 V32" reference="global:allDifferent"/>
+<constraint name="C3" arity="11" scope="V33 V34 V35 V36 V37 V38 V39 V40 V41 V42 V43" reference="global:allDifferent"/>
+<constraint name="C4" arity="11" scope="V44 V45 V46 V47 V48 V49 V50 V51 V52 V53 V54" reference="global:allDifferent"/>
+<constraint name="C5" arity="11" scope="V55 V56 V57 V58 V59 V60 V61 V62 V63 V64 V65" reference="global:allDifferent"/>
+<constraint name="C6" arity="11" scope="V66 V67 V68 V69 V70 V71 V72 V73 V74 V75 V76" reference="global:allDifferent"/>
+<constraint name="C7" arity="11" scope="V77 V78 V79 V80 V81 V82 V83 V84 V85 V86 V87" reference="global:allDifferent"/>
+<constraint name="C8" arity="11" scope="V88 V89 V90 V91 V92 V93 V94 V95 V96 V97 V98" reference="global:allDifferent"/>
+<constraint name="C9" arity="11" scope="V99 V100 V101 V102 V103 V104 V105 V106 V107 V108 V109" reference="global:allDifferent"/>
+<constraint name="C10" arity="11" scope="V110 V111 V112 V113 V114 V115 V116 V117 V118 V119 V120" reference="global:allDifferent"/>
+<constraint name="C11" arity="11" scope="V0 V11 V22 V33 V44 V55 V66 V77 V88 V99 V110" reference="global:allDifferent"/>
+<constraint name="C12" arity="11" scope="V1 V12 V23 V34 V45 V56 V67 V78 V89 V100 V111" reference="global:allDifferent"/>
+<constraint name="C13" arity="11" scope="V2 V13 V24 V35 V46 V57 V68 V79 V90 V101 V112" reference="global:allDifferent"/>
+<constraint name="C14" arity="11" scope="V3 V14 V25 V36 V47 V58 V69 V80 V91 V102 V113" reference="global:allDifferent"/>
+<constraint name="C15" arity="11" scope="V4 V15 V26 V37 V48 V59 V70 V81 V92 V103 V114" reference="global:allDifferent"/>
+<constraint name="C16" arity="11" scope="V5 V16 V27 V38 V49 V60 V71 V82 V93 V104 V115" reference="global:allDifferent"/>
+<constraint name="C17" arity="11" scope="V6 V17 V28 V39 V50 V61 V72 V83 V94 V105 V116" reference="global:allDifferent"/>
+<constraint name="C18" arity="11" scope="V7 V18 V29 V40 V51 V62 V73 V84 V95 V106 V117" reference="global:allDifferent"/>
+<constraint name="C19" arity="11" scope="V8 V19 V30 V41 V52 V63 V74 V85 V96 V107 V118" reference="global:allDifferent"/>
+<constraint name="C20" arity="11" scope="V9 V20 V31 V42 V53 V64 V75 V86 V97 V108 V119" reference="global:allDifferent"/>
+<constraint name="C21" arity="11" scope="V10 V21 V32 V43 V54 V65 V76 V87 V98 V109 V120" reference="global:allDifferent"/>
+<constraint name="C22" arity="11" scope="V110 V1 V13 V25 V37 V49 V61 V73 V85 V97 V109" reference="global:allDifferent"/>
+<constraint name="C23" arity="11" scope="V99 V111 V2 V14 V26 V38 V50 V62 V74 V86 V98" reference="global:allDifferent"/>
+<constraint name="C24" arity="11" scope="V88 V100 V112 V3 V15 V27 V39 V51 V63 V75 V87" reference="global:allDifferent"/>
+<constraint name="C25" arity="11" scope="V77 V89 V101 V113 V4 V16 V28 V40 V52 V64 V76" reference="global:allDifferent"/>
+<constraint name="C26" arity="11" scope="V66 V78 V90 V102 V114 V5 V17 V29 V41 V53 V65" reference="global:allDifferent"/>
+<constraint name="C27" arity="11" scope="V55 V67 V79 V91 V103 V115 V6 V18 V30 V42 V54" reference="global:allDifferent"/>
+<constraint name="C28" arity="11" scope="V44 V56 V68 V80 V92 V104 V116 V7 V19 V31 V43" reference="global:allDifferent"/>
+<constraint name="C29" arity="11" scope="V33 V45 V57 V69 V81 V93 V105 V117 V8 V20 V32" reference="global:allDifferent"/>
+<constraint name="C30" arity="11" scope="V22 V34 V46 V58 V70 V82 V94 V106 V118 V9 V21" reference="global:allDifferent"/>
+<constraint name="C31" arity="11" scope="V11 V23 V35 V47 V59 V71 V83 V95 V107 V119 V10" reference="global:allDifferent"/>
+<constraint name="C32" arity="11" scope="V0 V12 V24 V36 V48 V60 V72 V84 V96 V108 V120" reference="global:allDifferent"/>
+<constraint name="C33" arity="11" scope="V0 V21 V31 V41 V51 V61 V71 V81 V91 V101 V111" reference="global:allDifferent"/>
+<constraint name="C34" arity="11" scope="V1 V11 V32 V42 V52 V62 V72 V82 V92 V102 V112" reference="global:allDifferent"/>
+<constraint name="C35" arity="11" scope="V2 V12 V22 V43 V53 V63 V73 V83 V93 V103 V113" reference="global:allDifferent"/>
+<constraint name="C36" arity="11" scope="V3 V13 V23 V33 V54 V64 V74 V84 V94 V104 V114" reference="global:allDifferent"/>
+<constraint name="C37" arity="11" scope="V4 V14 V24 V34 V44 V65 V75 V85 V95 V105 V115" reference="global:allDifferent"/>
+<constraint name="C38" arity="11" scope="V5 V15 V25 V35 V45 V55 V76 V86 V96 V106 V116" reference="global:allDifferent"/>
+<constraint name="C39" arity="11" scope="V6 V16 V26 V36 V46 V56 V66 V87 V97 V107 V117" reference="global:allDifferent"/>
+<constraint name="C40" arity="11" scope="V7 V17 V27 V37 V47 V57 V67 V77 V98 V108 V118" reference="global:allDifferent"/>
+<constraint name="C41" arity="11" scope="V8 V18 V28 V38 V48 V58 V68 V78 V88 V109 V119" reference="global:allDifferent"/>
+<constraint name="C42" arity="11" scope="V9 V19 V29 V39 V49 V59 V69 V79 V89 V99 V120" reference="global:allDifferent"/>
+<constraint name="C43" arity="11" scope="V10 V20 V30 V40 V50 V60 V70 V80 V90 V100 V110" reference="global:allDifferent"/>
+</constraints>
+</instance>

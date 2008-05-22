@@ -124,6 +124,68 @@ Haystacks
 haystacks11,26			unsat
 
 
+Job-Shop			watchsum, reified sum
+e0ddr1
+enddr1
+
+Job Shop/ Job Open Taillard	watchsum, sum, reified sum
+js-taillard*
+os-taillard*			(discrete vs. bounds)
+
+
+Multi-knapsack			weighted sum
+mknap0,4
+
+Open Shop (Competition 2006)	sum, reified sum, watchsum
+gp10*				(single domain propagation)
+
+
+Radar Surveillance		reify ineq,watchsum, diseq, reify sum	
+radar*				(cse)
+
+
+QuasiGroup Completion Problem   table constraints
+qcp*				(evaluated tables!)
+qwh (with holes)		(evaluated tables!)
+
+
+Super-Jobs, Super-Queens	same constraints as jobs/queens instances
+super-e*
+super-q*
+
+
+All Interval Series		weighted sum, abs, sum
+series-*
+
+BIBD
+bibd8				product, sum
+
+Chessboard Coloration		
+cc*				(cse!)
+
+Costas Array			weightedsum, alldiff
+costasArray*
+
+Domino				reify eq, reify sum,eq, product, watchsum
+domin0-*			direct variable usage (different #solutions!)
+
+Golomb Ruler (arity3 and arity4)  diseq, sum, (weighted sum ar4)
+ruler*a3
+ruler*a4			(cse)
+
+
+Hanoi				table constraints
+hanoi*
+
+
+Latin Squares			alldiff
+latinSquare*
+
+
+Magic Squares			alldiff, gsum
+magocSquares*
+
+
 Flattening Tests
 ---------------------------------------------------------------------------
 add.eprime			flattening of sums: a + b = c + d

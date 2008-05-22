@@ -39,6 +39,7 @@ public class Translate {
 	public static final String TIME_INFO_FILE = "tf"; // don't write translation time into file
 	public static final String WRITE_EP_MODEL_TO_FILE = "out-ep"; // write the Essence' model into a file
 	public static final String NO_PROPAGATE_SINGLE_DOMAINS = "no-sdp"; // don't propagate single domains, e.g. (1..1)
+	public static final String DISCRETE_VAR_UPPER_BOUND = "discrete-ub"; // maximum domain size for when to use discrete vars
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -67,7 +68,7 @@ public class Translate {
 				if(args[i].equalsIgnoreCase("-"+HELP) || args[i].equalsIgnoreCase("-h")) {
 					//if(settings.giveTranslationInfo)
 					printWelcomeMessage();
-					printHelpMessage();
+					printHelpMessage(settings);
 					System.exit(0);
 				}
 				
@@ -98,6 +99,21 @@ public class Translate {
 					settings.setPrintTranslationTimeIntoFile(false);
 				}
 				
+				else if(args[i].equalsIgnoreCase("-"+DISCRETE_VAR_UPPER_BOUND)) {
+					if(i + 1 >= args.length) {
+						printWelcomeMessage();
+						System.out.println("Sorry, could not read upper bound for discrete variables.");
+						System.exit(1);
+					}
+					Integer upperBound = new Integer(args[i+1]);
+					if(upperBound < 0) 
+						System.out.println("Sorry, cannot set a discrete upper bound that is smaller than zero:"+upperBound+
+								"\nUpper bound flag ignored.");
+					
+					settings.setDiscreteUpperBound(upperBound);
+					i++;
+				}
+				
 				else if(args[i].equalsIgnoreCase("-"+NO_INFO) || args[i].equalsIgnoreCase("-s")) {
 					settings.giveTranslationInfo = false;
 					settings.giveTranslationTimeInfo = false;
@@ -126,14 +142,14 @@ public class Translate {
 					if(i+1 == args.length) {
 						System.out.println("No xml-input file specified...");
 						System.out.println("Aborting translation process.\n");
-						printHelpMessage();
+						printHelpMessage(settings);
 						System.exit(1);
 					}
 					else if(i+2 == args.length) {
 						if(args[i+1].startsWith("-")) {
 							System.out.println("No xml-input file specified...");
 							System.out.println("Aborting translation process.\n");
-							printHelpMessage();
+							printHelpMessage(settings);
 							System.exit(1);
 						}
 							
@@ -142,15 +158,16 @@ public class Translate {
 					}
 					else if(i+3 == args.length) {
 						if(args[i+1].startsWith("-") || args[i+2].startsWith("-")) {
+							printWelcomeMessage();
 							System.out.println("No xml-input file specified...");
 							System.out.println("Aborting translation process.\n");
-							printHelpMessage();
 							System.exit(1);
 						}
 						translateXCSP(args[i+1], args[i+2], settings);
 						System.exit(0);
 					}
 					else {
+						printWelcomeMessage();
 						System.out.println("Too many input files specified for XCSP translation...");
 						System.out.println("Trying to translate '"+args[i+1]+" as XCSP input file and '"+
 								args[i+2]+"' as Minion output file.");
@@ -178,6 +195,7 @@ public class Translate {
 					System.exit(0);
 				}
 				else {
+					printWelcomeMessage();
 					System.out.println("Too many input files specified for translation...");
 					System.out.println("Trying to translate '"+args[i+1]+" as input file and '"+
 							args[i+2]+"' as parameter file.");
@@ -362,7 +380,8 @@ public class Translate {
 	
 	// ======================= HELPER METHODS ============================================================
 	
-	private static void printHelpMessage() {
+	private static void printHelpMessage(TranslationSettings settings) {
+		
 		System.out.println("\nUsage: java -jar tailor.jar [flags] [inputfiles]");
 		System.out.println("If no arguments are given, the graphical translator version will start.\n");
 		
@@ -404,6 +423,12 @@ public class Translate {
 		System.out.println("\t(for instance, if variable X ranges over (1..1) then replace every .");
 		System.out.println("\toccurrence of X with 1).");
 		System.out.println("\tDefault: on");
+		System.out.println("-"+DISCRETE_VAR_UPPER_BOUND+" BOUND");
+		System.out.println("\tSet the maximum domain size for which to use discrete variables,");
+		System.out.println("\ti.e. if BOUND equals 300, every variable with a domain size smaller or ");
+		System.out.println("\tequal 300 will be represented by a discrete variable");
+		System.out.println("\t(allowing domain consistency)");
+		System.out.println("\tDefault: "+settings.getDiscreteUpperBound());
 		System.out.println("-"+TIME_OFF);
 		System.out.println("\tDon't display time statistics");
 		System.out.println("\tDefault: show time statistics");

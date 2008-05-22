@@ -81,9 +81,9 @@ reify(sumgeq([rings[3, 0],rings[3, 1]], 2), aux13)
 reify(sumgeq([rings[2, 0],rings[2, 1]], 2), aux14)
 reify(sumgeq([rings[1, 0],rings[1, 1]], 2), aux15)
 reify(sumgeq([rings[0, 0],rings[0, 1]], 2), aux16)
-sumgeq([aux1,aux2,aux3,aux4], 1)
-sumgeq([aux5,aux6,aux7,aux8], 1)
-sumgeq([aux10,aux11,aux12,aux9], 1)
-sumgeq([aux16,aux15,aux14,aux13], 1)
+watchsumgeq([aux1,aux2,aux3,aux4], 1)
+watchsumgeq([aux5,aux6,aux7,aux8], 1)
+watchsumgeq([aux10,aux11,aux12,aux9], 1)
+watchsumgeq([aux16,aux15,aux14,aux13], 1)
 
 **EOF**
