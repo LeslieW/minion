@@ -173,7 +173,8 @@ public class Flattener {
 		else if(expression instanceof Array)
 			return expression;  // TODO: here we will need to flatten in case the target solver does not support arrays
 		
-		else throw new TailorException("Unknown variable/expression: "+expression+" (expression with no domain associated)");
+		else throw new TailorException("Unknown variable/expression: "+expression+" (expression with no domain associated). Type:"
+				+expression.getClass().getSimpleName());
 	}
 	
 	/**
@@ -896,7 +897,10 @@ public class Flattener {
 		
 	
 		// direct absolute value
-		if(rightExpression instanceof AbsoluteValue && expression.getOperator() == Expression.EQ) {
+		if(rightExpression instanceof AbsoluteValue && 
+				expression.getOperator() == Expression.EQ &&
+				 (!expression.isGonnaBeFlattenedToVariable() || 
+						 this.targetSolver.supportsReificationOf(Expression.ABS))) {
 			
 			Expression argument = ((AbsoluteValue) rightExpression).getArgument();
 			
@@ -933,9 +937,10 @@ public class Flattener {
 			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
-				this.constraintBuffer.add(absConstraint);
+				//this.constraintBuffer.add(absConstraint);
 				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
-				return leftExpression;
+				//return leftExpression;
+				return reifyConstraint(absConstraint);
 			}
 			else  {
 				if(!expression.isNested())
@@ -944,7 +949,10 @@ public class Flattener {
 				return absConstraint;
 			}
 		}
-		else if(leftExpression instanceof AbsoluteValue && expression.getOperator() == Expression.EQ) {
+		else if(leftExpression instanceof AbsoluteValue && 
+				expression.getOperator() == Expression.EQ &&
+				 (!expression.isGonnaBeFlattenedToVariable() || 
+						 this.targetSolver.supportsReificationOf(Expression.ABS))) {
 		
 			Expression argument = ((AbsoluteValue) leftExpression).getArgument();
 			
@@ -973,8 +981,9 @@ public class Flattener {
 				absConstraint.setIsNotNested();
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
-				this.constraintBuffer.add(absConstraint);
-				return rightExpression;
+				//this.constraintBuffer.add(absConstraint);
+				//return rightExpression;
+				return reifyConstraint(absConstraint);
 			}
 			else return absConstraint;
 			
@@ -983,7 +992,10 @@ public class Flattener {
 		
 		
 		// max values
-		if(rightExpression instanceof Minimum && expression.getOperator() == Expression.EQ) {
+		if(rightExpression instanceof Minimum && 
+				expression.getOperator() == Expression.EQ &&
+				(!expression.isGonnaBeFlattenedToVariable() ||
+						this.targetSolver.supportsReificationOf(Expression.MIN))) {
 			
 			Expression argument = ((Minimum) rightExpression).getArgument();
 			
@@ -1025,9 +1037,9 @@ public class Flattener {
 			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
-				this.constraintBuffer.add(minConstraint);
+				//this.constraintBuffer.add(minConstraint);
 				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
-				return leftExpression;
+				return reifyConstraint(minConstraint);
 			}
 			else  {
 				if(!expression.isNested())
@@ -1037,7 +1049,9 @@ public class Flattener {
 			}
 		}
 		else if(leftExpression instanceof Minimum && 
-				expression.getOperator() == Expression.EQ) {
+				expression.getOperator() == Expression.EQ && 
+				(!expression.isGonnaBeFlattenedToVariable() ||
+						this.targetSolver.supportsReificationOf(Expression.MIN))) {
 		
 			Expression argument = ((Minimum) leftExpression).getArgument();
 			
@@ -1074,8 +1088,9 @@ public class Flattener {
 				minConstraint.setIsNotNested();
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
-				this.constraintBuffer.add(minConstraint);
-				return rightExpression;
+				//this.constraintBuffer.add(minConstraint);
+				//return rightExpression;
+				return reifyConstraint(minConstraint);
 			}
 			else return minConstraint;
 			
@@ -1083,10 +1098,126 @@ public class Flattener {
 		
 		
 		
+		// -------------------------------------------
+		
+		
+		
+		// modulo, div, power
+		if(rightExpression instanceof NonCommutativeArithmeticBinaryExpression && 
+				expression.getOperator() == Expression.EQ && 
+				(!expression.isGonnaBeFlattenedToVariable() ||
+						this.targetSolver.supportsReificationOf(
+								((NonCommutativeArithmeticBinaryExpression) rightExpression).getOperator()))) {
+			
+			NonCommutativeArithmeticBinaryExpression e = (NonCommutativeArithmeticBinaryExpression) rightExpression;
+			
+			Expression leftArgument = (e).getLeftArgument();
+			Expression rightArgument = (e).getRightArgument();
+			
+			//if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.)
+			//		|| expression.isGonnaBeFlattenedToVariable())
+			leftExpression.willBeFlattenedToVariable(true);
+			
+			
+			if(hasCommonSubExpression(leftExpression))
+				leftExpression = getCommonSubExpression(leftExpression);
+			
+			else {
+				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+				leftExpression = flattenExpression(leftExpression);
+				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
+				addToSubExpressions(rightExpression, leftExpression);
+			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+			}
+			
+			
+			// check if the solver supports variables only as result of absolute value
+			//if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
+			leftArgument.willBeFlattenedToVariable(true);
+			rightArgument.willBeFlattenedToVariable(true);
+			
+			leftArgument = flattenExpression(leftArgument);
+			rightArgument = flattenExpression(rightArgument);
+			
+			
+			BinaryNonLinearConstraint nonLinearConstraint = new BinaryNonLinearConstraint(leftArgument,
+																							e.getOperator(),
+																							rightArgument,
+																							leftExpression);
+			
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				//this.constraintBuffer.add(nonLinearConstraint);
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
+				//return leftExpression;
+				return reifyConstraint(nonLinearConstraint);
+			}
+			else  {
+				if(!expression.isNested())
+					nonLinearConstraint.setIsNotNested();
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
+				return nonLinearConstraint;
+			}
+		}
+		else if(leftExpression instanceof NonCommutativeArithmeticBinaryExpression 
+				&& expression.getOperator() == Expression.EQ) {
+			
+			NonCommutativeArithmeticBinaryExpression e = (NonCommutativeArithmeticBinaryExpression) leftExpression;
+			
+			Expression leftArgument = (e).getLeftArgument();
+			Expression rightArgument = (e).getRightArgument();
+			
+			//if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.)
+			//		|| expression.isGonnaBeFlattenedToVariable())
+			rightExpression.willBeFlattenedToVariable(true);
+			
+			
+			if(hasCommonSubExpression(rightExpression))
+				rightExpression = getCommonSubExpression(rightExpression);
+			
+			else {
+				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+				rightExpression = flattenExpression(rightExpression);
+				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
+				addToSubExpressions(leftExpression, rightExpression);
+			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+			}
+			
+			
+			// check if the solver supports variables only as result of absolute value
+			//if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
+			leftArgument.willBeFlattenedToVariable(true);
+			rightArgument.willBeFlattenedToVariable(true);
+			
+			leftArgument = flattenExpression(leftArgument);
+			rightArgument = flattenExpression(rightArgument);
+			
+			
+			BinaryNonLinearConstraint nonLinearConstraint = new BinaryNonLinearConstraint(leftArgument,
+																							e.getOperator(),
+																							rightArgument,
+																							rightExpression);
+			
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				this.constraintBuffer.add(nonLinearConstraint);
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
+				return rightExpression;
+			}
+			else  {
+				if(!expression.isNested())
+					nonLinearConstraint.setIsNotNested();
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
+				return nonLinearConstraint;
+			}
+		}
 		
 		
 		
 		
+		// --------------------------------------------
 		
 		
 		
@@ -1589,7 +1720,7 @@ public class Flattener {
 			}
 		}
 		
-		//System.out.println("This conjunction :"+conjunction+"\nwill be flattened to a variable:"+conjunction.isGonnaBeFlattenedToVariable());
+		//System.out.println("This conjunction :"+conjunction+"\nwill be flattened to a variable?:"+conjunction.isGonnaBeFlattenedToVariable());
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
@@ -1643,6 +1774,8 @@ public class Flattener {
 					addToEqualExpressions(conjunction, equalExpression);
 				}
 			}
+			
+			//System.out.println("Flattened conjunction to "+conjunction+" and gonna reify it");
 			
 			if(this.targetSolver.supportsConstraint(Expression.NARY_CONJUNCTION)) {
 				return reifyConstraint(conjunction);

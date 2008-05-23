@@ -426,12 +426,29 @@ public class MinionModel {
 				domainString.append("BOOL");
 			
 			else if(domain instanceof SparseIntRange) {
-				domainString.append("SPARSEBOUND");
 				int[] range = ((SparseIntRange) domain).getFullDomain();
-				rangeString.append("{"+range[0]);
-				for(int j=1; j<range.length; j++)
-					rangeString.append(","+range[j]);
-				rangeString.append("}");
+				int domainSize = range[range.length-1] - range[0] -1;
+				if(domainSize <= settings.DISCRETE_UPPER_BOUND) {
+					domainString.append("DISCRETE");
+					rangeString.append("{"+range[0]+".."+range[range.length-1]+"}");
+					// add diseqaulity constraints
+					for(int j=0; j<range.length; j++) {
+						int value = j+range[0];
+						//System.out.println("Checking if range["+j+"]: "+range[j]+"=?"+value+" for var "+varName);
+						if(range[j] != value) {
+							this.constraintList.add(new DiseqConstraint(new MinionSingleVariable(varName),
+																		new MinionConstant(value)));
+							//System.out.println("Added diseq constraint: "+varName+" != "+value);
+						}
+					}
+				}
+				else { // TODO: sometimes we cannot use sparse bound vars (tables)				
+					domainString.append("SPARSEBOUND");
+					rangeString.append("{"+range[0]);
+					for(int j=1; j<range.length; j++)
+						rangeString.append(","+range[j]);
+					rangeString.append("}");
+				}
 			}
 			
 			else if(domain instanceof BoundedIntRange) {

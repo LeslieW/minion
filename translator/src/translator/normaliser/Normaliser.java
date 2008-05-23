@@ -132,7 +132,40 @@ public class Normaliser implements NormaliserSpecification {
 	}
 	
 
-	
+	public NormalisedModel normalise(NormalisedModel model) 
+		throws NormaliserException, Exception {
+		
+		ArrayList<Expression> constraints = model.constraintList;
+		this.decisionVariables = model.decisionVariables;
+		this.decisionVariablesNames = model.decisionVariablesNames;
+		
+		// update the types of variables since we now what domain they have now...
+		constraints = updateExpressionTypes(constraints);
+		//	System.out.println("Constraints after updating expressions:"+constraints);
+		
+		// orderExpressions
+		constraints = orderConstraints(constraints);
+		
+		//System.out.println("Constraints BEFORE evaluation:"+constraints);
+		// evaluate them
+		constraints = evaluateConstraints(constraints);
+		//System.out.println("Constraints AFTER evaluation:"+constraints);
+		
+		// reduce Expressions
+		constraints = reduceExpressions(constraints);
+		
+		// restructure Expressions
+		constraints = restructureExpressions(constraints);
+		
+		// order again
+		constraints = orderConstraints(constraints);
+		
+		//System.out.println("Constraints after normalisation:"+constraints);
+		
+		model.constraintList = constraints;
+		
+		return model;
+	}
 	
 	/**
 	 * Normalise the expressions only to a certain extent: either full, evaluate only,

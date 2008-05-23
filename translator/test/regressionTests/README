@@ -186,6 +186,28 @@ Magic Squares			alldiff, gsum
 magocSquares*
 
 
+Langford's Number Problem	
+langford*_ext*			table constraint version
+langford2*			weighted sum, diseq  (clique of diseq)
+
+
+Pigeon Hole Problem
+pigeons-*			diseq
+pigeons-glb*			alldiff
+
+
+QuasiGroup Existence Problem    watchelement, eq, alldiff,weightedsum, diseq
+quasiGroup3*			(sparse2discrete variables)
+quasiGroup4*			(sparse2discrete variables)
+quasiGroup5*			(sparse2discrete variables)
+quasiGroup6*			(sparse2discrete variables)
+quasiGroup7*			(sparse2discrete variables)
+
+
+Attacking Queens Problem (CSPlib29)
+queenAttacking*			(cse)
+
+
 Flattening Tests
 ---------------------------------------------------------------------------
 add.eprime			flattening of sums: a + b = c + d

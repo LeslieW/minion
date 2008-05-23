@@ -328,6 +328,10 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.MAX:
 			return this.featureMap.get(TargetSolver.REIFIED_MAX);
+			
+		case Expression.MOD:
+			return this.featureMap.get(TargetSolver.REIFIED_MOD);
+			
 		}
 		
 		return false;

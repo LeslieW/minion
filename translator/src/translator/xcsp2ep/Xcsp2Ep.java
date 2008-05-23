@@ -11,6 +11,7 @@ import translator.xcsp2ep.parser.InstanceParser;
 import translator.xcsp2ep.parser.XCSPInstance;
 import translator.xcsp2ep.mapper.EssencePModel;
 import translator.normaliser.NormalisedModel;
+import translator.normaliser.Normaliser;
 
 
 /**
@@ -134,7 +135,10 @@ public class Xcsp2Ep{
 			writeTimeInfo("Writing time:"+time+"sec");
 		}
 		
-		return essencePmodel.mapToNormalisedModel();
+		NormalisedModel model =  essencePmodel.mapToNormalisedModel();
+		Normaliser normaliser = new Normaliser();
+		model = normaliser.normalise(model);
+		return model;
 	}
 	
 	

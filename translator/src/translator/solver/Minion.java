@@ -151,6 +151,7 @@ public class Minion extends GeneralTargetSolver {
 		featureMap.put(new Integer(TargetSolver.REIFIED_NEGATION), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.REIFIED_MIN), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.REIFIED_MAX), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.REIFIED_MOD), new Boolean(false));
 		
 		// variables
 		featureMap.put(new Integer(SPARSE_VARIABLES),new Boolean(true));

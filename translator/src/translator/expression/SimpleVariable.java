@@ -61,7 +61,7 @@ public class SimpleVariable implements Variable, AtomExpression {
 		
 		if(this.variableName.equals(variableName)) {
 			
-			//System.out.println("Inserting domain '"+domain+"' for variable "+variableName+" in variable "+this);
+			System.out.println("Inserting domain '"+domain+"' for variable "+variableName+" in variable "+this);
 			
 			// We need to pack the variable as a RelationalAtom or Arithmetic Atom because 
 			// during parsing we only create Variable types, which are not feasible standalone...

@@ -93,7 +93,7 @@ public interface Expression {
 	public final int DIV = 112;
 	public final int MULT = 113;
 	public final int POWER = 114;
-	public final int MOD = 115;
+	public final int MOD = 122;
 	
 	// Quantifications
 	

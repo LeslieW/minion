@@ -438,7 +438,7 @@ public class Mapper {
 		throws MapperException {
 		
 		// index
-		Expression index = mapVariable(xcspElement.getIndexVariable());
+		Expression index = new ArithmeticAtomExpression(mapVariable(xcspElement.getIndexVariable()));
 		
 		// value
 		AtomExpression value;
