@@ -1,3 +1,4 @@
+#! /bin/sh
 # !! Please note, that you will need both jflex and java_cup 
 #    installed on your machine in order to build the parser and lexer
 cd src/translator/essencePrimeParser/

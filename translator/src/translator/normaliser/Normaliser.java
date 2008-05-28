@@ -140,16 +140,17 @@ public class Normaliser implements NormaliserSpecification {
 		this.decisionVariablesNames = model.decisionVariablesNames;
 		
 		// update the types of variables since we now what domain they have now...
-		constraints = updateExpressionTypes(constraints);
-		//	System.out.println("Constraints after updating expressions:"+constraints);
+		//System.out.println("Gonna update expressions:");
+		//constraints = updateExpressionTypes(constraints);
+		//System.out.println("Constraints after updating expressions:"+constraints);
 		
 		// orderExpressions
 		constraints = orderConstraints(constraints);
 		
-		//System.out.println("Constraints BEFORE evaluation:"+constraints);
+		//System.out.println("Constraints BEFORE evaluation:");//+constraints);
 		// evaluate them
 		constraints = evaluateConstraints(constraints);
-		//System.out.println("Constraints AFTER evaluation:"+constraints);
+		//System.out.println("Constraints AFTER evaluation:");//+constraints);
 		
 		// reduce Expressions
 		constraints = reduceExpressions(constraints);
@@ -160,7 +161,7 @@ public class Normaliser implements NormaliserSpecification {
 		// order again
 		constraints = orderConstraints(constraints);
 		
-		//System.out.println("Constraints after normalisation:"+constraints);
+		System.out.println("Constraints after normalisation:");//+constraints);
 		
 		model.constraintList = constraints;
 		

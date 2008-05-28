@@ -10,13 +10,13 @@ MINION 3
 # amount of auxiliary variables: 0
 
 **VARIABLES**
-SPARSEBOUND animal1 {2,4}
-SPARSEBOUND animal2 {2,4}
-SPARSEBOUND animal3 {2,4}
-SPARSEBOUND animal4 {2,4}
-SPARSEBOUND animal5 {2,4}
-SPARSEBOUND animal6 {2,4}
-SPARSEBOUND animal7 {2,4}
+DISCRETE animal1 {2..4}
+DISCRETE animal2 {2..4}
+DISCRETE animal3 {2..4}
+DISCRETE animal4 {2..4}
+DISCRETE animal5 {2..4}
+DISCRETE animal6 {2..4}
+DISCRETE animal7 {2..4}
 
 # aliases
 
@@ -33,5 +33,12 @@ animal1,animal2,animal3,animal4,animal5,animal6,animal7]
 
 sumleq([animal1,animal2,animal3,animal4,animal5,animal6,animal7], 22)
 sumgeq([animal1,animal2,animal3,animal4,animal5,animal6,animal7], 22)
+diseq(animal1, 3)
+diseq(animal2, 3)
+diseq(animal3, 3)
+diseq(animal4, 3)
+diseq(animal5, 3)
+diseq(animal6, 3)
+diseq(animal7, 3)
 
 **EOF**

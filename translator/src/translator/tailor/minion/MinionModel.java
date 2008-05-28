@@ -432,14 +432,18 @@ public class MinionModel {
 					domainString.append("DISCRETE");
 					rangeString.append("{"+range[0]+".."+range[range.length-1]+"}");
 					// add diseqaulity constraints
+					int value = range[0];
 					for(int j=0; j<range.length; j++) {
-						int value = j+range[0];
-						//System.out.println("Checking if range["+j+"]: "+range[j]+"=?"+value+" for var "+varName);
+						//System.out.println("Checking if range["+j+"]: "+range[j]+"=?"+value+ "(val) for var "+varName);
 						if(range[j] != value) {
-							this.constraintList.add(new DiseqConstraint(new MinionSingleVariable(varName),
+							while(range[j] != value) {
+								this.constraintList.add(new DiseqConstraint(new MinionSingleVariable(varName),
 																		new MinionConstant(value)));
 							//System.out.println("Added diseq constraint: "+varName+" != "+value);
+								value++;
+							}
 						}
+						value++;
 					}
 				}
 				else { // TODO: sometimes we cannot use sparse bound vars (tables)				

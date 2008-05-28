@@ -107,7 +107,7 @@ graphs3,11
 
 
 TimeTabeling			sum, reified diseq (+ single domain propagation)
-patat small			
+patat small			(sparse2discrete)
 patat competition
 
 Black Hole			table constraints (+evaluation (singledomain propagation))
@@ -164,7 +164,7 @@ Chessboard Coloration
 cc*				(cse!)
 
 Costas Array			weightedsum, alldiff
-costasArray*
+costasArray*			(sparse2discrete results in less search!)
 
 Domino				reify eq, reify sum,eq, product, watchsum
 domin0-*			direct variable usage (different #solutions!)

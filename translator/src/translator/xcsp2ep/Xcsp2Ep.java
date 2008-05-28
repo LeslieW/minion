@@ -126,7 +126,16 @@ public class Xcsp2Ep{
 		time = (stopTime - startTime) / 1000.0;
 		
 		writeTimeInfo("Time for Mapping XCSP to Essence': "+time+"sec");
+		//System.out.println("Before mapping E' model to normalised model");
+		
+		NormalisedModel model =  essencePmodel.mapToNormalisedModel();
+		//Normaliser normaliser = new Normaliser();
+		//System.out.println("Gonna normalise the model.");
+		//model = normaliser.normalise(model);
+		//System.out.println("Generated a normalised model.");
+		
 		if(this.settings.getWriteEssencePrimeModelIntoFile()) {
+			//System.out.println("Wrirting E' into file");
 			writeStringIntoFileNonStatic(fileName+".eprime", essencePmodel.toString());
 			startTime = stopTime;
 			stopTime = System.currentTimeMillis();
@@ -135,9 +144,6 @@ public class Xcsp2Ep{
 			writeTimeInfo("Writing time:"+time+"sec");
 		}
 		
-		NormalisedModel model =  essencePmodel.mapToNormalisedModel();
-		Normaliser normaliser = new Normaliser();
-		model = normaliser.normalise(model);
 		return model;
 	}
 	

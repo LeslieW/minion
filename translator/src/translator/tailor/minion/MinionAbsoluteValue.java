@@ -6,9 +6,9 @@ public class MinionAbsoluteValue implements MinionConstraint {
 	MinionAtom x;
 	MinionAtom y;
 	
-	public MinionAbsoluteValue(MinionAtom nested,
+	public MinionAbsoluteValue(MinionAtom argument,
 								MinionAtom abs) {
-		this.x = nested;
+		this.x = argument;
 		this.y = abs;
 	}
 	

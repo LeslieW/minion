@@ -76,6 +76,9 @@ public class EssencePModel {
 
 
 	public NormalisedModel mapToNormalisedModel() {
+		
+		//System.out.println("Mapping to normalised model");
+		
 		NormalisedModel model = new NormalisedModel(this.decisionVariables,
 				                   this.decisionVariablesNames,
 				                   this.constraintList,
@@ -95,7 +98,7 @@ public class EssencePModel {
 		
 		
 		model.evaluateDomains();
-		
+		//System.out.println("Returning model");
 		return model;
 	}
 	

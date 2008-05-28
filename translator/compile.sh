@@ -1,3 +1,4 @@
+#! /bin/sh
 # building Translator without rebuiliding the Parser
 cd src
 echo "### Compiling TAILOR "

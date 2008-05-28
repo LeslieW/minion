@@ -1504,7 +1504,7 @@ public class Flattener {
 		
 		
 		//if(expression.getOperator() == Expression.EQ)
-		//System.out.println("Flattened left expression of EQ relation:"+leftExpression);
+		//System.out.println("Flattened left expression of relation:"+leftExpression+"\nand right expression:"+rightExpression);
 		
 		if(expression.isGonnaBeFlattenedToVariable()) {
 			return reifyConstraint(new CommutativeBinaryRelationalExpression(leftExpression, 
