@@ -43,6 +43,7 @@ public class TranslationSettings {
 	
 	String settingsFileName;
 	String essenceP_outputFileName;
+	String solverOutputFileName;
 	String modelName;
 	
 	
@@ -275,4 +276,13 @@ public class TranslationSettings {
 			this.discreteUpperBound = -newUb;
 		this.discreteUpperBound = newUb;
 	}
+	
+	public void setSolverOutputFileName(String filename) {
+		this.solverOutputFileName = filename;
+	}
+	
+	public String getSolverOutputFileName() {
+		return this.solverOutputFileName;
+	}
+	
 }

@@ -17,10 +17,10 @@ DISCRETE V3 {0..99}
 DISCRETE V4 {0..99}
 
 # auxiliary variables
-DISCRETE aux0 {1..9}
-DISCRETE aux1 {1..9}
-DISCRETE aux2 {-8..8}
-DISCRETE aux3 {0..8}
+DISCRETE aux0 {0..9}
+DISCRETE aux1 {0..9}
+DISCRETE aux2 {-9..9}
+DISCRETE aux3 {0..9}
 BOOL aux4 
 DISCRETE aux5 {0..9}
 DISCRETE aux6 {0..9}
@@ -31,9 +31,9 @@ BOOL aux10
 BOOL aux11 
 BOOL aux12 
 BOOL aux13 
-DISCRETE aux14 {1..9}
-DISCRETE aux15 {-8..8}
-DISCRETE aux16 {0..8}
+DISCRETE aux14 {0..9}
+DISCRETE aux15 {-9..9}
+DISCRETE aux16 {0..9}
 BOOL aux17 
 DISCRETE aux18 {0..9}
 DISCRETE aux19 {-9..9}
@@ -43,9 +43,9 @@ BOOL aux22
 BOOL aux23 
 BOOL aux24 
 BOOL aux25 
-DISCRETE aux26 {1..9}
-DISCRETE aux27 {-8..8}
-DISCRETE aux28 {0..8}
+DISCRETE aux26 {0..9}
+DISCRETE aux27 {-9..9}
+DISCRETE aux28 {0..9}
 BOOL aux29 
 DISCRETE aux30 {0..9}
 DISCRETE aux31 {-9..9}
@@ -55,9 +55,9 @@ BOOL aux34
 BOOL aux35 
 BOOL aux36 
 BOOL aux37 
-DISCRETE aux38 {1..9}
-DISCRETE aux39 {-8..8}
-DISCRETE aux40 {0..8}
+DISCRETE aux38 {0..9}
+DISCRETE aux39 {-9..9}
+DISCRETE aux40 {0..9}
 BOOL aux41 
 DISCRETE aux42 {0..9}
 DISCRETE aux43 {-9..9}
@@ -67,8 +67,8 @@ BOOL aux46
 BOOL aux47 
 BOOL aux48 
 BOOL aux49 
-DISCRETE aux50 {-8..8}
-DISCRETE aux51 {0..8}
+DISCRETE aux50 {-9..9}
+DISCRETE aux51 {0..9}
 BOOL aux52 
 DISCRETE aux53 {-9..9}
 DISCRETE aux54 {0..9}

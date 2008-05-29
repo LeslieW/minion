@@ -67,7 +67,7 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		
 		case DIV:
 			if(left_lb >=0 && right_lb >= 0)
-				lb = 1;
+				lb = 0;
 			else 
 				lb = (left_ub > right_ub) ? -left_ub : -right_ub;
 			

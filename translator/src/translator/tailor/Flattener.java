@@ -755,7 +755,8 @@ public class Flattener {
 			ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(processedMultiplication);
 			
 			
-			if(expression.getOperator() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable()) {
+			if(expression.getOperator() == Expression.EQ && 
+					!expression.isGonnaBeFlattenedToVariable()) {
 				rightExpression.willBeFlattenedToVariable(this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator()));
 				rightExpression = flattenExpression(rightExpression);
 				
@@ -1109,6 +1110,7 @@ public class Flattener {
 						this.targetSolver.supportsReificationOf(
 								((NonCommutativeArithmeticBinaryExpression) rightExpression).getOperator()))) {
 			
+			//System.out.println("Flattening "+expression);
 			NonCommutativeArithmeticBinaryExpression e = (NonCommutativeArithmeticBinaryExpression) rightExpression;
 			
 			Expression leftArgument = (e).getLeftArgument();
@@ -1119,15 +1121,19 @@ public class Flattener {
 			leftExpression.willBeFlattenedToVariable(true);
 			
 			
-			if(hasCommonSubExpression(leftExpression))
+			if(hasCommonSubExpression(leftExpression)) {
+				//System.out.println("Left expression "+leftExpression+" has a common subexpression:"+getCommonSubExpression(leftExpression));
 				leftExpression = getCommonSubExpression(leftExpression);
+			}
 			
 			else {
-				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+				//System.out.println("About to flatten left expression "+leftExpression+" of nl constraint "+expression);
 				leftExpression = flattenExpression(leftExpression);
-				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
-				addToSubExpressions(rightExpression, leftExpression);
-			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+				//System.out.println("Flattenend left (result) expression of nl Constriant:"+leftExpression);
+				if(!expression.isNested()) {
+					addToSubExpressions(rightExpression, leftExpression);
+					//System.out.println("Added left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+				}
 			}
 			
 			
@@ -1145,7 +1151,7 @@ public class Flattener {
 																							rightArgument,
 																							leftExpression);
 			
-			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+			//System.out.println("Flattenend expression to absConstriant:"+nonLinearConstraint);
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
 				//this.constraintBuffer.add(nonLinearConstraint);
@@ -1161,9 +1167,14 @@ public class Flattener {
 			}
 		}
 		else if(leftExpression instanceof NonCommutativeArithmeticBinaryExpression 
-				&& expression.getOperator() == Expression.EQ) {
+				&& expression.getOperator() == Expression.EQ && 
+				(!expression.isGonnaBeFlattenedToVariable() ||
+						this.targetSolver.supportsReificationOf(
+								((NonCommutativeArithmeticBinaryExpression) rightExpression).getOperator()))) {
 			
 			NonCommutativeArithmeticBinaryExpression e = (NonCommutativeArithmeticBinaryExpression) leftExpression;
+			//System.out.println("Flattening "+e);
+			
 			
 			Expression leftArgument = (e).getLeftArgument();
 			Expression rightArgument = (e).getRightArgument();
@@ -1180,8 +1191,10 @@ public class Flattener {
 				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
 				rightExpression = flattenExpression(rightExpression);
 				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
-				addToSubExpressions(leftExpression, rightExpression);
-			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+				if(!expression.isNested()) {
+					addToSubExpressions(leftExpression, rightExpression);
+					//System.out.println("Added  left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+				}
 			}
 			
 			
@@ -1476,7 +1489,7 @@ public class Flattener {
 		
 		if(leftAndRightAreEqual && leftExpression.getType() != Expression.INT && leftExpression.getType() != Expression.BOOL) {
 			//if(expression.getOperator() == Expression.IFF)
-				//System.out.println("Flattening expression with flat left "+leftExpression+" and right expression: "+rightExpression);
+			//System.out.println("Adding  left expression "+leftExpression+" as equal to right expression: "+rightExpression);
 			//addToSubExpressions(rightExpression, leftExpression);
 			addToEqualExpressions(rightExpression, leftExpression);
 		}

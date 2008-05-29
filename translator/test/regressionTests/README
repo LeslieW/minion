@@ -204,8 +204,30 @@ quasiGroup6*			(sparse2discrete variables)
 quasiGroup7*			(sparse2discrete variables)
 
 
-Attacking Queens Problem (CSPlib29)
+Attacking Queens Problem (CSPlib29)  modulo, abs, division, weightedsum,..
 queenAttacking*			(cse)
+
+
+Queens-Knights Problem		abs, div, weightedsum, mod, diseq
+queensKnights*mul		(cse)
+queensKnights*add		(cse)
+
+
+Ramsey's Problem (CSPlib 17)	reified diseq, watchsum
+ramsey*
+
+
+Schur's Lemmma (CSPlib 15)	
+lemma*mod			diseq
+lemma*				(cse) reified diseq
+
+
+Social Golfers			watchsum, sum, weighted sum
+socialGolfer*
+
+
+Composed (random instances)	table, negative table
+composed*
 
 
 Flattening Tests

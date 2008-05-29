@@ -3,7 +3,7 @@ package translator;
 import javax.swing.JFrame;
 import java.io.*;
 import translator.solver.Minion;
-import translator.solver.Gecode;
+//import translator.solver.Gecode;
 import translator.gui.TailorGUI;
 import translator.xcsp2ep.Xcsp2Ep;
 
@@ -40,9 +40,11 @@ public class Translate {
 	public static final String WRITE_EP_MODEL_TO_FILE = "out-ep"; // write the Essence' model into a file
 	public static final String NO_PROPAGATE_SINGLE_DOMAINS = "no-sdp"; // don't propagate single domains, e.g. (1..1)
 	public static final String DISCRETE_VAR_UPPER_BOUND = "discrete-ub"; // maximum domain size for when to use discrete vars
+	public static final String OUTPUT = "out"; //set the output file name/directory
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
+	
 	/**
 	 * Start the GUI version or command-line version of the translator.
 	 * 
@@ -93,6 +95,17 @@ public class Translate {
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
 					settings.setGiveTranslationTimeInfo(false);
 					giveTimeInfo = false;
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+OUTPUT)) {
+					
+					if(args.length <= i+1) {
+						printWelcomeMessage();
+						System.out.println("Sorry, could not read output filename for translation.");
+						System.exit(1);
+					}
+					settings.setSolverOutputFileName(args[i+1]);
+					i++;
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+TIME_INFO_FILE)) {
@@ -153,7 +166,13 @@ public class Translate {
 							System.exit(1);
 						}
 							
-						translateXCSP(args[i+1], args[i+1]+".minion", settings);
+						String outFileName;
+						if(settings.getSolverOutputFileName() == null) {
+							outFileName = args[i+1]+"."+settings.targetSolver.getSolverInputExtension();
+						}
+						else outFileName = settings.getSolverOutputFileName();
+						
+						translateXCSP(args[i+1], outFileName, settings);
 						System.exit(0);
 					}
 					else if(i+3 == args.length) {
@@ -254,7 +273,13 @@ public class Translate {
 			if(settings.getPrintTranslationTimeIntoFile())
 				solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
 			
-			File outputFile = writeStringIntoFile(filename+"."+settings.targetSolver.getSolverInputExtension(),
+			String outFileName;
+			if(settings.getSolverOutputFileName() == null) {
+				outFileName = filename+"."+settings.targetSolver.getSolverInputExtension();
+			}
+			else outFileName = settings.getSolverOutputFileName();
+			
+			File outputFile = writeStringIntoFile(outFileName,
 					                              solverInstance);
 			writeInfo("Translated '"+filename+"' to "+settings.targetSolver.getSolverName()
 					+" and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
@@ -310,7 +335,12 @@ public class Translate {
 			if(settings.getPrintTranslationTimeIntoFile())
 				solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
 			
-			File outputFile = writeStringIntoFile(parameterFileName+"."+settings.targetSolver.getSolverInputExtension(),
+			String outFileName;
+			if(settings.getSolverOutputFileName() == null) {
+				outFileName = parameterFileName+"."+settings.targetSolver.getSolverInputExtension();
+			}
+			else outFileName = settings.getSolverOutputFileName();
+			File outputFile = writeStringIntoFile(outFileName,
 												  solverInstance);
 			writeInfo("Translated '"+problemFileName+"' and '"+parameterFileName+
 					"' to "+settings.targetSolver.getSolverName()+
