@@ -166,7 +166,7 @@ ALIAS quasiGroup_flattened2Vector[64] = [quasiGroup[0,0],quasiGroup[0,1],quasiGr
 **SEARCH**
 
 PRINT [
-quasiGroup_ORIG,qgDiagonal]
+quasiGroup,qgDiagonal]
 
 VARORDER [
 quasiGroup_ORIG,qgDiagonal,

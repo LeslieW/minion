@@ -24,6 +24,8 @@ public class MinionModel {
 	HashMap<String, MinionAtom> equalAtoms;
 	HashMap<String, Boolean> variableIsDiscrete = new HashMap<String, Boolean>();
 	ArrayList<String> decisionVariablesNames;
+	ArrayList<String> allOriginalDecisionVariables; // we need these to remember all the original variables
+	HashMap<String, ConstantDomain> allDecisionVariablesDomains; // we need these to remeber original domains
 	ArrayList<String> variableAliases;
 	ArrayList<Variable> auxVariables;
 	HashMap<String, Domain> auxVarDomains;
@@ -47,6 +49,8 @@ public class MinionModel {
 		this.constraintList = constraints;
 		this.decisionVariables = decisionVariables;
 		this.decisionVariablesNames = decisionVariablesNames;
+		this.allOriginalDecisionVariables = (ArrayList<String>) decisionVariablesNames.clone();
+		this.allDecisionVariablesDomains = (HashMap<String, ConstantDomain>) decisionVariables.clone();
 		this.auxVariables = auxVariables;
 		this.auxVarDomains = new HashMap<String, Domain>();
 		for(int i=0; i<this.auxVariables.size(); i++) {
@@ -351,13 +355,13 @@ public class MinionModel {
 		StringBuffer print = new StringBuffer("PRINT [");
 		
 		StringBuffer decisionVarString = new StringBuffer();
-		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
+		for(int i=0; i<this.allOriginalDecisionVariables.size(); i++) {
 			if(i > 0) decisionVarString.append(",");
 			if(i % 8 == 0) decisionVarString.append("\n");
 			
-			if(this.decisionVariables.get(this.decisionVariablesNames.get(i)).getType() != Domain.CONSTANT_ARRAY)
-				decisionVarString.append("["+this.decisionVariablesNames.get(i)+"]");
-			else decisionVarString.append(this.decisionVariablesNames.get(i));
+			if(this.allDecisionVariablesDomains.get(this.allOriginalDecisionVariables.get(i)).getType() != Domain.CONSTANT_ARRAY)
+				decisionVarString.append("["+this.allOriginalDecisionVariables.get(i)+"]");
+			else decisionVarString.append(this.allOriginalDecisionVariables.get(i));
 		}
 		print.append(decisionVarString).append("]\n\n");	
 		
@@ -692,9 +696,9 @@ public class MinionModel {
 		
 		// then map variables to solutions -> the solutionString holds all Solutions now
 		if(!noSolution) {
-		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
-			String variableName = this.decisionVariablesNames.get(i);
-			ConstantDomain domain = this.decisionVariables.get(variableName);
+		for(int i=0; i<this.allOriginalDecisionVariables.size(); i++) {
+			String variableName = this.allOriginalDecisionVariables.get(i);
+			ConstantDomain domain = this.allDecisionVariablesDomains.get(variableName);
 			
 			//System.out.println("Decision variable: "+variableName);
 			
@@ -1009,9 +1013,9 @@ public class MinionModel {
 		
 		// then map variables to solutions -> the solutionString holds all Solutions now
 		
-		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
-			String variableName = this.decisionVariablesNames.get(i);
-			ConstantDomain domain = this.decisionVariables.get(variableName);
+		for(int i=0; i<this.allOriginalDecisionVariables.size(); i++) {
+			String variableName = this.allOriginalDecisionVariables.get(i);
+			ConstantDomain domain = this.allDecisionVariablesDomains.get(variableName);
 			
 			//System.out.println("Decision variable: "+variableName);
 			

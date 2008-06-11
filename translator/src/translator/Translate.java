@@ -32,7 +32,7 @@ public class Translate {
 	public static final String OLD_GUI = "oldgui";
 	public static final String NO_COMMON_SUBEXPRS = "no-cse";
 	public static final String NO_COMMON_EXPLICIT_SUBEXPRS = "no-ecse";
-	public static final String TIME_OFF = "no-time"; // don't display time statistics
+	public static final String TIME_OFF = "time"; // display time statistics
 	public static final String NO_INFO = "silent"; // silent -> no verbose info
 	public static final String NO_DIRECT_VAR_REUSE = "no-dvr";
 	public static final String DEBUG_MODE = "debug";
@@ -93,8 +93,8 @@ public class Translate {
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
-					settings.setGiveTranslationTimeInfo(false);
-					giveTimeInfo = false;
+					settings.setGiveTranslationTimeInfo(true);
+					giveTimeInfo = true;
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+OUTPUT)) {
@@ -260,7 +260,7 @@ public class Translate {
 	    	
 	    	if(!noError) {
 				System.out.println(ERROR+"Cannot translate to "+settings.targetSolver.getSolverName()
-						+" from problem file '"+problemString+"'.");
+						+" from problem file '"+filename+"'.");
 				System.out.println(translator.errorMessage);
 				System.exit(1);
 	    	}
@@ -460,8 +460,8 @@ public class Translate {
 		System.out.println("\t(allowing domain consistency)");
 		System.out.println("\tDefault: "+settings.getDiscreteUpperBound());
 		System.out.println("-"+TIME_OFF);
-		System.out.println("\tDon't display time statistics");
-		System.out.println("\tDefault: show time statistics");
+		System.out.println("\tDisplay time statistics");
+		System.out.println("\tDefault: don't show time statistics");
 		System.out.println("-"+NO_INFO);
 		System.out.println("\tSilent mode. Don't give translation information.");
 		System.out.println("\tDefault: give translation info");

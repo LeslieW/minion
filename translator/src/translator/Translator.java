@@ -278,7 +278,7 @@ public class Translator {
 		if(this.normalisedModelHasBeenFlattened) {
 			try{ 
 				long startTime = System.currentTimeMillis();
-				System.out.println("Starting to tailor the stuff");
+				//System.out.println("Starting to tailor the stuff");
 				this.targetSolverInstance = this.tailor.tailor(this.normalisedModel, settings.targetSolver);
 				if(this.settings.giveTranslationTimeInfo) {
 					long stopTime = System.currentTimeMillis();

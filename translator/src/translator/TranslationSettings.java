@@ -55,7 +55,7 @@ public class TranslationSettings {
 		this.useEqualSubExpressions =true;
 		this.useExplicitCommonSubExpressions = true;
 		this.applyStrictCopyPropagation = false;
-		this.giveTranslationTimeInfo = true;
+		this.giveTranslationTimeInfo = false;
 		this.giveTranslationInfo = true;
 		this.applyDirectVariableReusage = true;
 		this.pathToMinion = readPathToMinion();
@@ -75,7 +75,7 @@ public class TranslationSettings {
 		this.useEqualSubExpressions =true;
 		this.useExplicitCommonSubExpressions = true;
 		this.applyStrictCopyPropagation = false;
-		this.giveTranslationTimeInfo = true;
+		this.giveTranslationTimeInfo = false;
 		this.giveTranslationInfo = true;
 		this.applyDirectVariableReusage = true;
 		this.pathToMinion = readPathToMinion();

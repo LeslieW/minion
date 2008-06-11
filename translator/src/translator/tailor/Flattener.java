@@ -779,8 +779,22 @@ public class Flattener {
 			if(hasCommonSubExpression(multiplication)) 
 				auxVar = getCommonSubExpression(multiplication);
 			else {
-				auxVar = new ArithmeticAtomExpression(createAuxVariable(multiplication.getDomain()[0], 
+				if(expression.getOperator() == Expression.EQ) {
+					int lb = rightExpression.getDomain()[0];
+					int ub = rightExpression.getDomain()[1];
+					
+					if(multiplication.getDomain()[0] > lb)
+						lb = multiplication.getDomain()[0];
+					if(multiplication.getDomain()[1] < ub)
+						ub = multiplication.getDomain()[1];
+					
+					auxVar = new ArithmeticAtomExpression(createAuxVariable(lb, 
+                            												ub));
+				}
+				else {
+					auxVar = new ArithmeticAtomExpression(createAuxVariable(multiplication.getDomain()[0], 
 						                                                multiplication.getDomain()[1]));
+				}
 				addToSubExpressions(multiplication, auxVar);
 				productConstraint.setResult(auxVar);
 				this.constraintBuffer.add(productConstraint);
@@ -809,8 +823,29 @@ public class Flattener {
 					if(hasCommonSubExpression(multiplicationRight)) 	
 						auxVar2 = getCommonSubExpression(multiplicationRight);
 					else {
-						auxVar2 = new ArithmeticAtomExpression(createAuxVariable(multiplicationRight.getDomain()[0], 
+						
+						if(expression.getOperator() == Expression.EQ) {
+							int lb = leftExpression.getDomain()[0];
+							int ub = leftExpression.getDomain()[1];
+							
+							//System.out.println("Left expressions bounds: "+lb+".."+ub);
+							
+							if(multiplicationRight.getDomain()[0] > lb)
+								lb = multiplicationRight.getDomain()[0];
+							if(multiplicationRight.getDomain()[1] < ub)
+								ub = multiplicationRight.getDomain()[1];
+							
+							
+							//System.out.println("Choosed the bounds: "+lb+".."+ub+" for aux var: "+auxVar2);
+							
+							auxVar2 = new ArithmeticAtomExpression(createAuxVariable(lb, 
+		                            												ub));
+						}
+						else {
+							auxVar2 = new ArithmeticAtomExpression(createAuxVariable(multiplicationRight.getDomain()[0], 
 								                                                multiplicationRight.getDomain()[1]));
+						}
+						
 						addToSubExpressions(multiplicationRight, auxVar2);
 						productConstraintRight.setResult(auxVar2);
 						this.constraintBuffer.add(productConstraintRight);
@@ -875,8 +910,28 @@ public class Flattener {
 			if(hasCommonSubExpression(multiplication)) 
 				auxVar = getCommonSubExpression(multiplication);
 			else {
-				auxVar = new ArithmeticAtomExpression(createAuxVariable(multiplication.getDomain()[0], 
+				if(expression.getOperator() == Expression.EQ) {
+					int lb = leftExpression.getDomain()[0];
+					int ub = leftExpression.getDomain()[1];
+					
+					//System.out.println("Left expressions bounds: "+lb+".."+ub);
+					
+					if(multiplication.getDomain()[0] > lb)
+						lb = multiplication.getDomain()[0];
+					if(multiplication.getDomain()[1] < ub)
+						ub = multiplication.getDomain()[1];
+					
+					
+					//System.out.println("Choosed the bounds: "+lb+".."+ub+" for aux var: "+auxVar);
+					
+					auxVar = new ArithmeticAtomExpression(createAuxVariable(lb, 
+                            												ub));
+				}
+				else {
+					auxVar = new ArithmeticAtomExpression(createAuxVariable(multiplication.getDomain()[0], 
 						                                                multiplication.getDomain()[1]));
+				}
+				
 				addToSubExpressions(multiplication, auxVar);
 			}
 			

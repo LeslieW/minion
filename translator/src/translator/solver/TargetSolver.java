@@ -174,6 +174,7 @@ public interface TargetSolver {
 	public final int REIFIED_MAX = 264;
 	public final int REIFIED_IFF = 265;
 	public final int REIFIED_MOD = 266;
+	public final int REIFIED_WEIGHTED_SUM = 267;
 	
 	
 	

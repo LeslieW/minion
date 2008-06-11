@@ -82,10 +82,15 @@ public class SingleVariable implements Variable {
 		SingleVariable otherVariable = (SingleVariable) e;
 		
 		 // returns <0 if object is lexicographically smaller	
-		int lexComparison = this.variableName.compareTo(otherVariable.variableName);
+		if(this.variableName.length() == otherVariable.variableName.length()) {
+			int lexComparison = this.variableName.compareTo(otherVariable.variableName);
 		
-		if(lexComparison == 0) return EQUAL;
-		else return (lexComparison < 0) ?
+			if(lexComparison == 0) return EQUAL;
+			else return (lexComparison < 0) ?
+					SMALLER : BIGGER;
+		}
+		
+		else return (this.variableName.length() < otherVariable.variableName.length()) ? 
 				SMALLER : BIGGER;
 	
 	}

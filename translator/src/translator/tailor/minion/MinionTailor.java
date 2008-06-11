@@ -998,6 +998,7 @@ public class MinionTailor {
 	private MinionConstraint toMinion(Negation negation) 
 		throws MinionException {
 		
+	    //System.out.println("Tailoring a negation: "+negation);
 		RelationalAtomExpression auxVariable;
 		
 		if(this.hasCommonSubExpression(negation)) {
@@ -1020,8 +1021,15 @@ public class MinionTailor {
 			this.minionModel.addConstraint(new DiseqConstraint(auxVar, argument));
 			return auxVar;
 		}
-				
+		
+		// the expression is false
+		if(!negation.isNested())
+			return new EqConstraint(new MinionConstant(0),argument);
+		
+		//System.out.println("Returning a diseq constraint for the negation: "+negation);
 		return new DiseqConstraint(auxVar, argument);
+		// the expression is false
+		//return new EqConstraint(new MinionConstant(0), argument);
 	}
 	
 	
@@ -1224,8 +1232,61 @@ public class MinionTailor {
 		if(sumConstraint.isGonnaBeFlattenedToVariable()) {
 	
 			
-			if(negativeArgs.length > 0)
-				throw new MinionException("Cannot tailor sumConstraint to Minion, because weighted sums are not reifiable:"+sumConstraint);
+			if(negativeArgs.length > 0) {
+				//MinionAtom[] negatives = new MinionAtom[negativeArgs.length];
+				for(int i=0; i<negativeArgs.length; i++) {
+					Expression argument = negativeArgs[i];
+					if(argument instanceof Multiplication) {
+						Multiplication mul = (Multiplication) argument;
+						if(mul.getArguments().size() != 2)
+							throw new MinionException("Flattening error. Cannot tailor non-binary multiplication '"+argument
+								+"' in sum:"+sumConstraint);
+						if(this.hasCommonSubExpression(mul)) {
+							negativeArgs[i] = this.getCommonSubExpression(mul);
+						}
+						else {
+							ArithmeticAtomExpression auxVar = new ArithmeticAtomExpression(this.createAuxVariable(mul.getDomain()[0],
+																												  mul.getDomain()[1]));
+							this.addToSubExpressions(mul, auxVar);
+							MinionConstraint leftArg = toMinion(mul.getArguments().get(0));
+							MinionConstraint rightArg = toMinion(mul.getArguments().get(1));
+							if(!(leftArg instanceof MinionAtom))
+								throw new MinionException("Flattening error. Cannot tailor non atomic argument '"+leftArg
+										+"' in sum:"+sumConstraint);
+							if(!(rightArg instanceof MinionAtom))
+								throw new MinionException("Flattening error. Cannot tailor non atomic argument '"+rightArg
+										+"' in sum:"+sumConstraint);
+							this.minionModel.addConstraint(new ProductConstraint((MinionAtom) leftArg,
+																				 (MinionAtom) rightArg,
+																				  toMinion(auxVar.copy())));
+							negativeArgs[i] = auxVar;
+						}
+					}
+					else if(!(argument instanceof AtomExpression)) 
+						throw new MinionException("Flattening error. Cannot tailor non atomic argument '"+argument
+								+"' in sum:"+sumConstraint);
+					else {
+						MinionConstraint arg = toMinion(argument);
+						if(!(arg instanceof MinionAtom)) 
+							throw new MinionException("Flattening error. Cannot tailor non atomic argument '"+arg
+								+"' in sum:"+sumConstraint);
+						if(this.hasCommonSubExpression(new UnaryMinus(argument))) {
+							negativeArgs[i] = this.getCommonSubExpression(new UnaryMinus(argument));
+						}	
+						else {
+							ArithmeticAtomExpression auxVar  = new ArithmeticAtomExpression(this.createAuxVariable(-argument.getDomain()[1],
+																												-argument.getDomain()[0]));
+							this.addToSubExpressions(new UnaryMinus(argument), auxVar);
+							this.minionModel.constraintList.add(new MinusEq(toMinion(auxVar.copy()), 
+													                   (MinionAtom) arg));
+							negativeArgs[i] = auxVar;
+						}
+					}
+				}
+				
+				
+				//throw new MinionException("Cannot tailor sumConstraint to Minion, because weighted sums are not reifiable:"+sumConstraint);
+			}
 			
 			//System.out.println("Tailoring a weak sumConstraint that needs to be reified:"+sumConstraint);
 			
@@ -1234,6 +1295,9 @@ public class MinionTailor {
 			for(int i=0; i<positiveArgs.length; i++) {
 				positiveArgs[i].willBeFlattenedToVariable(true);
 				arguments[i] = (MinionAtom) toMinion(positiveArgs[i]);
+			}
+			for(int i=positiveArgs.length; i<arguments.length; i++) {
+				arguments[i] = (MinionAtom) toMinion(negativeArgs[i-positiveArgs.length]);
 			}
 			Expression resultExpression = sumConstraint.getResult();
 			resultExpression.willBeFlattenedToVariable(true);
@@ -1713,6 +1777,18 @@ public class MinionTailor {
 			else if(leftExpression instanceof AbsoluteValue) {
 				leftAtom = toMinion((AbsoluteValue) leftExpression);
 			}
+			else if(leftExpression instanceof Negation) {
+				Negation leftNegation = (Negation) leftExpression;
+				MinionConstraint arg = toMinion(leftNegation.getArgument());
+				if(arg instanceof MinionAtom) {
+					leftAtom = this.createMinionAuxiliaryVariable();
+					this.minionModel.constraintList.add( new DiseqConstraint(leftAtom,
+							                   								(MinionAtom) arg )
+														);
+				}
+				else throw new MinionException("Flattening error. Cannot apply Negation on non-flattened argument '"+
+						arg+"' in "+constraint);
+			}
 			else throw new MinionException("Cannot translate constraint nested in another expression as in:"+constraint);	
 				
 		}
@@ -1730,6 +1806,17 @@ public class MinionTailor {
 			}
 			else if(rightExpression instanceof AbsoluteValue) {
 				rightAtom = toMinion((AbsoluteValue) rightExpression);
+			}
+			else if(rightExpression instanceof Negation) {
+				Negation rightNegation = (Negation) rightExpression;
+				MinionConstraint arg = toMinion(rightNegation.getArgument());
+				if(arg instanceof MinionAtom) {
+					if(leftAtom == null) leftAtom = toMinion(leftArgument);
+					return new DiseqConstraint(leftAtom,
+							                   (MinionAtom) arg);
+				}
+				else throw new MinionException("Flattening error. Cannot apply Negation on non-flattened argument '"+
+						arg+"' in "+constraint);
 			}
 			else throw new MinionException("Internal error. Cannot translate constraint nested in another expression as in:"+constraint);	
 				
