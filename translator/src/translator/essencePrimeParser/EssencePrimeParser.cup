@@ -37,9 +37,9 @@ package translator.essencePrimeParser;
 import translator.expression.*;
 import java.util.ArrayList;
 
+action code {:
 
-parser code {:
-
+	public boolean hadErrorRecovery = false;
      public StringBuffer errorMessage = new StringBuffer("");
 
     /* The reason for the error is passed into the method in the
@@ -64,21 +64,72 @@ parser code {:
         System.err.println(m);
     }
 
+
+	
+
+:}
+
+
+parser code {:
+
+	 public boolean hadErrorRecovery = false;
+     public StringBuffer errorMessage = new StringBuffer("");
+
+    /* The reason for the error is passed into the method in the
+       String 'message'. */
+
+    public void report_error(String message, Object info)  {
+
+        StringBuffer m = new StringBuffer("Parse error:");
+
+
+        if (info instanceof java_cup.runtime.Symbol) {
+                java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                                m.append(" in line "+(s.left));
+                if (s.right >= 0)
+                        m.append(", column "+(s.right));
+            }
+            m.append(" : "+message);
+        }
+        else m.append(" "+message);
+        //throw new Exception(m);
+        errorMessage = m;
+        System.err.println(m);
+    }
+
     public void report_fatal_error(String message, Object info)  {
         report_error(message, info);
         //System.exit(1);
     }
-
-
+    
+    public void setErrorRecovery(boolean on) {
+    	hadErrorRecovery = on;
+    	//System.out.println("Error recovery on?:"+hadErrorRecovery);
+    }
+   
+   /* 
+    public boolean hadErrorRecovery() {
+    	if(this.action_obj!= null)
+    		return this.action_obj.hadErrorRecovery;
+    	else return false;
+    }
+    
+    public StringBuffer getActionErrorMessage() {
+    	if(action_obj != null)
+			return this.action_obj.errorMessage;
+		else return new StringBuffer("");
+	}
+	*/
 
 :};
 
-action code {:
+//action code {:
 
-        public int errors_found = 0;
+//        public int errors_found = 0;
        
 
-:}
+//:}
 
 
 
@@ -326,6 +377,21 @@ letting_block ::= LETTING IDENTIFIER:id BE expression:e
 	                                       );
 	    
 	    :}
+	    
+	    | LETTING IDENTIFIER:id COLON domain:d BE constant_vector:cv
+	    {: 
+	      ArrayList<Integer> i_list = (ArrayList<Integer>) cv;
+	      Integer[] i_array = new Integer[i_list.size()];
+	      for(int i=i_array.length-1; i>=0; i--)
+	      	i_array[i] = i_list.remove(i);
+	      
+	      RESULT = new ExpressionDefinition( (String) id,
+	                                          new ConstantVector( (String) id,
+	                                                              i_array,
+	                                                              (Domain) d)
+	                                       );
+	    
+	    :}
 		
 		
 		| LETTING IDENTIFIER:id BE constant_matrix:constant_matrix 
@@ -338,6 +404,16 @@ letting_block ::= LETTING IDENTIFIER:id BE expression:e
 		                                                          
 		:}
 		
+		| LETTING IDENTIFIER:id COLON domain:d BE constant_matrix:constant_matrix 
+		{: 
+		  RESULT = new ExpressionDefinition( (String) id,
+		                                      new ConstantMatrix( (String) id,
+		                                                          (Integer[][]) constant_matrix,
+		                                                           (Domain) d
+		                                                         )
+		                                   );
+		                                                          
+		:}
 	
 				
 ;
@@ -546,6 +622,22 @@ expression_list ::=  	  expression:e
 				{: ((ArrayList<Expression>) e_list).add(0,(Expression) e); 
 				   RESULT = e_list;
 				:}
+			| expression:e error expression_list:e_list 
+			    {:
+			       //((ArrayList<Expression>) e_list).add(0,(Expression) e); 
+				   //RESULT = e_list;
+				   String errMessage = "Detected parse error around the expression '"+e+
+				   	"'\nMaybe missing comma after constraint?";
+				   errorMessage.append(errMessage);
+				   parser.errorMessage.append("\n"+errMessage);
+				   parser.hadErrorRecovery = true;
+				   //parser.setErrorRecovery(true);
+				   //System.err.println(errMessage);
+				   //parser.report_error(errMessage, e);
+				   ((ArrayList<Expression>) e_list).add(0,(Expression) e); 
+				   RESULT = e_list;
+				   //throw new Exception("Parse error: "+errMessage);
+			    :}
 ;
 
 

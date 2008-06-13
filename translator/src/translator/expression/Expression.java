@@ -333,5 +333,5 @@ public interface Expression {
 	
 	
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression);
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception;
 }

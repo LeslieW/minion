@@ -89,7 +89,7 @@ public class IndexedArray implements SingleArray {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		// TODO!
 		//this.baseDomain = this.baseDomain.insertValueForVariable(value, variableName);
 		

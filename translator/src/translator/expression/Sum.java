@@ -413,7 +413,7 @@ public class Sum extends NaryArithmeticExpression {
 	}
 	
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.positiveArguments.size(); i++) {
 			this.positiveArguments.add(i, this.positiveArguments.remove(i).replaceVariableWithExpression(variableName, expression));

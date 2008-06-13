@@ -1001,6 +1001,17 @@ public class MinionTailor {
 	    //System.out.println("Tailoring a negation: "+negation);
 		RelationalAtomExpression auxVariable;
 		
+		// if it is not nested: argument = false
+		if(!negation.isNested()) {
+			if(!(negation.getArgument() instanceof AtomExpression))
+				throw new MinionException("Cannot tailor negation "+negation
+						+" to Minion because the argument is not flattened to a variable.");
+
+			MinionAtom argument = (MinionAtom) toMinion(negation.getArgument());
+			return new EqConstraint(new MinionConstant(0),argument);
+		}
+		
+		// else: create a diseq constraint
 		if(this.hasCommonSubExpression(negation)) {
 			auxVariable = getCommonSubExpression(negation).toRelationalAtomExpression();
 		}
@@ -1009,12 +1020,12 @@ public class MinionTailor {
 			this.addToSubExpressions(negation, auxVariable.toArithmeticExpression());
 		}
 		
-		MinionAtom auxVar = toMinion(auxVariable.toArithmeticExpression());
-		
+	
 		if(!(negation.getArgument() instanceof AtomExpression))
 			throw new MinionException("Cannot tailor negation "+negation
 					+" to Minion because the argument is not flattened to a variable.");
 		
+		MinionAtom auxVar = toMinion(auxVariable.toArithmeticExpression());
 		MinionAtom argument = (MinionAtom) toMinion(negation.getArgument());
 		
 		if(negation.isGonnaBeFlattenedToVariable()) {
@@ -1022,9 +1033,6 @@ public class MinionTailor {
 			return auxVar;
 		}
 		
-		// the expression is false
-		if(!negation.isNested())
-			return new EqConstraint(new MinionConstant(0),argument);
 		
 		//System.out.println("Returning a diseq constraint for the negation: "+negation);
 		return new DiseqConstraint(auxVar, argument);

@@ -131,7 +131,7 @@ public class TableConstraint implements RelationalExpression {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.variableList.length; i++) {
 			Expression e = this.variableList[i].replaceVariableWithExpression(variableName, expression);

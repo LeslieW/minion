@@ -240,7 +240,7 @@ public class Multiplication extends NaryArithmeticExpression {
 		return this;
 	}
 	
-public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.arguments.size(); i++)
 			this.arguments.add(i, this.arguments.remove(i).replaceVariableWithExpression(variableName, expression));

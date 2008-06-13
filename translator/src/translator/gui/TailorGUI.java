@@ -264,7 +264,7 @@ public class TailorGUI extends javax.swing.JFrame {
         inputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Modelling"));
         inputPanel.setMinimumSize(new java.awt.Dimension(200, 400));
         inputPanel.setName("modellingPanel"); // NOI18N
-        inputPanel.setPreferredSize(new java.awt.Dimension(400, 600));
+        inputPanel.setPreferredSize(new java.awt.Dimension(480, 670));
         inputPanel.setLayout(new java.awt.GridBagLayout());
         this.inputPanel.setBackground(this.inputBgColor);
 
@@ -504,7 +504,7 @@ public class TailorGUI extends javax.swing.JFrame {
         
         outputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Solving")));
         outputPanel.setMinimumSize(new java.awt.Dimension(200, 400));
-        outputPanel.setPreferredSize(new java.awt.Dimension(400, 600));
+        outputPanel.setPreferredSize(new java.awt.Dimension(420, 600));
         outputPanel.setLayout(new java.awt.GridBagLayout());
         outputPanel.setBackground(this.outputBgColor);
         
@@ -625,8 +625,8 @@ public class TailorGUI extends javax.swing.JFrame {
         
         // translation settings
         JMenu translationSettings = new JMenu("Translation");
-        JMenuItem cseDetection = new JCheckBoxMenuItem("Basic Common Subexpression Exploition");
-        JMenuItem ecseDetection = new JCheckBoxMenuItem("Derived Common Subexpressions' Exploition");
+        JMenuItem cseDetection = new JCheckBoxMenuItem("Basic Common Subexpression Elimination");
+        JMenuItem ecseDetection = new JCheckBoxMenuItem("Derived Common Subexpressions' Elimination");
         JMenuItem directVarReusage = new JCheckBoxMenuItem("Directly reuse variables");
         cseDetection.setSelected(this.settings.useCommonSubExpressions());
         ecseDetection.setSelected(this.settings.useEqualCommonSubExpressions());
@@ -1042,7 +1042,7 @@ protected void translate(String command) {
 		
 		if(tailoring) {	
 			writeOnOutput(this.MINION_TAB_NR, this.translator.getTargetSolverInstance());
-			writeOnMessageOutput("Tailored model to t arget solver "+solver.getSolverName()+"\n");
+			writeOnMessageOutput("Tailored model to target solver "+solver.getSolverName()+"\n");
 		}
 		else {
 			writeOnMessageOutput("===================== ERROR ======================\n"+
@@ -1186,6 +1186,7 @@ protected void translate(String command) {
 			writeOnMessageOutput("===================== ERROR ======================\n"+
 			"Parse Error.\n"+this.translator.getErrorMessage()+"\n"+
 			"===============================================\n");
+			System.err.println(this.translator.getErrorMessage());
 			return false;
 		}
 		return true;

@@ -195,7 +195,7 @@ public class Disjunction extends NaryRelationalExpression {
 		return this;
 	}
 	
-public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.disjointExpressions.size(); i++)
 			this.disjointExpressions.add(i, this.disjointExpressions.remove(i).replaceVariableWithExpression(variableName, expression));

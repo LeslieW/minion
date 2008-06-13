@@ -182,7 +182,7 @@ public class QuantifiedExpression implements RelationalExpression {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		this.quantifiedExpression = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
 		return this;

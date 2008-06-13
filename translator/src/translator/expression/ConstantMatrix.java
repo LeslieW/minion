@@ -4,7 +4,7 @@ public class ConstantMatrix implements ConstantArray {
 
 	private String arrayName;
 	private int[][] elements;
-	
+	private Domain domain;
 	
 	private boolean willBeFlattenedToVariable = false;
 	private boolean isNested = true;
@@ -27,6 +27,23 @@ public class ConstantMatrix implements ConstantArray {
 				this.elements[i][j] = (int) values[i][j];
 			}
 		}
+		
+	}
+	
+	
+	public ConstantMatrix(String arrayName,
+					      Integer[][] values,
+					      Domain domain) {
+		
+		this.arrayName = arrayName;
+		this.elements = new int[values.length][values[0].length];
+		
+		for(int i=0; i<values.length; i++) {
+			for(int j=0; j<values[0].length; j++) {
+				this.elements[i][j] = (int) values[i][j];
+			}
+		}
+		this.domain = domain;
 		
 	}
 	
@@ -71,7 +88,7 @@ public class ConstantMatrix implements ConstantArray {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		return this;	
 	}
 
@@ -170,10 +187,51 @@ public class ConstantMatrix implements ConstantArray {
 		if(rowIndex <this.elements.length && rowIndex >= 0) {
 			if(colIndex <this.elements[0].length && colIndex >= 0) 
 				return elements[rowIndex][colIndex];
-			else throw new Exception("The column-Index '"+colIndex+"' for constant array '"+this+"' is out of bounds.\n"+
-					"Feasible bounds are: rows: 1.."+(elements.length-1)+", cols: 1.."+(elements[0].length-1));
+			else {
+				int[] offsets = this.getIndexOffsets();
+				if(offsets.length == 0)
+					throw new Exception("The column-Index '"+colIndex+"' for constant array '"+this.arrayName+"' is out of bounds.\n"+	
+							"Feasible bounds are: rows: 0.."+(elements.length-1)+", cols: 0.."+(elements[0].length-1));
+				else {
+					throw new Exception("The column-Index '"+(colIndex+offsets[1])+"' for constant array '"+this.arrayName+"' is out of bounds.\n"+	
+							"Feasible bounds are: rows: "+offsets[0]+".."+(elements.length-1+offsets[0])+
+							", cols: "+(offsets[1])+".."+(elements[0].length-1+offsets[1]));
+				}
+			}
 		}
-		else throw new Exception("The row-Index '"+rowIndex+"' for constant array '"+this+"' is out of bounds.\n"+
-				"Feasible bounds are: rows: 1.."+(elements.length-1)+", cols: 1.."+(elements[0].length-1));
+		else {
+			int[] offsets = this.getIndexOffsets();
+			if(offsets.length == 0)
+				throw new Exception("The row-Index '"+rowIndex+"' for constant array '"+this.arrayName+"' is out of bounds.\n"+
+				"Feasible bounds are: rows: 0.."+(elements.length-1)+", cols: 0.."+(elements[0].length-1));
+			else 
+				throw new Exception("The row-Index '"+(rowIndex+offsets[0])+"' for constant array '"+this.arrayName+"' is out of bounds.\n"+
+						"Feasible bounds are: rows: "+offsets[0]+".."+(elements.length-1+offsets[0])+
+						", cols: "+(offsets[1])+".."+(elements[0].length-1+offsets[1]));
+		}
+	}
+	
+	public Domain getArrayDomain() {
+		return this.domain;
+	}
+	
+	public void setArrayDomain(ArrayDomain domain) {
+		this.domain = domain;
+	}
+	
+	public int[] getIndexOffsets() {
+		
+		if(this.domain != null) {
+			domain = domain.evaluate();
+			if(domain instanceof ConstantArrayDomain) { 
+				ConstantArrayDomain constDomain = (ConstantArrayDomain) domain;
+				int[] offsets = new int[constDomain.getIndexDomains().length];
+				for(int i=0; i<offsets.length; i++) {
+					offsets[i] = constDomain.getIndexDomains()[i].getRange()[0];
+				}
+				return offsets;
+			}
+		}
+		return new int[0];
 	}
 }

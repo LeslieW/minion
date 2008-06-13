@@ -103,7 +103,7 @@ public class ProductConstraint implements GlobalConstraint {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		this.result = this.result.replaceVariableWithExpression(variableName, expression);
 		for(int i=0; i<this.arguments.length; i++)
 			this.arguments[i] = this.arguments[i].replaceVariableWithExpression(variableName, expression);

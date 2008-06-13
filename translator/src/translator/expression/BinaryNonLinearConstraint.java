@@ -161,7 +161,7 @@ public class BinaryNonLinearConstraint implements RelationalExpression {
 	}
 
 	public Expression replaceVariableWithExpression(String variableName,
-			Expression expression) {
+			Expression expression) throws Exception {
 		
 		this.leftArgument = this.leftArgument.replaceVariableWithExpression(variableName, expression);
 		this.rightArgument = this.rightArgument.replaceVariableWithExpression(variableName, expression);

@@ -534,16 +534,46 @@ public class Normaliser implements NormaliserSpecification {
 		throws NormaliserException {
 		
 		
-		for(int i=0; i<this.parameterNames.size(); i++) {
+		ArrayList<String> names = (ArrayList<String>) this.constantArrayNames.clone();
+		for(int i=0; i<this.parameterNames.size(); i++)
+			names.add(parameterNames.get(i));
 		
-			String parameterName = parameterNames.get(i);
+	
+		for(int i=0; i<names.size(); i++) {
+		
+			String parameterName = names.get(i);
 			
 			if(this.constantArrays.containsKey(parameterName)) {
 			
 				ConstantArray constantArray = this.constantArrays.get(parameterName);
+				//System.out.println("Computing offsets of constant array :"+constantArray);
+				
+				// the constant array's domain has been defined 
+				if(constantArray.getArrayDomain() != null) {
+					Domain domain = constantArray.getArrayDomain();
+					domain = domain.evaluate();
+					if(!(domain instanceof ConstantArrayDomain)) 
+						//throw new NormaliserException("Cannot compute offsets of indices of constant array \n"+parameterName+
+						//		" when its domain '"+domain+"' is not constant.\nPlease declare all parameters and constants before using them.");
+						throw new NormaliserException("Infeasible domain for constant array '"+parameterName+
+							"'. "+domain+" is "+
+							((domain instanceof ArrayDomain) ? "not constant.\nPlease declare all parameters and constants before using them."
+									: "not an array domain.")+
+									"");
+					
+					ConstantArrayDomain arrayDomain = (ConstantArrayDomain) domain;
+			
+					int[] offsets = new int[arrayDomain.getIndexDomains().length];
+					for(int j=0; j<offsets.length; j++) {
+						ConstantDomain indexDomain = arrayDomain.getIndexDomains()[j];
+						offsets[j] = indexDomain.getRange()[0];
+					}
+			
+					this.constantArrayOffsets.put(parameterName, offsets);
+				}
 			
 				/* if there is a specification of the constant array's domain */
-				if(this.parameterDomains.containsKey(parameterName)) {
+				else if(this.parameterDomains.containsKey(parameterName)) {
 					Domain domain = parameterDomains.get(parameterName).evaluate();
 					if(!(domain instanceof ConstantArrayDomain)) 
 						throw new NormaliserException("Cannot compute offsets of indices of constant array \n"+parameterName+
@@ -584,7 +614,8 @@ public class Normaliser implements NormaliserSpecification {
 	 */
 	private ArrayList<Expression> insertExpressionForVariable(Expression expression,
 															  String variableName,
-															  ArrayList<Expression> constraints) {
+															  ArrayList<Expression> constraints) 
+															  	throws Exception {
 		
 		for(int i=0; i<constraints.size(); i++) {
 			Expression constraint = constraints.remove(i);

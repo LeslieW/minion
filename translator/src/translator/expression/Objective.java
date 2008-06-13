@@ -68,7 +68,7 @@ public class Objective implements Expression {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		if(this.objective != null)
 			this.objective = this.objective.replaceVariableWithExpression(variableName, expression);
 		

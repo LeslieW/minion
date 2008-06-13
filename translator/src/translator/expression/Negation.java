@@ -75,7 +75,7 @@ public class Negation implements UnaryRelationalExpression {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		this.argument = this.argument.replaceVariableWithExpression(variableName, expression);
 		return this;

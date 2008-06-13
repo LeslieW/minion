@@ -100,7 +100,7 @@ public class VariableArray implements SingleArray {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.variables.length; i++) {
 			Expression e = this.variables[i].replaceVariableWithExpression(variableName, expression);

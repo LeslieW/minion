@@ -183,7 +183,7 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		if(this.variable != null) {
 			Expression e = this.variable.replaceVariableWithExpression(variableName, expression);

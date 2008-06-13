@@ -261,20 +261,29 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
-		try { 
+		//try { 
 		
+			//System.out.println("1 Replacing "+variableName+" in "+this+" with "+expression);
+			
 		if(this.arrayName.equals(variableName)) {
+			
+			//System.out.println("1 Replacing "+this+" in "+this+" with "+variableName);
 			
 			if(!(expression instanceof ConstantArray))
 				return expression;
 				
+		
 			ConstantArray constantArray = (ConstantArray) expression;
+			//System.out.println("1 Replacing "+variableName+" in "+this+" with "+expression+". dim:"+constantArray.getDimension()+
+			//		" vs. #indices:"+indices.size());
+			
+			
 			if(constantArray.getDimension() != this.indices.size())
-				throw new Exception("Replacing variable "+this+" with infeasible expression:"+expression+
-						". Dimensions do not match: "+this+"' dimension: "+this.indices.size()+
-						" and "+expression+"'s dimension:"+constantArray.getDimension());
+				throw new Exception("I cannot match a constant value from constant array "+variableName+" to variable "+this+
+						",\n because the dimensions don't match: "+this+" is "+this.indices.size()+"-dimensionial and "
+						+expression+" is "+constantArray.getDimension()+"-dimensionial.");
 			
 			boolean allIndicesAreInts = true;
 			boolean allIndicesAreSingleExpressions = true;
@@ -303,12 +312,33 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 				for(int i=intIndices.length-1; i>=0; i--) {
 					intIndices[i] = ((SingleIntRange) indices.remove(i)).getSingleRange();
 				}
-				if(constantArray instanceof ConstantVector)
-					return new ArithmeticAtomExpression( ((ConstantVector) constantArray).getElementAt(intIndices[0]) );
+				if(constantArray.getArrayDomain() != null){
+					if(!(constantArray.getArrayDomain() instanceof MatrixDomain))
+						throw new Exception("Infeasible domain for constant array "+variableName+": "+constantArray.getArrayDomain()+
+								".\nExpected an array domain.");
+				}
 				
-				else if(constantArray instanceof ConstantMatrix)
+				int[] offsets = constantArray.getIndexOffsets();
+				if(offsets.length > 0) {
+					if(offsets.length != intIndices.length)
+						throw new Exception("Domains of constant array element "+this+" and constant array "+variableName+" don't match.\n"+
+								this+" is "+intIndices.length+"-dimensional and "+variableName+" is defined as "+offsets.length+"-dimensional.");
+					for(int i=0; i<offsets.length; i++) {
+						//System.out.println("Dereferenced "+variableName+" : index "+intIndices[i]+" - "+offsets[i]+"(offset)");
+						intIndices[i] = intIndices[i]-offsets[i];
+					}
+				}
+				//else System.out.println("No offsets for constArray:"+constantArray.getArrayName());
+				
+				if(constantArray instanceof ConstantVector) {
+					return new ArithmeticAtomExpression( ((ConstantVector) constantArray).getElementAt(intIndices[0]) );
+				}
+				
+				else if(constantArray instanceof ConstantMatrix) {
+					//System.out.println("Dereferenced "+variableName+" : adapted index "+intIndices[0]+","+intIndices[1]);
 					return new ArithmeticAtomExpression( ((ConstantMatrix) constantArray).getElementAt(intIndices[0],
 																										intIndices[1]) );
+				}
 			}
 			
 			if(allIndicesAreSingleExpressions) {
@@ -327,11 +357,11 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 				throw new Exception("Cannot translate indexing constant arrays with integer ranges, as in "+expression+" yet, sorry.");
 		}
 		
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-			System.exit(1);
-		}
-		
+		//} catch (Exception e) {
+		//	e.printStackTrace(System.out);
+		//	System.exit(1);
+		//}
+		//System.out.println("2 Replaced "+this+" in "+this+" with "+variableName);
 		//this = this.quantifiedExpression.replaceVariableWithExpression(variableName, expression);
 		return this;
 	}

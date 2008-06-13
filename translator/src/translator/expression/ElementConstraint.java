@@ -72,7 +72,7 @@ public class ElementConstraint implements GlobalConstraint {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		this.variableArray = this.variableArray.replaceVariableWithExpression(variableName, expression);
 		this.index = this.index.replaceVariableWithExpression(variableName, expression);

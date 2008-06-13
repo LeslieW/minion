@@ -262,7 +262,7 @@ public class Atmost implements GlobalConstraint {
 		return this;	
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		//System.out.println("Replacing variable "+variableName+" with expression "+expression+" in :"+this);
 		

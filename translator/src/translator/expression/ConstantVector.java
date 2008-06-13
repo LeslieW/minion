@@ -4,6 +4,7 @@ public class ConstantVector implements ConstantArray {
 
 	private String arrayName;
 	private int[] elements;
+	private Domain domain;
 	
 	private boolean willBeFlattenedToVariable = false;
 	private boolean isNested = true;
@@ -26,6 +27,15 @@ public class ConstantVector implements ConstantArray {
 			elements[i] = (int) values[i];
 	}
 	
+	public ConstantVector(String arrayName,
+						  Integer[] values,
+						  Domain domain) {
+		this.arrayName = arrayName;
+		this.elements = new int[values.length];
+		for(int i=0; i<this.elements.length; i++)
+			elements[i] = (int) values[i];
+		this.domain = domain;
+	}
 	
 	// =========== INHERITED METHIODS =================
 	
@@ -67,7 +77,7 @@ public class ConstantVector implements ConstantArray {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		return this;	
 	}
 	
@@ -134,6 +144,7 @@ public class ConstantVector implements ConstantArray {
 	
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
+		this.domain = this.domain.replaceVariableWithDomain(variableName, domain);
 		return this;
 	}
 	
@@ -156,5 +167,27 @@ public class ConstantVector implements ConstantArray {
 		else throw new Exception("Index '"+index+"' for constant array '"+this+"' is out of bounds.");
 	}
 	
+	public Domain getArrayDomain() {
+		return this.domain;
+	}
 	
+	public void setArrayDomain(ArrayDomain domain) {
+		this.domain = domain;
+	}
+	
+	public int[] getIndexOffsets() {
+		
+		if(this.domain != null) {
+			domain = domain.evaluate();
+			if(domain instanceof ConstantArrayDomain) { 
+				ConstantArrayDomain constDomain = (ConstantArrayDomain) domain;
+				int[] offsets = new int[constDomain.getIndexDomains().length];
+				for(int i=0; i<offsets.length; i++) {
+					offsets[i] = constDomain.getIndexDomains()[i].getRange()[0];
+				}
+				return offsets;
+			}
+		}
+		return new int[0];
+	}
 }

@@ -140,7 +140,7 @@ public class AllDifferent implements UnaryRelationalExpression {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		if(argument!=null)
 			this.argument = (Array) this.argument.replaceVariableWithExpression(variableName, expression);

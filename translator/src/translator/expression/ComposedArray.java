@@ -69,7 +69,7 @@ public class ComposedArray implements Array {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.arrayList.length; i++) {
 			try { 

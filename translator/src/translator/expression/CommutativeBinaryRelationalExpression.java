@@ -223,7 +223,7 @@ public class CommutativeBinaryRelationalExpression implements
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		this.leftArgument = this.leftArgument.replaceVariableWithExpression(variableName, expression);
 		this.rightArgument = this.rightArgument.replaceVariableWithExpression(variableName, expression);
 		

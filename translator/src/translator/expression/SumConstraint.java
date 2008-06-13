@@ -273,7 +273,7 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.positiveArguments.length; i++) {
 			this.positiveArguments[i] =  this.positiveArguments[i].replaceVariableWithExpression(variableName, expression);

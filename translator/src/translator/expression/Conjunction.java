@@ -203,7 +203,7 @@ public class Conjunction extends NaryRelationalExpression {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		for(int i=0; i<this.conjointExpressions.size(); i++)
 			this.conjointExpressions.add(i, this.conjointExpressions.remove(i).replaceVariableWithExpression(variableName, expression));

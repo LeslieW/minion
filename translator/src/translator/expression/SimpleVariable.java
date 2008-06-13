@@ -133,7 +133,7 @@ public class SimpleVariable implements Variable, AtomExpression {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		if(this.variableName.equals(variableName)) {
 			return expression;

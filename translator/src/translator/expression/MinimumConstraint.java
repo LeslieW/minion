@@ -99,7 +99,7 @@ public class MinimumConstraint implements RelationalExpression {
 	}
 
 	public Expression replaceVariableWithExpression(String variableName,
-			Expression expression) {
+			Expression expression) throws Exception {
 		
 		this.arguments = (Array) this.arguments.replaceVariableWithExpression(variableName, expression);
 		this.result = this.result.replaceVariableWithExpression(variableName, expression);

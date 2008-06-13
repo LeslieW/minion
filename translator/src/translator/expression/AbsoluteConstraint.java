@@ -126,7 +126,7 @@ public class AbsoluteConstraint implements GlobalConstraint {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		this.argument = this.argument.replaceVariableWithExpression(variableName, expression);
 		this.result = this.result.replaceVariableWithExpression(variableName, expression);

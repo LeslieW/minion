@@ -280,7 +280,7 @@ public class ArrayVariable implements Variable {
 	}
 	
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		if(this.exprIndices != null) {
 			boolean allIndicesAreInteger = true;

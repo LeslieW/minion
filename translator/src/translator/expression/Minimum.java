@@ -103,7 +103,7 @@ public class Minimum implements UnaryArithmeticExpression {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		if(this.argument != null) {
 			Expression e = this.argument.replaceVariableWithExpression(variableName, expression);

@@ -290,6 +290,7 @@ public class Translate {
 			if(settings.debugMode)
 				e.printStackTrace(System.out);
 			else System.out.println(e.getMessage());
+			System.out.println("GGGGGGGGGGGGGGGGGGGGGR");
 			System.out.println("Cannot translate to "+settings.targetSolver.getSolverName()+" from problemfile:"+filename);
 			System.exit(1);
 		}

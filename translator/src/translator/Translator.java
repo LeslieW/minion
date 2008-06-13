@@ -80,11 +80,19 @@ public class Translator {
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(problemString)) );
 			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
+			if(parser.hadErrorRecovery) {
+				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+				return false;
+			}
 			//print_debug(problemSpec.toString());
     	
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(parameterString)) );
 			this.parameterSpecification = (EssencePrimeModel) parser.parse().value;
+			if(parser.hadErrorRecovery) {
+				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+				return false;
+			}
 			//print_debug(parameterSpec.toString());
 		}
 		catch(Exception e) {
@@ -116,6 +124,11 @@ public class Translator {
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 				(new StringReader(problemString)) );
 			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
+			if(parser.hadErrorRecovery) {
+				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+				return false;
+			}
+			
 			this.normalisedModelHasBeenFlattened = false;
 			// create an empty parameter file
 			this.parameterSpecification = new EssencePrimeModel();
@@ -322,10 +335,21 @@ public class Translator {
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 				(new StringReader(problemString)) );
 			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
+			if(parser.hadErrorRecovery) {
+				//System.out.println("Error recovery. Stop translation NOW.");
+				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+				return false;
+			}
+			
 			
 			this.parser = new EssencePrimeParser(new EssencePrimeLexer
 					(new StringReader(parameterString)) );
+				
 			this.parameterSpecification = (EssencePrimeModel) parser.parse().value;
+			if(parser.hadErrorRecovery) {
+				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
+				return false;
+			}
 			
 			if(this.settings.giveTranslationTimeInfo) {
 				long stopTime = System.currentTimeMillis();

@@ -3648,6 +3648,8 @@ public class Flattener {
 		throws TailorException,Exception {
 		
 		
+		
+		
 		if(expression instanceof RelationalAtomExpression) 
 			return expression;
 		
@@ -3771,7 +3773,7 @@ public class Flattener {
 			if(atom.getType() == Expression.INT_ARRAY_VAR) {
 				Variable arrayVariable = atom.getVariable();
 				
-				//System.out.println("Trying to find constant array variable match for :"+arrayVariable);
+				//System.out.println("Trying to find constant array variable match for int array var:"+arrayVariable);
 				
 				if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
 					
@@ -3779,9 +3781,30 @@ public class Flattener {
 					Expression[] indices = aVar.getExpressionIndices();
 					
 					// we still have expression indices
-					if(indices!=null)
-						return expression;
+					if(indices!=null) {
+						boolean someThingChanged = false;
+						
+						for(int j=0; j<indices.length; j++) {
+							Expression e = this.insertConstantArraysInExpression(indices[j]);
+							if(!e.toString().equals(indices[j].toString())) {
+								someThingChanged = true;
+								indices[j] = e;
+							}
+						}
+						if(!someThingChanged)
+							return expression;
 					
+						Expression e = new ArrayVariable(aVar.getArrayNameOnly(), 
+									indices,
+										aVar.getBaseDomain());
+						//System.out.println("After inserting expressions into atom:"+atom+" we get: "+e+
+						//		" in which we will insert constant arrays again...");
+						return this.insertConstantArraysInExpression(new ArithmeticAtomExpression(new ArrayVariable(aVar.getArrayNameOnly(), 
+												 										indices,
+												 										aVar.getBaseDomain())));
+						//return expression;
+					}
+						
 					//System.out.println("constant arrays: "+this.normalisedModel.constantArrays);
 					//System.out.println("The array element '"+atom+"' is a constant array?? with nameL:"+((ArrayVariable) arrayVariable).getArrayNameOnly());
 					
@@ -3816,6 +3839,8 @@ public class Flattener {
 								int rowOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(matrix.getArrayName(), 0);
 								int colOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(matrix.getArrayName(), 1);
 								
+								//System.out.println("Matrix rowOffset:"+rowOffsetFromZero+", colOffset:"+colOffsetFromZero);
+								
 								return new ArithmeticAtomExpression(matrix.getElementAt(intIndices[0]-rowOffsetFromZero, 
 										                                                intIndices[1]-colOffsetFromZero));
 								
@@ -3831,7 +3856,148 @@ public class Flattener {
 						
 					}
 				}
+				else if(arrayVariable.getType() == Expression.SIMPLE_ARRAY_VARIABLE) {
+					
+					//System.out.println("Inserting the constant shit in simple array var:"+expression);
+					SimpleArrayVariable simpleVar = (SimpleArrayVariable) expression;
+					
+					if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
+						ConstantArray constArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
+						
+						//System.out.println("1 inserting constArray "+simpleVar.getVariableName()+" in "+expression);
+						Expression e = simpleVar.replaceVariableWithExpression(simpleVar.getVariableName(), constArray);
+						//System.out.println("2 inserted constArray "+simpleVar.getVariableName()+" in "+expression+": "+e);
+						return e;
+					}
+					
+				}
 			}
+		}
+		
+		
+		
+		
+		// HERE IS THE STUFF THAT IS ACTUALLY HAPPENING: insert constant array value
+		else if(expression instanceof RelationalAtomExpression) {
+			
+			RelationalAtomExpression  atom = (RelationalAtomExpression) expression;
+		
+			if(atom.getType() == Expression.BOOL_ARRAY_VAR) {
+				Variable arrayVariable = atom.getVariable();
+				
+				//System.out.println("Trying to find constant array variable match for :"+arrayVariable);
+				
+				if(arrayVariable.getType() == Expression.ARRAY_VARIABLE) {
+					
+					ArrayVariable aVar = (ArrayVariable) arrayVariable;
+					Expression[] indices = aVar.getExpressionIndices();
+					
+					// we still have expression indices
+					if(indices!=null) {
+						
+						for(int j=0; j<indices.length; j++) {
+							indices[j] = this.insertConstantArraysInExpression(indices[j]);
+						}
+						Expression e = new ArrayVariable(aVar.getArrayNameOnly(), 
+									indices,
+										aVar.getBaseDomain());
+						//System.out.println("After inserting expressions into atom:"+atom+" we get: "+e+
+						//		" in which we will insert constant arrays again...");
+						return this.insertConstantArraysInExpression(new ArrayVariable(aVar.getArrayNameOnly(), 
+												 										indices,
+												 										aVar.getBaseDomain()));
+						//return expression;
+					}
+						
+					//System.out.println("constant arrays: "+this.normalisedModel.constantArrays);
+					//System.out.println("The array element '"+atom+"' is a constant array?? with nameL:"+((ArrayVariable) arrayVariable).getArrayNameOnly());
+					
+					// ---------- if this is a constant variable --------------------------------------------------------
+					if(this.normalisedModel.constantArrays.containsKey( ((ArrayVariable) arrayVariable).getArrayNameOnly() )) {
+					
+						
+						ConstantArray constArray = this.normalisedModel.constantArrays.get(((ArrayVariable) arrayVariable).getArrayNameOnly());
+					
+						if(indices != null) 
+							throw new TailorException("Sorry, cannot tailor constant arrays that are indexed by decision variables yet.");
+						
+						int[] intIndices = ((ArrayVariable) arrayVariable).getIntegerIndices();
+						
+						// we have a vector
+						if(intIndices.length == 1) {
+							if(constArray instanceof ConstantVector) {
+								ConstantVector vector = (ConstantVector) constArray;
+								int rowOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(vector.getArrayName(), 0);
+								
+								return new RelationalAtomExpression(vector.getElementAt(intIndices[0]-rowOffsetFromZero) > 0);
+							}
+							else throw new TailorException("Illegal index dimensions of constant array element '"+atom+
+									"' that dereferences the array '"+constArray+
+									"'.\nPlease make sure you have an index for every dimension of the array.");
+						}
+						// matrix
+						else if(intIndices.length == 2) {
+							if(constArray instanceof ConstantMatrix) {
+								ConstantMatrix matrix = (ConstantMatrix) constArray;
+								
+								int rowOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(matrix.getArrayName(), 0);
+								int colOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(matrix.getArrayName(), 1);
+								
+								//System.out.println("Matrix rowOffset:"+rowOffsetFromZero+", colOffset:"+colOffsetFromZero);
+								
+								return new RelationalAtomExpression(matrix.getElementAt(intIndices[0]-rowOffsetFromZero, 
+										                                                intIndices[1]-colOffsetFromZero) > 0);
+								
+							}
+							else throw new TailorException("Illegal index dimensions of constant array element '"+atom+
+									"' that dereferences the array '"+constArray+
+									"'.\nPlease make sure you have an index for every dimension of the array.");
+							
+						}
+						// cube
+						//else if(intIndices.length == 3) 
+						else throw new TailorException("Cannot tailor constant elements with more than 2 dimensions yet, sorry:"+atom);
+						
+					}
+				}
+				else if(arrayVariable.getType() == Expression.SIMPLE_ARRAY_VARIABLE) {
+					
+					//System.out.println("Inserting the constant shit in simple array var:"+expression);
+					SimpleArrayVariable simpleVar = (SimpleArrayVariable) expression;
+					
+					if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
+						ConstantArray constArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
+						
+						//System.out.println("1 inserting constArray "+simpleVar.getVariableName()+" in "+expression);
+						Expression e = simpleVar.replaceVariableWithExpression(simpleVar.getVariableName(), constArray);
+						//System.out.println("2 inserted constArray "+simpleVar.getVariableName()+" in "+expression+": "+e);
+						return e;
+					}
+					
+				}
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
+		else if(expression instanceof SimpleArrayVariable) {
+			
+				//System.out.println("Inserting the constant shit in simple array var:"+expression);
+				SimpleArrayVariable simpleVar = (SimpleArrayVariable) expression;
+				
+				if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
+					ConstantArray constArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
+					
+					//System.out.println("1 inserting constArray "+simpleVar.getVariableName()+" in "+expression);
+					Expression e = simpleVar.replaceVariableWithExpression(simpleVar.getVariableName(), constArray);
+					//System.out.println("2 inserted constArray "+simpleVar.getVariableName()+" in "+expression+": "+e);
+					return e;
+				}
+			
 		}
 		
 		return expression;

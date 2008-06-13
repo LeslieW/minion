@@ -53,7 +53,7 @@ public class Reification implements RelationalExpression {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 	
 		this.reifiedExpression = this.reifiedExpression.replaceVariableWithExpression(variableName, expression);
 		return this;

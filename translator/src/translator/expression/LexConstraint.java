@@ -67,7 +67,7 @@ public class LexConstraint implements RelationalExpression {
 		return this;
 	}
 	
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		this.leftArray = this.leftArray.replaceVariableWithExpression(variableName, expression);
 		this.rightArray = this.rightArray.replaceVariableWithExpression(variableName, expression);
 		

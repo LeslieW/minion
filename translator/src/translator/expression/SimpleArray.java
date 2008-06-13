@@ -76,7 +76,7 @@ public class SimpleArray implements SingleArray {
 		return this;
 	}
 
-	public Expression replaceVariableWithExpression(String variableName, Expression expression) {
+	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception {
 		
 		if(this.arrayName.equals(variableName)) {
 			return expression;
