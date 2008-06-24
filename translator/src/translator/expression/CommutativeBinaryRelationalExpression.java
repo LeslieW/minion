@@ -249,6 +249,8 @@ public class CommutativeBinaryRelationalExpression implements
 	
 	public Expression restructure() {
 	
+		//System.out.println("Before restructuring CommExpr:"+this);
+		
 		if(this.type == Expression.EQ) {
 		
 			if(this.rightArgument instanceof Sum) {
@@ -277,7 +279,16 @@ public class CommutativeBinaryRelationalExpression implements
 				if(rightArgument instanceof Sum) {
 					ArrayList<Expression> negArgs = ((Sum) rightArgument).getNegativeArguments();
 					if(negArgs.size() > 0 && negArgs.get(0).getType() == INT){
-						leftArgument = negArgs.remove(0);
+						leftArgument = new Sum( new Expression[] { leftArgument,negArgs.remove(0)},
+								                 new Expression[] {});
+						
+						if(rightSum.getNegativeArguments().size() == 0 && 
+								rightSum.getPositiveArguments().size() == 1) {
+							Expression buffer = leftArgument;
+							leftArgument = rightSum.getPositiveArguments().get(0);
+							rightArgument = buffer;
+						}
+							
 					}
 				}
 			}
@@ -306,13 +317,23 @@ public class CommutativeBinaryRelationalExpression implements
 				if(leftArgument instanceof Sum) {
 					ArrayList<Expression> negArgs = ((Sum) leftArgument).getNegativeArguments();
 					if(negArgs.size() > 0 && negArgs.get(0).getType() == INT){
-						rightArgument = negArgs.remove(0);
+						rightArgument = new Sum( new Expression[] { rightArgument,negArgs.remove(0)},
+				                 								new Expression[] {});
+						rightArgument = rightArgument.reduceExpressionTree();
+						if(leftSum.getNegativeArguments().size() == 0 && 
+								leftSum.getPositiveArguments().size() == 1) {
+							leftArgument = leftSum.getPositiveArguments().get(0);
+						}
+						
 					}
 				}
 			}
 			
 		} // else: not EQ
 		
+		
+		//System.out.println("After restructuring CommExpr:"+this);
+		//this.orderExpression();
 		return this;
 	}
 	

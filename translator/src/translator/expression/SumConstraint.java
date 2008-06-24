@@ -157,6 +157,8 @@ public class SumConstraint implements GlobalConstraint {
 
 	public Expression evaluate() {
 		
+		//System.out.println("Before evaluating sum constraint:"+this);
+		
 		int noZeros = 0;
 		
 		for(int i=0; i<this.positiveArguments.length; i++) {
@@ -216,6 +218,8 @@ public class SumConstraint implements GlobalConstraint {
 		}
 		
 		this.result = this.result.evaluate();
+		
+		//ystem.out.println("After evaluating sum constraint:"+this);
 		return this;
 	}
 

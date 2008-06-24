@@ -100,9 +100,11 @@ public class Normaliser implements NormaliserSpecification {
 		
 		// reduce Expressions
 		constraints = reduceExpressions(constraints);
+		//System.out.println("Constraints AFTER reduction:"+constraints);
 		
 		// restructure Expressions
 		constraints = restructureExpressions(constraints);
+		//System.out.println("Constraints AFTER restructuring:"+constraints);
 		
 		// order again
 		constraints = orderConstraints(constraints);

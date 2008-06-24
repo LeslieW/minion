@@ -301,11 +301,13 @@ public class Sum extends NaryArithmeticExpression {
 		else if(newConstant > 0){	
 		    // add the constant to the beginning of the list, since it is smallest for sure
 			this.positiveArguments.add(0,new ArithmeticAtomExpression(newConstant));
+			//System.out.println("After evaluating sum :"+this);
 			return this;
 		}
 		else { // if newConstant < 0
 			// we add the positive value to the negative list, since it will be displayed with a minus anyway
 			this.negativeArguments.add(0,new ArithmeticAtomExpression(newConstant-2*newConstant));
+			//System.out.println("After evaluating sum :"+this);
 			return this;			
 		}
 		
@@ -328,7 +330,7 @@ public class Sum extends NaryArithmeticExpression {
 			}
 			
 			// if the argument is a nested addition
-			if(positiveArguments.get(i).getType() == SUM) {
+			else if(positiveArguments.get(i).getType() == SUM) {
 				Sum nestedPositiveSum = (Sum) positiveArguments.remove(i);
 				
 				//print_debug("we can merge this element :"+nestedPositiveSum+" to the sum:"+this);
@@ -429,6 +431,8 @@ public class Sum extends NaryArithmeticExpression {
 		if(this.positiveArguments.size() ==0 || this.negativeArguments.size() ==0)
 			return this;
 		
+		//System.out.println("Before restructuring:"+this);
+		
 		// cancellation:
 		// if we find 2 equal arguments where one is in the positive list
 		// and one in the negative list, remove them both
@@ -447,6 +451,7 @@ public class Sum extends NaryArithmeticExpression {
 		}
 		
 
+		//System.out.println("After  restructuring:"+this);
 		
 		return this;
 	}
