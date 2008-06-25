@@ -66,7 +66,7 @@ process to enhance the problem model.
 \url{http://minion.sourceforge.net/} as an executable 
 Java {\tt jar}~\cite{java} file. It can also be downloaded
 as a standalone version from 
-\url{http://www.cs.st-and.ac.uk/TILDEandrea/tailor/tailor.tar.gz}.
+\url{http://www.cs.st-and.ac.uk/~andrea/tailor/tailor.tar.gz}.
 
 \subsection{Running {\sc Tailor}}
 The Java jar file {\tt tailor.jar} can be executed either 
@@ -464,11 +464,20 @@ Arithmetic operators may only be used on arithmetic expressions
 with the exception of addition and substraction (i.e. Booleans 
 may be added/subtracted).\\
 
-[TODO: introduction and description of operator precedence and associativity] \\
-
+To use operators correctly, you have to understand the precedence and associativity of operators. 
 Table \ref{tab:precedence} 
-describes the precedence of the operators that 
-are arranged by decreasing order of precedence (the operators on top have highest precedence)
+describes the precedence and associativity of the operators, arranged by decreasing order of precedence (the operators on top have highest precedence).
+
+As you would expect, operators with higher precedence take priority, so are applied first.   We have, for example 
+\begin{eqnarray*}
+a => b \verb.^. c * d / ( e + f ) & \equiv & a => ( (b \verb.^. c) * d ) /  (e + f) )
+\end{eqnarray*}
+
+For associativity, an operator $\cdot$ with left associativity has 
+$a \cdot b \cdot c \equiv  a \cdot b) \cdot c$ while with right associativity we have 
+$a \cdot b \cdot  c \equiv a \cdot (b \cdot c)$.   The operators with no associativity defined are meaningless if nested, so that $a = b = c$ is incorrect.    
+
+
 
 
 \begin{table}  
@@ -476,7 +485,7 @@ are arranged by decreasing order of precedence (the operators on top have highes
     \begin{tabular}{|l|lc|}
  
       \hline
-       Operator & Functionality & Associativity \\
+       Operator(s) & Functionality & Associativity \\
        \hline
        \hline
        ,   & comma & Left \\   
