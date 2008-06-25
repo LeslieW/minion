@@ -441,10 +441,12 @@ public class Sum extends NaryArithmeticExpression {
 			for(int j=this.negativeArguments.size()-1; j>=0; j--) {
 				Expression negArgument = this.negativeArguments.get(j);
 				if(negArgument.getType() == argument.getType()) {
-					if(negArgument.isSmallerThanSameType(argument) == Expression.EQUAL) {
-						//System.out.println("The two arguments are the same:"+positiveArguments.get(i)+" and "+negativeArguments.get(j));
+					//System.out.println("Comparing -"+negArgument+" with "+argument);
+					if(negArgument.toString().equals(argument.toString())) {
+						//System.out.println("The two arguments are the same:"+argument+" and -"+negArgument);
 						positiveArguments.remove(i);
 						negativeArguments.remove(j);
+						break;
 					}
 				}
 			}

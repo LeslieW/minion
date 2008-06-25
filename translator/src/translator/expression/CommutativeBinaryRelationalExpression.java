@@ -261,20 +261,27 @@ public class CommutativeBinaryRelationalExpression implements
 					positiveArgs.add(((UnaryMinus) leftArgument).getArgument());
 					this.leftArgument = new ArithmeticAtomExpression(0);
 				}
-				else if(!(this.leftArgument instanceof ArithmeticAtomExpression) &&
+				 else if(!(this.leftArgument instanceof ArithmeticAtomExpression) &&
 						!(this.leftArgument instanceof RelationalAtomExpression) ){ 
 				    // sum = E     ====>   sum - E = 0
 					ArrayList<Expression> negativeArgs = rightSum.getNegativeArguments();
 					negativeArgs.add(this.leftArgument.copy());
 					this.leftArgument = new ArithmeticAtomExpression(0);
+					rightArgument = rightSum.reduceExpressionTree();
 					
+					//System.out.println("After doing the bad thing: "+this);
 				}
 				// then flatten the sum
 				this.rightArgument = this.rightArgument.reduceExpressionTree();
+				//System.out.println("1 After doing the normalisation thing: "+this);
 				this.rightArgument = this.rightArgument.restructure();
+				//System.out.println("2 After doing the normalisation thing: "+this);
 				this.rightArgument.orderExpression();
+				//System.out.println("3 After doing the normalisation thing: "+this);
 				this.rightArgument = this.rightArgument.evaluate();
+				//System.out.println("4 After doing the normalisation thing: "+this);
 				
+				//System.out.println("5 After doing the normalisation thing: "+this);
 				
 				if(rightArgument instanceof Sum) {
 					ArrayList<Expression> negArgs = ((Sum) rightArgument).getNegativeArguments();

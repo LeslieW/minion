@@ -527,7 +527,7 @@ a => b \verb.^. c * d / ( e + f ) & \equiv & a => ( (b \verb.^. c) * d ) /  (e +
 \end{eqnarray*}
 
 For associativity, an operator $\cdot$ with left associativity has 
-$a \cdot b \cdot c \equiv  a \cdot b) \cdot c$ while with right associativity we have 
+$a \cdot b \cdot c \equiv  ( a \cdot b) \cdot c$ while with right associativity we have 
 $a \cdot b \cdot  c \equiv a \cdot (b \cdot c)$.   The operators with no associativity defined are meaningless if nested, so that $a = b = c$ is incorrect.    
 
 
@@ -572,6 +572,8 @@ such that
 
 pigs + hens = 7,
 pigs * 4 + hens * 2 = 22
+\end{verbatim}
+
 \subsection{K4P2GracefulGraph.eprime}
 \begin{verbatim}
 language ESSENCE' 1.b.a
