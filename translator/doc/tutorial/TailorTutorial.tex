@@ -468,16 +468,6 @@ To use operators correctly, you have to understand the precedence and associativ
 Table \ref{tab:precedence} 
 describes the precedence and associativity of the operators, arranged by decreasing order of precedence (the operators on top have highest precedence).
 
-As you would expect, operators with higher precedence take priority, so are applied first.   We have, for example 
-\begin{eqnarray*}
-a => b \verb.^. c * d / ( e + f ) & \equiv & a => ( (b \verb.^. c) * d ) /  (e + f) )
-\end{eqnarray*}
-
-For associativity, an operator $\cdot$ with left associativity has 
-$a \cdot b \cdot c \equiv  a \cdot b) \cdot c$ while with right associativity we have 
-$a \cdot b \cdot  c \equiv a \cdot (b \cdot c)$.   The operators with no associativity defined are meaningless if nested, so that $a = b = c$ is incorrect.    
-
-
 
 
 \begin{table}  
@@ -529,7 +519,321 @@ $a \cdot b \cdot  c \equiv a \cdot (b \cdot c)$.   The operators with no associa
 \label{tab:precedence}
 \end{table}
 
+As you would expect, operators with higher precedence take priority, so are applied first.   We have, for example 
+\begin{eqnarray*}
+a => b \verb.^. c * d / ( e + f ) & \equiv & a => ( (b \verb.^. c) * d ) /  (e + f) )
+\end{eqnarray*}
 
+For associativity, an operator $\cdot$ with left associativity has 
+$a \cdot b \cdot c \equiv  a \cdot b) \cdot c$ while with right associativity we have 
+$a \cdot b \cdot  c \equiv a \cdot (b \cdot c)$.   The operators with no associativity defined are meaningless if nested, so that $a = b = c$ is incorrect.    
+
+
+
+\section{Examples} 
+
+\subsection{EightNumberPuzzle.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+find circles: matrix indexed by [int(1..8)] of int(1..8)
+
+such that
+
+alldiff(circles),
+| circles[1] - circles[2] | > 1,
+| circles[1] - circles[3] | > 1,
+| circles[1] - circles[4] | > 1,
+| circles[2] - circles[3] | > 1,
+| circles[3] - circles[4] | > 1,
+| circles[2] - circles[5] | > 1,
+| circles[2] - circles[6] | > 1,
+| circles[3] - circles[5] | > 1,
+| circles[3] - circles[6] | > 1,
+| circles[3] - circles[7] | > 1,
+| circles[4] - circles[6] | > 1,
+| circles[4] - circles[7] | > 1,
+| circles[5] - circles[6] | > 1,
+| circles[6] - circles[7] | > 1,
+| circles[5] - circles[8] | > 1,
+| circles[6] - circles[8] | > 1,
+| circles[7] - circles[8] | > 1
+\end{verbatim}
+
+\subsection{FarmersProblem.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+find pigs, hens: int(0..7)
+
+such that
+
+pigs + hens = 7,
+pigs * 4 + hens * 2 = 22
+\subsection{K4P2GracefulGraph.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+find nodes : matrix indexed by [int(1..8)] of int(0..16),
+       edges: matrix indexed by [int(1..16)] of int(1..16)
+
+such that
+
+|nodes[1] - nodes[2]| = edges[1],
+|nodes[1] - nodes[3]| = edges[2],
+|nodes[1] - nodes[4]| = edges[3],
+|nodes[2] - nodes[3]| = edges[4],
+|nodes[2] - nodes[4]| = edges[5],
+|nodes[3] - nodes[4]| = edges[6],
+
+|nodes[5] - nodes[6]| = edges[7],
+|nodes[5] - nodes[7]| = edges[8],
+|nodes[5] - nodes[8]| = edges[9],
+|nodes[6] - nodes[7]| = edges[10],
+|nodes[6] - nodes[8]| = edges[11],
+|nodes[7] - nodes[8]| = edges[12],
+
+|nodes[1] - nodes[5]| = edges[13],
+|nodes[2] - nodes[6]| = edges[14],
+|nodes[3] - nodes[7]| = edges[15],
+|nodes[4] - nodes[8]| = edges[16],
+
+alldiff(edges),
+alldiff(nodes)
+\end{verbatim}
+\subsection{NQueensBool.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+given n: int
+find queens: matrix indexed by [int(1..n), int(1..n)] of bool
+
+such that
+
+forall i : int(1..n). ( sum j : int(1..n). queens[i,j] ) = 1,
+forall i : int(1..n). ( sum j : int(1..n). queens[j,i] ) = 1 ,
+
+forall i : int(1..n). forall j: int(1..n). forall k:int(1..n). forall l:int(1..n).
+(
+  ( 
+    (|i - k| = |j - l| ) /\ 
+    ((i != k) \/ (j != l)) 
+  ) 
+
+=> 
+
+   (queens[i,j] + queens[k,l] <= 1)
+)
+\end{verbatim}
+\subsection{NQueensColumn.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+given n: int
+find queens: matrix indexed by [int(1..n)] of int(1..n)
+
+such that
+
+alldiff(queens),
+
+forall i : int(1..n). forall j : int(i+1..n). | queens[i] - queens[j] | != |i - j|
+\end{verbatim}
+\subsection{SENDMOREMONEY.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+
+find S,E,N,D,M,O,R,Y : int(0..9)
+
+such that
+
+1000*S + 100*E + 10*N + D + 
+1000*M + 100*O + 10*R + E =
+10000*M + 1000*O + 100*N + 10*E + Y,
+
+alldiff([S,E,N,D,M,O,R,Y])
+\end{verbatim}
+\subsection{zebra.eprime}
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+$red = colour[1]
+$green = colour[2]
+$ivory = colour[3]
+$yellow = colour[4]
+$blue = colour[5]
+$Englishman = nationality[1]
+$Spaniard = nationality[2]
+$Ukranian = nationality[3]
+$Norwegian = nationality[4]
+$Japanese = nationality[5]
+$coffee = drink[1]
+$tea = drink[2]
+$milk = drink[3]
+$orange juice = drink[4]
+$Old Gold = smoke[1]
+$Kools = smoke[2]
+$Chesterfields = smoke[3]
+$Lucky Strike = smoke[4]
+$Parliaments = smoke[5]
+$dog = pets[1]
+$snails = pets[2]
+$fox = pets[3]
+$horse = pets[4]
+
+
+find colour: matrix indexed by [int(1..5)] of int(1..5),
+       nationality: matrix indexed by [int(1..5)] of int(1..5),
+       drink: matrix indexed by [int(1..5)] of int(1..5),
+       smoke: matrix indexed by [int(1..5)] of int(1..5),
+       pets: matrix indexed by [int(1..5)] of int(1..5)
+
+such that
+
+$constraints needed as this is a logical problem where 
+$the value allocated to each position of the matrix represents positon of house
+alldiff(colour),
+alldiff(nationality),
+alldiff(drink),
+alldiff(smoke),
+alldiff(pets),
+
+$There are five houses.
+$No constraint covered by domain specification
+
+$The Englishman lives in the red house
+nationality[1] = colour[1],
+
+$The Spaniard owns the dog.
+nationality[2] = pets[1],
+
+$Coffee is drunk in the green house.
+drink[1] = colour[2],
+
+$The Ukranian drinks tea.
+nationality[3] = drink[2],
+
+$The green house is immediately to the right of the ivory house.
+colour[2] + 1 = colour[3],
+
+$The Old Gold smoker owns snails.
+smoke[1] = pets[2],
+
+$Kools are smoked in the yellow house.
+smoke[2] = colour[4],
+
+$Milk is drunk in the middle house.
+drink[3] = 3,
+
+$The Norwegian lives in the first house
+nationality[4] = 1,
+
+$The man who smokes Chesterfields lives in the house next to the man with the fox.
+|smoke[3] - pets[3]| = 1,
+
+$Kools are smoked in the house next to the house where the horse is kept.
+|smoke[2] - pets[4]| = 1,
+
+$The Lucky Strike smoker drinks orange juice.
+smoke[4] = drink[4],
+
+$The Japanese smokes Parliaments.
+nationality[5] = smoke[5],
+
+$The Norwegian lives next to the blue house.
+|nationality[4] - colour[5]| = 1
+\end{verbatim}
+\subsection{zebraAlt.eprime}
+
+\begin{verbatim}
+language ESSENCE' 1.b.a
+
+$red = colour[1]
+$green = colour[2]
+$ivory = colour[3]
+$yellow = colour[4]
+$blue = colour[5]
+$Englishman = nationality[1]
+$Spaniard = nationality[2]
+$Ukranian = nationality[3]
+$Norwegian = nationality[4]
+$Japanese = nationality[5]
+$coffee = drink[1]
+$tea = drink[2]
+$milk = drink[3]
+$orange juice = drink[4]
+$Old Gold = smoke[1]
+$Kools = smoke[2]
+$Chesterfields = smoke[3]
+$Lucky Strike = smoke[4]
+$Parliaments = smoke[5]
+$dog = pets[1]
+$snails = pets[2]
+$fox = pets[3]
+$horse = pets[4]
+
+
+find colour: matrix indexed by [int(1..5)] of int(1..5),
+       nationality: matrix indexed by [int(1..5)] of int(1..5),
+       drink: matrix indexed by [int(1..5)] of int(1..5),
+       smoke: matrix indexed by [int(1..5)] of int(1..5),
+       pets: matrix indexed by [int(1..5)] of int(1..5)
+
+such that
+
+$constraints needed as this is a logical problem where 
+$the value allocated to each position of the matrix represents positon of house
+alldiff(colour),
+alldiff(nationality),
+alldiff(drink),
+alldiff(smoke),
+alldiff(pets),
+
+$There are five houses.
+$No constraint covered by domain specification
+
+$The Englishman lives in the red house
+nationality[1] = colour[1],
+
+$The Spaniard owns the dog.
+nationality[2] = pets[1],
+
+$Coffee is drunk in the green house.
+drink[1] = colour[2],
+
+$The Ukranian drinks tea.
+nationality[3] = drink[2],
+
+$The green house is immediately to the right of the ivory house.
+colour[2] + 1 = colour[3],
+
+$The Old Gold smoker owns snails.
+smoke[1] = pets[2],
+
+$Kools are smoked in the yellow house.
+smoke[2] = colour[4],
+
+$Milk is drunk in the middle house.
+drink[3] = 3,
+
+$The Norwegian lives in the first house
+nationality[4] = 1,
+
+$The man who smokes Chesterfields lives in the house next to the man with the fox.
+(smoke[3] = pets[3]+1) \/ (smoke[3] = pets[3]-1),
+
+$Kools are smoked in the house next to the house where the horse is kept.
+(smoke[2] = pets[4]+1) \/ (smoke[2] = pets[4]-1),
+
+$The Lucky Strike smoker drinks orange juice.
+smoke[4] = drink[4],
+
+$The Japanese smokes Parliaments.
+nationality[5] = smoke[5],
+
+$The Norwegian lives next to the blue house.
+(nationality[4] = colour[5]+1) \/ (nationality[4] = colour[5]-1)
+\end{verbatim}
 
 \begin{thebibliography}{10}
 
