@@ -188,7 +188,9 @@ An {\sc Essence}$'$ model is structured in the following way:
 \item Constraints (optional)
 \end{enumerate}
 
-[TODO: decribe what header 1.b.a means]
+The version number needs a little explanation.   Over time it is inevitable that the input language will change, and the basic reason for the version number is to ensure that the user is protected against changes to the format which might change the semantics.   At all times Tailor should deal with a given version as intended, even if the latest version of the input format would be treated differently.   In the worst case, a future version of Tailor may refuse to process an earlier language format if the changes are too drastic.\footnote{Unfortunately we do not guarantee perfect emulation of earlier formats, for example if we implement bug fixes which affect how earlier versions are dealt with.}  
+The version number is of the form \verb|<number>.<letter1>.<letter2>|.  The number corresponds to a major {\sc Essence} version number, and the first letter the {\sc Essence}$'$ revision within that.
+Finally, the second letter indicates changes which are meant to be backwards compatible.
 
 Parameter declaration, Constant definitions and Variable 
 declarations can be interleaved, but for readability we suggest to put them in the 
