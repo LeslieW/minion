@@ -1,0 +1,535 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage{url}
+\pagestyle{fancy}
+
+\lhead{}
+%\chead{Solving Games Symbolically}
+\rhead{\thepage}
+\lfoot{}
+\cfoot{Introduction to {\sc Tailor}}
+\rfoot{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+%%\thispagestyle{plain}
+
+%%\setlength{\oddsidemargin}{0.3in}
+%%\setlength{\evensidemargin}{0.3in}
+
+\begin{document}
+
+\title{{\sc Tailor} Tutorial}
+
+\author{Andrea Rendl}
+
+
+\date{\today}
+
+\maketitle
+%%\begin{center}
+
+\section{Introduction}
+This tutorial introduces the tool {\sc Tailor} that 
+converts constraint problem models formulated in the solver-independent modelling language 
+{\sc Essence}$'$ to the input format of the Constraint Solver
+{\sc Minion}. 
+%\subsection{Modelling in Constraint Programming}
+%To solve a problem with Constraint Programming techniques, 
+%the problem has to be formulated as a Constraint Satisfaction 
+%Problem(CSP) [***]. A  CSP consists of a set of variables
+%and a set of constraints (relations) on these variables.
+%Each variable ranges over a finite integer domain which the
+%constraints restrict. A constraint can be any kind of 
+%relation, using a wide range of operators (linear, non-linear,
+%arithmetic, logic, ...). To describe CSPs more generally, 
+
+{\sc Essence}$'$ is a solver-independent modelling 
+language for Constraint Programming. It provides means to define 
+variables, constants, parameters and offers a great range of 
+constraint expressions, including complex constructs, 
+such as quantifications.
+
+{\sc Minion} is a fast scalable Constraint solver. 
+However, modelling problems in {\sc Minion}'s input
+language is time-consuming and tedious because of its 
+primitive structure (it can be compared to writing a 
+complex program in machine language).
+
+{\sc Tailor} converts {\sc Essence}$'$ problem instances
+into {\sc Minion} format and applies reformulatios  
+(such as common subexpression elimination) during this 
+process to enhance the problem model.
+
+\subsection{Installing {\sc Tailor}}
+{\sc Tailor} comes together with {\sc Minion} on
+\url{http://minion.sourceforge.net/} as an executable 
+Java {\tt jar}~\cite{java} file. It can also be downloaded
+as a standalone version from 
+\url{http://www.cs.st-and.ac.uk/TILDEandrea/tailor/tailor.tar.gz}.
+
+\subsection{Running {\sc Tailor}}
+The Java jar file {\tt tailor.jar} can be executed either 
+by double-clicking or in the command line with the command
+\begin{center}
+{\tt java -jar tailor.jar}
+\end{center}
+This initiates the graphical user interface of {\sc Tailor}. 
+More details about the command line version are given with 
+\begin{center}
+{\tt java -jar tailor.jar -help}
+\end{center}
+
+\section{An Introduction to {\sc Essence}$'$}
+
+%It allows you to formulate problem classes
+%and problem instances. 
+
+\subsection{Types and Domains}
+
+Types and domains play a similar role; they prescribe a range of
+values that a variable can take.
+Types denote non-empty
+sets that contain all elements
+that have a similar structure, 
+whereas domains denote possibly  empty
+sets drawn from a
+single type.  In this manner, each domain is associated with an
+underlying type.  For example integer is the type underlying the
+domain comprising integers between 1 and 10.
+
+% what kind of types: only integers, booleans 
+{\sc Essence}$'$ is a strongly typed language;
+every expression
+has a type, and the types of all
+expressions can be inferred and checked for correctness.
+Furthermore, {\sc Essence}$'$ is a finite-domain language; every decision variable is
+associated with a finite domain of values. 
+
+
+The 
+atomic types of {\sc Essence}$'$ are {\tt int} (integer), {\tt bool} (Boolean) and
+ user-defined enumerated types. There is also a compound type, array (or matrix),
+ type that is constructed of atomic types.
+
+
+There are three different types of domains in {\sc Essence}$'$:
+boolean, integer and matrix/array domains. Boolean and integer 
+domains are both atomic domains; array domains are built from 
+atomic domains.
+
+ Decision variables and quantified
+variables need to be associated with a {\em finite} domain. 
+The infinite integer domain, {\tt int}, is only valid with parameters. 
+Decision variables are not allowed as domain elements.
+
+\begin{description}
+
+\item[Boolean Domains]
+ {\tt bool} is the
+ Boolean domain consisting of {\em false} and 
+{\em true}. 
+
+\item[Integer Domains]
+An integer domain is a 
+range of integers that can be either continuous,  e.g. $int$(1..10), or
+sparse, e.g. $int$(1,3,5). Contineous domains are considered to be the empty 
+domain if the lower bound is greater than the upper bound, such as in 
+$int$(10..1).
+The elements of sparse domains need to be ordered, hence $int$(1,5,3) 
+is not valid. %and might produce error messages.
+
+
+\item[Array Domains] 
+%Arrays are used to combine a set of variables or
+  %constant values. In {\sc Essence}$'$ 
+  An array is defined by 
+  the keyword {\tt matrix}, followed by its
+  dimension and the base domain (over which the variables range).
+  For instance,
+  \begin{center}
+   $NAME_1$ : {\tt matrix indexed by } [$int$(1..10)] {\tt of} $int$(1..5) 
+  \end{center}
+ stands for a 1-dimensional array of 10 elements where each element
+ ranges from  $int$(1..5). The index domain states how to dereference 
+ arrays. In the example above, $NAME_1$[1] dereferences the first
+ element because the index domain starts with 1. 
+ However, consider $NAME_2$ with a different index 
+ domain, $int$(0..9):
+  \begin{center}
+   $NAME_2$ : {\tt matrix indexed by } [$int$(0..9)] {\tt of} $int$(1..5) 
+  \end{center}
+   $NAME_2$ is also a 1-dimensional array with 10 Boolean elements,
+  but is dereferenced differently: $NAME_2$[1] dereferences the second 
+  element because its index domain starts with 0.
+  
+
+
+%\item[Parameters]
+
+%\item[Constants]
+
+%\item[Variables]
+
+
+\end{description}
+
+
+
+\subsection{Basic Model Structure}
+An {\sc Essence}$'$ model is structured in the following way:
+
+\begin{enumerate}
+\item Header with version number: {\tt  language Essence' 1.b.a} 
+\item Parameter declarations (optional)
+\item Constant definitions (optional)
+\item Variable declarations (optional)
+\item Objective (optional)
+\item Constraints (optional)
+\end{enumerate}
+
+[TODO: decribe what header 1.b.a means]
+
+Parameter declaration, Constant definitions and Variable 
+declarations can be interleaved, but for readability we suggest to put them in the 
+order given above. Comments are preceded by `\$'.
+
+Parameter values are defined in a separate file, the 
+{\em parameter file}. Parameter files have the same header 
+as problem models and hold a list of parameter definitions.
+Table \ref{tab:modelstructure} gives an overview of the model
+structure of problem and parameter files.
+Each model part will be discussed in more detail in the following sections.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l||l|}
+\hline
+Problem Model Structure & Parameter File Structure \\
+\hline
+\hline
+%\$ problem model               & \$ parameter file \\
+{\tt language ESSENCE' 1.b.a}  & {\tt language ESSENCE' 1.b.a}  \\
+\ & \\
+\$ {\em parameter declaration}       & \$ {\em parameter instantiation} \\
+{\tt {\bf given} } $n$ : int         & {\tt {\bf letting} } $n$ {\tt be} 7 \\
+\$ {\em constant definition}        & \\
+{\tt {\bf  letting}} $c$ {\tt be} 5   & \\
+\ & \\
+\$ {\em variable declaration }       & \\
+{\tt {\bf find} } $x,y$ : int(1..$n$)  & \\
+\ & \\
+\$ {\em constraints}                 & \\
+{\tt{\bf such that} } & \\
+\ \ $x$ + $y$ $>=$ c,    & \\  
+\ \ $x$ + $c$*$y$ $=$ 0    & \\  
+\hline
+\end{tabular}
+\caption{Model Structure of problem files and parameter files in {\sc
+    Essence}$'$. `\$' denote comments.}\label{tab:modelstructure}
+\end{center}
+\end{table}
+
+\subsection{Constant Definitions}
+In most problem models there are re-occurring constant values and
+it can be useful to define them as constants. The {\tt letting}
+statement allows to assign a name with a constant value. The statement
+\begin{center}
+{\tt letting } {\em NAME} {\tt be} {\em constant}
+\end{center}
+introduces a new reserved name {\em NAME} that is associated with 
+the constant value {\em constant}. Every subsequent occurrence of 
+{\em NAME} in the model is replaced by {\em constant}. Please note 
+that {\em NAME} cannot be used in the model {\em before} it has been 
+defined. In the following subsections we discuss different kinds of 
+constants.
+
+\subsubsection{Constant Expressions}
+The statement
+\begin{center}
+{\tt letting } {\em c} {\tt be} 10
+\end{center}
+introduces a new constant with name $c$ that is assigned the value
+10. Usually constants are written with lower-case letters. The
+constant expression may also contain other constants or parameter
+values, for instance with
+\begin{center}
+\begin{tabular}{llll}
+{\tt letting } & {\em c}& {\tt be}& 10\\
+{\tt letting } &{\em d} &{\tt be}& $c$*2\\
+\end{tabular}
+\end{center}
+
+\subsubsection{Constant Domains}
+Constant domains are defined in a similar way using 
+the keywords {\tt be domain}:
+\begin{center}
+{\tt letting } {\em INDEX} {\tt be domain} $int$(1..5)
+\end{center}
+defines a domain with name {\em INDEX} that ranges 
+from $int$(1..5).
+For readability we suggest to use upper-case letters for domains.
+ Constant domains may contain other 
+constant/parameter values, such as in
+\begin{center}
+\begin{tabular}{llll}
+{\tt letting } & {\em c}& {\tt be} &10\\
+{\tt letting } &{\em INDEX}& {\tt be domain} &$int$(1..$c$) \\
+\end{tabular}
+\end{center}
+
+\subsubsection{Constant Arrays}
+Constant arrays are defined by stating a name, followed by 
+the corresponding matrix type and the constant values in brackets.
+For instance,
+\begin{center}
+{\tt letting }   $name_1$ :  {\tt matrix indexed by } [ $int$(1..4)] of $int$(1..10)  {\tt be}   [2,8,5,9]\\
+\end{center}
+defines a 1-dimensional constant array $name_1$ with 4 Elements
+ranging from $int$(1..10). Hence  $name_1$[3] is replaced by 5.
+2-dimensional constant arrays are defined in the same way:
+\begin{center}
+\begin{tabular}{ll}
+{\tt letting }&  $name_2$ : \\
+      &\ \ \ \ \ \  {\tt matrix indexed by } [ $int$(1..2), $int$(1..4)] of $int$(1..10) \\
+ & \ \ \ \ \ \   {\tt be}  [ [2,8,5,1], \\
+ & \ \ \ \ \ \ \ \ \ \ \ \ [3,7,9,4] ]   \\
+\end{tabular}
+\end{center}
+states that $name_2$ is a (1..2)$\times$(1..3)array of integers ranging from
+$int$(1..10) consisting of the values [ [2,8,5], [3,7,9] ]. Hence
+$name_2$[1,2] is replaced by 8. 
+
+
+
+
+\subsection{Parameter Declarations}
+Parameters are declared with the {\tt given} statement followed 
+by a domain the parameter ranges over. Parameters are allowed to 
+range over the infinite domain $int$. As example, consider
+\begin{center}
+\begin{tabular}{lll}
+{\tt given} & $n$ & : int \\
+%{\tt given} & $D$ & : int(1..$n$) \\
+\end{tabular}
+\end{center}
+
+
+\subsection{Variable Declaration}
+Variables are declared using {\tt find} followed by a name and their
+corresponding domain. The example below
+\begin{center}
+{\tt find}  $x$ : $int$(1..10)
+\end{center}
+defines a variable $x$ on the domain $int$(1..10).
+It is possible to define several variables on the same domain as 
+\begin{center}
+{\tt find}  $x,y,z$ : $int$(1..10)
+\end{center}
+that introduces 3 variables $x,y,z$ ranging over $int$(1..10).
+Arrays of variables are declared by defining the index domain and
+basedomain. Consider the example
+\begin{center}
+{\tt find}  $m$ : {\tt matrix indexed by} [$int$(1..10)] of {\tt bool}
+\end{center}
+that declares $m$ as a 1-dimensional matrix of 10 Booleans. 
+
+
+\subsection{Objective}
+The objective of a problem is either to {\tt maximise} or 
+{\tt minimise} a variable or expression. For instance,
+\begin{center}
+{\tt minimise} $x$
+\end{center}
+states that the value assigned to variable $x$ will be minimised.
+
+
+\subsection{Constraints}
+After defining constants and declaring variables and parameters,
+constraints are specified with the keyword {\tt such that}.
+ {\sc Essence}$'$ supports a wide range of operators (for more details
+on operators see Section \ref{sec:op}):
+
+\begin{itemize}
+
+\item Basic Arithmetic Operators: $+$ \  $-$ \  * \  / \ \% \  $\mid$ {\tt
+  min} \ {\tt max} 
+\item Basic Boolean Operators: \verb1\1/ \  /\verb1\1 \  $=>$ \  $<=>$
+\item Relational Operators: = \  != \  $>$ \  $<$ \  $>=$ \  $<=$
+\item Sum Operator: {\tt sum}
+\item Quantification operators: {\tt forall } \ {\tt exists}
+\item Global Constraints: {\tt alldifferent} \ {\tt element}
+\item Table Constraint: {\tt table}
+\end{itemize}
+
+We define two kinds of expressions: arithmetic and relational
+expressions. Arithmetic relations range over an integer domain, 
+for instance $x + 3$ is an arithmetic expression ranging from 
+($lb(x)+3 .. ub(x)+3$). Relational expressions range over the 
+Boolean domain, for instance the relational expression
+ $x = 3$ can either be {\em true}
+or {\em false}.
+Basic arithmetic operators and the {\tt sum} operator produce 
+arithmetic expressions and all other operators produce relational 
+expressions.
+
+Please note that each operator has a certain precedence and you will 
+sometimes need to use parenthesis to express
+certain constraints. As an example, consider the expression
+\begin{center}
+$x$ = $y$ /\verb1\1 $y$ $<$= $z$
+\end{center}
+According to the operator precedence in {\sc Essence}$'$, the
+expression would be parsed as 
+\begin{center}
+$x$ = (  ($y$ /\verb1\1 $y$)  $<$= $z$ )
+\end{center}
+which might not be intended. Setting parenthesis 
+is helpful to ensure a certain meaning, as illustrated below:
+\begin{center}
+($x$ =  $y$)  /\verb1\1 ($y$  $<$= $z$ )
+\end{center}
+More details about operator precedence is given in Section \ref{sec:op}.
+
+
+
+
+\subsubsection{The {\tt sum} Operator}
+The {\tt sum} operator corresponds to the mathematical 
+$\sum$ and has the following syntax:
+\begin{center}
+{\tt sum} {\em quantified-variable(s)} : {\em domain} . {\em expression} 
+\end{center}
+For example, if we want to take the sum from 1 to 10 we write
+\begin{center}
+{\tt sum} $i$ : $int$(1..10) . $i$ 
+\end{center}
+which corresponds to 
+\begin{center}
+1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10
+\end{center}
+Several quantified variables may be defined for a particular
+quantification domain and {\tt sum}s can also be nested:
+\begin{center}
+{\tt sum} $i,j$ : $int$(1..10) . \\
+\ \ \ \ {\tt sum} $k$ : $int$(i..10) . \\
+\ \ \ \ \ \ \ \ $x$[$i$,$j$] * $k$ 
+\end{center}
+
+
+
+\subsubsection{Universal and Existential Quantification}
+Universal and existential quantification are powerful means to 
+write down a series of constraints in a compact way. 
+Quantifications have the same syntax as {\tt sum}, but with 
+{\tt forall} and {\tt exists} as keywords:
+\begin{center}
+{\tt forall}  {\em quantified-variable(s)} : {\em domain} . {\em expression}
+\end{center}
+For instance, the universal quantification 
+\begin{center}
+{\tt forall}  $i$ : $int$(1..5) . \\
+\ \ \ \ $x$[$i$] = $i$
+\end{center}
+corresponds to the conjunction 
+\begin{center}
+($x$[1] = 1) /\verb1\1 ($x$[2] = 2) /\verb1\1 $\dots$  /\verb1\1  ($x$[5] = 5)
+\end{center}
+which could also be written as 
+\begin{center}
+$x$[1] = 1, \\
+$x$[2] = 2,\\
+ $\dots$ \\ 
+$x$[5] = 5
+\end{center}
+An example for existential quantification is 
+\begin{center}
+{\tt exists}  $i$ : $int$(1..5) . \\
+\ \ \ \ $x$[$i$] = $i$
+\end{center}
+that corresponds to the disjunction
+\begin{center}
+($x$[1] = 1) \verb1\1/ ($x$[2] = 2) \verb1\1/ $\dots$  \verb1\1/  ($x$[5] = 5)
+\end{center}
+Quantifications can range over several quantified variables and can 
+be arbitrarily nested, as demonstrated with the {\tt sum} operator.
+
+% --------------------------------------------------------------
+
+\subsection{Operators in {\sc Essence}$'$}\label{sec:op}
+
+Arithmetic operators and the sum operator return arithmetic
+expressions while all other expressions return relational expressions.
+Arithmetic operators may only be used on arithmetic expressions
+with the exception of addition and substraction (i.e. Booleans 
+may be added/subtracted).\\
+
+[TODO: introduction and description of operator precedence and associativity] \\
+
+Table \ref{tab:precedence} 
+describes the precedence of the operators that 
+are arranged by decreasing order of precedence (the operators on top have highest precedence)
+
+
+\begin{table}  
+    \begin{center}
+    \begin{tabular}{|l|lc|}
+ 
+      \hline
+       Operator & Functionality & Associativity \\
+       \hline
+       \hline
+       ,   & comma & Left \\   
+       \hline
+       :   & colon & Left \\
+       \hline
+       ( ) & left and right parenthesis & Left \\
+       \hline
+       \verb1[ ]1 & left and right brackets & Left \\
+       \hline
+       ! & not & Right \\  
+       \hline
+       \verb1/\1 & and & Left \\ 
+       \hline
+       \verb1\/1 & or & Left \\ 
+       \hline
+        {\tt =>} & if (implication)  & Left \\ 
+	\hline
+        {\tt <=>} & iff (logical equality) & Left \\ 
+	\hline
+        {\tt -} & unary minus & Right \\
+	\hline
+        \verb1^1 & power & Left \\ 
+	\hline
+        * / & multiplication, integer division & Left \\ 
+	\hline
+        {\tt + -} & addition, substraction &  Left \\
+	\hline
+        {\tt < <= > >= } & (lex)less, (lex)less or equal, &  \\ 
+	{\tt <lex <=lex >lex >=lex } & (lex)greater, (lex)greater or equal & none \\ 
+	\hline
+        {\tt = !=} & equality, disequality & none \\
+	\hline
+        . & dot & Right \\ 
+	\hline
+
+      \end{tabular}
+\end{center}
+    \caption{Operator precedence in {\sc Essence}$'$}
+
+\label{tab:precedence}
+\end{table}
+
+
+
+\begin{thebibliography}{10}
+
+\bibitem{java} 
+  Java 
+ \newblock  http://java.sun.com
+
+\end{thebibliography}
+
+\end{document}
+
+
