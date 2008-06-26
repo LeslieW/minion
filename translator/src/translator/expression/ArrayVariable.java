@@ -360,6 +360,12 @@ public class ArrayVariable implements Variable {
 		
 		if(this.domain.toString().equals(variableName))
 			this.domain = domain;
+		
+		if(this.exprIndices != null) {
+			for(int i=0; i<exprIndices.length; i++)
+				exprIndices[i] = exprIndices[i].insertDomainForVariable(domain, variableName);
+		}
+		
 		return this;
 	}
 	

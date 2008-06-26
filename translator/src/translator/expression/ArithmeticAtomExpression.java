@@ -215,8 +215,17 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 	}
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
-		if(this.variable != null)
-			this.variable.insertDomainForVariable(domain, variableName);
+		if(this.variable != null) {
+			Expression e = this.variable.insertDomainForVariable(domain, variableName);
+			if(e instanceof Variable) {
+				this.variable = (Variable) e;
+				//System.out.println("1 Inserted domain "+domain+" for variable "+variableName+" in: "+this+
+				//" and variable "+variable+" is of type:"+variable.getClass().getSimpleName());
+			}
+		}
+		//if(variable != null)
+		//System.out.println("2 Inserted domain "+domain+" for variable "+variableName+" in: "+this+
+		//		" and variable is of type:"+variable.getClass().getSimpleName());
 		return this;
 	}
 	

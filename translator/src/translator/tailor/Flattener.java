@@ -77,6 +77,7 @@ public class Flattener {
 		}
 		
 		ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
+		//System.out.println("Constraints before flattening:"+constraints);
 		ArrayList<Expression> flattenedConstraints = new ArrayList<Expression>();
 		
 		this.normalisedModel.setFlattenedObjectiveExpression(flattenObjective());
@@ -1287,7 +1288,7 @@ public class Flattener {
 		
 		// --------------------------------------------
 		
-		
+		//System.out.println("Right expr is: "+rightExpression);
 		
 		//3. Detect element constraints
 		if(!this.targetSolver.supportsVariableArrayIndexing()) {
@@ -1305,12 +1306,15 @@ public class Flattener {
 						
 						Expression[] indices = arrayVar.getExpressionIndices();
 						
+						//System.out.println("Right expression 1 "+rightExpression);
+						
 						if(indices != null) {
 							
 							int[] intIndices = new int[indices.length];
 							boolean allIndicesAreInteger = true;
 							
 							for(int i=0; i<indices.length; i++) {
+								indices[i].willBeFlattenedToVariable(true);
 								indices[i] = flattenExpression(indices[i]);
 								if(indices[i].getType() == Expression.INT) {
 									intIndices[i] = ((ArithmeticAtomExpression) indices[i]).getConstant();
@@ -1327,6 +1331,7 @@ public class Flattener {
 							
 						}
 						
+						//System.out.println("Right expression again>"+rightExpression);
 						
 						if(this.normalisedModel.constantArrays.containsKey(arrayVar.getArrayNameOnly())) {
 							rightExpression = flattenArithmeticAtomExpression((ArithmeticAtomExpression) rightExpression);
@@ -1334,7 +1339,9 @@ public class Flattener {
 						else if(arrayVar.isIndexedBySomethingNotConstant()) {
 
 								arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
-								ElementConstraint elementConstraint = flattenToPartwiseElementConstraint(rightExpression.copy());
+								//System.out.println("Array var is:"+arrayVar+" of rightExoression:"+rightExpression);
+								ElementConstraint elementConstraint = //flattenToPartwiseElementConstraint(new ArithmeticAtomExpression(arrayVar));
+																	flattenToPartwiseElementConstraint(rightExpression.copy());
 							
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 									leftExpression.willBeFlattenedToVariable(true);
@@ -1342,6 +1349,8 @@ public class Flattener {
 							
 								addToSubExpressions(rightExpression, leftExpression);
 								elementConstraint.setResultExpression(leftExpression);
+								//System.out.println("Flattened to element constraint: "+elementConstraint);
+								
 								if(expression.isGonnaBeFlattenedToVariable()) {
 									this.constraintBuffer.add(elementConstraint);
 									return leftExpression;
@@ -1364,6 +1373,7 @@ public class Flattener {
 								boolean allIndicesAreInteger = true;
 								
 								for(int i=0; i<indices.length; i++) {
+									indices[i].willBeFlattenedToVariable(true);
 									indices[i] = flattenExpression(indices[i]);
 									if(indices[i].getType() == Expression.INT) {
 										intIndices[i] = ((ArithmeticAtomExpression) indices[i]).getConstant();
@@ -1694,6 +1704,8 @@ public class Flattener {
 	private Expression flattenElementConstraint(ElementConstraint elementConstraint) 
 		throws TailorException,Exception {
 		
+		//System.out.println("Flattening elem expression:"+elementConstraint);
+		
 		// 1. flatten subexpressions
 		boolean noConstraintsAsArguments = !this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT);
 		Expression[] arguments = elementConstraint.getArguments();
@@ -1703,6 +1715,12 @@ public class Flattener {
 
 			arguments[i] = flattenExpression(arguments[i]);
 		}
+		
+		if(arguments.length != 3)
+			throw new TailorException("Internal error. Element constraint has less/more than 3 arguments.");
+		elementConstraint = new ElementConstraint(arguments[0], arguments[1], arguments[2]);
+		
+		//System.out.println("Flattenend element constraint to:"+elementConstraint);
 		
 		// 2. if the constraint has to be reified	
 		if(elementConstraint.isGonnaBeFlattenedToVariable()) {
@@ -2972,7 +2990,8 @@ public class Flattener {
 				return getCommonSubExpression(atom);	
 		}
 		
-		//System.out.println("Flattening atom:"+atom+" with type:"+atom.getType());
+		//System.out.println("1 Atom "+atom+" is gonna be flattened to a variuabe? "+atom.isGonnaBeFlattenedToVariable());
+		//System.out.println("\n1 Flattening atom:"+atom+" with type:"+atom.getType());
 		
 		if(atom.getType() == Expression.INT_ARRAY_VAR) {
 			Variable variable = atom.getVariable();
@@ -3160,6 +3179,8 @@ public class Flattener {
 							Expression rowIndexExpression = indices[0].evaluate();
 							Expression colIndexExpression = indices[1].evaluate();
 							
+							//System.out.println("Flattening expression with row:"+rowIndexExpression+" and col:"+colIndexExpression);
+							
 							// ------------- 1.case:  matrix[row:int, colExpr:E] ---> element(m[row,..], colExpr, aux) -----
 							if(rowIndexExpression.getType() == Expression.INT) {
 								
@@ -3264,11 +3285,15 @@ public class Flattener {
 									//System.out.println("have an atom expression: "+atom+" with INT col:"+col+" and row:"+rowIndexExpression);
 									
 									// prepare  index expression
-									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
-										rowIndexExpression.willBeFlattenedToVariable(true);									
+									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT)) {
+										rowIndexExpression.willBeFlattenedToVariable(true);		
+										//System.out.println("We have to flatten the row index expression to a variable");
+									}
 									rowIndexExpression = flattenExpression(rowIndexExpression);
 									
 									//System.out.println("have an atom expression: "+atom+" with INT col:"+col+" and flattened row:"+rowIndexExpression);
+									
+									//System.out.println("2  Atom "+atom+" is gonna be flattened to a variuabe? "+atom.isGonnaBeFlattenedToVariable());
 									
 									// return element constraint
 									if(atom.isGonnaBeFlattenedToVariable()) {
@@ -3339,6 +3364,7 @@ public class Flattener {
 			// --------- if we have an array element indexed by something that is not a single integer -----------	
 				// the solver does not support array indexing with something other than an integer
 			else {
+				//System.out.println("Flattening to partwise elem constraint: "+expression);
 					if(indices.length == 1) {
 						Expression index = indices[0];
 						//System.out.println("Flattening index '"+index+"' in expression: "+expression);
@@ -3438,9 +3464,12 @@ public class Flattener {
 								
 								
 								// prepare  index expression
-								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT)) 
 									rowIndexExpression.willBeFlattenedToVariable(true);
+								
+								//System.out.println("Row index "+rowIndexExpression+" will be flattened to variable? "+rowIndexExpression.isGonnaBeFlattenedToVariable());
 								rowIndexExpression = flattenExpression(rowIndexExpression);
+								//System.out.println("Flattened roIndex >"+rowIndexExpression);
 								
 								// return element constraint
 								return new ElementConstraint(indexedArray,

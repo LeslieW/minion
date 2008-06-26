@@ -35,6 +35,7 @@ public class Translate {
 	public static final String TIME_OFF = "time"; // display time statistics
 	public static final String NO_INFO = "silent"; // silent -> no verbose info
 	public static final String NO_DIRECT_VAR_REUSE = "no-dvr";
+	public static final String DIRECT_VAR_REUSE = "dvr";
 	public static final String DEBUG_MODE = "debug";
 	public static final String TIME_INFO_FILE = "tf"; // don't write translation time into file
 	public static final String WRITE_EP_MODEL_TO_FILE = "out-ep"; // write the Essence' model into a file
@@ -137,6 +138,10 @@ public class Translate {
 				
 				else if(args[i].equalsIgnoreCase("-"+NO_DIRECT_VAR_REUSE)) {
 					settings.setApplyDirectVariableReusage(false);
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+DIRECT_VAR_REUSE)) {
+					settings.setApplyDirectVariableReusage(true);
 				}
 
 				//else if(args[i].equalsIgnoreCase("-"+GECODE_TRANSLATION) || args[i].equalsIgnoreCase("-g")) {
@@ -290,7 +295,7 @@ public class Translate {
 			if(settings.debugMode)
 				e.printStackTrace(System.out);
 			else System.out.println(e.getMessage());
-			System.out.println("GGGGGGGGGGGGGGGGGGGGGR");
+			//System.out.println("GGGGGGGGGGGGGGGGGGGGGR");
 			System.out.println("Cannot translate to "+settings.targetSolver.getSolverName()+" from problemfile:"+filename);
 			System.exit(1);
 		}
@@ -443,9 +448,12 @@ public class Translate {
 		System.out.println("-"+NO_COMMON_SUBEXPRS);
 		System.out.println("\tTurn off eliminating common subexpressions during flattening.");
 		System.out.println("\tDefault: on");
-		System.out.println("-"+NO_DIRECT_VAR_REUSE);
-		System.out.println("\tTurn off directly reusing variables (e.g. in x=y, replacing x with y).");
-		System.out.println("\tDefault: on");
+		//System.out.println("-"+NO_DIRECT_VAR_REUSE);
+		//System.out.println("\tTurn off directly reusing variables (e.g. in x=y, replacing x with y).");
+		//System.out.println("\tDefault: on");
+		System.out.println("-"+DIRECT_VAR_REUSE);
+		System.out.println("\tTurn on directly reusing variables (e.g. in x=y, replacing x with y).");
+		System.out.println("\tDefault: off");
 		System.out.println("-"+NO_COMMON_EXPLICIT_SUBEXPRS);
 		System.out.println("\tTurn off eliminating complex common subexpressions.");
 		System.out.println("\tDefault: on");

@@ -57,7 +57,7 @@ public class TranslationSettings {
 		this.applyStrictCopyPropagation = false;
 		this.giveTranslationTimeInfo = false;
 		this.giveTranslationInfo = true;
-		this.applyDirectVariableReusage = true;
+		this.applyDirectVariableReusage = false;
 		this.pathToMinion = readPathToMinion();
 		this.essenceP_outputFileName = "out.eprime";
 		this.modelName = DEFAULT_MODEL_NAME;
@@ -77,7 +77,7 @@ public class TranslationSettings {
 		this.applyStrictCopyPropagation = false;
 		this.giveTranslationTimeInfo = false;
 		this.giveTranslationInfo = true;
-		this.applyDirectVariableReusage = true;
+		this.applyDirectVariableReusage = false;
 		this.pathToMinion = readPathToMinion();
 		this.essenceP_outputFileName = "out.eprime";
 		this.debugMode = false;

@@ -11,7 +11,7 @@ XCSP_DIR=test/regressionTests/xcsp
 cd ..
 for X in `ls ${XCSP_DIR}/*.xml`;
   do	
-  java -Xms128m -Xmx512m -jar tailor.jar -tf -silent -xcsp $X
+  java -Xms128m -Xmx512m -jar tailor.jar -tf -dvr -silent -xcsp $X
   Difference=`diff "${X}.minion" "${X}.minion.expected"`  
   if [ "$Difference" != "" ]; then
       echo "ERROR in translating ${X}"
@@ -26,7 +26,7 @@ cd test/
 cd ..
 for X in `ls ${TEST_DIR}/*.cm`;
   do
-  java -jar tailor.jar  -tf -silent $X 
+  java -jar tailor.jar  -tf -silent -dvr $X 
   Difference=`diff "${X}.minion" "${X}.minion.expected"`
   
   if [ "$Difference" != "" ]; then
@@ -48,7 +48,7 @@ parameters=`ls ${X}*.param 2> /dev/null`
 if [ "$parameters" != "" ]; then 
     for Y in `ls ${X}*.param` 
       do
-      java -jar tailor.jar  -tf -silent $X $Y 
+      java -jar tailor.jar  -tf -silent -dvr $X $Y 
       Difference=`diff "${Y}.minion" "${Y}.minion.expected"`
       if [ "$Difference" != "" ]; then
 	  echo "ERROR in translating ${Y}"
@@ -61,7 +61,7 @@ if [ "$parameters" != "" ]; then
 # otherwise just run the .eprime file
     
 else
-    java -jar tailor.jar -tf -silent $X 
+    java -jar tailor.jar -tf -dvr -silent $X 
     
     Difference=`diff "${X}.minion" "${X}.minion.expected"` 
     
