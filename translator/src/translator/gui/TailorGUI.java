@@ -28,6 +28,8 @@ import javax.swing.JTextArea;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Element;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.*;
 
 import translator.TranslationSettings;
 import translator.Translator;
@@ -921,12 +923,15 @@ public class TailorGUI extends javax.swing.JFrame {
 		String type = "";
 		if(command.endsWith(SAVE_PROBLEM))
 			type = "problem";
-		else if(command.equalsIgnoreCase(SAVE_PARAMETER))
+		else if(command.equalsIgnoreCase(SAVE_PARAMETER)) {
 			type = "parameter";
+			//FileFilter filter = new FileNameExtensionFilter("param");
+		}
 		else if(command.equalsIgnoreCase(SAVE_OUTPUT))
 			type ="output";
 		
 		fileChooser.setDialogTitle("Save "+type+" file");
+		
 		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
@@ -1239,7 +1244,8 @@ protected void translate(String command) {
             else {
                 String line;
                 
-                input =new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                //input =new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                input =new BufferedReader(new InputStreamReader(inputStream));
                 String s = "";
                   while ((line = input.readLine()) != null) {
                 	  s = s+line+"\n";

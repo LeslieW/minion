@@ -284,6 +284,7 @@ public class Normaliser implements NormaliserSpecification {
 														   ArrayList<Expression> constraints) 
 		throws NormaliserException,Exception {
 		
+		
 		// buffers for insertion
 		HashMap<String, Expression> expressionParameters = new HashMap<String, Expression>();
 		ArrayList<String> remainingExpressionParameters = new ArrayList<String>();
@@ -354,7 +355,10 @@ public class Normaliser implements NormaliserSpecification {
 			if(definitions.get(i) instanceof ExpressionDefinition) {
 				
 				ExpressionDefinition definition = (ExpressionDefinition) definitions.remove(i);
-				String parameterName = definition.getName();				
+				String parameterName = definition.getName();	
+				if(this.decisionVariables.containsKey(parameterName)) 
+					throw new NormaliserException("Parameter "+parameterName+" has the same name as decision variable.");
+				
 				Expression expression = expressionParameters.get(parameterName);
 				expression = expression.evaluate();
 				
@@ -461,6 +465,9 @@ public class Normaliser implements NormaliserSpecification {
 				
 				DomainDefinition domainDefinition = (DomainDefinition) definitions.remove(i);
 				String parameterName = domainDefinition.getName();
+				if(this.decisionVariables.containsKey(parameterName)) 
+					throw new NormaliserException("Parameter "+parameterName+" has the same name as decision variable.");
+				
 				Domain domain = domainParameters.get(parameterName);
 				domain = domain.evaluate();
 				

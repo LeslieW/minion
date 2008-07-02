@@ -330,7 +330,11 @@ integerExpression ::= 	  INTEGER:i
                                              ( new Expression[] {first, second} ); 
                         	                  
                         	                  
-                           //RESULT = new ArithmeticAtomExpression(0);	                  
+                           //RESULT = new ArithmeticAtomExpression(0);	
+                           
+                           // for solver competition
+                           //System.out.println("s UNKNOWN");
+                           //System.exit(0);                  
                         	                  
-                        	                  :}  
+                       :}  
  ;                       

@@ -79,9 +79,12 @@ public class Flattener {
 		ArrayList<Expression> constraints = this.normalisedModel.getConstraints();
 		//System.out.println("Constraints before flattening:"+constraints);
 		ArrayList<Expression> flattenedConstraints = new ArrayList<Expression>();
+		this.constraintBuffer.clear();
 		
 		this.normalisedModel.setFlattenedObjectiveExpression(flattenObjective());
-		
+		for(int i=0; i<this.constraintBuffer.size(); i++)
+			flattenedConstraints.add(this.constraintBuffer.get(i));
+			
 		for(int i=0; i<constraints.size(); i++) {
 			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
 			for(int j=flatExpression.size()-1; j>=0; j--) {
