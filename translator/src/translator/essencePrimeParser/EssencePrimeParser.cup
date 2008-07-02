@@ -913,6 +913,13 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 					                         isMaximum ); 
 					 :}
 
+				  | MIN LPAREN atom_expression:e RPAREN
+					{: 
+					  boolean isMaximum = false;
+					  RESULT = new Minimum( (Expression) e,
+					                         isMaximum ); 
+					 :}
+
 				   | MAX LPAREN variable_array:va RPAREN
 			  		{: 
 					  boolean isMaximum = true;
@@ -920,6 +927,12 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 					                         isMaximum ); 
 					 :}
 
+				   | MAX LPAREN atom_expression:e RPAREN
+					{: 
+					  boolean isMaximum = true;
+					  RESULT = new Minimum( (Expression) e,
+					                         isMaximum ); 
+					 :}
 	                                                   
 	               | ELEMENT LPAREN expression:e1 COMMA expression:e2 COMMA expression:e3 RPAREN
 	                 {: RESULT = new ElementConstraint( (Expression) e1,
