@@ -1623,7 +1623,8 @@ public class Flattener {
 		int domainType = bindingDomain.getType();
 		if(domainType != Domain.BOOL &&
 				domainType!= Domain.INT_BOUNDS &&
-				domainType != Domain.INT_SPARSE)
+				domainType != Domain.INT_SPARSE &&
+			     domainType != Domain.SINGLE_INT)
 					throw new TailorException("Cannot unfold quantified expression '"+quantifiedSum
 						+"'. The binding domain is not entirely constant:"+bindingDomain);
 			
@@ -1634,6 +1635,9 @@ public class Flattener {
 		else if(domainType == Domain.INT_BOUNDS) 
 			domainElements = ((BoundedIntRange) bindingDomain).getFullDomain();
 			
+		else if(domainType == Domain.SINGLE_INT)
+			domainElements = ((SingleIntRange) bindingDomain).getFullDomain();
+		
 		else domainElements = ((SparseIntRange) bindingDomain).getFullDomain();
 			
 			
