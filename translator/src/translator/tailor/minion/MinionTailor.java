@@ -920,9 +920,10 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(Reification reification) 
 		throws MinionException {
 		
-		System.out.println("Generating reified constraint:"+reification);
+		//System.out.println("Generating reified constraint:"+reification);
 		
 		Expression constraint = reification.getReifiedConstraint();
+		MinionConstraint reifiedConstraint;
 		
 		// still need to flatten if we have a sum as an argument
 		if(constraint instanceof SumConstraint) {
@@ -931,14 +932,19 @@ public class MinionTailor {
 				// flatten sum constraint directly so we can reuse the auxVar
 				this.reifiedSumAuxVar = reification.getReifiedVariable().toArithmeticExpression();
 				constraint.willBeFlattenedToVariable(true);
+				reifiedConstraint = toMinion(constraint);
+				return reifiedConstraint;
 			}
 			else constraint.willBeFlattenedToVariable(false);
 		}
-		else constraint.willBeFlattenedToVariable(false); // we don't need to reify this constraint again
-		MinionConstraint reifiedConstraint = toMinion(constraint);
+		
+		constraint.willBeFlattenedToVariable(false); // we don't need to reify this constraint again
+		
+		reifiedConstraint = toMinion(constraint);
 		
 		if(reifiedConstraint instanceof MinionAtom)
 			return new EqConstraint((MinionAtom) reifiedConstraint, (MinionAtom) toMinion(reification.getReifiedVariable()) );
+		
 		
 		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
 		addToSubExpressions(reifiedConstraint, reifiedVariable);
@@ -1341,9 +1347,9 @@ public class MinionTailor {
 				else reifiedVariable	= createMinionAuxiliaryVariable();
 				
 				ProductConstraint conjunction = new ProductConstraint(auxVariable1,auxVariable2,reifiedVariable);
-				this.minionModel.addConstraint(conjunction);
-				
-				return reifiedVariable;
+				//this.minionModel.addConstraint(conjunction);
+				return conjunction;
+				//return reifiedVariable;
 				
 			}
 			else throw new MinionException("Interal error: expected only weak operator instead of operator '"

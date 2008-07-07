@@ -1250,7 +1250,8 @@ protected void translate(String command) {
                   while ((line = input.readLine()) != null) {
                 	  s = s+line+"\n";
                   }
-                  writeOnMessageOutput(s);
+                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
+                  //writeOnMessageOutput(s);
                   input.close();
             }
 		

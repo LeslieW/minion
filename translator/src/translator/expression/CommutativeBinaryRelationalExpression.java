@@ -356,4 +356,38 @@ public class CommutativeBinaryRelationalExpression implements
 		return this;
 	}
 	
+	// ============== ADDITIONAL METHODS ===============================
+	
+	
+	public Expression invertExpression() {
+		
+		switch(this.type) {
+		case IFF:
+			this.setType(NEQ);
+			return this;
+
+		case EQ:  
+			this.setType(NEQ);
+			return this;
+		
+		case NEQ:  
+			this.setType(EQ);
+			return this;
+			
+		case AND: 
+			return new Negation(this); 
+			
+		case OR: return new Conjunction(new Expression[] 
+		                                             {new Negation(this.leftArgument),
+		                                              new Negation(this.rightArgument)} );
+		
+		default:
+			return new Negation(this); 
+		}
+
+	}
+	
+	private void setType(int operator) {
+		this.type = operator;
+	}
 }

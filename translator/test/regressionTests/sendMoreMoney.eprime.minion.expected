@@ -32,7 +32,7 @@ e,n,d,o,r,y,s,m]
 
 **CONSTRAINTS**
 
-alldiff([ s, e, n, d, m, o, r, y])
+gacalldiff([ s, e, n, d, m, o, r, y])
 weightedsumgeq([1,10,100,1000,10000,-1,-1,-10,-10,-100,-100,-1000,-1000], [y,e,n,o,m,d,e,n,r,e,o,m,s], 0)
 weightedsumleq([1,10,100,1000,10000,-1,-1,-10,-10,-100,-100,-1000,-1000], [y,e,n,o,m,d,e,n,r,e,o,m,s], 0)
 

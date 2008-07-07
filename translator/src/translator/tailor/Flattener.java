@@ -43,6 +43,10 @@ public class Flattener {
 	int usedCommonSubExpressions;
 	int usedEqualSubExpressions;
 	
+	// helper vars
+	boolean flatteningNegatedArgument = false;
+	
+	
 	// ========== CONSTRUCTOR ============================
 	
 	public Flattener(TranslationSettings settings,
@@ -108,7 +112,7 @@ public class Flattener {
 				}
 				
 				else throw new TailorException
-				("Constraint expression has to be a relational expression and not:"+constraint+" of type "+constraint.getType());
+				("Constraint expression has to be a relational expression and not:"+constraint+" of type "+constraint.getClass().getSimpleName());
 			}
 		}
 		
@@ -1949,7 +1953,9 @@ public class Flattener {
 		if(expression.getType() == Expression.NEGATION) {
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION)) 
 				argument.willBeFlattenedToVariable(true);
+			this.flatteningNegatedArgument = true;
 			argument = flattenExpression(argument);
+			this.flatteningNegatedArgument = false;
 			
 			// we have to flatten !E to an aux variable: aux != E
 			if(expression.isGonnaBeFlattenedToVariable()) {	
@@ -4178,11 +4184,26 @@ public class Flattener {
 		
 		ArithmeticAtomExpression auxVariable = null;
 		
-		
+		//System.out.println("Reifying constraint "+constraint+" and flattening a negation? "+this.flatteningNegatedArgument);
 		//System.out.println("Reifying constraint "+constraint+" that has a CSE? "+hasCommonSubExpression(constraint));
 		
+		// the constraint is false
+		if(this.flatteningNegatedArgument) {
+			auxVariable = new ArithmeticAtomExpression(0);
+			addToSubExpressions(constraint, auxVariable);
+			
+			Reification reification = new Reification(constraint,
+                    auxVariable.toRelationalAtomExpression());
+			
+			Expression r = reification.evaluate();
+			
+			System.out.println("Reified constraint to: "+r);
+			
+			this.constraintBuffer.add(r);
+		}
+			
 		// if we have a common subexpression, use the corresponding variable
-		if(hasCommonSubExpression(constraint)) 
+		else if(hasCommonSubExpression(constraint)) 
 			auxVariable = getCommonSubExpression(constraint);
 			
 		else if(hasEqualSubExpression(constraint)) {

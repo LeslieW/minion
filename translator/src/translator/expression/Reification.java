@@ -29,6 +29,12 @@ public class Reification implements RelationalExpression {
 		if(this.reifiedVariable.getType() == BOOL) {
 			if(reifiedVariable.getBool())
 				return reifiedExpression;
+			// the expression is false
+			else {
+				if(this.reifiedExpression instanceof CommutativeBinaryRelationalExpression) {
+					return ((CommutativeBinaryRelationalExpression) reifiedExpression).invertExpression();
+				}
+			}
 			
 		}
 		

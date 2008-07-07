@@ -6,8 +6,8 @@ MINION 3
 # amount of common subexpressions used:0
 # amount of inferred common subexpressions used:0
 # amount of original variables saved (over direct equality):999
-# amount of constraints:8
-# amount of auxiliary variables: 7
+# amount of constraints:7
+# amount of auxiliary variables: 6
 
 **VARIABLES**
 BOUND V0 {0..299}
@@ -19,7 +19,6 @@ BOOL aux2
 BOOL aux3 
 BOOL aux4 
 BOOL aux5 
-BOOL aux6 
 
 # aliases
 ALIAS V1 = V0
@@ -1153,7 +1152,7 @@ PRINT [
 
 VARORDER [
 V0,
-aux0,aux1,aux2,aux3,aux4,aux5,aux6]
+aux0,aux1,aux2,aux3,aux4,aux5]
 
 
 **CONSTRAINTS**
@@ -1163,8 +1162,7 @@ reify(eq(299, V0), aux1)
 reify(sumgeq([aux1,aux0], 2), aux2)
 reify(sumleq([1,V0], V999), aux4)
 reify(sumgeq([1,V0], V999), aux5)
-product(aux4,aux5, aux6)
-eq(aux6, aux3)
+product(aux4,aux5, aux3)
 watchsumgeq([aux3,aux2], 1)
 
 **EOF**

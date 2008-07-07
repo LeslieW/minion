@@ -94,8 +94,8 @@ sumleq([7,q1[7]], q3[7])
 eq(0, q3[0])
 eq(0, q2[0])
 eq(0, q1[0])
-alldiff([q3])
-alldiff([q2])
-alldiff([q1])
+gacalldiff([q3])
+gacalldiff([q2])
+gacalldiff([q1])
 
 **EOF**

@@ -6,8 +6,8 @@ MINION 3
 # amount of common subexpressions used:1
 # amount of inferred common subexpressions used:0
 # amount of original variables saved (over direct equality):0
-# amount of constraints:30
-# amount of auxiliary variables: 6
+# amount of constraints:29
+# amount of auxiliary variables: 5
 
 **VARIABLES**
 DISCRETE sokPosn[2] {0..8}
@@ -20,7 +20,6 @@ BOOL aux1
 BOOL aux2 
 BOOL aux3 
 BOOL aux4 
-BOOL aux5 
 
 # aliases
 
@@ -31,22 +30,21 @@ sokPosn,move,crateGoalPosns]
 
 VARORDER [
 sokPosn,move,crateGoalPosns,
-aux0,aux1,aux2,aux3,aux4,aux5]
+aux0,aux1,aux2,aux3,aux4]
 
 
 **CONSTRAINTS**
 
 eq(5, crateGoalPosns[1, 0])
 reify(eq(crateGoalPosns[0, 0], crateGoalPosns[1, 0]), aux2)
-sumgeq([aux2,aux0], 1)
+watchsumgeq([aux2,aux0], 1)
 reify(eq(crateGoalPosns[0, 0], sokPosn[1]), aux0)
 reify(sumleq([crateGoalPosns[0, 0],move[0]], crateGoalPosns[1, 0]), aux3)
 reify(sumgeq([crateGoalPosns[0, 0],move[0]], crateGoalPosns[1, 0]), aux4)
-product(aux3,aux4, aux5)
-eq(aux5, aux1)
+product(aux3,aux4, aux1)
 ineq(aux0,aux1,0)
-alldiff([crateGoalPosns[1,_]])
-alldiff([crateGoalPosns[0,_]])
+gacalldiff([crateGoalPosns[1,_]])
+gacalldiff([crateGoalPosns[0,_]])
 eq(4, crateGoalPosns[0, 0])
 sumleq([move[0],sokPosn[0]], sokPosn[1])
 sumgeq([move[0],sokPosn[0]], sokPosn[1])

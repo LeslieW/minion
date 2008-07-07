@@ -25,7 +25,7 @@ position]
 
 **CONSTRAINTS**
 
-alldiff([position])
+gacalldiff([position])
 sumleq([12,position[10]], position[21])
 sumgeq([12,position[10]], position[21])
 sumleq([11,position[9]], position[20])

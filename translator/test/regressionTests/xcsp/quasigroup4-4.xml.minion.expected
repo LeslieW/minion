@@ -88,14 +88,14 @@ V48,V49,V50,V51]
 
 **CONSTRAINTS**
 
-alldiff([ V1, V2, V3])
-alldiff([ V4, V8, V12])
-alldiff([ V4, V6, V7])
-alldiff([ V1, V9, V13])
-alldiff([ V8, V9, V11])
-alldiff([ V2, V6, V14])
-alldiff([ V12, V13, V14])
-alldiff([ V3, V7, V11])
+gacalldiff([ V1, V2, V3])
+gacalldiff([ V4, V8, V12])
+gacalldiff([ V4, V6, V7])
+gacalldiff([ V1, V9, V13])
+gacalldiff([ V8, V9, V11])
+gacalldiff([ V2, V6, V14])
+gacalldiff([ V12, V13, V14])
+gacalldiff([ V3, V7, V11])
 watchelement([ 0, V1, V2, V3, V4, 1, V6, V7, V8, V9, 2, V11, V12, V13, V14, 3], V17, 0)
 weightedsumgeq([1,4], [V1,V4], V19)
 weightedsumleq([1,4], [V1,V4], V19)

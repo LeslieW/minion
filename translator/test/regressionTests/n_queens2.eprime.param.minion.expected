@@ -128,6 +128,6 @@ diseq(aux6, aux10)
 diseq(aux13, aux9)
 diseq(aux8, aux10)
 diseq(aux13, aux11)
-alldiff([queens])
+gacalldiff([queens])
 
 **EOF**
