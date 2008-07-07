@@ -80,7 +80,7 @@ public class TableConstraint implements RelationalExpression {
 				this.variableList[i] = (Variable) e;
 			}
 			else {
-				if(e.getType() == INT) {
+				if(e.getType() == INT && !this.isConflictingTable) {
 					int v = ((ArithmeticAtomExpression) e).getConstant();
 					for(int j=0; j<this.tupleList.length; j++) {
 						ConstantTuple valueTuple = tupleList[j];
@@ -105,8 +105,9 @@ public class TableConstraint implements RelationalExpression {
 									}
 								}
 							} 
-					
-							return new Conjunction(eqConstraints);
+							if(this.isConflictingTable)
+								return new Disjunction(eqConstraints);
+							else return new Conjunction(eqConstraints);
 						
 						}
 						

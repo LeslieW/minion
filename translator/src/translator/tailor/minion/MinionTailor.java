@@ -26,6 +26,10 @@ public class MinionTailor {
 	HashMap<String, ArithmeticAtomExpression> essenceSubExpressions;
 	HashMap<String, Boolean> variableIsDiscrete = new HashMap<String, Boolean>();
 	TranslationSettings settings;
+	// the aux var for a reified sum, e.g. reify(a+b=c, aux)
+	// every reified aux Var is arithmetic 
+	ArithmeticAtomExpression reifiedSumAuxVar;
+	
 	
 	// ======== CONSTRUCTOR ==================================
 	
@@ -916,7 +920,7 @@ public class MinionTailor {
 	protected MinionConstraint toMinion(Reification reification) 
 		throws MinionException {
 		
-		//System.out.println("Generating reified constraint:"+reification);
+		System.out.println("Generating reified constraint:"+reification);
 		
 		Expression constraint = reification.getReifiedConstraint();
 		
@@ -924,6 +928,8 @@ public class MinionTailor {
 		if(constraint instanceof SumConstraint) {
 			SumConstraint sumConstraint = (SumConstraint) constraint;
 			if(sumConstraint.getOperator() == Expression.EQ) {
+				// flatten sum constraint directly so we can reuse the auxVar
+				this.reifiedSumAuxVar = reification.getReifiedVariable().toArithmeticExpression();
 				constraint.willBeFlattenedToVariable(true);
 			}
 			else constraint.willBeFlattenedToVariable(false);
@@ -1326,7 +1332,13 @@ public class MinionTailor {
 				MinionAtom auxVariable1 = reifyMinionConstraint(sum1);
 				MinionAtom auxVariable2 = reifyMinionConstraint(sum2);
 				
-				MinionAtom reifiedVariable = createMinionAuxiliaryVariable();
+				
+				MinionAtom reifiedVariable;
+				if(this.reifiedSumAuxVar != null) {
+					reifiedVariable = toMinion(this.reifiedSumAuxVar);
+					this.reifiedSumAuxVar = null;
+				}
+				else reifiedVariable	= createMinionAuxiliaryVariable();
 				
 				ProductConstraint conjunction = new ProductConstraint(auxVariable1,auxVariable2,reifiedVariable);
 				this.minionModel.addConstraint(conjunction);

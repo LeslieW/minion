@@ -38,7 +38,7 @@ aux0,aux1,aux2,aux3,aux4,aux5]
 
 eq(5, crateGoalPosns[1, 0])
 reify(eq(crateGoalPosns[0, 0], crateGoalPosns[1, 0]), aux2)
-watchsumgeq([aux2,aux0], 1)
+sumgeq([aux2,aux0], 1)
 reify(eq(crateGoalPosns[0, 0], sokPosn[1]), aux0)
 reify(sumleq([crateGoalPosns[0, 0],move[0]], crateGoalPosns[1, 0]), aux3)
 reify(sumgeq([crateGoalPosns[0, 0],move[0]], crateGoalPosns[1, 0]), aux4)

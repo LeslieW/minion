@@ -10,10 +10,10 @@ MINION 3
 # amount of auxiliary variables: 2
 
 **VARIABLES**
-BOUND item1 {0..711}
-BOUND item2 {0..711}
-BOUND item3 {0..711}
-BOUND item4 {0..711}
+DISCRETE item1 {0..711}
+DISCRETE item2 {0..711}
+DISCRETE item3 {0..711}
+DISCRETE item4 {0..711}
 
 # auxiliary variables
 BOUND aux0 {0..505521}

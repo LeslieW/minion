@@ -11,11 +11,11 @@ public class AllDifferent implements MinionConstraint {
 	
 	
 	public StringBuffer toStringFormat() {
-		return new StringBuffer("alldiff(").append(argument).append(")");
+		return new StringBuffer("gacalldiff(").append(argument).append(")");
 	}
 	
 	public String toString() {
-		return "alldiff("+argument+")";
+		return "gacalldiff("+argument+")";
 	}
 	
 }

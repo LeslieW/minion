@@ -197,7 +197,7 @@ public class Mapper {
 		else if(xcspGlobal instanceof PWeightedSum)
 			return mapWeightedSum((PWeightedSum) xcspGlobal);
 		
-		throw new MapperException("Unknown or unsupported global constraint type:"+xcspGlobal);
+		throw new MapperException("s UNKNOWN\nc Unknown or unsupported global constraint type:"+xcspGlobal);
 	}
 	
 
@@ -333,28 +333,55 @@ public class Mapper {
 		
 		int i = 0;
 		StringBuffer elem = new StringBuffer("");
+		
+		// cut off the shit at the beginning
+		while(parameters.charAt(i) == '\n' 
+			|| parameters.charAt(i) == ' ') {
+			parameters = parameters.substring(1);
+		}
+		
+		i = parameters.length()-1;
+		
+		// cut off the shit at the ending
+		while(parameters.charAt(i) == '\n' 
+			|| parameters.charAt(i) == ' ') {
+			parameters = parameters.substring(0, i);
+			i = parameters.length()-1;
+		}
+		
+	
+		i = 0;
 		while(i < parameters.length()) {
+			if(parameters.charAt(i) == '\n')
+				break;
+			
 			while(i < parameters.length() && 
-					parameters.charAt(i) != ' ') {
+					parameters.charAt(i) != ' ' &&
+					parameters.charAt(i) != '\n') {
 				elem.append(parameters.charAt(i));
+				
+				//else System.out.println("Char at parameter(i:"+i+"): is break:'"+parameters.charAt(i)+"'");
 				i++;	
 			}
-			// we have a variable
-			if(elem.charAt(0) == 'V') {
-				Domain domain = this.variablesMap.get(elem.toString());
-				if(domain == null)
-					throw new MapperException("Unknown variable '"+elem.toString()+"'. Has no domain associated with it.");
-				
-				
-				list.add(new ArithmeticAtomExpression(new SingleVariable(elem.toString(), domain )));
-			} // we have an integer value
-			else list.add(new ArithmeticAtomExpression(new Integer(elem.toString())));
 			
-			elem = new StringBuffer("");
-			if(parameters.length() > i)
-				parameters = parameters.substring(i+1);
-			else break;
-			i = 0;
+			// 	we have a variable
+				if(elem.charAt(0) == 'V') {
+					Domain domain = this.variablesMap.get(elem.toString());
+					if(domain == null)
+						throw new MapperException("Unknown variable '"+elem.toString()+"'. Has no domain associated with it.");
+				
+				
+					list.add(new ArithmeticAtomExpression(new SingleVariable(elem.toString(), domain )));
+				} // we have an integer value
+				else //System.out.println("this is the bad element:"+elem.toString());
+				  list.add(new ArithmeticAtomExpression(new Integer(elem.toString())));
+			
+				elem = new StringBuffer("");
+				if(parameters.length() > i)
+					parameters = parameters.substring(i+1);
+				else break;
+				i = 0;
+			
 		}
 		
 		return list;

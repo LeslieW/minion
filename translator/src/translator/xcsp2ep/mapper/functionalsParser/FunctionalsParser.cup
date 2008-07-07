@@ -313,7 +313,7 @@ integerExpression ::= 	  INTEGER:i
           				
           				| IF   LPAREN booleanExpression:e1 COMMA integerExpression:e2 COMMA integerExpression:e3 RPAREN
                         {: 
-                            RelationalExpression first = new NonCommutativeRelationalBinaryExpression
+                            /*RelationalExpression first = new NonCommutativeRelationalBinaryExpression
                                              ( (Expression) e1,
                                                 Expression.IF,
                         	                   (Expression) e2
@@ -335,6 +335,10 @@ integerExpression ::= 	  INTEGER:i
                            // for solver competition
                            //System.out.println("s UNKNOWN");
                            //System.exit(0);                  
-                        	                  
-                       :}  
+
+                        	  */
+                        	 System.out.println("s UNKNOWN");
+                        	 System.exit(0);                 
+                        	      :}  
+
  ;                       
