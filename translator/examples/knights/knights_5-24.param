@@ -1,0 +1,5 @@
+language ESSENCE' 1.b.a
+parameter n is 5
+parameter noKnights is 24
+parameter startRow is 0
+parameter startCol is 0

@@ -557,6 +557,17 @@ public class Flattener {
 	
 	//System.out.println("Gonna flatten left expression: "+leftExpression+" and right expression:"+rightExpression+" with op:"+expression.getOperator());
 	
+	// E => BOOL
+	if(rightExpression.getType() == Expression.BOOL && 
+			expression.getOperator() == Expression.IF	) {
+		if(((RelationalAtomExpression) rightExpression).getBool()) {
+			return new RelationalAtomExpression(true);
+		}
+		else return flattenExpression(new Negation(leftExpression));
+		
+	}
+	
+	
 	leftExpression = flattenExpression(leftExpression);
 	rightExpression = flattenExpression(rightExpression);
 	
@@ -571,12 +582,12 @@ public class Flattener {
 	
 	
 	// E => BOOL
-	if(rightExpression.getType() == Expression.BOOL && expression.getOperator() == Expression.IF) {
-		if(((RelationalAtomExpression) rightExpression).getBool()) {
-			return new RelationalAtomExpression(true);
-		}
-		else return flattenExpression(new Negation(leftExpression));
-	}
+	//if(rightExpression.getType() == Expression.BOOL && expression.getOperator() == Expression.IF) {
+	//	if(((RelationalAtomExpression) rightExpression).getBool()) {
+	//		return new RelationalAtomExpression(true);
+	//	}
+	//	else return flattenExpression(new Negation(leftExpression));
+	//}
 	
 	if(expression.isGonnaBeFlattenedToVariable()) {
 		return reifyConstraint(new NonCommutativeRelationalBinaryExpression(leftExpression,

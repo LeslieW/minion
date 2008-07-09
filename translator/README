@@ -22,8 +22,9 @@ Content:
 1. Running TAILOR
 2. Compiling TAILOR
 3. Documentation
-4. Essence' examples
-5. Limitations
+4. Emacs Mode for Essence' Syntax Highlighting
+5. Essence' examples
+6. Limitations
 
 
 
@@ -66,8 +67,18 @@ and the translator API.
 
 
 ----------------------------------
-4. Essence' examples
---------------------
+4. Emacs-Mode for Essence' 
+----------------------------------
+Peter Gregory was so generous to provide an Emacs-mode for Essence'
+that allows syntax highlighting of .eprime files. Emacs is 
+a popular, powerful, free class of editors. The directory 
+emacs-mode/ contains the Emacs-mode together with instructions on
+how to set it up.
+
+
+----------------------------------
+5. Essence' examples
+----------------------------------
 4.1 Problem Samples
 Several problem samples can be found in the /problems directory. All problem
 samples are documented.
@@ -78,8 +89,8 @@ contains a directory of generated Minion files.
 
 
 ----------------------------------
-5. Limitations and Known Bugs
------------------------------
+6. Limitations and Known Bugs
+----------------------------------
 The translator is still under development, so there are some limitations. 
 The following is not supported yet:
 - decision variable arrays with 4 or more dimensions
