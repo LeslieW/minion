@@ -665,49 +665,10 @@ expression ::= 	  LPAREN expression:e RPAREN
 			
 	    	| lex_expression:le
 		    {: RESULT = le;  :}
-		    
-		 /*   |  table_constraint:tab_constraint
+		    /*
+		    |  table_constraint:tab_constraint
 	        {: RESULT = tab_constraint;:}	
-	       
-	     */
-	        
-	   /*
-	    | ATLEAST LPAREN expression:e1 COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN
-	       
-		{: 
-		   Object[] tmp1 = ((LinkedList) int_list1).toArray();
-		   int[] int_array1 = new int[tmp1.length];
-		   for(int i=0;i<int_array1.length;i++)
- 				int_array1[i] = (Integer) tmp1[i];
- 				          
- 	       Object[] tmp2 = ((LinkedList) int_list2).toArray();
-		   int[] int_array2 = new int[tmp2.length];
-		   for(int i=0;i<int_array2.length;i++)
- 				int_array2[i] = (Integer) tmp2[i];
- 				
-		   RESULT = new Expression( new AtmostConstraint((Expression) e1,
-									                     int_array1,
-									                     int_array2,
-									                     false)); //isAtmost =false :}	
-
-
-		| ATMOST LPAREN expression:e1 COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN
-		{: 
-		   Object[] tmp1 = ((LinkedList) int_list1).toArray();
-		   int[] int_array1 = new int[tmp1.length];
-		   for(int i=0;i<int_array1.length;i++)
- 				int_array1[i] = (Integer) tmp1[i];
- 				          
- 	       Object[] tmp2 = ((LinkedList) int_list2).toArray();
-		   int[] int_array2 = new int[tmp2.length];
-		   for(int i=0;i<int_array2.length;i++)
- 				int_array2[i] = (Integer) tmp2[i];
- 				
-		   RESULT = new Expression( new AtmostConstraint((Expression) e1,
-									                     int_array1,
-									                     int_array2,
-									                     true)); //isAtmost =true :}	
-    */
+	       */
 ;
 
 
@@ -960,126 +921,7 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 		                                      isAtmost 
 		                                    );
 		             :}
-		             
-		             
-		             /*
-		             | ATMOST LPAREN expression:e COMMA LBRACK integer_list:occ_list RBRACK COMMA IDENTIFIER:val RPAREN 
-		             {: 
-		             	int[] occList = new int[( (ArrayList<Integer>) occ_list).size()];
-		             	
-		             	for(int i=occList.length-1; i>=0; i--) 
-		             		occList[i] = (int) ( (ArrayList<Integer>) occ_list ).remove(i);
-		             		
-		             	
-		             
-		                boolean isAtmost = true;
-		                RESULT = new Atmost((Expression) e, 
-		                                     occList,
-		                                     (String) val,
-		                                      isAtmost 
-		                                    );
-		             
-		             :}
-		             
-		           | ATLEAST LPAREN expression:e COMMA LBRACK integer_list:occ_list RBRACK COMMA IDENTIFIER:val RPAREN 
-		             {: 
-		             	int[] occList = new int[( (ArrayList<Integer>) occ_list).size()];
-		             	
-		             	for(int i=occList.length-1; i>=0; i--) 
-		             		occList[i] = (int) ( (ArrayList<Integer>) occ_list ).remove(i);
-		             		
-		             	
-		             
-		                boolean isAtmost = false;
-		                RESULT = new Atmost((Expression) e, 
-		                                     occList,
-		                                     (String) val,
-		                                      isAtmost 
-		                                    );
-		             
-		             :}
-		             
-		             | ATMOST LPAREN expression:e COMMA IDENTIFIER:occ COMMA LBRACK integer_list:val_list RBRACK RPAREN 
-		             {: 
-		             	int[] valList = new int[( (ArrayList<Integer>) val_list).size()];
-		             	
-		             	for(int i=valList.length-1; i>=0; i--) 
-		             		valList[i] = (int) ( (ArrayList<Integer>) val_list ).remove(i);
-		             		
-		             	
-		             
-		                boolean isAtmost = true;
-		                RESULT = new Atmost((Expression) e, 
-		                                     (String) occ,
-		                                     valList,
-		                                      isAtmost 
-		                                    );
-		             
-		             :} 
-		             
-		             
-		              | ATLEAST LPAREN expression:e COMMA IDENTIFIER:occ COMMA LBRACK integer_list:val_list RBRACK RPAREN 
-		             {: 
-		             	int[] valList = new int[( (ArrayList<Integer>) val_list).size()];
-		             	
-		             	for(int i=valList.length-1; i>=0; i--) 
-		             		valList[i] = (int) ( (ArrayList<Integer>) val_list ).remove(i);
-		             		
-		             	
-		             
-		                boolean isAtmost = false;
-		                RESULT = new Atmost((Expression) e, 
-		                                     (String) occ,
-		                                     valList,
-		                                      isAtmost 
-		                                    );
-		             
-		             :} 
-		            
-		            
-		            
-	               | ATMOST LPAREN expression:e COMMA LBRACK integer_list:int_list1 RBRACK COMMA LBRACK integer_list:int_list2 RBRACK RPAREN 
-		             {: 
-		             	int[] occList = new int[( (ArrayList<Integer>) int_list1).size()];
-		             	int[] valList = new int[( (ArrayList<Integer>) int_list2).size()];
-		             	
-		             	for(int i=occList.length-1; i>=0; i--) 
-		             		occList[i] = (int) ( (ArrayList<Integer>) int_list1 ).remove(i);
-		             		
-		             	for(int i=valList.length-1; i>=0; i--) 
-		             		valList[i] = (int) ( (ArrayList<Integer>) int_list2 ).remove(i);
-		             	
-		             
-		                boolean isAtmost = true;
-		                RESULT = new Atmost((Expression) e, 
-		                                     occList,
-		                                     valList,
-		                                      isAtmost 
-		                                    );
-		             
-		             :}
-		             
-		          | ATLEAST LPAREN expression:e COMMA LBRACK integer_list:int_list1 RBRACK  COMMA LBRACK integer_list:int_list2 RBRACK RPAREN 
-		             {: 
-		             	int[] occList = new int[( (ArrayList<Integer>) int_list1).size()];
-		             	int[] valList = new int[( (ArrayList<Integer>) int_list2).size()];
-		             	
-		             	for(int i=occList.length-1; i>=0; i--) 
-		             		occList[i] = (int) ( (ArrayList<Integer>) int_list1 ).remove(i);
-		             		
-		             	for(int i=valList.length-1; i>=0; i--) 
-		             		valList[i] = (int) ( (ArrayList<Integer>) int_list2 ).remove(i);
-		             	
-		             
-		                boolean isAtmost = false;
-		                RESULT = new Atmost((Expression) e, 
-		                                     occList,
-		                                     valList,
-		                                      isAtmost 
-		                                    );
-		             
-		             :}  */
-		            
+		             	        
 		            
 		            | ATMOST LPAREN expression:e COMMA LBRACK expression_list:list1 RBRACK COMMA LBRACK expression_list:list2 RBRACK RPAREN 
 		             {: 
@@ -1181,8 +1023,8 @@ quantified_expression ::= EXISTS identifier_list:id_list COLON domain:d DOT expr
 
 
 
-/*
-table_constraint ::= TABLE LPAREN variable_array:va COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
+
+/* table_constraint ::= TABLE LPAREN variable_array:va COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
                    {:  
                   
                     AtomExpression[] variables = ((VariableArray) va).getVariables();
@@ -1206,11 +1048,19 @@ table_constraint ::= TABLE LPAREN variable_array:va COMMA LBRACK constant_tuple_
                    RESULT = new TableConstraint(vars,
                                                 t_array);
                    :}
+                   
+                   
+                   
+                   TABLE LPAREN atom_expression:e COMMA atom_expression RPAREN
+					{: RESULT = new AllDifferent( (Expression) e); :}
+
+			       | TABLE LPAREN variable_array:va COMMA constant_matrix:ca RPAREN 
+			        {: RESULT = new AllDifferent( (VariableArray) va, 
+			                                      ); :}
 
 ;
+
 */
-
-
 
 
 atom_list ::=    atom_expression:atom 

@@ -12,6 +12,11 @@ import java.util.ArrayList;
 
 public class TableConstraint implements RelationalExpression {
 
+	/** we might just have variables */
+	//private Expression variableExpression;
+	//private Expression constantExpression;
+	
+	
 	private Variable[] variableList;
 	private ConstantTuple[] tupleList;
 	private boolean isNested;
@@ -28,6 +33,12 @@ public class TableConstraint implements RelationalExpression {
 		this.isNested = true;
 	}
 	
+	
+	public TableConstraint(VariableArray variableArray,
+						   ConstantMatrix constMatrix) {
+		
+		
+	}
 	
 	public TableConstraint(ArrayList<Variable> idents,
 			               ArrayList<ConstantTuple> tuples) {
