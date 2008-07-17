@@ -22,7 +22,9 @@ Content:
 1. Running TAILOR
 2. Compiling TAILOR
 3. Documentation
-4. Emacs Mode for Essence' Syntax Highlighting
+4. Tools for Syntax Highlighting
+   - Emacs
+   - KDE editors
 5. Essence' examples
 6. Limitations
 
@@ -67,14 +69,29 @@ and the translator API.
 
 
 ----------------------------------
-4. Emacs-Mode for Essence' 
+4. Tools for Syntax Highlighting
 ----------------------------------
-Peter Gregory was so generous to provide an Emacs-mode for Essence'
-that allows syntax highlighting of .eprime files. Emacs is 
-a popular, powerful, free class of editors. The directory 
-emacs-mode/ contains the Emacs-mode together with instructions on
-how to set it up.
 
+We provide tools for syntax highlighting of Essence' and Minion
+for some editors. The tools together with installation descriptions
+can be found in the directory syntax-highlighting/ .
+
+   4.1 Emacs 
+   ---------
+   Peter Gregory was so generous to provide an Emacs-mode for Essence'
+   that allows syntax highlighting of .eprime files. Emacs is 
+   a popular, powerful, free class of editors. The directory 
+   syntax-highlighting/emacs/ contains the Emacs-mode together with 
+   instructions on how to set it up.
+
+
+   4.2 KDE editors
+   ---------------
+    Jan de Muijnck-Hughes kindly provided .xml files that enable
+    syntax highlighting of Essence' and Minion for the KDE editors 
+    kate and kwrite. The corresponding files together with installtion
+    instructions can be found at syntax-highlighting/kde-editors.
+ 
 
 ----------------------------------
 5. Essence' examples

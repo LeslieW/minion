@@ -13,7 +13,7 @@
 <h2>Modelling with Essence'</h2>
 
 
-<h5>last update: June 29, 2007</h5> 
+<h5>last update: May 13, 2008</h5> 
 </center>
 
 
@@ -67,11 +67,11 @@ number between 0 and 9:
 
 We start with the header
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
     </pre>
      </td>
     </tr>
@@ -83,11 +83,11 @@ D, M, O, R, Y</code> which are in the domain of 0..9. We state that
 domains: one reaching from 0..9 and the other from 1..9. Domains and
 constants can be defined by the <code> letting </code> statement:
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting DOMAIN0 be domain int(0..9)
     letting DOMAIN1 be domain int(1..9)
@@ -100,11 +100,11 @@ Now we can define our decision variables that range over domains
     <code>DOMAIN0</code>
 and <code>DOMAIN1</code> by using the <code>find</code> statement.
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting DOMAIN0 be domain int(0..9)
     letting DOMAIN1 be domain int(1..9)
@@ -119,11 +119,11 @@ and <code>DOMAIN1</code> by using the <code>find</code> statement.
 All declarations have been done now and we can define our
 constraint. The constraints are stated after <code>such that</code>:
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting DOMAIN0 be domain int(0..9)
     letting DOMAIN1 be domain int(1..9)
@@ -141,7 +141,7 @@ constraint. The constraints are stated after <code>such that</code>:
     </tr>
 </table>
 </center>
-The code for the Send more money problem can be found <a href="problems/sendMoreMoney/">here</a>.
+The code for the Send more money problem can be found <a href="examples/sendMoreMoney/">here</a>.
 <hr>
 
 <h4 id="sudoku">2. Advanced Example: Sudoku</h4>
@@ -173,11 +173,11 @@ The code for the Send more money problem can be found <a href="problems/sendMore
 </table>
 
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting   RANGE be domain int(1..9)
 
@@ -201,11 +201,11 @@ of <code>alldifferent(board[1]), ... alldifferent(board[9])</code>.
 
 
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting   RANGE be domain int(1..9)
 
@@ -213,72 +213,22 @@ of <code>alldifferent(board[1]), ... alldifferent(board[9])</code>.
 
     such that 
               forall row : int(1..9) .
-                 alldifferent(board[row])
+                 alldifferent(board[row,..])
     </pre>
      </td>
     </tr>
 </table>
 </center>
 
-Then we want to impose <code>alldifferent</code> on all columns of the board. 
-Unfortunately, Essence' does not allow us to solely access the columns of a
-matrix without specifying the exact row of the matrix. This means, that there is 
-no expression such as <code>boards[_,1]</code> to represent column 1, for instance.
-But we can use a trick: we define another matrix, <code>columns</code>,
-that holds the same elements as <code>board</code>, but with the columns switched 
-with the rows. The example below illustrates the idea:
-
+Then we want to impose <code>alldifferent</code> on all columns of the board. <br>
+<br>
 
 <center>
-<table cellpadding="20">
-  <tr>
-    <td>
-
-     <table border=1 cellpadding="5">
-      <tr>
-        <td bgcolor="#FF0000" >1</td> <td bgcolor="#00FF00">4</td> <td  bgcolor="#0000FF">7</td>
-      </tr>
-      <tr>
-        <td bgcolor="#FF0000">2</td> <td bgcolor="#00FF00">5</td> <td  bgcolor="#0000FF">8</td>
-      </tr>
-      <tr>
-        <td bgcolor="#FF0000">3</td> <td bgcolor="#00FF00">6</td> <td  bgcolor="#0000FF">9</td>
-      </tr>
-     </table>
-
-
-    </td>
-    <td>becomes
-    </td>
-    <td>
-
-     <table border=1 cellpadding="5">
-      <tr bgcolor="#FF0000">
-        <td>1</td> <td>2</td> <td>3</td>
-      </tr>
-      <tr bgcolor="#00FF00">
-        <td>4</td> <td>5</td> <td>6</td>
-      </tr>
-      <tr bgcolor="#0000FF">
-        <td>7</td> <td>8</td> <td>9</td>
-      </tr>
-     </table>
-
-    </td>
-  </tr>
-
-</table>
-</center>
-
-We can then impose <code>alldifferent</code> on every row of <code>columns</code> which corresponds to
-imposing <code>alldifferent</code> on the columns of <code>board</code>.
-
-<center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting   RANGE be domain int(1..9)
 
@@ -286,19 +236,21 @@ imposing <code>alldifferent</code> on the columns of <code>board</code>.
               columns : matrix indexed by [RANGE, RANGE] of RANGE
 
     such that 
-          forall row : int(1..9) .
-              alldifferent(board[row])
 
-          forall row,col : RANGE .
-              columns[col,row] = board[row,col],     
+          $ all rows have to be different
+          forall row : RANGE .
+              alldifferent(field[row,..]),
 
+          $ all columns have to be different
           forall col : RANGE .
-              alldifferent(columns[col])	
+              alldifferent(field[..,col]),	 
+
     </pre>
      </td>
     </tr>
 </table>
 </center>
+<br>
 
 Now we have imposed <code>alldifferent</code> on both the rows and columns of 
 the board. It remains to state that every 3x3 box of the board contains
@@ -309,11 +261,11 @@ that no element in a 3x3 box may be equal to another. This is
 expressed by a double-nested <code>forall</code> expression.
 
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
 
     letting   RANGE be domain int(1..9)
 
@@ -321,14 +273,14 @@ expressed by a double-nested <code>forall</code> expression.
               columns : matrix indexed by [RANGE, RANGE] of RANGE
 
     such that 
-          forall row : int(1..9) .
-              alldifferent(board[row])
 
-          forall row,col : RANGE .
-              columns[col,row] = board[row,col],     
+          $ all rows have to be different
+          forall row : RANGE .
+              alldifferent(field[row,..]),
 
+          $ all columns have to be different
           forall col : RANGE .
-              alldifferent(columns[col]),
+              alldifferent(field[..,col]),	 
 
           forall i,j : int(0..2) . 
               forall col1,col2,row1,row2 : int(1..3) .
@@ -360,11 +312,11 @@ element of <code>board</code> at the same position equals the value of
 this element of <code>values</code>.  
 
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
+    language ESSENCE' 1.b.a
     given     values : matrix indexed by [RANGE,RANGE] of VALUES
 
     letting   RANGE be domain int(1..9)
@@ -374,14 +326,14 @@ this element of <code>values</code>.
               columns : matrix indexed by [RANGE, RANGE] of RANGE
 
     such that 
-          forall row : int(1..9) .
-              alldifferent(board[row])
-	  
-          forall row,col : RANGE .
-              columns[col,row] = board[row,col],     
 
+          $ all rows have to be different
+          forall row : RANGE .
+              alldifferent(field[row,..]),
+
+          $ all columns have to be different
           forall col : RANGE .
-              alldifferent(columns[col]),
+              alldifferent(field[..,col]),	 
 
           forall i,j : int(0..2) . 
               forall col1,col2,row1,row2 : int(1..3) .
@@ -404,14 +356,12 @@ the comment):
 
 
 <center>
-<table  bgcolor="#eeeeee" width="500">
+<table  bgcolor="#eeeeee" width="500" border="1">
   <tr>
     <td>
     <pre>
-    ESSENCE' 1.0
-    where forall row,col : int(1..9) .
-            values[row,col] = 0,
-
+    language ESSENCE' 1.b.a
+  
   $ 5 3 0 | 0 7 0 | 0 0 0 
   $ 6 0 0 | 1 9 5 | 0 0 0 
   $ 0 9 8 | 0 0 0 | 0 6 0 
@@ -422,59 +372,30 @@ the comment):
   $ ---------------------
   $ 0 6 0 | 0 0 0 | 2 8 0 
   $ 0 0 0 | 4 1 9 | 0 0 5
-  $ 0 0 0 | 0 8 0 | 0 7 9 
-
-   values[1,1] = 5,
-   values[1,2] = 3,
-   values[1,5] = 7,
+  $ 0 0 0 | 0 8 0 | 0 7 9
  
-   values[2,1] = 6,	
-   values[2,4] = 1,	
-   values[2,5] = 9,	
-   values[2,6] = 5,	  
+  letting values be [ [ 5, 3, 0, 0, 7, 0, 0, 0 ,0 ],
+                      [ 6, 0, 0, 1, 9, 5, 0, 0, 0 ], 
+                      [ 0, 9, 8, 0, 0, 0, 0, 6, 0 ],
+                      [ 8, 0, 0, 0, 6, 0, 0, 0, 3 ],
+                      [ 4, 0, 0, 8, 0, 3, 0, 0, 1 ],
+                      [ 7, 0, 0, 0, 2, 0, 0, 0, 6 ],
+                      [ 0, 6, 0, 0, 0, 0, 2, 8, 0 ], 
+                      [ 0, 0, 0, 4, 1, 9, 0, 0, 5 ],
+                      [ 0, 0, 0, 0, 8, 0, 0, 7, 9 ]] 
 
-   values[3,2] = 9,	
-   values[3,3] = 8,	
-   values[3,8] = 6,	
-
-   values[4,1] = 8,
-   values[4,5] = 6,
-   values[4,9] = 3,
-
-   values[5,1] = 4,
-   values[5,4] = 8,
-   values[5,6] = 3,
-   values[5,9] = 1,
-
-   values[6,1] = 7,
-   values[6,5] = 2,
-   values[6,9] = 6,
-
-   values[7,2] = 6,
-   values[7,7] = 2,
-   values[7,8] = 8,
-
-   values[8,4] = 4,
-   values[8,5] = 1,
-   values[8,6] = 9,
-   values[8,9] = 5,
-
-   values[9,5] = 8,
-   values[9,8] = 7,
-   values[9,9] = 9
     </pre>
      </td>
     </tr>
 </table>
 </center>
 
-The code for the Sudoku problem file can be found here at <a href="problems/sudoku/sudoku.cm">sudoku.cm</a>
-and there are two parameter files for the sudoku:  <a href="problems/sudoku/sudoku1.param">sudoku1.param</a>
-and  <a href="problems/sudoku/sudoku2.param">sudoku2.param</a>.
+The code for the Sudoku problem file can be found here at <a href="examples/sudoku/sudoku.eprime">sudoku.eprime</a>
+and the parameter file for sudoku:  <a href="examples/sudoku/sudoku1.param">sudoku1.param</a>.
 
 <hr> 
 
-More examples can be found in the <a href="problems/">problems/</a> directory.
+More examples can be found in the <a href="examples/">problems/</a> directory.
 <br>
 <br>
 <center>

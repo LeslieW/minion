@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language>
+<!-- 
+     Copyright (C) 2007-2008 
+     Jan de Muijnck-Hughes <jfdm@st-andrews.ac.uk>
+	     
+	     This program is free software: you can redistribute it and/or modify
+	     it under the terms of the GNU General Public License as published by
+	     the Free Software Foundation, either version 3 of the License, or
+	     (at your option) any later version.
+	     
+	     This program is distributed in the hope that it will be useful,
+	     but WITHOUT ANY WARRANTY; without even the implied warranty of
+	     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	     GNU General Public License for more details.
+	     
+	     You should have received a copy of the GNU General Public License
+	     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<language name="EssencePrime" version="0.1" kateversion="2.5.9" section="Other" extensions="*.eprime"  mimetype="text/eprime" casesensitive="1" author="Jan de Muijnck-Hughes" license="">
+	<!-- Specifiy items from source file that need to be highlighted-->
+	<highlighting>
+		<list name="preproc">
+			<item> language</item> 
+			<item> ESSENCE' </item> 
+		</list>
+		<list name="keywords">
+			<item> find </item>
+			<item> such </item>
+			<item> that </item>
+			<item> maximising</item>
+			<item> minimising</item>
+			<item> max</item>
+			<item> min</item>
+			<item> given </item>
+			<item> letting </item>
+			<item> indexed </item>	
+			<item> by </item>
+			<item> be </item>
+			<item> of </item>
+			<item> forall </item>
+			<item> sum </item>
+		</list>
+		<list name="misc">
+			<item> int </item>
+			<item> matrix </item>
+			<item> alldiff </item>
+		</list>
+		<!-- Specifiy language in terms of contexts-->
+		<contexts>			
+			<context name="Top_Level" attribute="Normal Text" lineEndContext="#stay">
+				<DetectSpaces />				
+				<IncludeRules context="Strings" />
+				<IncludeRules context="Multi Char Operators Def" />
+				<DetectChar   context="Commentary"   char="$" />
+				<AnyChar      context="#stay"        attribute="Single Char Operators"	String="|!:^*./=&lt;&gt;" />
+				<keyword      context="#stay"        attribute="Misc"  			String="misc" />
+				<keyword      context="#stay"        attribute="KeyWords"    		String="keywords" />
+				<keyword      context="#stay"        attribute="Operator"      		String="operators" />
+				<keyword      context="#stay"        attribute="Preprocessing"  	String="preproc" />	
+				<RegExpr      context="#stay"        attribute="Number"        		String="(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?[ij]?" />
+				<RegExpr      context="#stay"        attribute="Variable"     		String="[a-zA-Z]\w*" />
+			</context>
+			<context name="Commentary" attribute="Commentary" lineEndContext="#pop">
+			</context>	
+			<context name="Strings"    attribute="Strings" lineEndContext="#stay">
+				<RegExpr context="#stay" attribute="String" String="'([^'\\]|''|\\'|\\[^'])*'(?=[^']|$)" />
+				<RegExpr context="#stay" attribute="Incomplete String" String="'([^']|''|\\')*" />
+			</context>			
+			<context name="Multi Char Operators Def" attribute="Single Char Operators" lineEndContext="#stay">
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="!="/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="/\"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="\/"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="=&gt;"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="=&lt;"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="&lt;lex"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="&lt;=lex"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="&gt;lex"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="&gt;=lex"/>
+				<StringDetect context="#stay" attribute="Multi Char Operators " String="&lt;=&gt;"/>
+			</context>
+		</contexts>
+		<!-- Apply Style information-->
+		<itemDatas>
+			<itemData name="Normal Text" defStyleNum="dsNormal"/>
+			<itemData name="Commentary"  defStyleNum="dsComment" color="#009900" italic="1" />
+			<itemData name="Preprocessing" defStyleNum="dsKeyword"/>
+			<itemData name="Single Char Operators" defStyleNum="dsDataType"  bold="1" />
+			<itemData name="Multi Char Operators " defStyleNum="dsDataType"  bold="1" />
+			<itemData name="KeyWords" defStyleNum="dsKeyword"/>
+			<itemData name="Misc" defStyleNum="dsDataType"/>
+		</itemDatas>
+	</highlighting>
+<!-- Specifiy Code Folding Information and comment information -->
+   <general>
+     <folding indentationsensitive="1" />
+     <emptyLines>
+       <emptyLine regexpr="\s+" casesensitive="false"/>
+       <emptyLine regexpr="\s*#.*$" casesensitive="false"/>
+     </emptyLines>
+     <comments>
+        <comment name="singleLine" start="$" position="afterwhitespace"/>
+     </comments>
+     <keywords casesensitive="1" />
+   </general>
+</language>
