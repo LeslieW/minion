@@ -82,7 +82,7 @@ public class Translator {
 			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
 			if(parser.hadErrorRecovery) {
 				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
-				return false;
+				return this.settings.allowParseErrorRecovery;
 			}
 			//print_debug(problemSpec.toString());
     	
@@ -91,7 +91,7 @@ public class Translator {
 			this.parameterSpecification = (EssencePrimeModel) parser.parse().value;
 			if(parser.hadErrorRecovery) {
 				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
-				return false;
+				return this.settings.allowParseErrorRecovery;
 			}
 			//print_debug(parameterSpec.toString());
 		}
@@ -126,7 +126,7 @@ public class Translator {
 			this.problemSpecification = (EssencePrimeModel) parser.parse().value;
 			if(parser.hadErrorRecovery) {
 				this.errorMessage = this.errorMessage.concat("\n"+this.parser.errorMessage);
-				return false;
+				return this.settings.allowParseErrorRecovery;
 			}
 			
 			this.normalisedModelHasBeenFlattened = false;

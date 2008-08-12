@@ -56,7 +56,7 @@ public class GecodeTailor {
 		System.out.println("==================================");
 		System.out.println("Normal print:\n"+gecodeModel.toString()+"\n\n");
 		System.out.println("==================================");
-		System.out.println("CC print:\n"+gecodeModel.toCCString()+"\n\n");
+		System.out.println("CC print:\n"+gecodeModel.toSimpleString()+"\n\n");
 		System.out.println("==================================");
 		return gecodeModel;
 	}
@@ -124,7 +124,8 @@ public class GecodeTailor {
 									intRange.getRange()[1]);
 		}
 		
-		throw new GecodeException("Cannot tailor variable '"+variableName+"' to Gecode (yet).");
+		throw new GecodeException("Cannot tailor variable '"+variableName+"' with domain-type "
+				+domain.getClass().getSimpleName()+" to Gecode (yet).");
 	}
 	
 	/**

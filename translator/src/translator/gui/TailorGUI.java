@@ -291,7 +291,8 @@ public class TailorGUI extends javax.swing.JFrame {
         problemInput.setForeground(this.textAreaFontColor);
         problemInput.setMinimumSize(new java.awt.Dimension(190, 200));
         problemInput.setPreferredSize(new java.awt.Dimension(390, 400));
-        problemInput.setText(this.ESSENCE_PRIME_HEADER);
+        problemInput.setText(this.ESSENCE_PRIME_HEADER+"\n");
+        problemInput.setCaretPosition((this.ESSENCE_PRIME_HEADER+"\n").length());
         this.problemInput.addCaretListener( new CaretListener()
 		{
 			public void caretUpdate(CaretEvent e)
@@ -385,7 +386,8 @@ public class TailorGUI extends javax.swing.JFrame {
         parameterInput.setForeground(this.textAreaFontColor);
         parameterInput.setMinimumSize(new java.awt.Dimension(190, 150));
         parameterInput.setPreferredSize(new java.awt.Dimension(390, 200));
-        parameterInput.setText(this.ESSENCE_PRIME_HEADER);
+        parameterInput.setText(this.ESSENCE_PRIME_HEADER+"\n");
+        problemInput.setCaretPosition((this.ESSENCE_PRIME_HEADER+"\n").length());
         parameterInput.addCaretListener( new CaretListener()
 		{
 			public void caretUpdate(CaretEvent e)
@@ -606,6 +608,9 @@ public class TailorGUI extends javax.swing.JFrame {
         initMenuBar();
         
         pack();
+        
+        
+        
     }// </editor-fold>//GEN-END:initComponents
 
     
@@ -658,6 +663,20 @@ public class TailorGUI extends javax.swing.JFrame {
         settingsMenu.add(translationSettings);
         
         
+        // solving settings
+        JMenu solvingSettings = new JMenu("Solving");
+        JMenuItem allSolutions = new JCheckBoxMenuItem("Find all solutions");
+        allSolutions.setSelected(settings.getNoOfSolutions() == settings.FIND_ALL_SOLUTIONS);
+        allSolutions.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          if(item.isSelected())
+		        	  settings.setNoOfSolutions(settings.FIND_ALL_SOLUTIONS);
+		          else settings.setNoOfSolutions(settings.DEFAULT_NO_OF_SOLUTIONS);
+			  }
+			});
+        solvingSettings.add(allSolutions);
+        settingsMenu.add(solvingSettings);
         
         
         //      skin selection (just for fun)
@@ -1047,7 +1066,8 @@ protected void translate(String command) {
 		
 		if(tailoring) {	
 			writeOnOutput(this.MINION_TAB_NR, this.translator.getTargetSolverInstance());
-			writeOnMessageOutput("Tailored model to target solver "+solver.getSolverName()+"\n");
+			writeOnMessageOutput("Tailored model to target solver "+solver.getSolverName()+ "\n");
+			setCaretPositionOnOutput(this.MINION_TAB_NR, 1);
 		}
 		else {
 			writeOnMessageOutput("===================== ERROR ======================\n"+
@@ -1212,15 +1232,32 @@ protected void translate(String command) {
 				writeOnMessageOutput("Cannot write file: \n "+file.toString()+"\n");
 
 			writer.write(this.minionOutput.getText());
-			writeOnMessageOutput("Saved minion output in: \n " + file.getName() + "." +"\n");
+			String message = "Saved minion input in file: \n " + file.getName() + "." +"\n";
+			writeOnMessageOutput(message);
 			
 			writer.flush();
             writer.close();
             
-            String minionExecPath = this.settings.getPathToMinion();            
-            String[] commandArguments = new String[] { minionExecPath, this.OUTPUT_FILENAME };
+            String minionExecPath = this.settings.getPathToMinion(); 
+            
+            String[] commandArguments;
+            int noOfSolutions = this.settings.getNoOfSolutions();
+            writeOnMessageOutput(message+"\n\nSearch for "+
+            		((noOfSolutions == settings.FIND_ALL_SOLUTIONS) ? "all" : noOfSolutions)+" solution(s)" +
+            				". This might take a while.");
+            
+            if(noOfSolutions == 1) {
+            	commandArguments = new String[] { minionExecPath, this.OUTPUT_FILENAME };
+            }
+            else if(noOfSolutions == this.settings.FIND_ALL_SOLUTIONS){
+            	commandArguments = new String[] {minionExecPath, "-findallsols", this.OUTPUT_FILENAME};
+            }
+            else {
+            	commandArguments = new String[] {minionExecPath, "-sollimit "+noOfSolutions, this.OUTPUT_FILENAME};
+            }
             
             Process process = Runtime.getRuntime().exec(commandArguments);
+            
             InputStream inputStream = process.getInputStream();
             
             process.waitFor();
@@ -1287,6 +1324,34 @@ protected void translate(String command) {
 		
 		else if(tabNumber == this.SOLUTION_TAB_NR) {
 			this.solutionOutput.setText(text);
+			this.outputTabbedPanel.setEnabledAt(this.SOLUTION_TAB_NR, true);
+			this.outputTabbedPanel.setSelectedIndex(this.SOLUTION_TAB_NR);
+		}
+	}
+    
+    
+  public void setCaretPositionOnOutput(int tabNumber, int position) {
+		
+		if(tabNumber == this.NORMALISE_TAB_NR) {
+			this.normaliseOutput.setCaretPosition(position);
+			this.outputTabbedPanel.setEnabledAt(this.NORMALISE_TAB_NR, true);
+			this.outputTabbedPanel.setSelectedIndex(this.NORMALISE_TAB_NR);
+		}
+			
+		else if(tabNumber == this.FLAT_TAB_NR) {
+			this.flatOutput.setCaretPosition(position);
+			this.outputTabbedPanel.setEnabledAt(this.FLAT_TAB_NR, true);
+			this.outputTabbedPanel.setSelectedIndex(this.FLAT_TAB_NR);
+		}
+		
+		else if(tabNumber == this.MINION_TAB_NR) {
+			this.minionOutput.setCaretPosition(position);
+			this.outputTabbedPanel.setEnabledAt(this.MINION_TAB_NR, true);
+			this.outputTabbedPanel.setSelectedIndex(this.MINION_TAB_NR);
+		}
+		
+		else if(tabNumber == this.SOLUTION_TAB_NR) {
+			this.solutionOutput.setCaretPosition(position);
 			this.outputTabbedPanel.setEnabledAt(this.SOLUTION_TAB_NR, true);
 			this.outputTabbedPanel.setSelectedIndex(this.SOLUTION_TAB_NR);
 		}

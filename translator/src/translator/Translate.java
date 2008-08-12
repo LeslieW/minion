@@ -3,7 +3,7 @@ package translator;
 import javax.swing.JFrame;
 import java.io.*;
 import translator.solver.Minion;
-//import translator.solver.Gecode;
+import translator.solver.Gecode;
 import translator.gui.TailorGUI;
 import translator.xcsp2ep.Xcsp2Ep;
 
@@ -42,6 +42,7 @@ public class Translate {
 	public static final String NO_PROPAGATE_SINGLE_DOMAINS = "no-sdp"; // don't propagate single domains, e.g. (1..1)
 	public static final String DISCRETE_VAR_UPPER_BOUND = "discrete-ub"; // maximum domain size for when to use discrete vars
 	public static final String OUTPUT = "out"; //set the output file name/directory
+	public static final String NO_OF_SOLUTIONS = "sols";
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -128,6 +129,21 @@ public class Translate {
 					i++;
 				}
 				
+				else if(args[i].equalsIgnoreCase("-"+NO_OF_SOLUTIONS)) {
+					if(i + 1 >= args.length) {
+						printWelcomeMessage();
+						System.out.println("Sorry, could not read the number of solutions to search for.");
+						System.exit(1);
+					}
+					Integer noOfSolutions = new Integer(args[i+1]);
+					if(noOfSolutions < 0) 
+						System.out.println("Sorry, cannot set the amount of solutions to an amount smaller than zero:"+noOfSolutions+
+								"\n.To search for all solutions set the amount to '0'. Number of solutions flag ignored.");
+					
+					settings.setNoOfSolutions(noOfSolutions);
+					i++;
+				}
+				
 				else if(args[i].equalsIgnoreCase("-"+NO_INFO) || args[i].equalsIgnoreCase("-s")) {
 					settings.giveTranslationInfo = false;
 					settings.giveTranslationTimeInfo = false;
@@ -144,9 +160,9 @@ public class Translate {
 					settings.setApplyDirectVariableReusage(true);
 				}
 
-				//else if(args[i].equalsIgnoreCase("-"+GECODE_TRANSLATION) || args[i].equalsIgnoreCase("-g")) {
-				//	settings.setTargetSolver(new Gecode());
-				//}
+				else if(args[i].equalsIgnoreCase("-"+GECODE_TRANSLATION) || args[i].equalsIgnoreCase("-g")) {
+					settings.setTargetSolver(new Gecode());
+				}
 				
 				else if(args[i].equalsIgnoreCase("-"+MINION_TRANSLATION) || args[i].equalsIgnoreCase("-m")) {
 					settings.setTargetSolver(new Minion());
@@ -241,6 +257,7 @@ public class Translate {
 		
 		JFrame frame = new TailorGUI();
 		frame.setVisible(true);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 	}
 	
 	
@@ -439,12 +456,15 @@ public class Translate {
 		System.out.println("\tThe generated Minion file is written into 'output.minion'");
 		System.out.println("\tPlease make sure that '-xcsp' is the last flag you set.\n");
 		
-		System.out.println("\nAvailable flags:");
+		//System.out.println("\nAvailable flags:");
+		System.out.println("\nGeneral flags:");
 		System.out.println("-"+HELP+" or -h\n\tprints this help message");
 		System.out.println("-"+MINION_TRANSLATION+" or -m");
 		System.out.println("\tTranslates input files to solver Minion (default).");
 		//System.out.println("-"+GECODE_TRANSLATION+" or -g");
 		//System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
+		
+		System.out.println("\nTranslation flags:");
 		System.out.println("-"+NO_COMMON_SUBEXPRS);
 		System.out.println("\tTurn off eliminating common subexpressions during flattening.");
 		System.out.println("\tDefault: on");
@@ -468,6 +488,12 @@ public class Translate {
 		System.out.println("\tequal 300 will be represented by a discrete variable");
 		System.out.println("\t(allowing domain consistency)");
 		System.out.println("\tDefault: "+settings.getDiscreteUpperBound());
+		System.out.println("-"+NO_OF_SOLUTIONS+" AMOUNT");
+		System.out.println("\tSet the amount of solutions to search for in the target solver.");
+		System.out.println("\tTo search for all solutions, set AMOUNT to '"+settings.getFindAllSolutionsAlias()+"'.");
+		System.out.println("\tDefault amount of solutions to search for: "+settings.getNoOfSolutions());
+		
+		System.out.println("\nOutput flags:");
 		System.out.println("-"+TIME_OFF);
 		System.out.println("\tDisplay time statistics");
 		System.out.println("\tDefault: don't show time statistics");

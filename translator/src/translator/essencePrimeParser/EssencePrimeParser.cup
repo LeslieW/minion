@@ -65,7 +65,17 @@ action code {:
     }
 
 
+	public String print_array_list (ArrayList<Domain> list) {
 	
+		StringBuffer s = new StringBuffer("");
+			
+		for(int i=0; i<list.size(); i++) {
+			if(i>0) s.append(",");
+			s.append(list.get(i));
+		} 
+	
+		return s.toString();
+	}
 
 :}
 
@@ -121,6 +131,8 @@ parser code {:
 		else return new StringBuffer("");
 	}
 	*/
+
+	
 
 :};
 
@@ -690,6 +702,32 @@ atomic_expression ::=  INTEGER:i
 
 deref_expression ::= 	IDENTIFIER:id LBRACK index_list:e_list RBRACK
                	        {:  
+							RESULT = new SimpleArrayVariable(new String(id), 
+							                                 (ArrayList<Domain>) e_list); 
+							                                   
+								                           
+					    :}
+					    
+					   | IDENTIFIER:id LBRACK index_list:e_list1 RBRACK LBRACK index_list:e_list2 RBRACK 
+               	        {:  
+               	        	 String errMessage = "Detected parse error around expression expression '"+id+
+				   			"["+(print_array_list((ArrayList<Domain>)e_list1))+"]["
+				   			       +(print_array_list((ArrayList<Domain>) e_list2))+"]'\nShould be written '"
+				   			+id+"["+(print_array_list((ArrayList<Domain>)e_list1))+","+(print_array_list((ArrayList<Domain>) e_list2))+"]'.";
+				   			
+				   			
+				  			errorMessage.append(errMessage);
+				  			parser.errorMessage.append("\n"+errMessage);
+				   			parser.hadErrorRecovery = true;
+				   			//report_error(errMessage,e_list1);
+				   			
+				   			ArrayList<Domain> e_list = (ArrayList<Domain>) e_list1;
+				   			ArrayList<Domain> e_list_rest = (ArrayList<Domain>) e_list2;
+				   			
+				   			for(int i=0; i<e_list_rest.size(); i++) {
+				   				e_list.add(e_list_rest.remove(0));
+				   			}
+				   			
 							RESULT = new SimpleArrayVariable(new String(id), 
 							                                 (ArrayList<Domain>) e_list); 
 							                                   

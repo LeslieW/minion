@@ -61,7 +61,7 @@ public class GecodeModel {
 	 * Print the Gecode Model
 	 * 
 	 */
-	public String toString() {
+	public String toSimpleString() {
 		
 		StringBuffer s = new StringBuffer("#include \"examples/support.hh\"\n#include \"gecode/minimodel.hh\"\n\n");
 	
@@ -76,12 +76,16 @@ public class GecodeModel {
 	 * Print the Gecode C++ Model
 	 * 
 	 */
-	public String toCCString() {
+	public String toString() {
 		
-		StringBuffer s = new StringBuffer("#include \"examples/support.hh\"\n#include \"gecode/minimodel.hh\"\n\n");
+		StringBuffer s = new StringBuffer("/** \n *  "+this.settings.OUTPUTFILE_HEADER+
+				                         "\n *  "+this.settings.OUTPUTFILE_HEADER_BUGS+"\n */\n\n");
+		// s.append(printStatistics()); TODO!!
+		
+		s.append("#include \"examples/support.hh\"\n#include \"gecode/minimodel.hh\"\n\n");
 		
 		// file header
-		s.append("/** \n *  "+this.settings.OUTPUTFILE_HEADER+"\n *  "+this.settings.OUTPUTFILE_HEADER_BUGS+"\n */\n\n");
+		//s.append("/** \n *  "+this.settings.OUTPUTFILE_HEADER+"\n *  "+this.settings.OUTPUTFILE_HEADER_BUGS+"\n */\n\n");
 		
 		s.append(modelClassToString()+"\n\n");
 		s.append(mainFunctionToString());
@@ -132,7 +136,7 @@ public class GecodeModel {
 	
 	private String copyMethodToString() {
 		
-		StringBuffer s = new StringBuffer("   // copy during cloning\n   vitual Space*\n   copy(bool share) {\n");
+		StringBuffer s = new StringBuffer("   // copy during cloning\n   virtual Space*\n   copy(bool share) {\n");
 		s.append("      return new "+modelName+"(share, *this);\n");
 		s.append("   }\n");
 		

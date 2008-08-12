@@ -21,6 +21,8 @@ public class TranslationSettings {
 	public final String OUTPUTFILE_HEADER_BUGS = "bug-reports: andrea@cs.st-and.ac.uk";
 	public final String DEFAULT_MODEL_NAME = "ProblemModel";
 	public final int DISCRETE_UPPER_BOUND = 200;
+	public final int FIND_ALL_SOLUTIONS = 0;
+	public final int DEFAULT_NO_OF_SOLUTIONS = 1;
 	
 	int discreteUpperBound;
 	
@@ -37,6 +39,10 @@ public class TranslationSettings {
 	boolean writeEssencePIntoFile; // for xcsp conversion
 	boolean propagateSingleIntRanges;
 	
+	// if set to true, then parse errors, such as m[5][4] are accepted and recovered from
+	boolean allowParseErrorRecovery;
+	int noOfSolutions;
+	
 	String pathToMinion;
 	// the variables whose solutions have been printed by the target solver
 	String[] printedVariables;
@@ -46,9 +52,21 @@ public class TranslationSettings {
 	String solverOutputFileName;
 	String modelName;
 	
+
 	
 	// DEFAULT settings for every translation
 	public TranslationSettings() {
+		this.targetSolver = new Minion();
+		initialiseSettings();
+	}
+	
+	public TranslationSettings(TargetSolver solver) {	
+		this.targetSolver = solver;
+		initialiseSettings();
+	}
+
+	
+	private void initialiseSettings() {
 		this.settingsFileName = "settings";
 		this.targetSolver = new Minion();
 		this.useCommonSubExpressions = true;
@@ -66,25 +84,10 @@ public class TranslationSettings {
 		this.writeEssencePIntoFile = false;
 		this.propagateSingleIntRanges = true;
 		this.discreteUpperBound = this.DISCRETE_UPPER_BOUND;
-	}
-	
-	public TranslationSettings(TargetSolver solver) {	
-		this.settingsFileName = "settings";
-		this.targetSolver = solver;
-		this.useCommonSubExpressions = true;
-		this.useEqualSubExpressions =true;
-		this.useExplicitCommonSubExpressions = true;
-		this.applyStrictCopyPropagation = false;
-		this.giveTranslationTimeInfo = false;
-		this.giveTranslationInfo = true;
-		this.applyDirectVariableReusage = false;
-		this.pathToMinion = readPathToMinion();
-		this.essenceP_outputFileName = "out.eprime";
-		this.debugMode = false;
-		this.writeTimeInfoIntoFile = true;
-		this.writeEssencePIntoFile = false;
-		this.propagateSingleIntRanges = true;
-		this.discreteUpperBound = this.DISCRETE_UPPER_BOUND;
+		this.allowParseErrorRecovery = false;
+		this.noOfSolutions = this.DEFAULT_NO_OF_SOLUTIONS;
+		
+		
 	}
 	
 	
@@ -287,4 +290,23 @@ public class TranslationSettings {
 		return this.solverOutputFileName;
 	}
 	
+	public void setAllowParseErrorRecovery(boolean turnOn) {
+		this.allowParseErrorRecovery = turnOn;
+	}
+	
+	public boolean getAllowParseErrorRecovery() {
+		return this.allowParseErrorRecovery;
+	}
+	
+	public void setNoOfSolutions(int noOfSols) {
+		this.noOfSolutions = noOfSols;
+	}
+	
+	public int getNoOfSolutions() {
+		return this.noOfSolutions;
+	}
+	
+	public int getFindAllSolutionsAlias() {
+		return this.FIND_ALL_SOLUTIONS;
+	}
 }
