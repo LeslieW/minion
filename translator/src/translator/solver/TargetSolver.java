@@ -17,7 +17,7 @@ public interface TargetSolver {
 	// for flattening
 	public final int USE_COMMON_SUBEXPRESSIONS = 1000;
 	
-	// branching strategies
+	// variable branching strategies
 	public final String BRANCH_SMALLEST_DOMAIN = "smallest domain first (first fail)";
 	public final String BRANCH_LARGEST_DOMAIN = "largest domain first";
 	public final String BRANCH_SMALLEST_MINIMUM ="domain with smallest minimum first";
@@ -27,10 +27,15 @@ public interface TargetSolver {
 	public final String BRANCH_SMALLEST_VAR_DEGREE = "smallest variable degree first";
 	public final String BRANCH_LARGEST_VAR_DEGREE = "largest variable degree first";	
 	// TODO: some more branching strategies of GECODE
+	public final String BRANCH_RANDOM_DOMAIN = "random";
+	public final String BRANCH_STATIC_NORMAL = "static normal order";
+	public final String DEFAULT_VAR_BRANCHING = "default variable branching";
 	
-	public final String RANDOM_DOMAIN = "random";
-	public final String STATIC_NORMAL = "static normal order";
-	public final String DEFAULT_BRANCHING = "default";
+	
+	// value branching strategies
+	public final String BRANCH_SMALLEST_VALUE = "smallest value";
+	public final String BRANCH_LARGEST_VALUE = "largest value";
+	public final String DEFAULT_VAL_BRANCHING = "default value branching";
 	
 	// search strategies
 	public final String DEPTH_FIRST = "depth first";
@@ -202,13 +207,16 @@ public interface TargetSolver {
 	
 	// ======== SOLVING PROCESS ===================
 	
-	public String getBranchingStrategy();
-	public void setBranchingStrategy(String strategy);
+	public String getVarBranchingStrategy();
+	public String getValBranchingStrategy();
+	public void setVarBranchingStrategy(String strategy);
+	public void setValBranchingStrategy(String strategy);
 	public String getSearchStrategy();
 	public void setSearchStrategy(String strategy);
-	public boolean supportsBranchingStrategy(String strategy);
+	public boolean supportsVarBranchingStrategy(String strategy);
+	public boolean supportsValBranchingStrategy(String strategy);
 	public boolean supportsSearchStrategy(String strategy);
-	public String[] getBranchingStrategies();
+	public String[] getVarBranchingStrategies();
 	public String[] getSearchStrategies();
 	public void setSearchOverAuxiliaryVariables(boolean turnOn);
 	public boolean willSearchOverAuxiliaryVariables();

@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import translator.expression.Domain;
 import translator.TranslationSettings;
+import translator.solver.Gecode;
 
 /**
  * This class represents a Gecode Model
@@ -16,8 +17,14 @@ import translator.TranslationSettings;
 
 public class GecodeModel {
 
-	private ArrayList<GecodeVariable> variableList;
-	private ArrayList<ArgsVariable> bufferArrays;
+	/** list of 1-dim. variable arrays */
+	private ArrayList<GecodeArrayVariable> variableList;
+	/** arrays that buffer single vars */
+	private ArrayList<GecodeArrayVariable> bufferArrays;
+	/** buffered single int variables*/
+	private ArrayList<GecodeIntVar> singleIntVarNames;
+	/** buffered single bool variables*/
+	private ArrayList<GecodeBoolVar> singleBoolVarNames;
 	private HashMap<GecodeVariable, Domain> variableDomains = new HashMap<GecodeVariable, Domain>();
 	private ArrayList<GecodeConstraint> constraints;
 	private TranslationSettings settings;
@@ -27,21 +34,31 @@ public class GecodeModel {
 	
 	
 	public GecodeModel(TranslationSettings settings,
-					   ArrayList<GecodeVariable> variables,
-					   ArrayList<ArgsVariable> bufferArrays,
-					   ArrayList<GecodeConstraint> constraints) {
+					   ArrayList<GecodeArrayVariable> variables,
+					   ArrayList<GecodeArrayVariable> bufferArrays,
+					   ArrayList<GecodeConstraint> constraints, 
+					   ArrayList<GecodeIntVar> singleIntVars, 
+					   ArrayList<GecodeBoolVar> singleBoolVars) {
 		
 		this.settings = settings;
 		this.variableList = variables;
 		this.bufferArrays = bufferArrays;
 		this.constraints = constraints;
+		
 		this.modelName = settings.getModelName();
+		String firstLetter = modelName.substring(0, 1);
+		modelName = modelName.substring(1,modelName.length());
+		firstLetter = firstLetter.toUpperCase();
+		modelName = firstLetter+modelName; // make the name uppercase
+		
+		this.singleIntVarNames = singleIntVars;
+		this.singleBoolVarNames = singleBoolVars;
 	}
 	
 	
 	// ================ METHODS ==============================
 	
-	public ArrayList<GecodeVariable> getDecisionVariables() {
+	public ArrayList<GecodeArrayVariable> getDecisionVariables() {
 		return this.variableList;
 	}
 	
@@ -66,7 +83,8 @@ public class GecodeModel {
 		StringBuffer s = new StringBuffer("#include \"examples/support.hh\"\n#include \"gecode/minimodel.hh\"\n\n");
 	
 		s.append("\n\nConstraints: "+this.constraints);
-		s.append("\n\nVariables: "+this.variableList);
+		s.append("\n\n1-dim. array-Variables: "+this.variableList);
+		s.append("\n\nBuffered variables: "+this.bufferArrays);
 		
 		// TODO:!!
 		return s.toString();
@@ -116,19 +134,47 @@ public class GecodeModel {
 		s.append("public: \n\n");
 		s.append(actualProblemConstructorToString()+"\n");
 		
-		// TODO: print, clone and copy
+		s.append(printingMethodToString()+"\n\n");
+		
 		s.append(copyMethodToString());
+		
+		s.append("\n\n");
+		s.append(cloningConstructorToString());
 		
 		s.append("\n};\n");
 		return s.toString();
 	}
 	
 	
+	private String actualProblemConstructorToString() {
+		
+		StringBuffer s = new StringBuffer("   // actual problem\n   "+this.modelName+"(const Options& opt) : "+
+				variableInitialisationToString());
+		
+		s.append(" {\n\n");
+		s.append(bufferArraysDeclaration()+"\n");
+		s.append(constraintsToString()+"\n");
+		s.append(branchingToString()+"\n");
+		
+		s.append("   }\n\n");
+		return s.toString();
+	}
+	
+	
+	//------------------------------------------------------------------
+	
+	/**
+	 * Writes down the variable declaration of the variables
+	 * @return
+	 */
 	private String variableDeclarationToString() {
 		
 		StringBuffer s = new StringBuffer("");
 		for(int i=0; i<this.variableList.size(); i++)
-			s.append("   "+variableList.get(i).toCCString()+";\n");
+			s.append("   "+variableList.get(i).toDeclarationCCString()+";\n");
+		
+		for(int i=0; i<this.bufferArrays.size(); i++)
+			s.append("   "+bufferArrays.get(i).toDeclarationCCString()+";\n");
 		
 		return s.toString();
 	}
@@ -137,54 +183,149 @@ public class GecodeModel {
 	private String copyMethodToString() {
 		
 		StringBuffer s = new StringBuffer("   // copy during cloning\n   virtual Space*\n   copy(bool share) {\n");
-		s.append("      return new "+modelName+"(share, *this);\n");
+		s.append("\treturn new "+modelName+"(share, *this);\n");
 		s.append("   }\n");
 		
 		return s.toString();
 		
 	}
 	
-	private String actualProblemConstructorToString() {
+	/**
+	 * Returns the cloning constructor of the problem model where 
+	 * every variable array is updated.
+	 * @return
+	 */
+	private String cloningConstructorToString() {
+		StringBuffer s = new StringBuffer("   // constructor for cloning\n   "
+				+modelName+"(bool share, "+modelName+"& s) : Example(share,s) {\n");
 		
-		StringBuffer s = new StringBuffer("   // actual problem\n   "+this.modelName+"(const Options& opt) : "+
-				variableInitialisationToString());
+		for(int i=0; i<this.bufferArrays.size(); i++) {
+			s.append("\t"+bufferArrays.get(i)+".update(this, share, s."+bufferArrays.get(i)+");\n");
+		}
 		
-		s.append(" {\n");
-		s.append(bufferArraysDeclaration());
-		s.append(constraintsToString()+"\n");
-		s.append(branchingToString()+"\n");
+		s.append("\n   }\n");
 		
-		s.append("   }\n\n");
 		return s.toString();
+		
 	}
 	
+	/**
+	 * Method that prints the results/solutions of the variables
+	 * @return
+	 */
+	private String printingMethodToString() {
+		StringBuffer s = new StringBuffer("   // method for printing solutions\n");
+		s.append("   virtual void print(void) {\n\tstd::cout << \"\\t\";\n");
+		
+		for(int i=0; i<this.variableList.size(); i++) {
+			GecodeArrayVariable var = variableList.get(i);
+			s.append("\tstd::cout  << \" "+var.getVariableName()+":\" << std::endl;\n");
+			s.append("\tfor(int i=0; i<"+var.getLength()+", i++) \n");
+			s.append("\t   std::cout  << "+var.getVariableName()+"[i] << \"  \";");
+			s.append("\tstd::cout << std::endl;\n\n");
+		}
+		
+		s.append("\n");
+		
+		for(int i=0; i<this.bufferArrays.size(); i++) {
+			GecodeArrayVariable var = bufferArrays.get(i);
+			boolean isInteger = (var instanceof GecodeIntVarArray);
+			
+			for(int j=0; j<var.getLength(); j++) {
+				if(isInteger) {
+					s.append("\tstd::cout  << \" "+this.singleIntVarNames.get(j).getVariableName()+":\"");
+				}
+				else s.append("\tstd::cout  << \" "+this.singleBoolVarNames.get(j).getVariableName()+":\"");
+				
+				s.append(" << "+var.getVariableName()+"["+j+"] << std::endl;\n");
+			}
+		}
+		
+		s.append("   }\n");
+		
+		return s.toString();
+	}
+
 	private String bufferArraysDeclaration() {
 		
 		StringBuffer s = new StringBuffer("");
+		
+		if(bufferArrays.size() > 0) {
+			s.append("      // mapping single variables to the array\n");
+		}
+		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
-			// Under constructioN!!
-			s.append("      "+bufferArrays.get(i).toCCString()+";\n");
+			GecodeArrayVariable array = bufferArrays.get(i);
+			
+			if(array instanceof GecodeIntVarArray) {
+				String arrayName = array.getVariableName();
+				s.append("\tIntVar");
+				for(int j=0; j<array.getLength(); j++) {
+					if(j>0) s.append(", ");
+					if(j%5==0) s.append("\n\t ");
+					s.append(this.singleIntVarNames.get(j).getVariableName()+"("+arrayName+"["+j+"])");
+				}				
+			}
+			else if(array instanceof GecodeBoolVarArray) {
+				String arrayName = array.getVariableName();
+				s.append("\tBoolVar");
+				for(int j=0; j<array.getLength(); j++) {
+					if(j>0) s.append(", ");
+					if(j%5==0) s.append("\n\t ");
+					s.append(this.singleBoolVarNames.get(j).getVariableName()+"("+arrayName+"["+j+"])");
+				}	
+			}
+			s.append(";\n\n");
 		}
 		
 		return s.toString();
 		
 	}
 	
+	/**
+	 * Produce the branching strategy for the variables
+	 * @return
+	 */
 	private String branchingToString() {
-		// TODO:
-		return "      branching...";
+		
+		StringBuffer s = new StringBuffer("");
+	
+		String variableBranching = ((Gecode) this.settings.getTargetSolver()).toGecodeVariableBranching(settings.getVarBranching());
+		String valueBranching = ((Gecode) this.settings.getTargetSolver()).toGecodeValueBranching(settings.getValBranching());
+		
+		for(int i=0; i<this.bufferArrays.size(); i++) {
+			s.append("\tbranch(this, "+bufferArrays.get(i)+", "+variableBranching+", "+valueBranching+");\n");
+		}
+		return s.toString();
 	}
 	
-	
+	/**
+	 * Initialising the variable in the constructor
+	 * @return
+	 */
 	private String variableInitialisationToString() {
-		// TODO:
-		return "variable-Initialisation";
+		StringBuffer s= new StringBuffer("");
+		for(int i=0; i<this.variableList.size(); i++) {
+			if(i > 0) s.append(",\n");
+			GecodeArrayVariable var = variableList.get(i);
+			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
+		}
+		for(int i=0; i<this.bufferArrays.size(); i++) {
+			if(i > 0) s.append(",\n");
+			GecodeArrayVariable var = bufferArrays.get(i);
+			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
+		}
+		return s.toString();
 	}
 	
+	/**
+	 * Printing the constraints
+	 * @return
+	 */
 	private String constraintsToString() {
 		StringBuffer s = new StringBuffer("");
 		for(int i=0; i<this.constraints.size(); i++) {
-			s.append("      "+constraints.get(i)+";\n");
+			s.append("\t"+constraints.get(i)+";\n");
 		}
 		return s.toString();
 	}

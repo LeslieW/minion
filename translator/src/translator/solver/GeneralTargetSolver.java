@@ -26,9 +26,11 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	protected String version;
 	
 	// ------- solving ---------------
-	protected String[] branchingStrategies;
+	protected String[] varBranchingStrategies;
+	protected String[] valBranchingStrategies;
 	protected String[] searchStrategies;
-	protected String branchingStrategy;
+	protected String varBranchingStrategy;
+	protected String valBranchingStrategy;
 	protected String searchStrategy;
 	
 	// ============ CONSTRUCTOR =============
@@ -63,17 +65,26 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	
 	// ======= SOLVING PROCESS ==============
 	
-	public String getBranchingStrategy() {
-		return this.branchingStrategy;
+	public String getVarBranchingStrategy() {
+		return this.varBranchingStrategy;
+	}
+	
+	public String getValBranchingStrategy() {
+		return this.valBranchingStrategy;
 	}
 	
 	public String getSearchStrategy() {
 		return this.searchStrategy;
 	}
  	
-	public void setBranchingStrategy(String strategy) {
-		if(supportsBranchingStrategy(strategy))
-			this.branchingStrategy = strategy;
+	public void setVarBranchingStrategy(String strategy) {
+		if(supportsVarBranchingStrategy(strategy))
+			this.varBranchingStrategy = strategy;
+	}
+	
+	public void setValBranchingStrategy(String strategy) {
+		if(supportsValBranchingStrategy(strategy))
+			this.valBranchingStrategy = strategy;
 	}
 	
 	public void setSearchStrategy(String strategy) {
@@ -81,9 +92,16 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			this.searchStrategy = strategy;
 	}
 	
-	public boolean supportsBranchingStrategy(String strategy) {
-		for(int i=0; i<this.branchingStrategies.length; i++)
-			if(this.branchingStrategies[i] == strategy)
+	public boolean supportsVarBranchingStrategy(String strategy) {
+		for(int i=0; i<this.varBranchingStrategies.length; i++)
+			if(this.varBranchingStrategies[i] == strategy)
+				return true;
+		return false;
+	}
+	
+	public boolean supportsValBranchingStrategy(String strategy) {
+		for(int i=0; i<this.valBranchingStrategies.length; i++)
+			if(this.valBranchingStrategies[i] == strategy)
 				return true;
 		return false;
 	}
@@ -95,8 +113,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		return false;
 	}
 	
-	public String[] getBranchingStrategies() {
-		return this.branchingStrategies;
+	public String[] getVarBranchingStrategies() {
+		return this.varBranchingStrategies;
+	}
+	
+	public String[] getValBranchingStrategies() {
+		return this.varBranchingStrategies;
 	}
 	
 	public String[] getSearchStrategies() {

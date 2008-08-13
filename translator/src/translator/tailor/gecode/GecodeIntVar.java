@@ -43,7 +43,7 @@ public class GecodeIntVar implements IntegerVariable, GecodeAtomVariable {
 		return this.name;
 	}
 	
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		return "IntVar "+this.name;
 	}
 }

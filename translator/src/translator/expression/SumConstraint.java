@@ -533,7 +533,47 @@ public class SumConstraint implements GlobalConstraint {
 		return this;
 	}
 	
-/*	public boolean isResultOnLeftSide() {
+	/*
+	public boolean isResultOnLeftSide() {
 		return this.resultIsOnLeftSide;
-	}*/
+	}
+	*/
+	
+	
+	
+	public String toGecodeString() {
+		
+		String operator = "";
+		
+		switch(this.relationalOperator) {
+		case IF: 	operator = "=>"; break;
+		case LESS:	operator = "<"; break; 
+		case LEQ: 	operator = "<="; break;
+		case GEQ:   operator = ">="; break;
+		case GREATER: operator = ">"; break;	
+		case EQ: operator = "=="; break;
+		case NEQ: operator = "!="; break;
+		
+		}
+		
+		String sumPart = "";
+		
+		if(this.positiveArguments.length > 0)
+			sumPart = ""+this.positiveArguments[0];
+		
+		for(int i=1; i<this.positiveArguments.length; i++)
+			sumPart = sumPart.concat(" + "+positiveArguments[i]);
+		
+		for(int i=0; i<this.negativeArguments.length; i++)
+			sumPart = sumPart.concat(" - "+negativeArguments[i]);
+		
+		String resultPart = this.result.toString();
+		
+		return sumPart+" "+operator+" "+resultPart;
+				
+		//return (resultIsOnLeftSide) ? 
+				//operator+"("+resultPart+","+sumPart+")" :
+				//return operator+"("+sumPart+","+resultPart+")";
+	}
+
 }

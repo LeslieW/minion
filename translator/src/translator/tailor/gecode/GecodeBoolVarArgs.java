@@ -44,7 +44,7 @@ public class GecodeBoolVarArgs implements ArgsVariable, BooleanVariable {
 			this.variables[index];
 	}
 	
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		return "BoolVarArgs "+name;
 	}
 }

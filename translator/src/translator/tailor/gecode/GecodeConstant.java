@@ -13,7 +13,7 @@ public class GecodeConstant implements GecodeAtom {
 		return this.value+"";
 	}
 	
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		return this.value+"";
 	}
 }

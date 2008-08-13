@@ -22,7 +22,7 @@ public class GecodeArrayBoolVar implements BooleanVariable {
 	}
 
 	public char getType() {
-		return GecodeVariable.BOOL_ARRAY_VAR;
+		return GecodeVariable.BOOL_CONST_ARRAY_VAR;
 	}
 
 	public String getVariableName() {
@@ -41,7 +41,7 @@ public class GecodeArrayBoolVar implements BooleanVariable {
 		return s.toString();
 	}
 	
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		StringBuffer s = new StringBuffer(this.name+"[");
 		
 		for(int i=0; i<this.indices.length-1; i++)

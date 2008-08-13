@@ -17,6 +17,7 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
 		this.ub = ub;
 	}
 	
+	
 	//========== INHERITED METHODS ==================
 	
 	public int[] getBounds() {
@@ -52,7 +53,7 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
 			this.variables[index];
 	}
 	
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		return "IntVarArgs "+name;
 	}
 }

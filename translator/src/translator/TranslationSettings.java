@@ -21,12 +21,19 @@ public class TranslationSettings {
 	public final String OUTPUTFILE_HEADER_BUGS = "bug-reports: andrea@cs.st-and.ac.uk";
 	public final String DEFAULT_MODEL_NAME = "ProblemModel";
 	public final int DISCRETE_UPPER_BOUND = 200;
+	
+	// solving issues
 	public final int FIND_ALL_SOLUTIONS = 0;
 	public final int DEFAULT_NO_OF_SOLUTIONS = 1;
 	
-	int discreteUpperBound;
 	
+	
+	int discreteUpperBound;
 	TargetSolver targetSolver;
+	String variableBranching = TargetSolver.DEFAULT_VAR_BRANCHING;
+	String valueBranching = TargetSolver.DEFAULT_VAL_BRANCHING;
+	
+	// translation issues
 	boolean useCommonSubExpressions;
 	boolean useEqualSubExpressions;
 	boolean applyStrictCopyPropagation;
@@ -49,7 +56,7 @@ public class TranslationSettings {
 	
 	String settingsFileName;
 	String essenceP_outputFileName;
-	String solverOutputFileName;
+	String solverInputFileName;
 	String modelName;
 	
 
@@ -86,6 +93,7 @@ public class TranslationSettings {
 		this.discreteUpperBound = this.DISCRETE_UPPER_BOUND;
 		this.allowParseErrorRecovery = false;
 		this.noOfSolutions = this.DEFAULT_NO_OF_SOLUTIONS;
+		this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
 		
 		
 	}
@@ -282,12 +290,12 @@ public class TranslationSettings {
 		this.discreteUpperBound = newUb;
 	}
 	
-	public void setSolverOutputFileName(String filename) {
-		this.solverOutputFileName = filename;
+	public void setSolverInputFileName(String filename) {
+		this.solverInputFileName = filename;
 	}
 	
-	public String getSolverOutputFileName() {
-		return this.solverOutputFileName;
+	public String getSolverInputFileName() {
+		return this.solverInputFileName;
 	}
 	
 	public void setAllowParseErrorRecovery(boolean turnOn) {
@@ -309,4 +317,24 @@ public class TranslationSettings {
 	public int getFindAllSolutionsAlias() {
 		return this.FIND_ALL_SOLUTIONS;
 	}
+	
+	public String getVarBranching() {
+		return this.variableBranching;
+	}
+	
+	public String getValBranching() {
+		return this.valueBranching;
+	}
+	
+	public void setVarBranching(String varBranching) {
+		if(this.targetSolver.supportsVarBranchingStrategy(varBranching))
+			this.variableBranching = varBranching;
+	}
+	
+	public void setValBranching(String valBranching) {
+		if(this.targetSolver.supportsValBranchingStrategy(valBranching))
+			this.valueBranching = valBranching;
+	}
+	
+	
 }

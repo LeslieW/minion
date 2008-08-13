@@ -7,5 +7,5 @@ public interface GecodeAtom  {
 	
 	public String toString();
 	
-	public String toCCString();
+	public String toDeclarationCCString();
 }

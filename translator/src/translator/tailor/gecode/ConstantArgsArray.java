@@ -28,7 +28,7 @@ public class ConstantArgsArray implements ArgsAtom {
 		else return this.name;
 	}
 	
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		return "IntArgs "+name;
 	}
 }

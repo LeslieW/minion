@@ -35,7 +35,7 @@ public class GecodeBoolVar implements BooleanVariable, GecodeAtomVariable {
 		return this.name;
 	}
 
-	public String toCCString() {
+	public String toDeclarationCCString() {
 		return "BoolVar "+name;
 	}
 }

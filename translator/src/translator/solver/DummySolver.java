@@ -20,11 +20,11 @@ public class DummySolver extends GeneralTargetSolver {
 	public DummySolver() {
 		// general stuff
 		this.solverName = "Dummy Solver 1.0";
-		this.branchingStrategies = new String[] {DEFAULT_BRANCHING, BRANCH_SMALLEST_DOMAIN, BRANCH_LARGEST_DOMAIN, RANDOM_DOMAIN};
+		this.varBranchingStrategies = new String[] {DEFAULT_VAR_BRANCHING, BRANCH_SMALLEST_DOMAIN, BRANCH_LARGEST_DOMAIN, BRANCH_RANDOM_DOMAIN};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH, DEPTH_FIRST, BREADTH_FIRST};
 		
 		this.searchStrategy = DEPTH_FIRST;
-		this.branchingStrategy = BRANCH_SMALLEST_DOMAIN;
+		this.varBranchingStrategy = BRANCH_SMALLEST_DOMAIN;
 	
 		
 		this.featureMap = new HashMap<Integer, Boolean>();

@@ -5,6 +5,16 @@ import java.util.HashMap;
 public class Gecode extends GeneralTargetSolver {
 
 	
+	// translation issues
+	public final String SINGLE_INT_VAR_ARRAY_NAME = "_int_var_buffer";
+	public final String SINGLE_BOOL_VAR_ARRAY_NAME = "_bool_var_buffer";
+	
+	// solving issues
+	public final String GECODE_DEFAULT_VAR_BRANCHING = BRANCH_SMALLEST_DOMAIN;
+	public final String GECODE_DEFAULT_VAL_BRANCHING = BRANCH_SMALLEST_VALUE;
+	
+	
+	
 	public Gecode() {
 		
 		this.solverName = "Gecode";
@@ -20,7 +30,7 @@ public class Gecode extends GeneralTargetSolver {
   		  Gecode::INT_VAR_REGRET_MAX_MIN, Gecode::INT_VAR_REGRET_MAX_MAX 
 		 */
 		
-		this.branchingStrategies = new String[] {DEFAULT_BRANCHING,
+		this.varBranchingStrategies = new String[] {DEFAULT_VAR_BRANCHING,
 												TargetSolver.BRANCH_SMALLEST_DOMAIN,  // INT_VAR_SIZE_MIN
 												TargetSolver.BRANCH_LARGEST_DOMAIN, // INT_VAR_SIZE_MAX
 												TargetSolver.BRANCH_LARGEST_MAXIMUM, // INT_VAR_MAX_MAX
@@ -29,11 +39,17 @@ public class Gecode extends GeneralTargetSolver {
 												TargetSolver.BRANCH_SMALLEST_MINIMUM // INT_VAR_MIN_MIN
 												
 												};
+		
+		this.valBranchingStrategies = new String[] {DEFAULT_VAL_BRANCHING,
+													TargetSolver.BRANCH_SMALLEST_VALUE,  // INT_VAL_MIN
+													TargetSolver.BRANCH_LARGEST_VALUE};  // INT_VAL_MAX
+		
 		this.searchStrategies = new String[] {DEFAULT_SEARCH};
 		
 		// default settings for translation
 		this.searchStrategy = DEPTH_FIRST;
-		this.branchingStrategy = BRANCH_SMALLEST_DOMAIN;
+		this.varBranchingStrategy = this.GECODE_DEFAULT_VAR_BRANCHING;
+		this.valBranchingStrategy = this.GECODE_DEFAULT_VAL_BRANCHING;
 		
 		// initialise features of Gecode
 		this.featureMap = new HashMap<Integer, Boolean>();
@@ -162,5 +178,55 @@ public class Gecode extends GeneralTargetSolver {
 		featureMap.put(new Integer(VARIABLE_ALIASES), new Boolean(true));
 	}
 	
+	
+	/**
+	 * Returns the Gecode alias for the given variable branching strategy
+	 * 
+	 * @param branching
+	 * @return 
+	 * @throws Exception if the variable branching strategy is unknown
+	 */
+	public String toGecodeVariableBranching(String branching) {
+		
+		if(branching.equals(TargetSolver.BRANCH_LARGEST_DOMAIN))
+			return "INT_VAR_SIZE_MAX";
+		
+		else if(branching.equals(TargetSolver.BRANCH_SMALLEST_DOMAIN))
+			return "INT_VAR_SIZE_MIN";
+		
+		else if(branching.equals(TargetSolver.BRANCH_LARGEST_MAXIMUM)) 
+			return "INT_VAR_MAX_MAX";
+		
+		else if(branching.equals(TargetSolver.BRANCH_LARGEST_MINIMUM)) 
+			return "INT_VAR_MIN_MAX";
+		
+		else if(branching.equals(TargetSolver.BRANCH_SMALLEST_MINIMUM)) 
+			return "INT_VAR_MIN_MIN";
+		
+		else if(branching.equals(TargetSolver.BRANCH_SMALLEST_MAXIMUM)) 
+			return "INT_VAR_MAX_MIN";
+		
+		else return toGecodeVariableBranching(GECODE_DEFAULT_VAR_BRANCHING);
+	}
+	
+	
+	/**
+	 * Converts the internal value branching representation to the 
+	 * Gecode alias (global) of the value branching strategy.  
+	 * 
+	 * @param branching
+	 * @return
+	 * @throws Exception if the value branching is unkown 
+	 */
+	public String toGecodeValueBranching(String branching) {
+		
+		if(branching.equals(TargetSolver.BRANCH_LARGEST_VALUE))
+			return "INT_VAL_MAX";
+		
+		else if(branching.equals(TargetSolver.BRANCH_SMALLEST_VALUE))
+			return "INT_VAL_MIN";
+		
+		else return toGecodeValueBranching(GECODE_DEFAULT_VAL_BRANCHING);
+	}
 	
 }

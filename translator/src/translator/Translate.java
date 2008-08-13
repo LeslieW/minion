@@ -8,7 +8,7 @@ import translator.gui.TailorGUI;
 import translator.xcsp2ep.Xcsp2Ep;
 
 /**
- * This is the started class. It can either evoke the GUI version or
+ * This is the main class. It can either evoke the GUI version or
  * the command-line version of the Essence' translator. The GUI version 
  * is default. Starting the translator with the "help" argument gives 
  * some information about the usage. 
@@ -57,7 +57,6 @@ public class Translate {
 		
 		
 		if(args.length == 0) {
-			//printHelpMessage();
 			runNewGUI();	
 		}
 		
@@ -106,7 +105,7 @@ public class Translate {
 						System.out.println("Sorry, could not read output filename for translation.");
 						System.exit(1);
 					}
-					settings.setSolverOutputFileName(args[i+1]);
+					settings.setSolverInputFileName(args[i+1]);
 					i++;
 				}
 				
@@ -188,10 +187,10 @@ public class Translate {
 						}
 							
 						String outFileName;
-						if(settings.getSolverOutputFileName() == null) {
+						if(settings.getSolverInputFileName() == null) {
 							outFileName = args[i+1]+"."+settings.targetSolver.getSolverInputExtension();
 						}
-						else outFileName = settings.getSolverOutputFileName();
+						else outFileName = settings.getSolverInputFileName();
 						
 						translateXCSP(args[i+1], outFileName, settings);
 						System.exit(0);
@@ -261,7 +260,12 @@ public class Translate {
 	}
 	
 	
-	
+	/**
+	 * Translates a problem file only (without parameter instantiations)
+	 * 
+	 * @param filename
+	 * @param settings
+	 */
 	private static void translate(String filename, TranslationSettings settings) {
 		
 		try {
@@ -292,19 +296,22 @@ public class Translate {
 			
 			
 			double translationTime = (stopTime - startTime) / 1000.0;
-			if(settings.getPrintTranslationTimeIntoFile())
-				solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
+			if(settings.getPrintTranslationTimeIntoFile()) {
+				if(settings.targetSolver instanceof Minion)
+					solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
+				else solverInstance = "/* Translation Time: "+translationTime+"*/\n"+solverInstance;
+			}
 			
 			String outFileName;
-			if(settings.getSolverOutputFileName() == null) {
+			if(settings.getSolverInputFileName() == null) {
 				outFileName = filename+"."+settings.targetSolver.getSolverInputExtension();
 			}
-			else outFileName = settings.getSolverOutputFileName();
+			else outFileName = settings.getSolverInputFileName();
 			
-			File outputFile = writeStringIntoFile(outFileName,
+			File solverInputFile = writeStringIntoFile(outFileName,
 					                              solverInstance);
 			writeInfo("Translated '"+filename+"' to "+settings.targetSolver.getSolverName()
-					+" and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
+					+" and written solver input\n into '"+solverInputFile.getAbsolutePath()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
 	    	
 		} catch(Exception e) {
@@ -312,7 +319,6 @@ public class Translate {
 			if(settings.debugMode)
 				e.printStackTrace(System.out);
 			else System.out.println(e.getMessage());
-			//System.out.println("GGGGGGGGGGGGGGGGGGGGGR");
 			System.out.println("Cannot translate to "+settings.targetSolver.getSolverName()+" from problemfile:"+filename);
 			System.exit(1);
 		}
@@ -323,7 +329,13 @@ public class Translate {
 	
 	
 	
-	
+	/**
+	 * Translates a poblem file together with a parameter file
+	 * 
+	 * @param problemFileName
+	 * @param parameterFileName
+	 * @param settings
+	 */
 	private static void translate(String problemFileName, String parameterFileName, TranslationSettings settings) {
 		try {
 			if(settings.giveTranslationInfo)
@@ -356,18 +368,21 @@ public class Translate {
 			double translationTime = (stopTime - startTime) / 1000.0;
 			
 			if(settings.getPrintTranslationTimeIntoFile())
-				solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
+				if(settings.targetSolver instanceof Minion)
+					solverInstance = "# Translation Time: "+translationTime+"\n"+solverInstance;
+				else // it's Gecode 
+					solverInstance = "/* Translation Time: "+translationTime+"*/\n"+solverInstance;
 			
 			String outFileName;
-			if(settings.getSolverOutputFileName() == null) {
+			if(settings.getSolverInputFileName() == null) {
 				outFileName = parameterFileName+"."+settings.targetSolver.getSolverInputExtension();
 			}
-			else outFileName = settings.getSolverOutputFileName();
-			File outputFile = writeStringIntoFile(outFileName,
+			else outFileName = settings.getSolverInputFileName();
+			File solverInputFile = writeStringIntoFile(outFileName,
 												  solverInstance);
 			writeInfo("Translated '"+problemFileName+"' and '"+parameterFileName+
 					"' to "+settings.targetSolver.getSolverName()+
-					" and written output\n into '"+outputFile.getName()+"'.\n");
+					" and written solver-input\n into '"+solverInputFile.getName()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
 			
 		} catch(Exception e) {
@@ -384,7 +399,13 @@ public class Translate {
 	}
 
 
-	
+	/**
+	 * Translates an XCSP instance
+	 * 
+	 * @param inputFileName
+	 * @param outputFileName
+	 * @param settings
+	 */
 	private static void translateXCSP(String inputFileName, String outputFileName, TranslationSettings settings) {
 		
 		try {
@@ -413,10 +434,10 @@ public class Translate {
 			if(settings.getPrintTranslationTimeIntoFile())
 				minionString = "# Translation Time: "+translationTime+"\n"+minionString;
 			
-			File outputFile = writeStringIntoFile(outputFileName, minionString);
+			File solverInputFile = writeStringIntoFile(outputFileName, minionString);
 			writeInfo("Translated '"+inputFileName+
 					"' to "+settings.targetSolver.getSolverName()
-					+" and written output\n into '"+outputFile.getAbsolutePath()+"'.\n");
+					+" and written solver input\n into '"+solverInputFile.getAbsolutePath()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
 			
 		} catch(Exception e) {
@@ -461,8 +482,8 @@ public class Translate {
 		System.out.println("-"+HELP+" or -h\n\tprints this help message");
 		System.out.println("-"+MINION_TRANSLATION+" or -m");
 		System.out.println("\tTranslates input files to solver Minion (default).");
-		//System.out.println("-"+GECODE_TRANSLATION+" or -g");
-		//System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
+		System.out.println("-"+GECODE_TRANSLATION+" or -g");
+		System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
 		
 		System.out.println("\nTranslation flags:");
 		System.out.println("-"+NO_COMMON_SUBEXPRS);

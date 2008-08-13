@@ -35,6 +35,7 @@ import translator.TranslationSettings;
 import translator.Translator;
 import translator.normaliser.NormaliserSpecification;
 import translator.solver.Minion;
+import translator.solver.Gecode;
 import translator.solver.TargetSolver;
 import javax.swing.*;
 /**
@@ -64,16 +65,16 @@ public class TailorGUI extends javax.swing.JFrame {
 	final String NORMALISE = "full";
 	final String FLATTEN = "flatten";
 	final String MINION = "to_minion";
+	final String GECODE = "to gecode";
 	final String DEBUG = "debug";
 	
 //	 output tab indices
 	public final int NORMALISE_TAB_NR = 0;
 	public final int FLAT_TAB_NR = 1;
-	public final int MINION_TAB_NR = 2;
+	public final int SOLVER_INPUT_TAB_NR = 2;
 	public final int SOLUTION_TAB_NR = 3;
 	
 	final String ESSENCE_PRIME_HEADER ="language ESSENCE' 1.b.a";
-	final String OUTPUT_FILENAME = "out.minion";
 	final String SYSTEM_START_MSG = "Welcome to "+this.TAILOR_VERSION+"\nbug reports: andrea@cs.st-and.ac.uk\n";
 	final String TAILOR_VERSION = "TAILOR v0.2";
 	
@@ -81,13 +82,15 @@ public class TailorGUI extends javax.swing.JFrame {
 	final char CLASSIC_SKIN = 'c';
 	final char GIRLIE_SKIN = 'g';
 	final char ARMY_SKIN = 'a';
-	final char SUNRISE_SKIN = 's';
+	final char WATERFALL_SKIN = 's';
 	final char NIGHTOWL_SKIN = 'n';
 	final char COLORBLIND_SKIN = 'b';
+	final char PIRATE_SKIN = 'p';
 	
 	TranslationSettings settings;
 	Translator translator;
 	char skinType;
+	TargetSolver solver;
 	
 	// translation
 	JButton parseButton;
@@ -95,6 +98,7 @@ public class TailorGUI extends javax.swing.JFrame {
 	JButton normaliseButton;
 	JButton flattenButton;
 	JButton minionButton;
+	JButton gecodeButton;
 	
 	JPanel normalisePanel;
 	JPanel debugPanel;
@@ -119,6 +123,7 @@ public class TailorGUI extends javax.swing.JFrame {
     	this.skinType = this.CLASSIC_SKIN;
         setColors();
         initComponents();
+        solver = settings.getTargetSolver();
     }
     
     public TailorGUI(TranslationSettings settings) {
@@ -127,7 +132,7 @@ public class TailorGUI extends javax.swing.JFrame {
     	this.skinType = this.CLASSIC_SKIN;
     	setColors();
         initComponents();
-        
+        solver = settings.getTargetSolver();
     }
     
     private String getSkinName(char skinType) {
@@ -141,6 +146,16 @@ public class TailorGUI extends javax.swing.JFrame {
     	else if(skinType == this.COLORBLIND_SKIN)
     		return "Colorblind Skin";
     	
+    	else if(skinType == this.WATERFALL_SKIN)
+    		return "Waterfall Skin";
+    	
+    	else if(skinType == this.PIRATE_SKIN)
+    		return "Cheeky Pirate Skin";
+    	
+    	// TODO:
+    	// sunrise skin
+    	// pirate skin
+    	
     	return "Classic Skin";
     }
     
@@ -148,8 +163,19 @@ public class TailorGUI extends javax.swing.JFrame {
     	
     	// Color lightGreenish = new java.awt.Color(211,245,177);
 		Color lightBlueish = new java.awt.Color(220,220,245);
-    	
-		
+    	Color darkRed = new java.awt.Color(142,5,5);
+    	Color reallyDarkRed = new java.awt.Color(82,10,5);
+		Color cheekyOrange = new java.awt.Color(252,105,20);
+		Color chalkYellow = new java.awt.Color(250,233,193);
+		Color sunShineYellow = new java.awt.Color(241,224,9);
+		//Color cheekyBarbiePink = new java.awt.Color(241,9,142);
+		Color barbiePink = new java.awt.Color(215,24,141);
+		Color babyBarbiePink = new java.awt.Color(254,222,241);
+		Color stepmotherPurple = new java.awt.Color(73,1,45);
+		Color thickPurple = new java.awt.Color(147,23,99);
+		Color darkWateryBlue = new java.awt.Color(54,129,185);
+		Color wateryBlue = new java.awt.Color(74,149,205);
+		Color caveWaterBlue = new java.awt.Color(3,60,99);
 		
     	if(this.skinType == this.CLASSIC_SKIN) {
     		
@@ -161,6 +187,7 @@ public class TailorGUI extends javax.swing.JFrame {
     		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.buttonColor = UIManager.getColor(new JButton());
+    		
     	}
     	
     	else if(this.skinType == this.NIGHTOWL_SKIN) {
@@ -179,12 +206,12 @@ public class TailorGUI extends javax.swing.JFrame {
     	}
     	
     	else if(this.skinType == this.GIRLIE_SKIN) {
-    		this.bgColor = java.awt.Color.pink;
-    		this.inputBgColor = java.awt.Color.pink;
-    		this.outputBgColor = java.awt.Color.pink;
-    		this.textAreaColor = new java.awt.Color(240,220,220);
-    		this.textAreaFontColor = java.awt.Color.black;
-    		this.buttonColor = new java.awt.Color(220,120,120);
+    		this.bgColor = barbiePink;
+    		this.inputBgColor = barbiePink;
+    		this.outputBgColor = barbiePink;
+    		this.textAreaColor = babyBarbiePink;
+    		this.textAreaFontColor = stepmotherPurple;
+    		this.buttonColor = thickPurple;
     		this.inputFont = new java.awt.Font("Dialog", 0, 12);
     		this.outputFont = new java.awt.Font("Dialog", 0, 12);
     
@@ -199,6 +226,17 @@ public class TailorGUI extends javax.swing.JFrame {
     		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.buttonColor = java.awt.Color.LIGHT_GRAY;
+    	}
+    	
+    	else if(this.skinType == this.WATERFALL_SKIN) {
+    		this.bgColor = wateryBlue;
+    		this.inputBgColor = wateryBlue;
+    		this.outputBgColor = wateryBlue;
+    		this.textAreaColor = lightBlueish;
+    		this.textAreaFontColor = caveWaterBlue;
+    		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
+    		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
+    		this.buttonColor = java.awt.Color.white;
     	}
     }
     
@@ -236,6 +274,7 @@ public class TailorGUI extends javax.swing.JFrame {
         outputPanel = new javax.swing.JPanel();
         outputSplitPane = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
+        this.solverButtonPanel = new JPanel();
         outputScrollPane = new javax.swing.JScrollPane();
         //outputTextPane = new javax.swing.JTextPane();
         outputButtonPanel = new javax.swing.JPanel();
@@ -263,7 +302,8 @@ public class TailorGUI extends javax.swing.JFrame {
         getContentPane().setLayout(new java.awt.GridBagLayout());
         getContentPane().setBackground(this.bgColor);
 
-        inputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Modelling"));
+        //inputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Modelling"));
+        //inputPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         inputPanel.setMinimumSize(new java.awt.Dimension(200, 400));
         inputPanel.setName("modellingPanel"); // NOI18N
         inputPanel.setPreferredSize(new java.awt.Dimension(480, 670));
@@ -321,7 +361,7 @@ public class TailorGUI extends javax.swing.JFrame {
         gridBagConstraints.weighty = 0.1;
         problemInputPanel.add(problemInputScrollPane, gridBagConstraints);
 
-        problemButtonPanel.setPreferredSize(new java.awt.Dimension(390, 130));
+        //problemButtonPanel.setPreferredSize(new java.awt.Dimension(390, 130));
         problemButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
 
         saveProblemButton.setText("save");
@@ -490,8 +530,13 @@ public class TailorGUI extends javax.swing.JFrame {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.weighty = 0.1;
         getContentPane().add(middlePanel, gridBagConstraints);
+        
+        
+        this.solverButtonPanel.setLayout(new java.awt.GridLayout(0, 1, 80, 0));
+        
+        Dimension solverButtonDimension = new Dimension(150,40);
         this.minionButton = new JButton("> to Minion >");
-		minionButton.setPreferredSize(new Dimension(150,40));
+		minionButton.setPreferredSize(solverButtonDimension);
 		minionButton.setActionCommand(MINION);
 		//minionButton.setBackground(this.buttonColor);
 		minionButton.setBackground(new JButton().getBackground());
@@ -500,13 +545,27 @@ public class TailorGUI extends javax.swing.JFrame {
 		           translate(e.getActionCommand());   
 			  }
 			});
-		middlePanel.add(minionButton);
+		solverButtonPanel.add(minionButton);
+		
+		this.gecodeButton = new JButton("> to Gecode >");
+		this.gecodeButton.setPreferredSize(solverButtonDimension);
+		gecodeButton.setActionCommand(GECODE);
+		gecodeButton.setBackground(new JButton().getBackground());
+		gecodeButton.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           translate(e.getActionCommand());   
+			  }
+			});
+		solverButtonPanel.add(gecodeButton);
+		
+		middlePanel.add(solverButtonPanel);
 		middlePanel.setBackground(this.bgColor);
 		//middlePanel.setOpaque(false);
 		//minionButton.setEnabled(false);
         
         
-        outputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Solving")));
+        //outputPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        //outputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder("Solving")));
         outputPanel.setMinimumSize(new java.awt.Dimension(200, 400));
         outputPanel.setPreferredSize(new java.awt.Dimension(420, 600));
         outputPanel.setLayout(new java.awt.GridBagLayout());
@@ -559,6 +618,7 @@ public class TailorGUI extends javax.swing.JFrame {
 		           runMinion();   
 			  }
 			});
+        runMinionButton.setEnabled(false);
         outputButtonPanel.add(runMinionButton);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -660,7 +720,8 @@ public class TailorGUI extends javax.swing.JFrame {
         translationSettings.add(cseDetection);
         translationSettings.add(ecseDetection);
         translationSettings.add(directVarReusage);
-        settingsMenu.add(translationSettings);
+        //settingsMenu.add(translationSettings);
+        menuBar.add(translationSettings);
         
         
         // solving settings
@@ -676,7 +737,8 @@ public class TailorGUI extends javax.swing.JFrame {
 			  }
 			});
         solvingSettings.add(allSolutions);
-        settingsMenu.add(solvingSettings);
+        //settingsMenu.add(solvingSettings);
+        menuBar.add(solvingSettings);
         
         
         //      skin selection (just for fun)
@@ -686,14 +748,17 @@ public class TailorGUI extends javax.swing.JFrame {
         JMenuItem girlieSkinSelection = new JRadioButtonMenuItem(getSkinName(this.GIRLIE_SKIN));
         JMenuItem nightOwlSkinSelection = new JRadioButtonMenuItem(getSkinName(this.NIGHTOWL_SKIN));
         JMenuItem colorBlindSkinSelection = new JRadioButtonMenuItem(getSkinName(this.COLORBLIND_SKIN));
+        JMenuItem sunriseSkinSelection = new JRadioButtonMenuItem(getSkinName(this.WATERFALL_SKIN));
         skinButtonGroup.add(classicSkinSelection);
         skinButtonGroup.add(nightOwlSkinSelection);
         skinButtonGroup.add(colorBlindSkinSelection);
         skinButtonGroup.add(girlieSkinSelection);
+        skinButtonGroup.add(sunriseSkinSelection);
         classicSkinSelection.setSelected(this.skinType == this.CLASSIC_SKIN);
         girlieSkinSelection.setSelected(this.skinType == this.GIRLIE_SKIN);
         nightOwlSkinSelection.setSelected(this.skinType == this.NIGHTOWL_SKIN);
         colorBlindSkinSelection.setSelected(this.skinType == this.COLORBLIND_SKIN);
+        colorBlindSkinSelection.setSelected(this.skinType == this.WATERFALL_SKIN);
         classicSkinSelection.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           changeSkin(CLASSIC_SKIN);   
@@ -714,10 +779,16 @@ public class TailorGUI extends javax.swing.JFrame {
 		           changeSkin(COLORBLIND_SKIN);   
 			  }
 			});
+        sunriseSkinSelection.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           changeSkin(WATERFALL_SKIN);   
+			  }
+			});
         skinSubMenu.add(classicSkinSelection);
         skinSubMenu.add(girlieSkinSelection);
         skinSubMenu.add(nightOwlSkinSelection);
         skinSubMenu.add(colorBlindSkinSelection);
+        skinSubMenu.add(sunriseSkinSelection);
         settingsMenu.add(skinSubMenu);
         //settingsMenu.addSeparator();
         
@@ -790,14 +861,14 @@ public class TailorGUI extends javax.swing.JFrame {
 		// don't change the order!!
 		outputTabbedPanel.add("Normalised E'", normaliseScrollPane);
 		outputTabbedPanel.add("Flat E'", flatScrollPane);
-		outputTabbedPanel.add("Minion Input", minionOutputScrollPane);
+		outputTabbedPanel.add("Solver Input", minionOutputScrollPane);
 		outputTabbedPanel.add("Essence' solution", solutionScrollPane);
 		outputTabbedPanel.setPreferredSize(new Dimension(width, outputHeight));
 		
 		outputTabbedPanel.setEnabledAt(this.NORMALISE_TAB_NR, false);
 		outputTabbedPanel.setEnabledAt(this.FLAT_TAB_NR, false);
 		outputTabbedPanel.setEnabledAt(this.SOLUTION_TAB_NR, false);
-		outputTabbedPanel.setSelectedIndex(this.MINION_TAB_NR);
+		outputTabbedPanel.setSelectedIndex(this.SOLVER_INPUT_TAB_NR);
     }
     
     private void changeSkin(char skinType) {
@@ -813,7 +884,21 @@ public class TailorGUI extends javax.swing.JFrame {
     	this.setBackground(this.bgColor);
     	 getContentPane().setBackground(this.bgColor);
     	this.inputPanel.setBackground(this.inputBgColor);
+    	this.inputSplitPane.setBackground(this.inputBgColor);
+    	this.problemButtonPanel.setBackground(this.inputBgColor);
+    	this.parameterButtonPanel.setBackground(this.inputBgColor);
+    	this.problemInputPanel.setBackground(this.inputBgColor);
+    	this.parameterInputPanel.setBackground(this.inputBgColor);
+    	this.problemInputScrollPane.setBackground(this.inputBgColor);
+    	this.parameterInputScrollPane.setBackground(this.inputBgColor);
+    	
     	this.outputPanel.setBackground(this.outputBgColor);
+    	this.outputSplitPane.setBackground(this.outputBgColor);
+    	this.outputButtonPanel.setBackground(this.outputBgColor);
+    	this.outputScrollPane.setBackground(this.outputBgColor);
+    	this.outputSplitPane.setBackground(this.outputBgColor);
+    	this.outputTabbedPanel.setBackground(this.outputBgColor);
+    	this.messagesPanel.setBackground(this.outputBgColor);
     	this.middlePanel.setBackground(this.bgColor);
     	
     	// text areas
@@ -937,7 +1022,7 @@ public class TailorGUI extends javax.swing.JFrame {
 	 */
 	protected void save(String command) {
 	
-		int returnVal = this.fileChooser.showSaveDialog(this);
+		//int returnVal = this.fileChooser.showSaveDialog(this);
 		
 		String type = "";
 		if(command.endsWith(SAVE_PROBLEM))
@@ -946,11 +1031,12 @@ public class TailorGUI extends javax.swing.JFrame {
 			type = "parameter";
 			//FileFilter filter = new FileNameExtensionFilter("param");
 		}
-		else if(command.equalsIgnoreCase(SAVE_OUTPUT))
-			type ="output";
+		else if(command.equalsIgnoreCase(SAVE_OUTPUT)) {
+			type =this.solver.getSolverName()+" input";
+		}
 		
 		fileChooser.setDialogTitle("Save "+type+" file");
-		
+		int returnVal = this.fileChooser.showSaveDialog(this);
 		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
@@ -976,7 +1062,7 @@ public class TailorGUI extends javax.swing.JFrame {
 							String text = "";
 							int selection = this.outputTabbedPanel.getSelectedIndex();
 							
-							if(selection == this.MINION_TAB_NR)
+							if(selection == this.SOLVER_INPUT_TAB_NR)
 								text = this.minionOutput.getText();
 							else if(selection == this.FLAT_TAB_NR)
 								text = this.flatOutput.getText();
@@ -988,7 +1074,7 @@ public class TailorGUI extends javax.swing.JFrame {
 							
 							
 							writer.write(text);
-							writeOnMessageOutput("Saving output in:\n " + file.getName() + "." +"\n");
+							writeOnMessageOutput("Saving "+solver.getSolverName()+" input in:\n " + file.getName() + "." +"\n");
 						
 					}
 					writer.flush();
@@ -1049,25 +1135,53 @@ protected void translate(String command) {
 		else if(command == MINION) {
 			toMinion();
 		}
+		else if(command == GECODE) {
+			toGecode();
+		}
 	}
 	
 	
 	protected boolean toMinion() {
 		
-		TargetSolver solver = this.settings.getTargetSolver();
-		
-		if(!(solver instanceof Minion))
-			solver = new Minion();
-		
+		this.solver = new Minion();
+		this.settings.setTargetSolver(solver);
 		
 		if(!flatten()) return false;
 		//System.out.println("Flattened the stuff, now tailoring.");
 		boolean tailoring = this.translator.tailorTo(solver);
 		
 		if(tailoring) {	
-			writeOnOutput(this.MINION_TAB_NR, this.translator.getTargetSolverInstance());
+			writeOnOutput(this.SOLVER_INPUT_TAB_NR, this.translator.getTargetSolverInstance());
 			writeOnMessageOutput("Tailored model to target solver "+solver.getSolverName()+ "\n");
-			setCaretPositionOnOutput(this.MINION_TAB_NR, 1);
+			setCaretPositionOnOutput(this.SOLVER_INPUT_TAB_NR, 1);
+			this.runMinionButton.setEnabled(true);
+		}
+		else {
+			writeOnMessageOutput("===================== ERROR ======================\n"+
+					"Tailoring to target solver "+solver.getSolverName()+" failed.\n"+
+					this.translator.getErrorMessage()+"\n"+
+					"===============================================\n");
+			return false;
+		}
+		return true;
+	}
+	
+	
+	protected boolean toGecode() {
+		
+		this.solver = new Gecode();
+		this.settings.setTargetSolver(solver);
+			
+		
+		if(!flatten()) return false;
+		//System.out.println("Flattened the stuff, now tailoring.");
+		boolean tailoring = this.translator.tailorTo(solver);
+		
+		if(tailoring) {	
+			writeOnOutput(this.SOLVER_INPUT_TAB_NR, this.translator.getTargetSolverInstance());
+			writeOnMessageOutput("Tailored model to target solver "+solver.getSolverName()+ "\n");
+			setCaretPositionOnOutput(this.SOLVER_INPUT_TAB_NR, 1);
+			this.runMinionButton.setEnabled(false);
 		}
 		else {
 			writeOnMessageOutput("===================== ERROR ======================\n"+
@@ -1081,10 +1195,9 @@ protected void translate(String command) {
 	
 	
 	protected boolean flatten() {
-		TargetSolver solver = new Minion();
 		
 		if(!normalise()) return false;
-		boolean flattening = this.translator.flatten(solver);
+		boolean flattening = this.translator.flatten(this.solver);
 		
 		if(flattening) {
 			//System.out.println("Flattening is fertig.");
@@ -1220,9 +1333,10 @@ protected void translate(String command) {
 	protected void runMinion() {
 		
 		try {
+			String outputFileName = this.settings.getSolverInputFileName();
 			//-------------- write the output into a file --------------- 
-			writeOnMessageOutput("Creating minion file: "+this.OUTPUT_FILENAME+"\n");
-			File file  = new File(this.OUTPUT_FILENAME);
+			writeOnMessageOutput("Creating minion file: "+outputFileName+"\n");
+			File file  = new File(outputFileName);
 		    if(file.createNewFile()) ;
 			FileWriter writer = new FileWriter(file);
         
@@ -1247,13 +1361,13 @@ protected void translate(String command) {
             				". This might take a while.");
             
             if(noOfSolutions == 1) {
-            	commandArguments = new String[] { minionExecPath, this.OUTPUT_FILENAME };
+            	commandArguments = new String[] { minionExecPath, outputFileName };
             }
             else if(noOfSolutions == this.settings.FIND_ALL_SOLUTIONS){
-            	commandArguments = new String[] {minionExecPath, "-findallsols", this.OUTPUT_FILENAME};
+            	commandArguments = new String[] {minionExecPath, "-findallsols", outputFileName};
             }
             else {
-            	commandArguments = new String[] {minionExecPath, "-sollimit "+noOfSolutions, this.OUTPUT_FILENAME};
+            	commandArguments = new String[] {minionExecPath, "-sollimit "+noOfSolutions, outputFileName};
             }
             
             Process process = Runtime.getRuntime().exec(commandArguments);
@@ -1316,10 +1430,12 @@ protected void translate(String command) {
 			this.outputTabbedPanel.setSelectedIndex(this.FLAT_TAB_NR);
 		}
 		
-		else if(tabNumber == this.MINION_TAB_NR) {
+		else if(tabNumber == this.SOLVER_INPUT_TAB_NR) {
 			this.minionOutput.setText(text);
-			this.outputTabbedPanel.setEnabledAt(this.MINION_TAB_NR, true);
-			this.outputTabbedPanel.setSelectedIndex(this.MINION_TAB_NR);
+			this.outputTabbedPanel.setTitleAt(this.SOLVER_INPUT_TAB_NR, 
+					this.settings.getTargetSolver().getSolverName()+" Input");
+			this.outputTabbedPanel.setEnabledAt(this.SOLVER_INPUT_TAB_NR, true);
+			this.outputTabbedPanel.setSelectedIndex(this.SOLVER_INPUT_TAB_NR);
 		}
 		
 		else if(tabNumber == this.SOLUTION_TAB_NR) {
@@ -1344,10 +1460,10 @@ protected void translate(String command) {
 			this.outputTabbedPanel.setSelectedIndex(this.FLAT_TAB_NR);
 		}
 		
-		else if(tabNumber == this.MINION_TAB_NR) {
+		else if(tabNumber == this.SOLVER_INPUT_TAB_NR) {
 			this.minionOutput.setCaretPosition(position);
-			this.outputTabbedPanel.setEnabledAt(this.MINION_TAB_NR, true);
-			this.outputTabbedPanel.setSelectedIndex(this.MINION_TAB_NR);
+			this.outputTabbedPanel.setEnabledAt(this.SOLVER_INPUT_TAB_NR, true);
+			this.outputTabbedPanel.setSelectedIndex(this.SOLVER_INPUT_TAB_NR);
 		}
 		
 		else if(tabNumber == this.SOLUTION_TAB_NR) {
@@ -1436,6 +1552,7 @@ protected void translate(String command) {
     private javax.swing.JButton saveOutputButton;
     private javax.swing.JButton saveParameterButton;
     private javax.swing.JButton saveProblemButton;
+    private javax.swing.JPanel solverButtonPanel;
     // End of variables declaration//GEN-END:variables
     //private InputPanel inputPanel;
     //private OutputPanel outputPanel;
@@ -1448,4 +1565,6 @@ protected void translate(String command) {
     private java.awt.Font inputFont;
     private java.awt.Font outputFont;
     private java.awt.Color buttonColor;
+    private java.awt.Color buttonFontColor;
+    private java.awt.Color buttonPressedColor;
 }

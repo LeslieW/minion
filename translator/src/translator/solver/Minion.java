@@ -20,11 +20,11 @@ public class Minion extends GeneralTargetSolver {
 		this.solverName = "Minion";
 		this.inputFileExtension = "minion";
 		this.version = "0.5.1";
-		this.branchingStrategies = new String[] {DEFAULT_BRANCHING};
+		this.varBranchingStrategies = new String[] {DEFAULT_VAR_BRANCHING};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH};
 		
 		this.searchStrategy = DEPTH_FIRST;
-		this.branchingStrategy = BRANCH_SMALLEST_DOMAIN;
+		this.varBranchingStrategy = BRANCH_SMALLEST_DOMAIN;
 	
 		this.useWatchedSum = true;
 		
