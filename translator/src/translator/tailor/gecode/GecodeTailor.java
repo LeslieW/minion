@@ -23,7 +23,11 @@ public class GecodeTailor {
 	
 	// conversion stuff
 	private ArrayList<GecodeConstraint> constraintBuffer;
-	private ArrayList<GecodeConstraint> additionalBoundsConstraints;
+	/** contains constraints that have to be added to preserve 
+	 *  the bounds of single variables that are put into a buffer/container */
+	private ArrayList<GecodeConstraint> additionalBoundsConstraintsBuffer;
+	
+	
 	/** contains all the buffer arrays that have been introduced 
 	 * to handle either multidimensional arrays or single variables */
 	private ArrayList<GecodeArrayVariable> bufferArrays;
@@ -32,7 +36,15 @@ public class GecodeTailor {
 	
 	// stuff for buffering single int/boolean variables
 	private ArrayList<GecodeIntVar> singleIntVariableList;
+	private ArrayList<GecodeIntVar> auxIntVariableList;
 	private ArrayList<GecodeBoolVar> singleBoolVariableList;
+	private ArrayList<GecodeBoolVar> auxBoolVariableList;
+	
+	/** works as container for all integer auxiliary variables*/
+	private GecodeIntVarArray auxIntVariableBuffer;
+	/** works as container for all boolean auxiliary variables*/
+	private GecodeBoolVarArray auxBoolVariableBuffer;
+	
 	/** contains all single integer variables */
 	private GecodeIntVarArray integerVariableBuffer;
 	/** contains all single boolean variables */
@@ -44,11 +56,13 @@ public class GecodeTailor {
 	
 	public GecodeTailor() {
 		constraintBuffer = new ArrayList<GecodeConstraint>();
-		additionalBoundsConstraints = new ArrayList<GecodeConstraint>();
+		this.additionalBoundsConstraintsBuffer = new ArrayList<GecodeConstraint>();
 		bufferArrays = new ArrayList<GecodeArrayVariable>();
 		variableList = new ArrayList<GecodeArrayVariable>();
 		singleIntVariableList = new ArrayList<GecodeIntVar>(); 
 		singleBoolVariableList = new ArrayList<GecodeBoolVar>(); 
+		auxIntVariableList = new ArrayList<GecodeIntVar>(); 
+		auxBoolVariableList = new ArrayList<GecodeBoolVar>(); 
 		settings = new TranslationSettings();
 		settings.setTargetSolver(new Gecode());
 		
@@ -57,13 +71,22 @@ public class GecodeTailor {
 															0,0,0);
 		this.booleanVariableBuffer = new GecodeBoolVarArray(  ((Gecode) settings.getTargetSolver()).SINGLE_BOOL_VAR_ARRAY_NAME, 0);
 															
-												
+		this.auxIntVariableBuffer = new GecodeIntVarArray(  ((Gecode) settings.getTargetSolver()).AUX_INT_VAR_ARRAY_NAME,
+				0,0,0);
+		this.auxBoolVariableBuffer = new GecodeBoolVarArray(  ((Gecode) settings.getTargetSolver()).AUX_BOOL_VAR_ARRAY_NAME, 0);
 															
 	}
 	
 	
 	//========== METHODS ==================
 	
+	/**
+	 * Basic method to tailor a normalised, flattened E' model
+	 * to Gecode, following the settings.
+	 * @param NormalisedModel model
+	 * @param TranslationSettings settings
+	 * @return the corresponding GecodeModel
+	 */
 	public GecodeModel tailorToGecode(NormalisedModel model,
 									  TranslationSettings settings) 
 		throws GecodeException {
@@ -71,8 +94,10 @@ public class GecodeTailor {
 		this.settings = settings;
 		this.essencePmodel = model;
 		
+		// decision variables
 		tailorDecisionVariables();
 		
+		// constraints
 		ArrayList<Expression> eConstraints = model.getConstraints();
 		for(int i=0; i<eConstraints.size(); i++)
 			constraintBuffer.add(tailorToGecode(eConstraints.get(i)));
@@ -84,12 +109,29 @@ public class GecodeTailor {
 			this.bufferArrays.add(this.integerVariableBuffer);
 		// TODO: add multidimensional arrays
 		
+		
+		// collect auxiliary variables
+		tailorAuxiliaryVariables();
+		ArrayList<GecodeArrayVariable> auxBufferArrays = new ArrayList<GecodeArrayVariable>();
+		if(this.auxBoolVariableBuffer.getLength() > 0)
+			auxBufferArrays.add(this.auxBoolVariableBuffer);
+		if(this.auxIntVariableBuffer.getLength() > 0)
+			auxBufferArrays.add(this.auxIntVariableBuffer);
+		
+		
+		// merge constraints
+		for(int i=0; i<this.additionalBoundsConstraintsBuffer.size(); i++)
+			this.constraintBuffer.add(this.additionalBoundsConstraintsBuffer.get(i));
+		
 		GecodeModel gecodeModel = new GecodeModel(settings,
 							   variableList,
 							   bufferArrays,
 							   constraintBuffer, 
 							   this.singleIntVariableList,
-							   this.singleBoolVariableList);
+							   this.singleBoolVariableList, 
+							   auxBufferArrays, 
+							   this.auxIntVariableList, 
+							   this.auxBoolVariableList);
 		//System.out.println("==================================");
 		//System.out.println("CC print:\n"+gecodeModel.toString()+"\n\n");
 		//System.out.println("==================================");
@@ -134,6 +176,7 @@ public class GecodeTailor {
 		throws GecodeException {
 		
 		ArrayList<String> decisionVarNames = this.essencePmodel.getDecisionVariablesNames();
+		boolean firstIntVar = true;
 		
 		for(int i=0; i < decisionVarNames.size(); i++) {
 			GecodeVariable variable = tailorToGecode(decisionVarNames.get(i));
@@ -145,29 +188,35 @@ public class GecodeTailor {
 			}
 			
 			else if(variable instanceof GecodeIntVar) {
+				    // 1. add another variable to the buffer
 					this.integerVariableBuffer.increaseLength();
 					
-					// take care of lower bound
-					int lb = integerVariableBuffer.getLowerBound();
-					int lb_of_var = variable.getBounds()[0];
-					// add an additional constraint : var >= lb(var)
-					if(lb_of_var > lb)
-						this.additionalBoundsConstraints.add(new SimpleIntRelation((GecodeIntVar) variable, 
-																					GecodeConstraint.IRT_GQ, 
-																					new GecodeConstant(lb_of_var)));
-					this.integerVariableBuffer.addLowerBound(variable.getBounds()[1]);
+					// 2. take care of lower bound of buffer
+					if(firstIntVar) 
+						this.integerVariableBuffer.setLowerBound(variable.getBounds()[0]);
+					else { 
+						this.integerVariableBuffer.addLowerBound(variable.getBounds()[0]);
+						if(variable.getBounds()[0] > this.integerVariableBuffer.getLowerBound()) {
+							this.additionalBoundsConstraintsBuffer.add(new SimpleIntRelation((GecodeIntVar) variable ,
+																							 GecodeConstraint.IRT_GQ,
+																							 new GecodeConstant(variable.getBounds()[0])));	
+						}
+					}
 					
-					// take care of upper bound
-					int ub = integerVariableBuffer.getLowerBound();
-					int ub_of_var = variable.getBounds()[0];
-					// add an additional constraint : var >= lb(var)
-					if(ub_of_var < ub)
-						this.additionalBoundsConstraints.add(new SimpleIntRelation((GecodeIntVar) variable, 
-																					GecodeConstraint.IRT_LQ, 
-																					new GecodeConstant(ub_of_var)));
-					this.integerVariableBuffer.addUpperBound(variable.getBounds()[1]);
+					// take care of upper bound of buffer
+					if(firstIntVar) 
+						this.integerVariableBuffer.setUpperBound(variable.getBounds()[1]);
+					else {
+						this.integerVariableBuffer.addUpperBound(variable.getBounds()[1]);
+						if(variable.getBounds()[1] < this.integerVariableBuffer.getUpperBound()) {
+							this.additionalBoundsConstraintsBuffer.add(new SimpleIntRelation((GecodeIntVar) variable ,
+																							 GecodeConstraint.IRT_LQ,
+																							 new GecodeConstant(variable.getBounds()[1])));	
+						}
+					}
+					
 					this.singleIntVariableList.add((GecodeIntVar) variable);
-				
+					firstIntVar = false;
 			}
 			//else if the variable is multi-dimensional ?
 			
@@ -181,6 +230,74 @@ public class GecodeTailor {
 		
 	}
 	
+	/**
+	 * Collect all auxiliary variables (booleans and ints separately) and collect 
+	 * them in an (int/bool) array-list and create a buffer for them.
+	 * 
+	 * @throws GecodeException
+	 */
+	protected void tailorAuxiliaryVariables() 
+		throws GecodeException {
+		
+		ArrayList<Variable> auxVariables = this.essencePmodel.getAuxVariables();
+		boolean firstIntVar = true;
+		
+		for(int i=0; i < auxVariables.size(); i++) {
+			Variable oldVar = auxVariables.get(i);
+			
+			if(!(oldVar instanceof SingleVariable))
+				throw new GecodeException("Internal error. Auxiliary variable '"+oldVar+
+						"' is not a simple/single variable but of type:"+oldVar.getClass().getSimpleName());
+			
+			SingleVariable oldVariable = (SingleVariable) oldVar;
+				
+			// if this variable is a single variable, add it to the collection of bool/int-vars
+			if(oldVariable.isBooleanVariable()) {
+				this.auxBoolVariableBuffer.increaseLength();
+				this.auxBoolVariableList.add(new GecodeBoolVar(oldVariable.getVariableName()));
+			}
+			
+			else {
+				    // 1. add another variable to the buffer
+					this.auxIntVariableBuffer.increaseLength();
+					
+					// 2. take care of lower bound of buffer
+					if(firstIntVar) 
+						this.auxIntVariableBuffer.setLowerBound(oldVariable.getDomain()[0]);
+					else {
+						this.auxIntVariableBuffer.addLowerBound(oldVariable.getDomain()[0]);
+						if(oldVariable.getDomain()[0] > this.integerVariableBuffer.getLowerBound()) {
+							this.additionalBoundsConstraintsBuffer.add(new SimpleIntRelation(new GecodeIntVar(oldVariable.getVariableName(),
+																												oldVariable.getDomain()[0],
+																												oldVariable.getDomain()[1]) ,
+																							 GecodeConstraint.IRT_GQ,
+																							 new GecodeConstant(oldVariable.getDomain()[0])));	
+						}
+					}
+					
+					// take care of upper bound of buffer
+					if(firstIntVar) 
+						this.auxIntVariableBuffer.setUpperBound(oldVariable.getDomain()[1]);
+					else { 
+						this.auxIntVariableBuffer.addUpperBound(oldVariable.getDomain()[1]);
+						if(oldVariable.getDomain()[1] < this.integerVariableBuffer.getUpperBound()) {
+							this.additionalBoundsConstraintsBuffer.add(new SimpleIntRelation(new GecodeIntVar(oldVariable.getVariableName(),
+																												oldVariable.getDomain()[0],
+																												oldVariable.getDomain()[1]) ,
+																							 GecodeConstraint.IRT_LQ,
+																							 new GecodeConstant(oldVariable.getDomain()[1])));
+						}
+					}
+					
+					this.auxIntVariableList.add(new GecodeIntVar (oldVariable.getVariableName(),
+																	 oldVariable.getDomain()[0],
+																	 oldVariable.getDomain()[1]));
+					firstIntVar = false;
+			}
+			
+		}
+		
+	}
 	
 	/**
 	 * Tailors variable with name variableName to a Gecode Atom
@@ -249,20 +366,42 @@ public class GecodeTailor {
 		}
 	}*/
 	
-	
+	/**
+	 * Translates a product constraint to Gecode's mult constraint
+	 * 
+	 */
 	private GecodeMult tailorProductConstraint(ProductConstraint product) 
 		throws GecodeException {
 		
-		Expression resultExpr = product.getResult();
-		Expression[] argumentExpr = product.getArguments();
+		Expression resultOld = product.getResult();
+		Expression[] arguments = product.getArguments();
 		
-		if(argumentExpr.length > 2)
+		if(arguments.length > 2)
 			throw new GecodeException("Flattening error of expression:"+product+". Gecode only supports binary multiplication.");
+		// else:  we don't need to care about 1 argument only -> evaluation should have taken care of that
 		
-		// we don't need to care about 1 argument only -> evaluation should have taken care of that
+		GecodeAtom leftArg, rightArg;
+		
+		if(arguments[0] instanceof ArithmeticAtomExpression) {
+			leftArg = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[0]);
+		}
+		else throw new GecodeException("Cannot tailor '"+arguments[0]+"' in expression '"+product+"' to Gecode because it is not an integer atom.");
+		
+		if(arguments[1] instanceof ArithmeticAtomExpression) {
+			rightArg = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[1]);
+		}
+		else throw new GecodeException("Cannot tailor '"+arguments[1]+"' in expression '"+product+"' to Gecode because it is not an integer atom.");
 		
 		
-		throw new GecodeException("Cannot tailor product constraint '"+product+"' to Gecode yet, sorry.");
+		// result expression
+		GecodeAtom result;
+		if(resultOld instanceof ArithmeticAtomExpression) {
+			result = tailorArithmeticAtom((ArithmeticAtomExpression) resultOld);
+		}
+		else throw new GecodeException("Cannot tailor '"+resultOld+"' in expression '"+product+"' to Gecode because it is not an integer atom.");
+		
+		
+		return new GecodeMult(leftArg,rightArg,result);
 	}
 	
 	/**
@@ -363,9 +502,9 @@ public class GecodeTailor {
 		else throw new GecodeException("Cannot tailor argument '"+argumentOld+"' of abs-expression '"+e+"' to Gecode because it is not an integer atom.");
 		
 		if(resultOld instanceof ArithmeticAtomExpression) {
-			result = tailorArithmeticAtom((ArithmeticAtomExpression) argumentOld);
+			result = tailorArithmeticAtom((ArithmeticAtomExpression) resultOld);
 		}
-		else throw new GecodeException("Cannot tailor argument '"+argumentOld+"' of abs-expression '"+e+"' to Gecode because it is not an integer atom.");
+		else throw new GecodeException("Cannot tailor argument '"+resultOld+"' of abs-expression '"+e+"' to Gecode because it is not an integer atom.");
 		
 		
 		if(!(argument instanceof GecodeIntVar && 
@@ -402,7 +541,7 @@ public class GecodeTailor {
 			ArrayVariable var = (ArrayVariable) e.getVariable();
 			if(var.getExpressionIndices() != null) 
 				throw new GecodeException("Sorry. Cannot tailor array variables with non-integer indices such as '"+e+"' yet.");
-			else return new GecodeArrayIntVar(var.getArrayNameOnly(),
+			else return new GecodeIntArrayElem(var.getArrayNameOnly(),
 											  var.getIntegerIndices(),
 											  var.getDomain()[0],
 											  var.getDomain()[1]);

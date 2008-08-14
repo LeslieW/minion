@@ -556,6 +556,7 @@ public class TailorGUI extends javax.swing.JFrame {
 		           translate(e.getActionCommand());   
 			  }
 			});
+		//this.gecodeButton.setEnabled(false);
 		solverButtonPanel.add(gecodeButton);
 		
 		middlePanel.add(solverButtonPanel);

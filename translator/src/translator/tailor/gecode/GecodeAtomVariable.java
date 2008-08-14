@@ -1,7 +1,8 @@
 package translator.tailor.gecode;
 
 /**
- * Describes atom variables, i.e. boolean and integer variables (no arrays)
+ * Describes atom variables, i.e. boolean and integer variables 
+ * (no full arrays), but array elements
  * 
  * @author andrea
  *

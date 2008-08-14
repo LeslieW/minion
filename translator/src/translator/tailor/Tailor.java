@@ -54,7 +54,7 @@ public class Tailor {
 		}
 		
 		else if(solver instanceof Gecode) {
-			writeInfo("Flattened Essence' for solver Gecode:\n"+this.problemModel.toString());
+			//writeInfo("Flattened Essence' for solver Gecode:\n"+this.problemModel.toString());
 			GecodeTailor gecodeTailor = new GecodeTailor();
 			translator.tailor.gecode.GecodeModel model = gecodeTailor.tailorToGecode(normalisedModel, settings);
 			
@@ -115,10 +115,10 @@ public class Tailor {
 	}
 	
 	
-	private void writeInfo(String info) {
+	/*private void writeInfo(String info) {
 		if(this.settings.giveTranslationInfo())
 			System.out.println(info);
-	}
+	}*/
 	
 	private void writeTimeInfo(String info) {
 		if(this.settings.giveTranslationTimeInfo())

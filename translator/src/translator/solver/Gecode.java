@@ -8,6 +8,9 @@ public class Gecode extends GeneralTargetSolver {
 	// translation issues
 	public final String SINGLE_INT_VAR_ARRAY_NAME = "_int_var_buffer";
 	public final String SINGLE_BOOL_VAR_ARRAY_NAME = "_bool_var_buffer";
+	public final String AUX_INT_VAR_ARRAY_NAME = "_aux_int_var_buffer";
+	public final String AUX_BOOL_VAR_ARRAY_NAME = "_aux_bool_var_buffer";
+	
 	
 	// solving issues
 	public final String GECODE_DEFAULT_VAR_BRANCHING = BRANCH_SMALLEST_DOMAIN;

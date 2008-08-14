@@ -1,12 +1,20 @@
 package translator.tailor.gecode;
 
-public class GecodeArrayBoolVar implements BooleanVariable {
+/**
+ * Represents array elements of boolean arrays, such as x[1,2]
+ * 
+ * @author andrea
+ *
+ */
+
+public class GecodeBoolArrayElem implements BooleanVariable, 
+											GecodeAtomVariable {
 
 	private String name;
 	private int[] indices;
 	
 	
-	public GecodeArrayBoolVar(String name,
+	public GecodeBoolArrayElem(String name,
 			                  int[] indices) {
 		
 		this.name = name;
@@ -22,7 +30,7 @@ public class GecodeArrayBoolVar implements BooleanVariable {
 	}
 
 	public char getType() {
-		return GecodeVariable.BOOL_CONST_ARRAY_VAR;
+		return GecodeVariable.BOOL_ARRAY_ELEM_VAR;
 	}
 
 	public String getVariableName() {

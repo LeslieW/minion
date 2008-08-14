@@ -1,13 +1,21 @@
 package translator.tailor.gecode;
 
-public class GecodeArrayIntVar implements IntegerVariable {
+/**
+ * Represents an array element, such as x[1,2] of type integer
+ * 
+ * @author andrea
+ *
+ */
+
+public class GecodeIntArrayElem implements IntegerVariable,
+										   GecodeAtomVariable {
 
 	private String name;
 	private int[] indices;
 	private int lb;
 	private int ub;
 	
-	public GecodeArrayIntVar(String name,
+	public GecodeIntArrayElem(String name,
 			                 int[] indices,
 			                 int lb,
 			                 int ub) {
@@ -26,7 +34,7 @@ public class GecodeArrayIntVar implements IntegerVariable {
 	}
 
 	public char getType() {
-		return GecodeVariable.INT_CONST_ARRAY_VAR;
+		return GecodeVariable.INT_ARRAY_ELEM_VAR;
 	}
 
 	public String getVariableName() {

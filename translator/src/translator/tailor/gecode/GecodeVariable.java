@@ -16,8 +16,8 @@ public interface GecodeVariable extends GecodeAtom {
 	public final char INT_ARG_VAR =4;
 	public final char BOOL_INT_VAR = 5;
 	
-	public final char BOOL_CONST_ARRAY_VAR = 10;
-	public final char INT_CONST_ARRAY_VAR = 11;
+	public final char BOOL_ARRAY_ELEM_VAR = 10;
+	public final char INT_ARRAY_ELEM_VAR = 11;
 	public final char BOOL_ARRAY_VAR = 12;
 	public final char INT_ARRAY_VAR = 13;
 	

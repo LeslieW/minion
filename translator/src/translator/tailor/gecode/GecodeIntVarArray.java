@@ -76,4 +76,12 @@ public class GecodeIntVarArray implements GecodeArrayVariable, IntegerVariable {
 	public void increaseLength() {
 		this.length++;
 	}
+	
+	public void setLowerBound(int lb) {
+		this.lb = lb;
+	}
+	
+	public void setUpperBound(int ub) {
+		this.ub = ub;
+	}
 }

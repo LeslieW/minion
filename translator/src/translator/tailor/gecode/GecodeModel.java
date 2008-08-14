@@ -21,10 +21,16 @@ public class GecodeModel {
 	private ArrayList<GecodeArrayVariable> variableList;
 	/** arrays that buffer single vars */
 	private ArrayList<GecodeArrayVariable> bufferArrays;
+	/** arrays that buffer auxiliary vars */
+	private ArrayList<GecodeArrayVariable> auxBufferArrays;
 	/** buffered single int variables*/
 	private ArrayList<GecodeIntVar> singleIntVarNames;
 	/** buffered single bool variables*/
 	private ArrayList<GecodeBoolVar> singleBoolVarNames;
+	/** buffered auxiliary int variables*/
+	private ArrayList<GecodeIntVar> auxIntVarNames;
+	/** buffered auxiliary bool variables*/
+	private ArrayList<GecodeBoolVar> auxBoolVarNames;
 	private HashMap<GecodeVariable, Domain> variableDomains = new HashMap<GecodeVariable, Domain>();
 	private ArrayList<GecodeConstraint> constraints;
 	private TranslationSettings settings;
@@ -38,25 +44,36 @@ public class GecodeModel {
 					   ArrayList<GecodeArrayVariable> bufferArrays,
 					   ArrayList<GecodeConstraint> constraints, 
 					   ArrayList<GecodeIntVar> singleIntVars, 
-					   ArrayList<GecodeBoolVar> singleBoolVars) {
+					   ArrayList<GecodeBoolVar> singleBoolVars, 
+					   ArrayList<GecodeArrayVariable> auxBufferArrays, 
+					   ArrayList<GecodeIntVar> auxIntVarNames, 
+					   ArrayList<GecodeBoolVar> auxBoolVarNames) {
 		
 		this.settings = settings;
 		this.variableList = variables;
-		this.bufferArrays = bufferArrays;
 		this.constraints = constraints;
 		
+		// C++ class name (should be uppercase)
 		this.modelName = settings.getModelName();
 		String firstLetter = modelName.substring(0, 1);
 		modelName = modelName.substring(1,modelName.length());
 		firstLetter = firstLetter.toUpperCase();
 		modelName = firstLetter+modelName; // make the name uppercase
 		
+		// single decision variables
+		this.bufferArrays = bufferArrays;
 		this.singleIntVarNames = singleIntVars;
 		this.singleBoolVarNames = singleBoolVars;
+		
+		// auxiliary variables
+		this.auxBufferArrays = auxBufferArrays;
+		this.auxBoolVarNames = auxBoolVarNames;
+		this.auxIntVarNames = auxIntVarNames;
 	}
 	
 	
 	// ================ METHODS ==============================
+	
 	
 	public ArrayList<GecodeArrayVariable> getDecisionVariables() {
 		return this.variableList;
@@ -176,6 +193,9 @@ public class GecodeModel {
 		for(int i=0; i<this.bufferArrays.size(); i++)
 			s.append("   "+bufferArrays.get(i).toDeclarationCCString()+";\n");
 		
+		for(int i=0; i<this.auxBufferArrays.size(); i++)
+			s.append("   "+auxBufferArrays.get(i).toDeclarationCCString()+";\n");
+		
 		return s.toString();
 	}
 	
@@ -246,37 +266,125 @@ public class GecodeModel {
 		return s.toString();
 	}
 
+	/**
+	 * Declaring and defining the arrays that work as buffers/containers of 
+	 * single decision variables or auxiliary variables.
+	 * 
+	 * @return
+	 */
 	private String bufferArraysDeclaration() {
 		
 		StringBuffer s = new StringBuffer("");
+		
+		// -------------------------------------------------
+		//  single variables declaration and definition
+		// -------------------------------------------------
 		
 		if(bufferArrays.size() > 0) {
 			s.append("      // mapping single variables to the array\n");
 		}
 		
+		// Define the variables: IntVar a(this,1,10), ...
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			GecodeArrayVariable array = bufferArrays.get(i);
 			
 			if(array instanceof GecodeIntVarArray) {
-				String arrayName = array.getVariableName();
-				s.append("\tIntVar");
+				s.append("      // defining integer variables\n\tIntVar");
 				for(int j=0; j<array.getLength(); j++) {
+					GecodeIntVar variable = this.singleIntVarNames.get(j);
 					if(j>0) s.append(", ");
-					if(j%5==0) s.append("\n\t ");
-					s.append(this.singleIntVarNames.get(j).getVariableName()+"("+arrayName+"["+j+"])");
+					if(j%4==0) s.append("\n\t ");
+					s.append(variable.getVariableName()+"(this, "+variable.getBounds()[0]+", "+variable.getBounds()[1]+")");
 				}				
 			}
 			else if(array instanceof GecodeBoolVarArray) {
-				String arrayName = array.getVariableName();
-				s.append("\tBoolVar");
+				s.append("      // defining boolean variables\n\tBoolVar");
 				for(int j=0; j<array.getLength(); j++) {
+					GecodeBoolVar variable = this.singleBoolVarNames.get(j);
 					if(j>0) s.append(", ");
 					if(j%5==0) s.append("\n\t ");
-					s.append(this.singleBoolVarNames.get(j).getVariableName()+"("+arrayName+"["+j+"])");
+					s.append(variable.getVariableName()+"(this, "+variable.getBounds()[0]+","+variable.getBounds()[1]+")");
 				}	
 			}
 			s.append(";\n\n");
 		}
+		
+		
+		// assign each variable to a place in the corresponding buffer/container
+		for(int i=0; i<this.bufferArrays.size(); i++) {
+			GecodeArrayVariable array = bufferArrays.get(i);
+			s.append("      // assigning each variable to a container/buffer\n");
+			
+			if(array instanceof GecodeIntVarArray) {
+				String arrayName = array.getVariableName();
+				for(int j=0; j<array.getLength(); j++) {
+					s.append("\t"+this.singleIntVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];\n");
+				}				
+			}
+			else if(array instanceof GecodeBoolVarArray) {
+				String arrayName = array.getVariableName();
+				for(int j=0; j<array.getLength(); j++) {
+					s.append("\t"+this.singleBoolVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];");
+				}	
+			}
+			s.append("\n\n");
+		}
+		
+		s.append("\n");
+		// -------------------------------------------------
+		// then again for the auxiliary variables
+		// -------------------------------------------------
+		
+		if(auxBufferArrays.size() > 0) {
+			s.append("      // mapping auxiliary variables to the array\n");
+		}
+		
+		// Define the variables: IntVar a(this,1,10), ...
+		for(int i=0; i<this.auxBufferArrays.size(); i++) {
+			GecodeArrayVariable array = auxBufferArrays.get(i);
+			
+			if(array instanceof GecodeIntVarArray) {
+				s.append("      // defining auxiliary integer variables\n\tIntVar");
+				for(int j=0; j<array.getLength(); j++) {
+					GecodeIntVar variable = this.auxIntVarNames.get(j);
+					if(j>0) s.append(", ");
+					if(j%4==0) s.append("\n\t ");
+					s.append(variable.getVariableName()+"(this, "+variable.getBounds()[0]+", "+variable.getBounds()[1]+")");
+				}				
+			}
+			else if(array instanceof GecodeBoolVarArray) {
+				s.append("      // defining auxiliary boolean variables\n\tBoolVar");
+				for(int j=0; j<array.getLength(); j++) {
+					GecodeBoolVar variable = this.auxBoolVarNames.get(j);
+					if(j>0) s.append(", ");
+					if(j%5==0) s.append("\n\t ");
+					s.append(variable.getVariableName()+"(this, "+variable.getBounds()[0]+","+variable.getBounds()[1]+")");
+				}	
+			}
+			s.append(";\n\n");
+		}
+		
+		
+		// assign each auxiliart variable to a place in the corresponding buffer/container
+		for(int i=0; i<this.auxBufferArrays.size(); i++) {
+			GecodeArrayVariable array = auxBufferArrays.get(i);
+			s.append("      // assigning each auxilary variable to the corresponding container/buffer\n");
+			
+			if(array instanceof GecodeIntVarArray) {
+				String arrayName = array.getVariableName();
+				for(int j=0; j<array.getLength(); j++) {
+					s.append("\t"+this.auxIntVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];\n");
+				}				
+			}
+			else if(array instanceof GecodeBoolVarArray) {
+				String arrayName = array.getVariableName();
+				for(int j=0; j<array.getLength(); j++) {
+					s.append("\t"+this.auxBoolVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];");
+				}	
+			}
+			s.append("\n\n");
+		}
+		
 		
 		return s.toString();
 		
@@ -296,6 +404,10 @@ public class GecodeModel {
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			s.append("\tbranch(this, "+bufferArrays.get(i)+", "+variableBranching+", "+valueBranching+");\n");
 		}
+		for(int i=0; i<this.auxBufferArrays.size(); i++) {
+			s.append("\tbranch(this, "+auxBufferArrays.get(i)+", "+variableBranching+", "+valueBranching+");\n");
+		}
+		
 		return s.toString();
 	}
 	
@@ -305,16 +417,31 @@ public class GecodeModel {
 	 */
 	private String variableInitialisationToString() {
 		StringBuffer s= new StringBuffer("");
+		//boolean needsFollowingComma = false;
+		
 		for(int i=0; i<this.variableList.size(); i++) {
-			if(i > 0) s.append(",\n");
+			if(i > 0) s.append(",\n\t\t");
 			GecodeArrayVariable var = variableList.get(i);
 			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
+		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
-			if(i > 0) s.append(",\n");
+			if(i > 0) s.append(",\n\t\t");
+			else if(this.variableList.size() > 0) s.append(",\n\t\t");
 			GecodeArrayVariable var = bufferArrays.get(i);
 			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
+		
+		for(int i=0; i<this.auxBufferArrays.size(); i++) {
+			if(i > 0) s.append(",\n\t\t");
+			else if(this.variableList.size() > 0 
+					|| this.bufferArrays.size() > 0) 
+				s.append(",\n\t\t");
+			
+			GecodeArrayVariable var = auxBufferArrays.get(i);
+			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
+		}
+		
 		return s.toString();
 	}
 	
@@ -323,7 +450,7 @@ public class GecodeModel {
 	 * @return
 	 */
 	private String constraintsToString() {
-		StringBuffer s = new StringBuffer("");
+		StringBuffer s = new StringBuffer("      // constraints\n");
 		for(int i=0; i<this.constraints.size(); i++) {
 			s.append("\t"+constraints.get(i)+";\n");
 		}

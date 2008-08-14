@@ -2,9 +2,9 @@ package translator.tailor.gecode;
 
 public class GecodeMult extends RelationalConstraint {
 
-	private GecodeIntVar argument1;
-	private GecodeIntVar argument2;
-	private GecodeIntVar result;
+	private GecodeAtom argument1;
+	private GecodeAtom argument2;
+	private GecodeAtom result;
 	
 	
 	/** 
@@ -15,9 +15,9 @@ public class GecodeMult extends RelationalConstraint {
 	 * @param arg2
 	 * @param result
 	 */
-	public GecodeMult(GecodeIntVar arg1,
-				      GecodeIntVar arg2,
-				      GecodeIntVar result) {
+	public GecodeMult(GecodeAtom arg1,
+				      GecodeAtom arg2,
+				      GecodeAtom result) {
 		this.argument1 = arg1;
 		this.argument2 =arg2;
 		this.result = result;

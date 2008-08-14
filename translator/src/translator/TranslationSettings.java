@@ -25,13 +25,13 @@ public class TranslationSettings {
 	// solving issues
 	public final int FIND_ALL_SOLUTIONS = 0;
 	public final int DEFAULT_NO_OF_SOLUTIONS = 1;
-	
-	
+	public final boolean BRANCH_OVER_AUX_VARIABLES = true;
 	
 	int discreteUpperBound;
 	TargetSolver targetSolver;
 	String variableBranching = TargetSolver.DEFAULT_VAR_BRANCHING;
 	String valueBranching = TargetSolver.DEFAULT_VAL_BRANCHING;
+	boolean branchOverAuxVariables;
 	
 	// translation issues
 	boolean useCommonSubExpressions;
@@ -94,8 +94,7 @@ public class TranslationSettings {
 		this.allowParseErrorRecovery = false;
 		this.noOfSolutions = this.DEFAULT_NO_OF_SOLUTIONS;
 		this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
-		
-		
+		this.branchOverAuxVariables = this.BRANCH_OVER_AUX_VARIABLES;
 	}
 	
 	
@@ -336,5 +335,11 @@ public class TranslationSettings {
 			this.valueBranching = valBranching;
 	}
 	
+	public boolean getBranchOverAuxVariables() {
+		return this.branchOverAuxVariables;
+	}
 	
+	public void setBranchOverAuxVariables(boolean turnOn) {
+		this.branchOverAuxVariables = turnOn;
+	}
 }
