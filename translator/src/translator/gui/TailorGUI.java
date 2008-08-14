@@ -1394,16 +1394,27 @@ protected void translate(String command) {
             }
             else {
                 String line;
-                
+                writeOnOutput(this.SOLUTION_TAB_NR, "$ Error in executing Minion.\n$ See system messages below for details.\n");
                 //input =new BufferedReader(new InputStreamReader(process.getErrorStream()));
                 input =new BufferedReader(new InputStreamReader(inputStream));
-                String s = "";
-                  while ((line = input.readLine()) != null) {
-                	  s = s+line+"\n";
-                  }
-                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
-                  //writeOnMessageOutput(s);
-                  input.close();
+                BufferedReader errorStream = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                
+                StringBuffer s = new StringBuffer("");
+                while ((line = input.readLine()) != null) {
+                	s.append(line+"\n");
+                }
+                //writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s.toString()));
+                if(s.length() > 1)
+                	this.writeOnMessageOutput("Minion returned the following error message:\n"+s);
+                
+                //writeOnMessageOutput(s);
+                input.close();
+                
+                StringBuffer errorMessage = new StringBuffer("");
+                while ((line = errorStream.readLine()) != null) {
+                	errorMessage.append(line+"\n");
+                }
+                this.writeOnMessageOutput("Minion returned the following error message:\n"+errorMessage);
             }
 		
 		} catch(Exception e) {

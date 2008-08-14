@@ -117,7 +117,9 @@ public class GecodeTailor {
 		else if(e instanceof SumConstraint) {
 			return tailorSumConstraint((SumConstraint) e);
 		}
-		
+		else if(e instanceof ProductConstraint) {
+			return tailorProductConstraint( (ProductConstraint) e);
+		}
 		
 		else throw new GecodeException("Cannot tailor constraint to Gecode (yet):"+e);
 	}
@@ -246,6 +248,22 @@ public class GecodeTailor {
 			this.variableList.add(this.bufferArrays.remove(i));
 		}
 	}*/
+	
+	
+	private GecodeMult tailorProductConstraint(ProductConstraint product) 
+		throws GecodeException {
+		
+		Expression resultExpr = product.getResult();
+		Expression[] argumentExpr = product.getArguments();
+		
+		if(argumentExpr.length > 2)
+			throw new GecodeException("Flattening error of expression:"+product+". Gecode only supports binary multiplication.");
+		
+		// we don't need to care about 1 argument only -> evaluation should have taken care of that
+		
+		
+		throw new GecodeException("Cannot tailor product constraint '"+product+"' to Gecode yet, sorry.");
+	}
 	
 	/**
 	 * Tailors an Essence' sum constraint 
