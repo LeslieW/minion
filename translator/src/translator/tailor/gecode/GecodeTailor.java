@@ -162,6 +162,13 @@ public class GecodeTailor {
 		else if(e instanceof ProductConstraint) {
 			return tailorProductConstraint( (ProductConstraint) e);
 		}
+		else if(e instanceof NonCommutativeRelationalBinaryExpression) {
+			return tailorRelation((RelationalExpression) e);
+		}
+		else if(e instanceof CommutativeBinaryRelationalExpression) {
+			return tailorRelation((RelationalExpression) e);
+		}
+		
 		
 		else throw new GecodeException("Cannot tailor constraint to Gecode (yet):"+e);
 	}
@@ -300,14 +307,17 @@ public class GecodeTailor {
 	}
 	
 	/**
-	 * Tailors variable with name variableName to a Gecode Atom
+	 * Tailors variable with name variableName to a Gecode Atom.
+	 * This method can only be used to tailor a definition of a 
+	 * decision variable - never use it to tailor a variable/atom
+	 * in a constraint expression!
 	 * 
 	 * @param variableName
 	 * @param domain
 	 * @return
 	 * @throws GecodeException
 	 */
-	protected GecodeVariable tailorToGecode(String variableName) 
+	private GecodeVariable tailorToGecode(String variableName) 
 		throws GecodeException {
 		
 		Domain domain = this.essencePmodel.getDomainOfVariable(variableName);
@@ -319,6 +329,10 @@ public class GecodeTailor {
 			return new GecodeIntVar(variableName, 
 									intRange.getRange()[0], 
 									intRange.getRange()[1]);
+		}
+	
+		if(domain.getType() == Domain.BOOL) {
+			return new GecodeBoolVar(variableName);
 		}
 		
 		throw new GecodeException("Cannot tailor variable '"+variableName+"' with domain-type "
@@ -332,7 +346,7 @@ public class GecodeTailor {
 	 * @return
 	 * @throws GecodeException
 	 */
-	protected char mapOperators(int essencePOperator) 
+	protected char mapOperatorToGecode(int essencePOperator) 
 		throws GecodeException {
 		
 		switch(essencePOperator) {
@@ -421,65 +435,187 @@ public class GecodeTailor {
 		StringBuffer sumConstraint = new StringBuffer(e.toGecodeString());
 		
 		return new GecodePostConstraint(sumConstraint.toString());
-		
-		/*
-		// this is an un-weighted sum
-		if(e.getNegativeArguments().length == 0) {
-			// map the sum arguments 
-			Expression[] arguments = e.getPositiveArguments();
-			GecodeAtom[] sumArguments = new GecodeAtom[arguments.length];
-			for(int i=0; i<arguments.length; i++) {
-				if(arguments[i] instanceof ArithmeticAtomExpression)
-					sumArguments[i] = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[i]);
-				else throw new GecodeException("Flattening error. Cannot tailor '"+e+
-						"' to linear sum constraint when sum-argument '"+arguments[i]+"' is not an atom expression.");
-			}
-			
-			// map the relational operator
-			char relation = mapOperators(e.getOperator());
-			
-			// map the result expression
-			GecodeAtom result;
-			if(e.getResult() instanceof ArithmeticAtomExpression)
-				result = tailorArithmeticAtom((ArithmeticAtomExpression) e.getResult());
-			else throw new GecodeException("Flattening error. Cannot tailor '"+e+
-					"' to linear sum constraint when sum-result '"+e.getResult()+"' is not an atom expression.");
-
-			ArgsVariable args;
-			
-			if(sumArguments[0] instanceof GecodeBoolVar) {
-				args = new GecodeBoolVarArgs(GecodeConstraint.BUFFERARRAY_NAME+this.numberOfBufferArrays++,
-											 sumArguments);
-			}
-			else args = new GecodeIntVarArgs(GecodeConstraint.BUFFERARRAY_NAME+this.numberOfBufferArrays++,
-					sumArguments,
-					e.getDomain()[0],
-					e.getDomain()[1]);
-			
-			//addToBufferArrays(args);
-			
-			if(result instanceof GecodeIntVar) {
-				return new GecodeLinear(args,
-									relation,
-									(GecodeIntVar) result);
-			}
-			else if(result instanceof GecodeBoolVar) {
-				return new GecodeLinear(args,
-							relation,
-							(GecodeIntVar) result);
-			}
-			else if(result instanceof GecodeConstant) {
-				return new GecodeLinear(args,
-						relation,	
-						(GecodeConstant) result);
-			}
-			else throw new GecodeException("Cannot tailor sum-constraint "+e+" to Gecode: unknown result type:"+result);
-		}
-		
-		 throw new GecodeException("Cannot tailor (weighted?) sum-constraint "+e+" to Gecode yet.");
-		 */
 	}
 	
+	/**
+	 * Tailor simple expressions (non-commutative and commutative expr).
+	 * to Gecode. They can be on boolean or arithmetic (int) variables.
+	 * 
+	 * @param expression
+	 * @return
+	 * @throws GecodeException
+	 */
+	private RelationalConstraint tailorRelation(RelationalExpression expression) 
+		throws GecodeException {
+		
+		if(expression instanceof NonCommutativeRelationalBinaryExpression) {
+			NonCommutativeRelationalBinaryExpression nonCommExpr = (NonCommutativeRelationalBinaryExpression) expression;
+			Expression leftExpression = nonCommExpr.getLeftArgument();
+			Expression rightExpression = nonCommExpr.getRightArgument();
+			
+			// this is an arithmetic relation
+			if(leftExpression instanceof ArithmeticAtomExpression) {
+				GecodeAtom leftArg = tailorArithmeticAtom((ArithmeticAtomExpression) leftExpression);
+				if(rightExpression instanceof ArithmeticAtomExpression) {
+					GecodeAtom rightArg = tailorArithmeticAtom((ArithmeticAtomExpression) rightExpression);
+					return tailorSimpleIntegerRelation(leftArg, 
+													   this.mapOperatorToGecode(nonCommExpr.getOperator()), 
+													   rightArg);					
+				}
+				else throw new GecodeException((rightExpression instanceof RelationalAtomExpression) ? 
+						"Type error. Cannot apply relational operator on arithmetic and boolean argument in: "+expression : 
+					    "Flattening error. Cannot tailor "+expression+" to Gecode.\nExpected an atom instead of: "+rightExpression);
+			}
+			
+			// this is a boolean relation
+			else if(leftExpression instanceof RelationalAtomExpression) {
+				GecodeAtom leftArg = tailorRelationalAtom((RelationalAtomExpression) leftExpression);
+				if(rightExpression instanceof RelationalAtomExpression) {
+					GecodeAtom rightArg = tailorRelationalAtom((RelationalAtomExpression) rightExpression);
+					return tailorSimpleBooleanRelation(leftArg, 
+													   this.mapOperatorToGecode(nonCommExpr.getOperator()), 
+													   rightArg);					
+				}
+				else throw new GecodeException((rightExpression instanceof RelationalAtomExpression) ? 
+						"Type error. Cannot apply relational operator on arithmetic and boolean argument in: "+expression : 
+					    "Flattening error. Cannot tailor "+expression+" to Gecode.\nExpected an atom instead of: "+rightExpression);
+			}
+			else throw new GecodeException("Flattening error. Cannot tailor "+expression+
+					" to Gecode.\nExpected an atom instead of :"+leftExpression);
+		}
+		
+		if(expression instanceof CommutativeBinaryRelationalExpression) {
+			CommutativeBinaryRelationalExpression commExpr = (CommutativeBinaryRelationalExpression) expression;
+			Expression leftExpression = commExpr.getLeftArgument();
+			Expression rightExpression = commExpr.getRightArgument();
+			
+			// this is an arithmetic relation
+			if(leftExpression instanceof ArithmeticAtomExpression) {
+				GecodeAtom leftArg = tailorArithmeticAtom((ArithmeticAtomExpression) leftExpression);
+				if(rightExpression instanceof ArithmeticAtomExpression) {
+					GecodeAtom rightArg = tailorArithmeticAtom((ArithmeticAtomExpression) rightExpression);
+					return tailorSimpleIntegerRelation(leftArg, 
+													   this.mapOperatorToGecode(commExpr.getOperator()), 
+													   rightArg);					
+				}
+				else throw new GecodeException((rightExpression instanceof RelationalAtomExpression) ? 
+						"Type error. Cannot apply relational operator on arithmetic and boolean argument in: "+expression : 
+					    "Flattening error. Cannot tailor "+expression+" to Gecode.\nExpected an atom instead of: "+rightExpression);
+			}
+			
+			// this is a boolean relation
+			else if(leftExpression instanceof RelationalAtomExpression) {
+				GecodeAtom leftArg = tailorRelationalAtom((RelationalAtomExpression) leftExpression);
+				if(rightExpression instanceof RelationalAtomExpression) {
+					GecodeAtom rightArg = tailorRelationalAtom((RelationalAtomExpression) rightExpression);
+					return tailorSimpleBooleanRelation(leftArg, 
+													   this.mapOperatorToGecode(commExpr.getOperator()), 
+													   rightArg);					
+				}
+				else throw new GecodeException((rightExpression instanceof RelationalAtomExpression) ? 
+						"Type error. Cannot apply relational operator on arithmetic and boolean argument in: "+expression : 
+					    "Flattening error. Cannot tailor "+expression+" to Gecode.\nExpected an atom instead of: "+rightExpression);
+			}
+			
+			// else it has not been flattened properly
+			else throw new GecodeException("Flattening error. Cannot tailor "+expression+
+					" to Gecode.\nExpected an atom instead of :"+leftExpression);
+		}
+		
+		throw new GecodeException("Sorry, cannot tailor relation "+expression+" to Gecode (yet).");
+	}
+
+	
+	/**
+	 * Tailors 2 (hopefully arithmetic) arguments and a relational 
+	 * operator to the corresponding Gecode 'rel' constraint/propagator
+	 * 
+	 * 
+	 * @param leftArgument
+	 * @param operator
+	 * @param rightArgument
+	 * @return
+	 * @throws GecodeException
+	 */
+	private SimpleIntRelation tailorSimpleIntegerRelation(GecodeAtom leftArgument, 
+														  char operator, 
+														  GecodeAtom rightArgument)
+		throws GecodeException {
+		
+		
+		if(leftArgument instanceof GecodeIntAtomVariable) {
+				if(rightArgument instanceof GecodeIntAtomVariable) {
+					return new SimpleIntRelation((GecodeIntAtomVariable) leftArgument,
+												  operator,
+												  (GecodeIntAtomVariable) rightArgument);
+				}
+				else if(rightArgument instanceof GecodeConstant) {
+					return new SimpleIntRelation((GecodeIntAtomVariable) leftArgument,
+							  					  operator,
+							  					  (GecodeConstant) rightArgument);
+				}
+				else throw new GecodeException("Sorry, cannot tailor "+leftArgument+" "+operator+" "+rightArgument
+						+" to Gecode.\nExpected constant or variable atom instead of: "+rightArgument);
+		}
+		
+		else if(leftArgument instanceof GecodeConstant) {
+				if(rightArgument instanceof GecodeIntAtomVariable) {
+					return new SimpleIntRelation((GecodeIntAtomVariable) rightArgument,
+												  this.invertRelationalOperator(operator),
+												   (GecodeConstant) leftArgument);
+				}
+				else throw new GecodeException("Sorry, cannot tailor "+leftArgument+" "+operator+" "+rightArgument
+						+" to Gecode.\nExpected a variable atom instead of: "+rightArgument);
+		}
+		
+		throw new GecodeException("Sorry, cannot tailor "+leftArgument+" "+operator+" "+rightArgument+" to Gecode.\n");
+	}
+	
+	
+	/**
+	 * Tailors 2 (hopefully) boolean arguments and a relational operator 
+	 * to the corresponding Gecode 'rel' constraint/propagator
+	 * 
+	 * 
+	 * @param leftArgument
+	 * @param operator
+	 * @param rightArgument
+	 * @return
+	 * @throws GecodeException
+	 */
+	private SimpleBoolRelation tailorSimpleBooleanRelation(GecodeAtom leftArgument, 
+														  char operator, 
+														  GecodeAtom rightArgument)
+		throws GecodeException {
+		
+		
+		if(leftArgument instanceof GecodeBoolAtomVariable) {
+				if(rightArgument instanceof GecodeBoolAtomVariable) {
+					return new SimpleBoolRelation((GecodeBoolAtomVariable) leftArgument,
+												  operator,
+												  (GecodeBoolAtomVariable) rightArgument);
+				}
+				else if(rightArgument instanceof GecodeConstant) {
+					return new SimpleBoolRelation((GecodeBoolAtomVariable) leftArgument,
+							  					  operator,
+							  					  (GecodeConstant) rightArgument);
+				}
+				else throw new GecodeException("Sorry, cannot tailor "+leftArgument+" "+operator+" "+rightArgument
+						+" to Gecode.\nExpected constant or variable atom instead of: "+rightArgument);
+		}
+		
+		else if(leftArgument instanceof GecodeConstant) {
+				if(rightArgument instanceof GecodeBoolAtomVariable) {
+					return new SimpleBoolRelation((GecodeBoolAtomVariable) rightArgument,
+												  this.invertRelationalOperator(operator),
+												   (GecodeConstant) leftArgument);
+				}
+				else throw new GecodeException("Sorry, cannot tailor "+leftArgument+" "+operator+" "+rightArgument
+						+" to Gecode.\nExpected a variable atom instead of: "+rightArgument);
+		}
+		
+		throw new GecodeException("Sorry, cannot tailor "+leftArgument+" "+operator+" "+rightArgument+" to Gecode.\n");
+	}
 	
 	
 	/**
@@ -526,7 +662,7 @@ public class GecodeTailor {
 	 */
 	private GecodeAtom tailorArithmeticAtom(ArithmeticAtomExpression e) 
 		throws GecodeException {
-		
+
 		if(e.getType() == Expression.INT) {
 			return new GecodeConstant(e.getConstant());
 		}
@@ -546,11 +682,73 @@ public class GecodeTailor {
 											  var.getDomain()[0],
 											  var.getDomain()[1]);
 		}
+
 		
 		else throw new GecodeException("Unknown arithmetic atomic type: "+e);
 	}
 	
 	
+	/**
+	 * Tailors boolean atom expressions to Gecode atoms
+	 * 
+	 * @param e
+	 * @return
+	 * @throws GecodeException
+	 */
+	private GecodeAtom tailorRelationalAtom(RelationalAtomExpression e) 
+		throws GecodeException {
+
+		if(e.getType() == Expression.BOOL) {
+			return new GecodeConstant(e.getBool() ? 1 : 0);
+		}
+		
+		else if(e.getType() == Expression.BOOL_VAR) {
+			Variable var = e.getVariable();
+			return new GecodeBoolVar(var.getVariableName());
+		}
+		else if(e.getType() == Expression.BOOL_ARRAY_VAR) {
+			ArrayVariable var = (ArrayVariable) e.getVariable();
+			if(var.getExpressionIndices() != null) 
+				throw new GecodeException("Sorry. Cannot tailor array variables with non-integer indices such as '"+e+"' yet.");
+			else return new GecodeBoolArrayElem(var.getArrayNameOnly(),
+											  var.getIntegerIndices());
+		}
+
+		
+		else throw new GecodeException("Unknown arithmetic atomic type: "+e);
+	}
+	
+	
+	/**
+	 * Inverts relational arithmetic Gecode operators.
+	 * 
+	 * @param operator
+	 * @return
+	 * @throws GecodeException
+	 */
+	public char invertRelationalOperator(char operator) 
+		throws GecodeException {
+			
+		if(operator == GecodeConstraint.IRT_EQ) 
+			return GecodeConstraint.IRT_NQ;
+		
+		else if (operator == GecodeConstraint.IRT_GQ)
+			return GecodeConstraint.IRT_LE;
+		
+		else if (operator == GecodeConstraint.IRT_LQ)
+			return GecodeConstraint.IRT_GR;
+		
+		else if (operator == GecodeConstraint.IRT_LE)
+			return GecodeConstraint.IRT_GQ;
+		
+		else if (operator == GecodeConstraint.IRT_GR)
+			return GecodeConstraint.IRT_LQ;
+		
+		else if (operator == GecodeConstraint.IRT_NQ)
+			return GecodeConstraint.IRT_EQ;
+		
+		throw new GecodeException("Internal error. Cannot convert unknown operator: "+operator+".");
+	}
 	
 	
 	/**
@@ -563,4 +761,61 @@ public class GecodeTailor {
 		this.bufferArrays.add(array);
 	}
 	*/
+	
+	/*
+	// this is an un-weighted sum
+	if(e.getNegativeArguments().length == 0) {
+		// map the sum arguments 
+		Expression[] arguments = e.getPositiveArguments();
+		GecodeAtom[] sumArguments = new GecodeAtom[arguments.length];
+		for(int i=0; i<arguments.length; i++) {
+			if(arguments[i] instanceof ArithmeticAtomExpression)
+				sumArguments[i] = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[i]);
+			else throw new GecodeException("Flattening error. Cannot tailor '"+e+
+					"' to linear sum constraint when sum-argument '"+arguments[i]+"' is not an atom expression.");
+		}
+		
+		// map the relational operator
+		char relation = mapOperators(e.getOperator());
+		
+		// map the result expression
+		GecodeAtom result;
+		if(e.getResult() instanceof ArithmeticAtomExpression)
+			result = tailorArithmeticAtom((ArithmeticAtomExpression) e.getResult());
+		else throw new GecodeException("Flattening error. Cannot tailor '"+e+
+				"' to linear sum constraint when sum-result '"+e.getResult()+"' is not an atom expression.");
+
+		ArgsVariable args;
+		
+		if(sumArguments[0] instanceof GecodeBoolVar) {
+			args = new GecodeBoolVarArgs(GecodeConstraint.BUFFERARRAY_NAME+this.numberOfBufferArrays++,
+										 sumArguments);
+		}
+		else args = new GecodeIntVarArgs(GecodeConstraint.BUFFERARRAY_NAME+this.numberOfBufferArrays++,
+				sumArguments,
+				e.getDomain()[0],
+				e.getDomain()[1]);
+		
+		//addToBufferArrays(args);
+		
+		if(result instanceof GecodeIntVar) {
+			return new GecodeLinear(args,
+								relation,
+								(GecodeIntVar) result);
+		}
+		else if(result instanceof GecodeBoolVar) {
+			return new GecodeLinear(args,
+						relation,
+						(GecodeIntVar) result);
+		}
+		else if(result instanceof GecodeConstant) {
+			return new GecodeLinear(args,
+					relation,	
+					(GecodeConstant) result);
+		}
+		else throw new GecodeException("Cannot tailor sum-constraint "+e+" to Gecode: unknown result type:"+result);
+	}
+	
+	 throw new GecodeException("Cannot tailor (weighted?) sum-constraint "+e+" to Gecode yet.");
+	 */
 }

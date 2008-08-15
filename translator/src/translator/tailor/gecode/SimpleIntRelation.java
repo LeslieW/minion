@@ -13,9 +13,9 @@ public class SimpleIntRelation extends RelationalConstraint {
 	 * @param operator relational integer operator r (see GecodeConstraint)
 	 * @param rightArgument IntVar x1
 	 */
-	public SimpleIntRelation(GecodeIntVar leftArgument,
+	public SimpleIntRelation(GecodeIntAtomVariable leftArgument,
 			              char operator,
-			              GecodeIntVar rightArgument) {
+			              GecodeIntAtomVariable rightArgument) {
 		
 		this.leftArgument = leftArgument;
 		this.rightArgument = rightArgument;
@@ -34,7 +34,7 @@ public class SimpleIntRelation extends RelationalConstraint {
 	 */
 	public SimpleIntRelation(GecodeIntVarArgs leftArgsArgument,
 						  char operator,						  
-						  GecodeIntVar rightArgument) {
+						  GecodeIntAtomVariable rightArgument) {
 		this.leftArgument = leftArgsArgument;
 		this.rightArgument = rightArgument;
 
@@ -49,7 +49,7 @@ public class SimpleIntRelation extends RelationalConstraint {
 	 * @param operator relational integer operator r (see GecodeConstraint)
 	 * @param constant constant c
 	 */
-	public SimpleIntRelation(GecodeIntVar leftArgument,
+	public SimpleIntRelation(GecodeIntAtomVariable leftArgument,
 							 char operator,
 							 GecodeConstant constant) {
 		this.leftArgument = leftArgument;
@@ -132,7 +132,7 @@ public class SimpleIntRelation extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF) {
-			return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+")";
+			return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+", opt.icl())";
 		}
 		
 		else return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+","
@@ -150,7 +150,7 @@ public class SimpleIntRelation extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF) {
-			return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+")";
+			return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+", opt.icl())";
 		}
 		
 		else return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+"," +

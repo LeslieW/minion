@@ -7,7 +7,7 @@ package translator.tailor.gecode;
  *
  */
 
-public class GecodeBoolVar implements BooleanVariable, GecodeAtomVariable {
+public class GecodeBoolVar implements GecodeBoolAtomVariable {
 
 	private String name;
 	

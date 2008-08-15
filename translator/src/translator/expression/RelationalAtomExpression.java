@@ -71,7 +71,7 @@ public class RelationalAtomExpression implements
 		
 		else return (variable.getType() == Expression.ARRAY_VARIABLE) ?
 				Expression.BOOL_ARRAY_VAR :
-					Expression.BOOL_VARIABLE;
+					Expression.BOOL_VAR;
 	}
 	
 	public void orderExpression() {

@@ -7,7 +7,7 @@ package translator.tailor.gecode;
  *
  */
 
-public class GecodeIntVar implements IntegerVariable, GecodeAtomVariable {
+public class GecodeIntVar implements GecodeIntAtomVariable {
 
 	private String name;
 	private int lb;

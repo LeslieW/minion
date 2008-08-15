@@ -28,8 +28,8 @@ import javax.swing.JTextArea;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Element;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.*;
+//import javax.swing.filechooser.FileFilter;
+//import javax.swing.filechooser.*;
 
 import translator.TranslationSettings;
 import translator.Translator;
@@ -38,6 +38,7 @@ import translator.solver.Minion;
 import translator.solver.Gecode;
 import translator.solver.TargetSolver;
 import javax.swing.*;
+import java.awt.Color;
 /**
  *
  * @author  andrea
@@ -152,6 +153,9 @@ public class TailorGUI extends javax.swing.JFrame {
     	else if(skinType == this.PIRATE_SKIN)
     		return "Cheeky Pirate Skin";
     	
+    	else if(skinType == this.ARMY_SKIN)
+    		return "Boring Army Skin";
+    	
     	// TODO:
     	// sunrise skin
     	// pirate skin
@@ -163,19 +167,23 @@ public class TailorGUI extends javax.swing.JFrame {
     	
     	// Color lightGreenish = new java.awt.Color(211,245,177);
 		Color lightBlueish = new java.awt.Color(220,220,245);
-    	Color darkRed = new java.awt.Color(142,5,5);
-    	Color reallyDarkRed = new java.awt.Color(82,10,5);
-		Color cheekyOrange = new java.awt.Color(252,105,20);
-		Color chalkYellow = new java.awt.Color(250,233,193);
-		Color sunShineYellow = new java.awt.Color(241,224,9);
+    	//Color darkRed = new java.awt.Color(142,5,5);
+    	//Color reallyDarkRed = new java.awt.Color(82,10,5);
+		//Color cheekyOrange = new java.awt.Color(252,105,20);
+		//Color chalkYellow = new java.awt.Color(250,233,193);
+		//Color sunShineYellow = new java.awt.Color(241,224,9);
 		//Color cheekyBarbiePink = new java.awt.Color(241,9,142);
 		Color barbiePink = new java.awt.Color(215,24,141);
 		Color babyBarbiePink = new java.awt.Color(254,222,241);
-		Color stepmotherPurple = new java.awt.Color(73,1,45);
-		Color thickPurple = new java.awt.Color(147,23,99);
-		Color darkWateryBlue = new java.awt.Color(54,129,185);
-		Color wateryBlue = new java.awt.Color(74,149,205);
-		Color caveWaterBlue = new java.awt.Color(3,60,99);
+		Color stepmotherPurple = new Color(73,1,45);
+		Color thickPurple = new Color(147,23,99);
+		//Color darkWateryBlue = new Color(54,129,185);
+		Color wateryBlue = new Color(74,149,205);
+		Color caveWaterBlue = new Color(3,60,99);
+		Color peasantArmyGreen = new Color(89,130,74);
+		Color paleArmyGreenBrown = new Color(237,240,208);
+		Color darkMountainGreen = new Color(13,40,10);
+		Color sandyBrown = new Color(198, 190, 152);
 		
     	if(this.skinType == this.CLASSIC_SKIN) {
     		
@@ -201,7 +209,8 @@ public class TailorGUI extends javax.swing.JFrame {
     		//this.textAreaFontColor = java.awt.Color.black;
     		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
-    		this.buttonColor = lightBlueish;
+    		this.buttonColor = new JButton().getBackground();
+    		//this.buttonColor = lightBlueish;
     		
     	}
     	
@@ -236,7 +245,19 @@ public class TailorGUI extends javax.swing.JFrame {
     		this.textAreaFontColor = caveWaterBlue;
     		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
-    		this.buttonColor = java.awt.Color.white;
+    		this.buttonColor = new JButton().getBackground();
+    		//this.buttonColor = lightBlueish;
+    	}
+    	
+    	else if(this.skinType == this.ARMY_SKIN) {
+    		this.bgColor = peasantArmyGreen;
+    		this.inputBgColor = peasantArmyGreen;
+    		this.outputBgColor = peasantArmyGreen;
+    		this.textAreaColor = paleArmyGreenBrown;
+    		this.textAreaFontColor = darkMountainGreen;
+    		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
+    		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
+    		this.buttonColor = sandyBrown;
     	}
     }
     
@@ -750,16 +771,20 @@ public class TailorGUI extends javax.swing.JFrame {
         JMenuItem nightOwlSkinSelection = new JRadioButtonMenuItem(getSkinName(this.NIGHTOWL_SKIN));
         JMenuItem colorBlindSkinSelection = new JRadioButtonMenuItem(getSkinName(this.COLORBLIND_SKIN));
         JMenuItem sunriseSkinSelection = new JRadioButtonMenuItem(getSkinName(this.WATERFALL_SKIN));
+        JMenuItem armySkinSelection = new JRadioButtonMenuItem(getSkinName(this.ARMY_SKIN));
         skinButtonGroup.add(classicSkinSelection);
         skinButtonGroup.add(nightOwlSkinSelection);
         skinButtonGroup.add(colorBlindSkinSelection);
         skinButtonGroup.add(girlieSkinSelection);
         skinButtonGroup.add(sunriseSkinSelection);
+        skinButtonGroup.add(armySkinSelection);
         classicSkinSelection.setSelected(this.skinType == this.CLASSIC_SKIN);
         girlieSkinSelection.setSelected(this.skinType == this.GIRLIE_SKIN);
         nightOwlSkinSelection.setSelected(this.skinType == this.NIGHTOWL_SKIN);
         colorBlindSkinSelection.setSelected(this.skinType == this.COLORBLIND_SKIN);
-        colorBlindSkinSelection.setSelected(this.skinType == this.WATERFALL_SKIN);
+        sunriseSkinSelection.setSelected(this.skinType == this.WATERFALL_SKIN);
+        armySkinSelection.setSelected(this.skinType == this.ARMY_SKIN);
+        
         classicSkinSelection.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           changeSkin(CLASSIC_SKIN);   
@@ -785,11 +810,17 @@ public class TailorGUI extends javax.swing.JFrame {
 		           changeSkin(WATERFALL_SKIN);   
 			  }
 			});
+        armySkinSelection.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           changeSkin(ARMY_SKIN);   
+			  }
+			});
         skinSubMenu.add(classicSkinSelection);
         skinSubMenu.add(girlieSkinSelection);
         skinSubMenu.add(nightOwlSkinSelection);
         skinSubMenu.add(colorBlindSkinSelection);
         skinSubMenu.add(sunriseSkinSelection);
+        skinSubMenu.add(armySkinSelection);
         settingsMenu.add(skinSubMenu);
         //settingsMenu.addSeparator();
         
@@ -920,6 +951,7 @@ public class TailorGUI extends javax.swing.JFrame {
 		
 		// Button colors
 		saveProblemButton.setBackground(this.buttonColor);
+		this.saveProblemButton.setFocusPainted(true);
 		saveParameterButton.setBackground(this.buttonColor);
 		saveOutputButton.setBackground(this.buttonColor);
 		loadProblemButton.setBackground(this.buttonColor);
@@ -928,6 +960,7 @@ public class TailorGUI extends javax.swing.JFrame {
 		clearParameterButton.setBackground(this.buttonColor);
 		clearOutputButton.setBackground(this.buttonColor);
 		minionButton.setBackground(this.buttonColor);
+		gecodeButton.setBackground(this.buttonColor);
 		this.runMinionButton.setBackground(this.buttonColor);
 		
     }
@@ -1331,23 +1364,29 @@ protected void translate(String command) {
 		return true;
 	}
 	
+	/**
+	 * Executes Minion: first the string from the solver input tab is read and 
+	 * written into a file. Then that file is given as input to Minion with 
+	 * respect to the solving settings given (amount of solutions etc).
+	 * 
+	 */
 	protected void runMinion() {
 		
 		try {
 			String outputFileName = this.settings.getSolverInputFileName();
 			//-------------- write the output into a file --------------- 
-			writeOnMessageOutput("Creating minion file: "+outputFileName+"\n");
+			writeOnMessageOutput("Creating Minion file: "+outputFileName+"\n");
 			File file  = new File(outputFileName);
 		    if(file.createNewFile()) ;
 			FileWriter writer = new FileWriter(file);
         
 			if(!file.canRead())
-				writeOnMessageOutput("Cannot read file: \n "+file.toString()+"\n");
+				writeOnMessageOutput("Cannot read file: \n "+file.toString()+"\nPlease change reading permissions.");
 			else if(!file.canWrite())
-				writeOnMessageOutput("Cannot write file: \n "+file.toString()+"\n");
+				writeOnMessageOutput("Cannot write file: \n "+file.toString()+"\nPlease change writing permissions.");
 
 			writer.write(this.minionOutput.getText());
-			String message = "Saved minion input in file: \n " + file.getName() + "." +"\n";
+			String message = "Saved Minion input in file: \n " + file.getName() + "." +"\n";
 			writeOnMessageOutput(message);
 			
 			writer.flush();
@@ -1373,61 +1412,60 @@ protected void translate(String command) {
             
             Process process = Runtime.getRuntime().exec(commandArguments);
             
+            // first read the input and the error stream
             InputStream inputStream = process.getInputStream();
+            InputStream errorStream = process.getErrorStream();
+            BufferedReader input =new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader error =new BufferedReader(new InputStreamReader(errorStream));
             
+            String line;
+            String solverOutputString = "";
+            while ((line = input.readLine()) != null) {
+            	solverOutputString = solverOutputString+line+"\n";
+            }
+            line = "";
+            StringBuffer solverErrorMessage = new StringBuffer("");
+            while ((line = error.readLine()) != null) {
+              	solverErrorMessage.append(line+"\n");
+            }              
+            
+            // then wait for process (to conform with Microsoft Windows)
             process.waitFor();
             
             int exitValue = process.exitValue();
               
-            BufferedReader input;
             
             if(exitValue == 0) {
-                String line;
-                
-                input =new BufferedReader(new InputStreamReader(inputStream));
-                String s = "";
-                  while ((line = input.readLine()) != null) {
-                	 s = s+line+"\n";
-                  }
-                  //writeOnOutput(this.SOLUTION_TAB_NR, s+"\n\n\n\n"+this.translator.getEssenceSolution(s));
-                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s));
+                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(solverOutputString));
                   input.close();
             }
             else {
-                String line;
                 writeOnOutput(this.SOLUTION_TAB_NR, "$ Error in executing Minion.\n$ See system messages below for details.\n");
-                //input =new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                input =new BufferedReader(new InputStreamReader(inputStream));
-                BufferedReader errorStream = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                
-                StringBuffer s = new StringBuffer("");
-                while ((line = input.readLine()) != null) {
-                	s.append(line+"\n");
-                }
-                //writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(s.toString()));
-                if(s.length() > 1)
-                	this.writeOnMessageOutput("Minion returned the following error message:\n"+s);
-                
-                //writeOnMessageOutput(s);
-                input.close();
-                
-                StringBuffer errorMessage = new StringBuffer("");
-                while ((line = errorStream.readLine()) != null) {
-                	errorMessage.append(line+"\n");
-                }
-                this.writeOnMessageOutput("Minion returned the following error message:\n"+errorMessage);
+           
+                if(solverOutputString.length() > 1)
+                	this.writeOnMessageOutput("Minion returned the following error message:\n"+solverOutputString);
+                input.close(); 
+       
+                this.writeOnMessageOutput("Minion returned the following error message:\n"+solverErrorMessage);
+                error.close();
             }
 		
 		} catch(Exception e) {
 			writeOnMessageOutput("Could not run Minion:\n"+e.getMessage()+"\n"+
 					"You can change the path to your Minion executable in 'Settings'.\n");
 			return;
-		}
-	
-		
+		}	
 	}
 	
 	
+	/**
+	 * Write a String on the tab with number 'tabNumber'. 
+	 * There are tabs for normalised E', flat E', solver input
+	 * and the E' solution.
+	 * 
+	 * @param tabNumber
+	 * @param text
+	 */
     public void writeOnOutput(int tabNumber, String text) {
 		
 		if(tabNumber == this.NORMALISE_TAB_NR) {
@@ -1457,7 +1495,13 @@ protected void translate(String command) {
 		}
 	}
     
-    
+    /**
+     * Puts the caret at a given position on the output with 
+     * number tabNumber.
+     * 
+     * @param tabNumber
+     * @param position
+     */
   public void setCaretPositionOnOutput(int tabNumber, int position) {
 		
 		if(tabNumber == this.NORMALISE_TAB_NR) {
@@ -1487,7 +1531,6 @@ protected void translate(String command) {
 	
 	
 	private void writeOnMessageOutput(String message) {
-		//((JTextArea) this.outputTabbedPanel.getSelectedComponent()).setText(message);
 		this.messageOutput.setText(message);
 	}
 	

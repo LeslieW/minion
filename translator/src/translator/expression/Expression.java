@@ -17,7 +17,7 @@ public interface Expression {
 	// RelationalAtomExpression.java
 	public final int FALSE = -1;
 	public final int BOOL = 0;
-	public final int BOOL_VARIABLE = 5;
+	public final int BOOL_VAR = 5;
 	public final int BOOL_ARRAY_VAR = 6;
 		
 	// --------------------------------------------------------

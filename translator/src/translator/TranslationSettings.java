@@ -200,6 +200,7 @@ public class TranslationSettings {
 	
 	public void setTargetSolver(TargetSolver solver) {
 		this.targetSolver = solver;
+		this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
 	}
 	
 	public void setUseCommonSubExpressions(boolean turnOn) {

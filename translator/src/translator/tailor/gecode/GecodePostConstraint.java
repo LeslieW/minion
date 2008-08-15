@@ -18,7 +18,7 @@ public class GecodePostConstraint extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF && 
 				this.propagationKind == GecodeConstraint.PK_DEF) 
-			s.append(")");
+			s.append(", opt.icl())");
 		else {
 			s.append(", "+consistencyToString(this.consistencyLevel)+", "+propagationToString(this.propagationKind)+")");
 		}
@@ -30,7 +30,7 @@ public class GecodePostConstraint extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF && 
 				this.propagationKind == GecodeConstraint.PK_DEF) 
-			s.append(")");
+			s.append(", opt.icl())");
 		else {
 			s.append(", "+consistencyToString(this.consistencyLevel)+", "+propagationToString(this.propagationKind)+")");
 		}

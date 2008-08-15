@@ -14,9 +14,9 @@ public class SimpleBoolRelation extends RelationalConstraint {
 	 * @param intOp integer relational operator
 	 * @param rightArgument x1
 	 */
-	public SimpleBoolRelation(GecodeBoolVar leftArgument,
+	public SimpleBoolRelation(GecodeBoolAtomVariable leftArgument,
 							  char intOp,
-							  GecodeBoolVar rightArgument) {
+							  GecodeBoolAtomVariable rightArgument) {
 		
 		this.leftArgument = leftArgument;
 		this.rightArgument = rightArgument;
@@ -37,7 +37,7 @@ public class SimpleBoolRelation extends RelationalConstraint {
 	 */
 	public SimpleBoolRelation(GecodeBoolVarArgs leftArgsArgument,
 			                  char intOp,
-			                  GecodeBoolVar rightArgument) {
+			                  GecodeBoolAtomVariable rightArgument) {
 		
 		this.leftArgument = leftArgsArgument;
 		this.rightArgument = rightArgument;
@@ -54,7 +54,7 @@ public class SimpleBoolRelation extends RelationalConstraint {
 	 * @param intOp
 	 * @param constant
 	 */
-	public SimpleBoolRelation(GecodeBoolVar leftVariable,
+	public SimpleBoolRelation(GecodeBoolAtomVariable leftVariable,
 							  char intOp,
 							  GecodeConstant constant) {
 		this.leftArgument = leftVariable;

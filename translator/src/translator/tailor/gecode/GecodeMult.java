@@ -35,7 +35,7 @@ public class GecodeMult extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF)
-			s = s+")";
+			s = s+", opt.icl())";
 		
 		else s = s+", "+consistencyToString(this.consistencyLevel)+", "+propagationToString(this.propagationKind)+")";
 		
@@ -49,7 +49,7 @@ public class GecodeMult extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF)
-			s = s+")";
+			s = s+", opt.icl())";
 		
 		else s = s+", "+consistencyToString(this.consistencyLevel)+", "+propagationToString(this.propagationKind)+")";
 		

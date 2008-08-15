@@ -7,8 +7,7 @@ package translator.tailor.gecode;
  *
  */
 
-public class GecodeIntArrayElem implements IntegerVariable,
-										   GecodeAtomVariable {
+public class GecodeIntArrayElem implements GecodeIntAtomVariable {
 
 	private String name;
 	private int[] indices;

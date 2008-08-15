@@ -16,7 +16,7 @@ import translator.solver.Gecode;
  */
 
 public class GecodeModel {
-
+	
 	/** list of 1-dim. variable arrays */
 	private ArrayList<GecodeArrayVariable> variableList;
 	/** arrays that buffer single vars */
@@ -36,7 +36,7 @@ public class GecodeModel {
 	private TranslationSettings settings;
 	
 	private String modelName;
-	
+	private int solutionBreak = 10;
 	
 	
 	public GecodeModel(TranslationSettings settings,
@@ -235,14 +235,16 @@ public class GecodeModel {
 	 */
 	private String printingMethodToString() {
 		StringBuffer s = new StringBuffer("   // method for printing solutions\n");
-		s.append("   virtual void print(void) {\n\tstd::cout << \"\\t\";\n");
+		String osStreamName = "os";
+		s.append("   virtual void print(std::ostream& "+osStreamName+") {\n\t"+osStreamName+" << \"\\n\";\n");
 		
 		for(int i=0; i<this.variableList.size(); i++) {
 			GecodeArrayVariable var = variableList.get(i);
-			s.append("\tstd::cout  << \" "+var.getVariableName()+":\" << std::endl;\n");
-			s.append("\tfor(int i=0; i<"+var.getLength()+", i++) \n");
-			s.append("\t   std::cout  << "+var.getVariableName()+"[i] << \"  \";");
-			s.append("\tstd::cout << std::endl;\n\n");
+			s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
+			s.append("\tfor(int i=0; i<"+var.getLength()+", i++) {\n");
+			s.append("\t   "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";");
+			s.append("\t   if(i % "+this.solutionBreak+" == 0) "+osStreamName+" << \"\\n\";\n");
+			s.append("\t"+osStreamName+"<< std::endl;\n\n");
 		}
 		
 		s.append("\n");
@@ -250,14 +252,18 @@ public class GecodeModel {
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			GecodeArrayVariable var = bufferArrays.get(i);
 			boolean isInteger = (var instanceof GecodeIntVarArray);
+			s.append("\t"+osStreamName+" << \" Solution: \" ;\n");
 			
 			for(int j=0; j<var.getLength(); j++) {
 				if(isInteger) {
-					s.append("\tstd::cout  << \" "+this.singleIntVarNames.get(j).getVariableName()+":\"");
+					s.append("\t"+osStreamName+"  << \" "+this.singleIntVarNames.get(j).getVariableName()+"=\"");
 				}
-				else s.append("\tstd::cout  << \" "+this.singleBoolVarNames.get(j).getVariableName()+":\"");
+				else s.append("\t"+osStreamName+"  << \" "+this.singleBoolVarNames.get(j).getVariableName()+"=\"");
 				
-				s.append(" << "+var.getVariableName()+"["+j+"] << std::endl;\n");
+				s.append(" << "+var.getVariableName()+"["+j+"]");
+				if(j != var.getLength()-1) s.append("<< \", \"");  
+				if(j % this.solutionBreak == 0 && j!= 0 )s.append("<< \" \\n\\t \"");
+				s.append(";\n");
 			}
 		}
 		
