@@ -9,10 +9,10 @@ package translator.tailor.gecode;
 
 public class GecodeDistinct extends RelationalConstraint {
 
-	private GecodeIntVarArgs array;
+	private GecodeIntArray array;
 	
 	
-	public GecodeDistinct(GecodeIntVarArgs variables) {
+	public GecodeDistinct(GecodeIntArray variables) {
 		this.array = variables;
 		
 		this.supportedConsistencyLevels = new char[] {GecodeConstraint.ICL_BND,

@@ -1,13 +1,23 @@
 package translator.tailor.gecode;
 
-public class GecodeIntVarArray implements GecodeArrayVariable, IntegerVariable {
+public class GecodeIntVarArray implements GecodeIntArray {
 
 	private int lb;
 	private int ub;
+	private int[] sparseDomain;
 	private String name;
 	private int length;
 	
 	
+	/**
+	 * Constructor for bounds (or discrete) domain 
+	 * variables
+	 * 
+	 * @param name
+	 * @param length
+	 * @param lb
+	 * @param ub
+	 */
 	public GecodeIntVarArray(String name, 
 							 int length,
 							 int lb,
@@ -16,6 +26,24 @@ public class GecodeIntVarArray implements GecodeArrayVariable, IntegerVariable {
 		this.length = length;
 		this.lb = lb;
 		this.ub = ub;
+	}
+	
+	
+	/**
+	 * Constructor for sparse domain variables
+	 * 
+	 * @param name
+	 * @param length
+	 * @param sparseDomain
+	 */
+	public GecodeIntVarArray(String name, 
+			 int length,
+			 int[] sparseDomain) {
+		this.name = name;
+		this.length = length;
+		this.sparseDomain = sparseDomain;
+		this.lb = sparseDomain[0];
+		this.ub = sparseDomain[sparseDomain.length-1];
 	}
 	
 	
@@ -83,5 +111,13 @@ public class GecodeIntVarArray implements GecodeArrayVariable, IntegerVariable {
 	
 	public void setUpperBound(int ub) {
 		this.ub = ub;
+	}
+	
+	public int[] getSparseDomain() {
+		return this.sparseDomain;
+	}
+	
+	public boolean isSparseDomain() {
+		return (this.sparseDomain != null);
 	}
 }

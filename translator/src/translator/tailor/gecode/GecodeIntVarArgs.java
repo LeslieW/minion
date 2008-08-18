@@ -1,6 +1,6 @@
 package translator.tailor.gecode;
 
-public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
+public class GecodeIntVarArgs implements GecodeIntArray, ArgsVariable {
 
 	private GecodeAtom[] variables;
 	private String name;
@@ -24,6 +24,18 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
 		return new int[] {lb, ub};
 	}
 
+	public int getLowerBound() {
+		return this.lb;
+	}
+	
+	public int getUpperBound() {
+		return this.lb;
+	}
+	
+	public int getLength() {
+		return this.variables.length;
+	}
+	
 	public boolean isArgsVariable() {
 		return true;
 	}

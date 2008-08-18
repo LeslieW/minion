@@ -216,8 +216,13 @@ public class GecodeModel {
 	 * @return
 	 */
 	private String cloningConstructorToString() {
+		
 		StringBuffer s = new StringBuffer("   // constructor for cloning\n   "
 				+modelName+"(bool share, "+modelName+"& s) : Example(share,s) {\n");
+		
+		for(int i=0; i<this.variableList.size(); i++) {
+			s.append("\t"+variableList.get(i)+".update(this, share, s."+variableList.get(i)+");\n");
+		}
 		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			s.append("\t"+bufferArrays.get(i)+".update(this, share, s."+bufferArrays.get(i)+");\n");
@@ -241,10 +246,10 @@ public class GecodeModel {
 		for(int i=0; i<this.variableList.size(); i++) {
 			GecodeArrayVariable var = variableList.get(i);
 			s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
-			s.append("\tfor(int i=0; i<"+var.getLength()+", i++) {\n");
-			s.append("\t   "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";");
-			s.append("\t   if(i % "+this.solutionBreak+" == 0) "+osStreamName+" << \"\\n\";\n");
-			s.append("\t"+osStreamName+"<< std::endl;\n\n");
+			s.append("\tfor(int i=0; i<"+var.getLength()+"; i++) {\n");
+			s.append("\t   "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";\n");
+			s.append("\t   if(i % "+this.solutionBreak+" == 0) "+osStreamName+" << \"\\n\";\n\t}\n");
+			s.append("\t"+osStreamName+" << std::endl;\n\n");
 		}
 		
 		s.append("\n");

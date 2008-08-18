@@ -330,9 +330,50 @@ public class GecodeTailor {
 									intRange.getRange()[0], 
 									intRange.getRange()[1]);
 		}
-	
-		if(domain.getType() == Domain.BOOL) {
+		
+		else if(domain.getType() == Domain.SINGLE_INT) {
+			SingleIntRange intRange = (SingleIntRange) domain;
+			return new GecodeIntVar(variableName, 
+									intRange.getRange()[0], 
+									intRange.getRange()[0]);
+		}
+		
+		else if(domain.getType() == Domain.BOOL) {
 			return new GecodeBoolVar(variableName);
+		}
+		
+		else if(domain.getType() == Domain.CONSTANT_ARRAY) {
+			ConstantArrayDomain constArrayDomain = (ConstantArrayDomain) domain;
+			ConstantDomain[] indexDomains = constArrayDomain.getIndexDomains();
+			ConstantDomain baseDomain = constArrayDomain.getBaseDomain();
+			
+			// 1-dimensional array
+			if(indexDomains.length == 1) {
+				ConstantDomain indexDomain = indexDomains[0];
+				int noOfVariables = indexDomain.getFullDomain().length;
+				
+				if(baseDomain.getType() == Domain.BOOL) {
+					return new GecodeBoolVarArray(variableName,
+											      noOfVariables);
+				}
+				else if(baseDomain.getType() == Domain.SINGLE_INT ||
+						  baseDomain.getType() == Domain.INT_SPARSE) {
+					return new GecodeIntVarArray(variableName, 
+												 noOfVariables,
+												 baseDomain.getFullDomain());
+				}
+				
+				else if(baseDomain.getType() == Domain.INT_BOUNDS) {
+					return new GecodeIntVarArray(variableName,
+												 noOfVariables,
+												 baseDomain.getRange()[0],
+												 baseDomain.getRange()[1]);
+				}
+				
+				else throw new GecodeException("Sorry, cannot tailor array '"+variableName+"' with base-domain "+baseDomain+" to Gecode (yet).");
+			}
+			
+			else throw new GecodeException("Sorry, cannot tailor multi-dimensional arrays, such as "+variableName+", to Gecode (yet).");
 		}
 		
 		throw new GecodeException("Cannot tailor variable '"+variableName+"' with domain-type "
@@ -682,7 +723,6 @@ public class GecodeTailor {
 											  var.getDomain()[0],
 											  var.getDomain()[1]);
 		}
-
 		
 		else throw new GecodeException("Unknown arithmetic atomic type: "+e);
 	}
