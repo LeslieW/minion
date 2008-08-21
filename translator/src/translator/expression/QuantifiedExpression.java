@@ -257,4 +257,17 @@ public class QuantifiedExpression implements RelationalExpression {
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		return false;
+		//return this.quantifiedExpression.isLinearExpression();
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 }

@@ -67,6 +67,7 @@ public class Gecode extends GeneralTargetSolver {
 		
 		// can expressions be arbitrarily nested?
 		featureMap.put(new Integer(NESTED_EXPRESSIONS),new Boolean(false));
+		featureMap.put(new Integer(NESTED_LINEAR_EXPRESSIONS),new Boolean(true));
 		// can we express an objective directly?
 		featureMap.put(new Integer(TargetSolver.SUPPORTS_OBJECTIVE), new Boolean(false));
 		// can the objective be an expression(true) or does it have to be a variable(false)?

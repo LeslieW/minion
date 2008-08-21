@@ -206,6 +206,17 @@ public class VariableArray implements SingleArray {
 		return s.toString();
 	}
 	
+	public boolean isLinearExpression() {
+		return true;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
 	
 	// ================== ADDITIONAL METHODS ===================
 	

@@ -382,12 +382,16 @@ public class TailorGUI extends javax.swing.JFrame {
         gridBagConstraints.weighty = 0.1;
         problemInputPanel.add(problemInputScrollPane, gridBagConstraints);
 
-        //problemButtonPanel.setPreferredSize(new java.awt.Dimension(390, 130));
+        
+        
+        //problemButtonPanel.setPreferredSize(new java.awt.Dimension(200, 30));
         problemButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
-
+        Dimension buttonSize = (new JButton()).getPreferredSize(); //new Dimension(20,30);
+        
         saveProblemButton.setText("save");
         saveProblemButton.setActionCommand(SAVE_PROBLEM);
         saveProblemButton.setBackground(this.buttonColor);
+        saveProblemButton.setPreferredSize(buttonSize);
 		saveProblemButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           save(e.getActionCommand());   
@@ -399,6 +403,7 @@ public class TailorGUI extends javax.swing.JFrame {
         loadProblemButton.setText("load");
         loadProblemButton.setActionCommand(LOAD_PROBLEM);
         loadProblemButton.setBackground(this.buttonColor);
+        loadProblemButton.setPreferredSize(buttonSize);
         loadProblemButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           load(e.getActionCommand());   
@@ -409,6 +414,7 @@ public class TailorGUI extends javax.swing.JFrame {
         clearProblemButton.setText("clear");
         clearProblemButton.setActionCommand(this.CLEAR_PROBLEM);
         clearProblemButton.setBackground(this.buttonColor);
+        clearProblemButton.setPreferredSize(buttonSize);
         clearProblemButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           clearInputField(e.getActionCommand());   
@@ -483,6 +489,7 @@ public class TailorGUI extends javax.swing.JFrame {
         saveParameterButton.setText("save");
         saveParameterButton.setActionCommand(SAVE_PARAMETER);
         saveParameterButton.setBackground(this.buttonColor);
+        saveParameterButton.setPreferredSize(buttonSize);
 		saveParameterButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           save(e.getActionCommand());   
@@ -493,6 +500,7 @@ public class TailorGUI extends javax.swing.JFrame {
         loadParameterButton.setText("load");
         loadParameterButton.setActionCommand(LOAD_PARAMETER);
         loadParameterButton.setBackground(this.buttonColor);
+        loadParameterButton.setPreferredSize(buttonSize);
 		loadParameterButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           load(e.getActionCommand());   
@@ -503,6 +511,7 @@ public class TailorGUI extends javax.swing.JFrame {
         clearParameterButton.setText("clear");
         clearParameterButton.setActionCommand(this.CLEAR_PARAMETER);
         clearParameterButton.setBackground(this.buttonColor);
+        clearParameterButton.setPreferredSize(buttonSize);
 		clearParameterButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           clearInputField(e.getActionCommand());   
@@ -577,8 +586,8 @@ public class TailorGUI extends javax.swing.JFrame {
 		           translate(e.getActionCommand());   
 			  }
 			});
-		//this.gecodeButton.setEnabled(false);
-		solverButtonPanel.add(gecodeButton);
+		this.gecodeButton.setEnabled(false);
+		//solverButtonPanel.add(gecodeButton);
 		
 		middlePanel.add(solverButtonPanel);
 		middlePanel.setBackground(this.bgColor);
@@ -622,6 +631,7 @@ public class TailorGUI extends javax.swing.JFrame {
         saveOutputButton.setText("save");
         saveOutputButton.setActionCommand(this.SAVE_OUTPUT);
         saveOutputButton.setBackground(this.buttonColor);
+        saveOutputButton.setPreferredSize(buttonSize);
         saveOutputButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           save(e.getActionCommand());   
@@ -631,10 +641,12 @@ public class TailorGUI extends javax.swing.JFrame {
 
         clearOutputButton.setText("clear");
         clearOutputButton.setBackground(this.buttonColor);
+        clearOutputButton.setPreferredSize(buttonSize);
         outputButtonPanel.add(clearOutputButton);
 
         runMinionButton.setText("run Minion");
         runMinionButton.setBackground(this.buttonColor);
+        runMinionButton.setPreferredSize(buttonSize);
         runMinionButton.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		           runMinion();   

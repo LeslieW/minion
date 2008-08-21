@@ -179,6 +179,18 @@ public class QuantifiedSum implements ArithmeticExpression {
 		return this;
 	}
     
+    public boolean isLinearExpression() {
+		return this.quantifiedExpression.isLinearExpression();
+	}
+    
+    public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+    
 	// ================ OTHER METHODS ======================================
 	
 	public Domain getQuantifiedDomain() {

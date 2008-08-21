@@ -237,4 +237,29 @@ public class ArithmeticAtomExpression implements ArithmeticExpression,AtomExpres
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		return true;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+	
+		if(solver instanceof translator.solver.Gecode) {
+			if(solver instanceof translator.solver.Gecode) {
+				if(this.variable instanceof ArrayVariable) {
+					if(((ArrayVariable) this.variable).isIndexedBySomethingNotConstant()){
+						throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+				+"' for solver "+solver.getSolverName());
+					}
+				}
+				return this.toString();
+			}
+			
+			
+		}
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 }

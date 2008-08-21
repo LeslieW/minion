@@ -488,4 +488,33 @@ public class Sum extends NaryArithmeticExpression {
 		return this;
 		
 	}
+	
+	public boolean isLinearExpression() {
+		
+		for(int i=0; i<this.positiveArguments.size(); i++) 
+			if(!this.positiveArguments.get(i).isLinearExpression())
+				return false;
+			
+		for(int i=0; i<this.negativeArguments.size(); i++) 
+			if(!this.negativeArguments.get(i).isLinearExpression())
+				return false;
+		
+		return true;
+	}
+	
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		if(solver instanceof translator.solver.Gecode &&
+				this.isLinearExpression()) {
+			
+			return this.toSolverExpression(solver);
+		}
+		
+
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 }

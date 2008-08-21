@@ -422,4 +422,26 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 		
 		return s.toString();
 	}
+	
+	public boolean isLinearExpression() {
+		return true;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		if(solver instanceof translator.solver.Gecode) {
+			for(int i=0; i<this.indices.size(); i++) {
+				if(indices.get(i).getType() != Expression.INT  || 
+						indices.get(i).getType() != Expression.BOOL )
+					throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+							+"' for solver "+solver.getSolverName());
+			}
+			return this.toSolverExpression(solver);
+		}
+		
+
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
 }

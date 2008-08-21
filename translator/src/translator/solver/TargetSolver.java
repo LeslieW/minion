@@ -53,7 +53,8 @@ public interface TargetSolver {
 	
 	// ============= constraints stuff =================
 	/** supports nested expressions in ANY constraint */
-	public final char NESTED_EXPRESSIONS = 69;
+	public final int NESTED_EXPRESSIONS = 69;
+	public final int NESTED_LINEAR_EXPRESSIONS = 700;
 	
 	public final int SUPPORTS_OBJECTIVE = 400;
 	public final int CONSTRAINT_OBJECTIVE = 401; // otherwise the objective has to be a variable

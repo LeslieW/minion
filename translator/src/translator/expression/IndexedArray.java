@@ -195,6 +195,17 @@ public class IndexedArray implements SingleArray {
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		return false;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 	 // =================== ADDITIONAL METHODS ===============================================
 	
 	

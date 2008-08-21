@@ -188,4 +188,21 @@ public class Objective implements Expression {
 		
 		return s;
 	}
-}
+	
+	public boolean isLinearExpression() {
+		return this.objective.isLinearExpression();
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		if(solver instanceof translator.solver.Gecode) {
+			if(this.isLinearExpression()) {
+				this.objective.toSolverExpression(solver);
+			}
+		}
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+ }

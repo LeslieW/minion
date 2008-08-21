@@ -111,4 +111,17 @@ public class Negation implements UnaryRelationalExpression {
 		this.argument = this.argument.replaceVariableWith(oldVariable, newVariable);
 		return this;
 	}
+	
+	public boolean isLinearExpression() {
+		return this.argument.isLinearExpression();
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
 }

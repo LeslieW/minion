@@ -397,4 +397,43 @@ public class NonCommutativeRelationalBinaryExpression implements
 		this.rightArgument = this.rightArgument.replaceVariableWith(oldVariable, newVariable);
 		return this;
 	}
+	
+	public boolean isLinearExpression() {
+		if(this.type == Expression.IF || 
+				this.type == Expression.LEX_GEQ || 
+				this.type == Expression.LEX_LEQ || 
+				this.type == Expression.LEX_LESS || 
+				this.type == Expression.LEX_GREATER) return false;
+		return this.leftArgument.isLinearExpression() && 
+			this.rightArgument.isLinearExpression();
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+	
+		if(solver instanceof translator.solver.Gecode &&
+				this.isLinearExpression()) {
+			String operator = "";
+			
+			switch(this.type) {
+			//case IF: 	operator = "=>"; break;
+			case LESS:	operator = "<"; break; 
+			case LEQ: 	operator = "<="; break;
+			case GEQ:   operator = ">="; break;
+			case GREATER: operator = ">"; break;	
+			//case LEX_LESS:	operator = "lex<"; break; 
+			//case LEX_LEQ: 	operator = "lex<="; break;
+			//case LEX_GEQ:   operator = "lex>="; break;
+			//case LEX_GREATER: operator = "lex>"; break;	
+			default: throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+					+"' for solver "+solver.getSolverName());
+			}
+			
+			return this.leftArgument+operator+this.rightArgument;
+		}
+			
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
 }

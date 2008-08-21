@@ -248,7 +248,7 @@ public class GecodeModel {
 			s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
 			s.append("\tfor(int i=0; i<"+var.getLength()+"; i++) {\n");
 			s.append("\t   "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";\n");
-			s.append("\t   if(i % "+this.solutionBreak+" == 0) "+osStreamName+" << \"\\n\";\n\t}\n");
+			s.append("\t   if(i % "+this.solutionBreak+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
 			s.append("\t"+osStreamName+" << std::endl;\n\n");
 		}
 		
@@ -412,6 +412,9 @@ public class GecodeModel {
 		String variableBranching = ((Gecode) this.settings.getTargetSolver()).toGecodeVariableBranching(settings.getVarBranching());
 		String valueBranching = ((Gecode) this.settings.getTargetSolver()).toGecodeValueBranching(settings.getValBranching());
 		
+		for(int i=0; i<this.variableList.size(); i++) {
+			s.append("\tbranch(this, "+variableList.get(i)+", "+variableBranching+", "+valueBranching+");\n");
+		}
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			s.append("\tbranch(this, "+bufferArrays.get(i)+", "+variableBranching+", "+valueBranching+");\n");
 		}

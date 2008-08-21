@@ -165,6 +165,22 @@ public class SingleVariable implements Variable {
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		return true;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		if(solver instanceof translator.solver.Gecode) {
+			return this.toSolverExpression(solver);
+		}
+		
+
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 	// =============== ADDITIONAL METHODS ==================
 	
 	public Domain getExplicitDomain() {

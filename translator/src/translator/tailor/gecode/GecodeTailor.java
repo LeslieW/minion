@@ -150,6 +150,13 @@ public class GecodeTailor {
 	protected GecodeConstraint tailorToGecode(Expression e) 
 		throws GecodeException {
 		
+		// linear expressions can be mapped directly
+		if(e.isLinearExpression()) {
+			try {
+				return new GecodePostConstraint(e.toSolverExpression(settings.getTargetSolver()));
+			} catch (Exception exception) {	; /* do nothing - just carry on */ }
+		}
+		
 		if(e instanceof AbsoluteValue) {
 			throw new GecodeException("Flattening error. Gecode does not support Absolute Values, such as:"+e);
 		}

@@ -284,6 +284,30 @@ public Expression replaceVariableWithExpression(String variableName, Expression 
 		
 	}
 	
+	public boolean isLinearExpression() {
+		return !isNonLinearMultiplication();
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		if(solver instanceof translator.solver.Gecode) {
+			if(!isNonLinearMultiplication()) {
+				if(this.arguments.size() == 0)
+					throw new Exception("Empty multiplication: "+this);
+			
+				StringBuffer s = new StringBuffer(this.arguments.get(0).toString());
+			
+				for(int i=1; i<this.arguments.size(); i++)
+					s.append("*"+this.arguments.get(i));
+			
+				return s.toString();
+			}
+		}
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
 	
 	// ================== ADDITIONAL METHODS ==============================
 	

@@ -246,5 +246,20 @@ public class Conjunction extends NaryRelationalExpression {
 		return this;
 		
 	}
+	
+	public boolean isLinearExpression() {
+		for(int i=0; i<this.conjointExpressions.size(); i++) {
+			if(!this.conjointExpressions.get(i).isLinearExpression())
+				return false;
+		}
+		return true;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
 }
 

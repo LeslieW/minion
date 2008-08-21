@@ -148,9 +148,22 @@ public class AbsoluteConstraint implements GlobalConstraint {
 
 	}
 
+	public boolean isLinearExpression() {
+		boolean isLinear = this.result.isLinearExpression();
+		return this.argument.isLinearExpression() && isLinear;
+	}
+	
+	
 	public String toString() {
 		
 		return "|"+this.argument+"| = "+this.result;
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+		throws Exception {
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+				+"' for solver "+solver.getSolverName());
 	}
 	
 	// ============= ADDITIONAL METHODS ============================

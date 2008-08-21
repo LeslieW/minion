@@ -265,8 +265,21 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		return this.leftArgument.isLinearExpression() && 
+			this.rightArgument.isLinearExpression();
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 	//======================== ADDITIONAL METHODS ===============================
-	private int power(int base, int exponent) {
+	/*private int power(int base, int exponent) {
 		
 		int result = 1;
 		
@@ -282,7 +295,7 @@ public class NonCommutativeArithmeticBinaryExpression implements
 		}
 		
 		return result;
-	}
+	} */
 	
 	
 	public int getOperator() {

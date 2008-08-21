@@ -10,7 +10,7 @@ public class CommutativeBinaryRelationalExpression implements
 	
 	private int type;
 	private boolean isNested = true;
-	private boolean willBeReified = false;
+	private boolean willBeReified = false;   
 	
 	//============== Constructors ==================
 	
@@ -356,6 +356,38 @@ public class CommutativeBinaryRelationalExpression implements
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		boolean isLinear = this.leftArgument.isLinearExpression();
+		isLinear = this.rightArgument.isLinearExpression() && isLinear;
+		return isLinear;
+	}
+	
+
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+	
+		if(solver instanceof translator.solver.Gecode &&
+				this.isLinearExpression()) {
+			String operator = "";
+			
+			switch(this.type) {
+			//case IFF: operator = "<=>";break;
+			case EQ:  operator = " == "; break;
+			case NEQ: operator = " != "; break;
+			//case AND: operator = " /\\ "; break;
+			//case OR: operator = " \\/ "; break;
+			default: throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+					+"' for solver "+solver.getSolverName());
+			}
+			
+			return this.leftArgument+operator+this.rightArgument;
+		}
+			
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 	// ============== ADDITIONAL METHODS ===============================
 	
 	
@@ -390,4 +422,6 @@ public class CommutativeBinaryRelationalExpression implements
 	private void setType(int operator) {
 		this.type = operator;
 	}
+	
+	
 }

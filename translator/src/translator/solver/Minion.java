@@ -19,7 +19,7 @@ public class Minion extends GeneralTargetSolver {
 		// general stuff
 		this.solverName = "Minion";
 		this.inputFileExtension = "minion";
-		this.version = "0.5.1";
+		this.version = "0.7.0";
 		this.varBranchingStrategies = new String[] {DEFAULT_VAR_BRANCHING};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH};
 		
@@ -36,6 +36,7 @@ public class Minion extends GeneralTargetSolver {
 		// ------------ features of the solver -----------------------------
 		// constraints
 		featureMap.put(new Integer(NESTED_EXPRESSIONS),new Boolean(false));
+		featureMap.put(new Integer(NESTED_LINEAR_EXPRESSIONS),new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.SUPPORTS_OBJECTIVE), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_OBJECTIVE), new Boolean(false));
 		

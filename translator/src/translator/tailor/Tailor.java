@@ -89,6 +89,7 @@ public class Tailor {
 		Flattener flattener = new Flattener(this.settings,
 										    this.problemModel);
 		
+		this.targetSolver = settings.getTargetSolver();
 		this.problemModel =  flattener.flattenModel();
 		return this.problemModel;
 	}

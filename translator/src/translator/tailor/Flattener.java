@@ -152,6 +152,15 @@ public class Flattener {
 		
         // flatten the constraint
 		constraint.setIsNotNested();
+		
+		// we don't need to flatten constraint since linear expressions can be arbitrarily nested
+		if(this.targetSolver.supportsFeature(TargetSolver.NESTED_LINEAR_EXPRESSIONS) &&
+				constraint.isLinearExpression()) {
+			ArrayList<Expression> constraints = new ArrayList<Expression>();
+			constraints.add(constraint); 
+			return constraints;
+		}
+		
 		Expression topExpression = flattenExpression(constraint);
 		ArrayList<Expression> flattenedSubExpressions = this.constraintBuffer;
 		flattenedSubExpressions.add(topExpression);
@@ -165,7 +174,7 @@ public class Flattener {
 	 * in the constraintList.
 	 * 
 	 * @param expression
-	 * @return the eflattened xpression that is representative for the parameter expression. If other constraints
+	 * @return the flattened expression that is representative for the parameter expression. If other constraints
 	 * have been added during the flattening process, they are stored in the constraintList.
 	 * @throws TailorException
 	 */
@@ -1841,13 +1850,20 @@ public class Flattener {
 			if(!conjunction.isNested())
 				arguments.get(i).setIsNotNested();
 			
-			Expression argument = flattenExpression(arguments.remove(i)); //.evaluate();
+			Expression flatArgument;
+			Expression constraint = arguments.remove(i);
 			
-			if(argument.getType() == Expression.BOOL) {
-				if(!((RelationalAtomExpression) argument).getBool())
+			if(this.targetSolver.supportsFeature(TargetSolver.NESTED_LINEAR_EXPRESSIONS) &&
+					constraint.isLinearExpression()) {
+				flatArgument = constraint;
+			}
+			else flatArgument = flattenExpression(constraint); //.evaluate();
+			
+			if(flatArgument.getType() == Expression.BOOL) {
+				if(!((RelationalAtomExpression) flatArgument).getBool())
 					return new RelationalAtomExpression(false);
 			}
-			else arguments.add(i, argument);
+			else arguments.add(i, flatArgument);
 		}
 		
 		if(arguments.size() == 0)

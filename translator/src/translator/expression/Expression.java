@@ -1,8 +1,5 @@
 package translator.expression;
 
-
-
-
 public interface Expression {
 
 	public final boolean DEBUG = true;
@@ -332,6 +329,34 @@ public interface Expression {
 	public Expression replaceVariableWith(Variable oldVariable, Variable newVariable);
 	
 	
-	
+	/**
+	 * Replace variable with variableName with expression Expression
+	 * 
+	 * @param variableName
+	 * @param expression
+	 * @return
+	 * @throws Exception
+	 */
 	public Expression replaceVariableWithExpression(String variableName, Expression expression) throws Exception;
+	
+	/**
+	 * Determines whether expression is linear or not. Returns true if expression is linear.
+	 * 
+	 * @return
+	 */
+	public boolean isLinearExpression();
+	
+	
+	/**
+	 * This method facilitates dealing with (nested) expressions that the target
+	 * solver supports. It returns the expression in the syntax of the respective
+	 * solver. If the expression is not supported by the solver directly, then an 
+	 * exception is thrown.
+	 * (This method has been added in order to facilitate dealing with Gecode's linear
+	 * constraints that can be directly posted because the are handled effectively
+	 * by Gecode internally)
+	 * 
+	 * @return
+	 */
+	public String toSolverExpression(translator.solver.TargetSolver solver) throws Exception;
 }

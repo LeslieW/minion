@@ -215,6 +215,32 @@ public class ProductConstraint implements GlobalConstraint {
 		return this;
 	}
 	
+	public boolean isLinearExpression() {
+		return (!(new Multiplication(this.arguments).isNonLinearMultiplication()) &&
+				this.result.isLinearExpression());
+	}
+	
+	public String toSolverExpression(translator.solver.TargetSolver solver) 
+	throws Exception {
+		
+		if(solver instanceof translator.solver.Gecode) {
+			if(this.isLinearExpression()) {
+				if(this.arguments.length == 0)
+					throw new Exception("Multiplication with no arguments.");
+				
+				StringBuffer s = new StringBuffer(this.arguments[0].toString());
+				
+				for(int i=1; i<this.arguments.length; i++)
+					s.append("*"+this.arguments[i]);
+				
+				return s.append(" == "+result.toSolverExpression(solver)).toString();
+			}
+		}
+		
+		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
+			+"' for solver "+solver.getSolverName());
+	}
+	
 	// ==================== ADDITIONAL METHODS ============================
 	
 	public Expression[] getProductArguments() {
