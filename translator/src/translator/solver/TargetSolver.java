@@ -50,6 +50,7 @@ public interface TargetSolver {
 	public final char VARIABLE_ALIASES = 53;
 	// is it allowed to do for instance M[ N[1], 1]
 	public final char ARRAY_INDEXING_WITH_ARRAYVARS = 54;
+	public final char ARRAY_INDEX_START_VALUE = 55;
 	
 	// ============= constraints stuff =================
 	/** supports nested expressions in ANY constraint */
@@ -228,24 +229,17 @@ public interface TargetSolver {
 	public boolean supportsVariableArrayIndexing();
 	public boolean supportsDiscreteBoundVariables();
 	
+	/** gives the index with which one can dereference the 
+	 * first element of an array in the solver. E.g. if 
+	 * x[0] returns the first element, the value is 0 */
+	public int getArrayIndexingStartValue();
+	
 	//========= CONSTRAINTS FEATURES ===============
 	
 	public boolean supportsNestedExpressions();
 	public boolean supportsConstraint(int constraint);
 	public boolean supportsReificationOf(int operation);
 	public boolean supportsConstraintsNestedAsArgumentOf(int operator);
-	    
-	
-	
-/*	public boolean supportsNaryDisjunction();
-	public boolean supportsNaryConjunction();
-    public boolean supportsNarySum();
-    public boolean supportsNaryMultiplication();
-    public boolean supportsWeightedNarySum();
-    public boolean supportsConstraintsNestedInNegation();
-    
-    public boolean supportsReifiedAllDifferent();
- */
     
     
     //=========	SETTING FEATURES ====================

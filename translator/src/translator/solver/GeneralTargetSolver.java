@@ -33,6 +33,12 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 	protected String valBranchingStrategy;
 	protected String searchStrategy;
 	
+	// --------- variable stuff ------------
+	/** gives the index with which one can dereference the 
+	 * first element of an array in the solver. E.g. if 
+	 * x[0] returns the first element, the value is 0 */
+	protected int arrayIndexStart;
+	
 	// ============ CONSTRUCTOR =============
 	
 	public GeneralTargetSolver() {
@@ -479,6 +485,10 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 		return this.featureMap.get(new Integer(VARIABLE_ARRAY_INDEXING));
 	}
 
+	public int getArrayIndexingStartValue() {
+		return this.arrayIndexStart;
+	}
+	
 	// ========= SOLVING PROCESS =====================
 	
 	

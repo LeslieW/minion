@@ -169,6 +169,9 @@ public class GecodeTailor {
 		else if(e instanceof ProductConstraint) {
 			return tailorProductConstraint( (ProductConstraint) e);
 		}
+		else if(e instanceof AllDifferent) {
+			return tailorAllDifferent((AllDifferent) e);
+		}
 		else if(e instanceof NonCommutativeRelationalBinaryExpression) {
 			return tailorRelation((RelationalExpression) e);
 		}
@@ -467,6 +470,29 @@ public class GecodeTailor {
 	}
 	
 	/**
+	 * Returns Gecode's alldifferent (distinct) constraint
+	 * 
+	 * @param alldiff
+	 * @return
+	 * @throws GecodeException
+	 */
+	private GecodeDistinct tailorAllDifferent(AllDifferent alldiff) 
+		throws GecodeException {
+		
+		Expression e = alldiff.getArgument();
+		if(!(e instanceof Array)) 
+			throw new GecodeException("Expected array as argument of alldifferent '"+
+					alldiff+"' instead of: "+e);
+		
+		GecodeArrayVariable array = tailorToGecodeIntArray((Array) e);
+		if(array instanceof GecodeIntArray)
+			return new GecodeDistinct((GecodeIntArray) array);
+		
+		else throw new GecodeException("Expected integer array instead of '"+
+				array+"' with basic domain:"+((Array) e).getBaseDomain().getClass().getSimpleName());
+	}
+	
+	/**
 	 * Tailors an Essence' sum constraint 
 	 *  sum(+/- X_i)  ~r   Y
 	 *  to the corresponding Gecode Expression.
@@ -700,6 +726,25 @@ public class GecodeTailor {
 				              (GecodeIntVar) result);
 	}
 	
+	/**
+	 * Returns Gecode int arrays.
+	 * 
+	 * @param array
+	 * @return
+	 * @throws GecodeException
+	 */
+	private GecodeArrayVariable tailorToGecodeIntArray(Array array) 
+		throws GecodeException {
+		
+		
+		
+		if(array instanceof SimpleArray) {
+			
+		}
+		
+		throw new GecodeException("Cannot tailor array '"+array+"' of type "+array.getClass().getSimpleName()+
+				" yet, sorry.");
+	}
 	
 	/**
 	 * Tailors arithmetic atom expressions to Gecode atom

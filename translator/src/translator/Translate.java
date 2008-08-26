@@ -478,14 +478,14 @@ public class Translate {
 		System.out.println("\tPlease make sure that '-xcsp' is the last flag you set.\n");
 		
 		//System.out.println("\nAvailable flags:");
-		System.out.println("\nGeneral flags:");
+		System.out.println("\n\nGeneral flags:");
 		System.out.println("-"+HELP+" or -h\n\tprints this help message");
 		System.out.println("-"+MINION_TRANSLATION+" or -m");
 		System.out.println("\tTranslates input files to solver Minion (default).");
 		System.out.println("-"+GECODE_TRANSLATION+" or -g");
 		System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
 		
-		System.out.println("\nTranslation flags:");
+		System.out.println("\n\nTranslation flags:");
 		System.out.println("-"+NO_COMMON_SUBEXPRS);
 		System.out.println("\tTurn off eliminating common subexpressions during flattening.");
 		System.out.println("\tDefault: on");
@@ -514,7 +514,7 @@ public class Translate {
 		System.out.println("\tTo search for all solutions, set AMOUNT to '"+settings.getFindAllSolutionsAlias()+"'.");
 		System.out.println("\tDefault amount of solutions to search for: "+settings.getNoOfSolutions());
 		
-		System.out.println("\nOutput flags:");
+		System.out.println("\n\nOutput flags:");
 		System.out.println("-"+TIME_OFF);
 		System.out.println("\tDisplay time statistics");
 		System.out.println("\tDefault: don't show time statistics");

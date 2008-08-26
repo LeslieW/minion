@@ -22,6 +22,7 @@ public class Minion extends GeneralTargetSolver {
 		this.version = "0.7.0";
 		this.varBranchingStrategies = new String[] {DEFAULT_VAR_BRANCHING};
 		this.searchStrategies = new String[] {DEFAULT_SEARCH};
+		this.arrayIndexStart = 0;
 		
 		this.searchStrategy = DEPTH_FIRST;
 		this.varBranchingStrategy = BRANCH_SMALLEST_DOMAIN;
@@ -32,6 +33,7 @@ public class Minion extends GeneralTargetSolver {
 		
 		featureMap.put(new Integer(TargetSolver.USE_COMMON_SUBEXPRESSIONS), new Boolean(true));
 		featureMap.put(new Integer(SEARCH_OVER_AUXILIARY_VARIABLES),new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.ARRAY_INDEX_START_VALUE), new Boolean(true));
 		
 		// ------------ features of the solver -----------------------------
 		// constraints

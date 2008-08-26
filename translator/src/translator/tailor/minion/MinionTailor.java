@@ -1957,6 +1957,7 @@ public class MinionTailor {
 	
 	/**
 	 * Return the String representation of the Atomic arithmetic expression.
+	 * The offsets to the target solver has been adapted during flattening.
 	 * 
 	 * NOTE: there are ONLY CONSTANT indices allowed now. Every occurrence
 	 * of another expression should have been flattened to an element constraint
@@ -1979,6 +1980,13 @@ public class MinionTailor {
 			if(variable instanceof ArrayVariable) {
 				ArrayVariable arrayElement = (ArrayVariable) variable;
 				
+				int[] indices = arrayElement.getIntegerIndices();
+				if(indices ==null) 
+					throw new MinionException("Flattening error. Cannot translate array element with non-constant element index:"+atom);
+				
+				return new MinionArrayElement(arrayElement.getArrayNameOnly(),
+											  indices);
+				/*
 				if(this.offsetsFromZero.containsKey(arrayElement.getArrayNameOnly())) {
 					int[] offsets = this.offsetsFromZero.get(((ArrayVariable) variable).getArrayNameOnly());
 					
@@ -1999,13 +2007,24 @@ public class MinionTailor {
 					return new MinionArrayElement(arrayElement.getArrayNameOnly(),indices);
 				}
 				else throw new MinionException("Cannot find offsets for array element:"+atom);
+				*/
+				
 			}
 			else return new MinionSingleVariable(variable.getVariableName());
 		}
 
 	}
 	
-	
+	/**
+	 * Flatten an atom expression. An atom is either a constant, a single decision 
+	 * variable or a dereferenced array variable. ONLY CONSTANTS are allowed as 
+	 * indices of array variables now. And the offsets to the target solver 
+	 * has been adapted during flattening.
+	 * 
+	 * @param atom
+	 * @return
+	 * @throws MinionException
+	 */
 	protected MinionConstraint toMinion(RelationalAtomExpression atom) 
 	throws MinionException {
 	
@@ -2020,22 +2039,11 @@ public class MinionTailor {
 		if(variable instanceof ArrayVariable) {
 			ArrayVariable arrayElement = (ArrayVariable) variable;
 			
-			if(this.offsetsFromZero.containsKey(arrayElement.getArrayNameOnly())) {
-				int[] offsets = this.offsetsFromZero.get(((ArrayVariable) variable).getArrayNameOnly());
-				
-				int[] indices = arrayElement.getIntegerIndices();
-				if(indices ==null) 
-					throw new MinionException("Cannot translate array element with non-constant element index:"+atom);
-				
-				for(int i=0; i<indices.length;i++) {
-					indices[i] = indices[i]-offsets[i];
-				}
-				
-				//System.out.println("Converted old relational expression "+atom+" to minion var:"+new MinionArrayElement(arrayElement.getArrayNameOnly(),indices));
-				
-				return new MinionArrayElement(arrayElement.getArrayNameOnly(),indices);
-			}
-			else throw new MinionException("Cannot find offsets for array element:"+atom);
+			int[] indices = arrayElement.getIntegerIndices();
+			if(indices ==null) 
+				throw new MinionException("Flattening error. Cannot translate array element with non-constant element index:"+atom);
+			
+			return new MinionArrayElement(arrayElement.getArrayNameOnly(),indices);
 		}
 		else return new MinionSingleVariable(variable.getVariableName());
 	}

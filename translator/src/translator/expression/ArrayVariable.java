@@ -23,6 +23,7 @@ public class ArrayVariable implements Variable {
 	private boolean isNested = true;
 	private boolean willBeReified = false;
 	private boolean willBeFlattenedToPartwiseElementConstraint = false;
+	private boolean isIndexAdaptedToSolver = false;
 	
 	// ========== CONSTRUCTORS ==========================
 	
@@ -72,18 +73,23 @@ public class ArrayVariable implements Variable {
 			for(int i=0; i<copiedIndices.length; i++) 
 				copiedIndices[i] = this.intIndices[i];
 			
-			return new ArrayVariable(copiedArrayName, 
-					                 copiedIndices, 
-					                 copiedDomain);
+			ArrayVariable newArrayVar =  new ArrayVariable(copiedArrayName, 
+					                 						copiedIndices, 
+					                 						copiedDomain);
+			newArrayVar.setIndexIsAdaptedToSolver(this.isIndexAdaptedToSolver);
+			return newArrayVar;
 		}
 		else {
 			Expression[] copiedIndices = new Expression[this.exprIndices.length];
 			
 			for(int i=0; i<copiedIndices.length; i++) 
-				copiedIndices[i] = this.exprIndices[i].copy();			
-			return new ArrayVariable(copiedArrayName, 
-	                 copiedIndices, 
-	                 copiedDomain);
+				copiedIndices[i] = this.exprIndices[i].copy();
+			
+			ArrayVariable newArrayVar =  new ArrayVariable(copiedArrayName, 
+														   copiedIndices, 
+														   copiedDomain);
+			newArrayVar.setIndexIsAdaptedToSolver(this.isIndexAdaptedToSolver);
+			return newArrayVar;
 		}
 	}
 
@@ -210,7 +216,7 @@ public class ArrayVariable implements Variable {
 			for(int i=1; i<exprIndices.length; i++)
 				s = s.concat(","+exprIndices[i].toString());			
 		}
-		return s+"]";
+		return s+"]";//+((this.isIndexAdaptedToSolver) ? "T" : "F");
 	}
 	
 	
@@ -401,5 +407,16 @@ public class ArrayVariable implements Variable {
 		
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());
+	}
+	
+	
+	// ==================== ADDITIONAL METHODS =======================
+	
+	public boolean isIndexAdaptedToSolver() {
+		return this.isIndexAdaptedToSolver;
+	}
+	
+	public void setIndexIsAdaptedToSolver(boolean turnOn) {
+		this.isIndexAdaptedToSolver = turnOn;
 	}
 }

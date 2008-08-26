@@ -93,7 +93,7 @@ public class TranslationSettings {
 		this.discreteUpperBound = this.DISCRETE_UPPER_BOUND;
 		this.allowParseErrorRecovery = false;
 		this.noOfSolutions = this.DEFAULT_NO_OF_SOLUTIONS;
-		this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
+		//this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
 		this.branchOverAuxVariables = this.BRANCH_OVER_AUX_VARIABLES;
 	}
 	
@@ -200,7 +200,8 @@ public class TranslationSettings {
 	
 	public void setTargetSolver(TargetSolver solver) {
 		this.targetSolver = solver;
-		this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
+		//if(this.solverInputFileName == null)
+		//	this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
 	}
 	
 	public void setUseCommonSubExpressions(boolean turnOn) {

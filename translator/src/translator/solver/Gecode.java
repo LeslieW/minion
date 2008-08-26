@@ -54,12 +54,15 @@ public class Gecode extends GeneralTargetSolver {
 		this.varBranchingStrategy = this.GECODE_DEFAULT_VAR_BRANCHING;
 		this.valBranchingStrategy = this.GECODE_DEFAULT_VAL_BRANCHING;
 		
+		// arrays are indexed starting from 0
+		this.arrayIndexStart = 0;
+		
 		// initialise features of Gecode
 		this.featureMap = new HashMap<Integer, Boolean>();
 		
 		featureMap.put(new Integer(TargetSolver.USE_COMMON_SUBEXPRESSIONS), new Boolean(true));
 		featureMap.put(new Integer(SEARCH_OVER_AUXILIARY_VARIABLES),new Boolean(false));
-		
+		featureMap.put(new Integer(TargetSolver.ARRAY_INDEX_START_VALUE), new Boolean(true));
 		
 		
 		// ------------ features of the solver -----------------------------

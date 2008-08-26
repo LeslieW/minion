@@ -428,7 +428,7 @@ public class SumConstraint implements GlobalConstraint {
 		for(int i=0; i<this.negativeArguments.length; i++)
 			sumPart = sumPart.concat(" - "+negativeArguments[i]);
 		
-		String resultPart = this.result.toString();
+		String resultPart = (this.result == null) ? "" : this.result.toString();
 		
 	/*	return (resultIsOnLeftSide) ?
 				resultPart+operator+sumPart:
@@ -567,7 +567,7 @@ public class SumConstraint implements GlobalConstraint {
 		for(int i=0; i<this.negativeArguments.length; i++)
 			sumPart = sumPart.concat(" - "+negativeArguments[i]);
 		
-		String resultPart = this.result.toString();
+		String resultPart =  this.result.toString();
 		
 		return sumPart+" "+operator+" "+resultPart;
 				
