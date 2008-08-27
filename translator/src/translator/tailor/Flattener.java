@@ -1953,12 +1953,15 @@ public class Flattener {
 			else arguments.add(i, flatArgument);
 		}
 		
+		//System.out.println("Flattened conjunction:"+conjunction);
+		
 		if(arguments.size() == 0)
 			return new RelationalAtomExpression(true);
 		
-		// 2. ---- if the conjunction is not nested/will be reified
+		// 2a. ---- if the conjunction is not nested/will be reified
 		//         then split it into independent constraints
-		if(!conjunction.isGonnaBeFlattenedToVariable()) {
+		if(!conjunction.isGonnaBeFlattenedToVariable() &&
+				!conjunction.isNested()) {
 			for(int i=arguments.size()-1; i>0; i--) {
 				Expression e  = arguments.remove(i);
 				e.orderExpression();
@@ -1969,7 +1972,12 @@ public class Flattener {
 			else return new RelationalAtomExpression(true);
 		}
 		
-		// 2. --- if the conjunction is nested, then just return it if n-ary conjunction is 
+		// 2b ----the conjunction is nested but won't be flattened to a variable
+		else if(!conjunction.isGonnaBeFlattenedToVariable()) {
+			return conjunction;
+			
+		}
+		// 2c. --- if the conjunction is nested, then just return it if n-ary conjunction is 
 		//        is supported by the target solver
 		else {
 			if(conjunction.getArguments().size() == 1) {

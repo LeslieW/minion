@@ -89,7 +89,7 @@ public class GecodeTailor {
 	 */
 	public GecodeModel tailorToGecode(NormalisedModel model,
 									  TranslationSettings settings) 
-		throws GecodeException {
+		throws GecodeException,Exception {
 		
 		this.settings = settings;
 		this.essencePmodel = model;
@@ -148,7 +148,9 @@ public class GecodeTailor {
 	 * @throws GecodeException
 	 */
 	protected GecodeConstraint tailorToGecode(Expression e) 
-		throws GecodeException {
+		throws GecodeException, Exception {
+		
+		
 		
 		// linear expressions can be mapped directly
 		if(e.isLinearExpression()) {
@@ -177,6 +179,15 @@ public class GecodeTailor {
 		}
 		else if(e instanceof CommutativeBinaryRelationalExpression) {
 			return tailorRelation((RelationalExpression) e);
+		}
+		else if( e instanceof Conjunction) {
+			return new GecodePostConstraint(e.toSolverExpression(settings.getTargetSolver()),
+					                        true);
+		}
+		else if( e instanceof Disjunction) {
+			return new GecodePostConstraint(e.toSolverExpression(settings.getTargetSolver()), 
+					                        true);
+			
 		}
 		
 		
@@ -436,7 +447,7 @@ public class GecodeTailor {
 	 * 
 	 */
 	private GecodeMult tailorProductConstraint(ProductConstraint product) 
-		throws GecodeException {
+		throws GecodeException,Exception {
 		
 		Expression resultOld = product.getResult();
 		Expression[] arguments = product.getArguments();
@@ -520,7 +531,7 @@ public class GecodeTailor {
 	 * @throws GecodeException
 	 */
 	private RelationalConstraint tailorRelation(RelationalExpression expression) 
-		throws GecodeException {
+		throws GecodeException, Exception {
 		
 		if(expression instanceof NonCommutativeRelationalBinaryExpression) {
 			NonCommutativeRelationalBinaryExpression nonCommExpr = (NonCommutativeRelationalBinaryExpression) expression;
@@ -699,7 +710,7 @@ public class GecodeTailor {
 	 * @return
 	 */
 	private GecodeAbs tailorAbsoluteConstraint(AbsoluteConstraint e) 
-		throws GecodeException {
+		throws GecodeException,Exception {
 		
 		Expression argumentOld = e.getArgument();
 		Expression resultOld = e.getResult();
@@ -782,7 +793,7 @@ public class GecodeTailor {
 	 * @throws GecodeException
 	 */
 	private GecodeAtom tailorArithmeticAtom(ArithmeticAtomExpression e) 
-		throws GecodeException {
+		throws GecodeException, Exception {
 
 		if(e.getType() == Expression.INT) {
 			return new GecodeConstant(e.getConstant());
@@ -798,10 +809,27 @@ public class GecodeTailor {
 			ArrayVariable var = (ArrayVariable) e.getVariable();
 			if(var.getExpressionIndices() != null) 
 				throw new GecodeException("Sorry. Cannot tailor array variables with non-integer indices such as '"+e+"' yet.");
-			else return new GecodeIntArrayElem(var.getArrayNameOnly(),
+			
+			if(!var.isIndexAdaptedToSolver()) {
+				int[] offsets = new int[var.getIntegerIndices().length];
+				Domain domain = this.essencePmodel.getDomainOfVariable(var.getArrayNameOnly());
+				if(!(domain instanceof ConstantArrayDomain)) 
+					throw new GecodeException("Expected constant domain for variable '"+var+"' instead of: "+domain);
+				ConstantDomain[] indexDomains = ((ConstantArrayDomain) domain).getIndexDomains();
+				if(indexDomains.length != offsets.length) 
+					throw new GecodeException("Unfeasible amount of array indices: "+var.getArrayNameOnly()+" is "+indexDomains.length+
+							"-dimensional but it is indexed with "+offsets.length+" indices.");
+				for(int i=0; i<indexDomains.length; i++) {
+					// offset = ub - lb + 1
+					offsets[i] = indexDomains[i].getRange()[1] - indexDomains[i].getRange()[0]  +1;
+				}
+				var = var.adaptOffsetToIndices(offsets);
+			}
+			return new GecodeIntArrayElem(var.getArrayNameOnly(),
 											  var.getIntegerIndices(),
 											  var.getDomain()[0],
 											  var.getDomain()[1]);
+			
 		}
 		
 		else throw new GecodeException("Unknown arithmetic atomic type: "+e);
@@ -816,7 +844,7 @@ public class GecodeTailor {
 	 * @throws GecodeException
 	 */
 	private GecodeAtom tailorRelationalAtom(RelationalAtomExpression e) 
-		throws GecodeException {
+		throws GecodeException, Exception {
 
 		if(e.getType() == Expression.BOOL) {
 			return new GecodeConstant(e.getBool() ? 1 : 0);
@@ -830,7 +858,24 @@ public class GecodeTailor {
 			ArrayVariable var = (ArrayVariable) e.getVariable();
 			if(var.getExpressionIndices() != null) 
 				throw new GecodeException("Sorry. Cannot tailor array variables with non-integer indices such as '"+e+"' yet.");
-			else return new GecodeBoolArrayElem(var.getArrayNameOnly(),
+			
+			if(!var.isIndexAdaptedToSolver()) {
+				int[] offsets = new int[var.getIntegerIndices().length];
+				Domain domain = this.essencePmodel.getDomainOfVariable(var.getArrayNameOnly());
+				if(!(domain instanceof ConstantArrayDomain)) 
+					throw new GecodeException("Expected constant domain for variable '"+var+"' instead of: "+domain);
+				ConstantDomain[] indexDomains = ((ConstantArrayDomain) domain).getIndexDomains();
+				if(indexDomains.length != offsets.length) 
+					throw new GecodeException("Unfeasible amount of array indices: "+var.getArrayNameOnly()+" is "+indexDomains.length+
+							"-dimensional but it is indexed with "+offsets.length+" indices.");
+				for(int i=0; i<indexDomains.length; i++) {
+					// offset = ub - lb + 1
+					offsets[i] = indexDomains[i].getRange()[1] - indexDomains[i].getRange()[0]  +1;
+				}
+				var = var.adaptOffsetToIndices(offsets);
+			}
+			
+			return new GecodeBoolArrayElem(var.getArrayNameOnly(),
 											  var.getIntegerIndices());
 		}
 

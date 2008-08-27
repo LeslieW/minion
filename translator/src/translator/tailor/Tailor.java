@@ -37,7 +37,7 @@ public class Tailor {
 	 * 
 	 */
 	public String tailor(NormalisedModel normalisedModel, TargetSolver solver)
-			throws TailorException, MinionException, GecodeException  {
+			throws TailorException, MinionException, GecodeException, Exception  {
 		this.problemModel = normalisedModel;
 		this.targetSolver = solver;
 		

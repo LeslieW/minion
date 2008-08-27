@@ -248,15 +248,32 @@ public class Conjunction extends NaryRelationalExpression {
 	}
 	
 	public boolean isLinearExpression() {
-		for(int i=0; i<this.conjointExpressions.size(); i++) {
-			if(!this.conjointExpressions.get(i).isLinearExpression())
-				return false;
-		}
-		return true;
+		//for(int i=0; i<this.conjointExpressions.size(); i++) {
+		//	if(!this.conjointExpressions.get(i).isLinearExpression())
+		//		return false;
+		//}
+		return false;
 	}
 	
 	public String toSolverExpression(translator.solver.TargetSolver solver) 
 	throws Exception {
+		
+		
+		if(solver instanceof translator.solver.Gecode) {
+			StringBuffer s = new StringBuffer("");
+			
+			for(int i=0; i<this.conjointExpressions.size(); i++) {
+				
+				Expression argument = this.conjointExpressions.get(i);
+				if(argument instanceof AtomExpression) 
+					s.append(argument.toSolverExpression(solver));
+				else s.append("("+argument.toSolverExpression(solver)+")");
+				
+				if(i<this.conjointExpressions.size()-1) 
+					s.append(" && ");
+			}
+			return s.toString();
+		}
 		
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());

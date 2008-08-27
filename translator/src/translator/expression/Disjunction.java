@@ -239,6 +239,23 @@ public Expression replaceVariableWithExpression(String variableName, Expression 
 	public String toSolverExpression(translator.solver.TargetSolver solver) 
 	throws Exception {
 		
+		
+		if(solver instanceof translator.solver.Gecode) {
+			StringBuffer s = new StringBuffer("");
+			
+			for(int i=0; i<this.disjointExpressions.size(); i++) {
+				
+				Expression argument = this.disjointExpressions.get(i);
+				if(argument instanceof AtomExpression) 
+					s.append(argument.toSolverExpression(solver));
+				else  s.append("("+argument.toSolverExpression(solver)+")");
+				
+				if(i<this.disjointExpressions.size()-1) 
+					s.append(" || ");
+			}
+			return s.toString();
+		}
+		
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());
 	}

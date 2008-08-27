@@ -450,7 +450,7 @@ public class Normaliser implements NormaliserSpecification {
 					else 
 					throw new NormaliserException("Cannot evaluate parameter '"+parameterName
 							+"' to a constant value, but to '"+expression+
-							"'. Please make sure that all constants/parameters have been declared and defined in the right order.");
+							"'.\nPlease make sure that all constants/parameters have been declared and defined in the right order.");
 				}
 				
 				//System.out.println("END of WHILE: Definitions:"+definitions+" and iterator: "+iterator+" and i:"+i);
@@ -502,7 +502,7 @@ public class Normaliser implements NormaliserSpecification {
 				else { // domain is not constant -> there is still a variable/constant/parameter that has not been inserted 
 					throw new NormaliserException("Cannot evaluate parameter '"+parameterName
 							+"' to a constant domain, but to '"+domain+
-							"'. Please make sure that all constants/parameters have been declared and defined in the right order.");
+							"'.\nPlease make sure that all constants/parameters have been declared and defined in the right order.");
 				}
 				
 			} // end if: definition is a Domain-definition	

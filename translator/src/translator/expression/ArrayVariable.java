@@ -419,4 +419,21 @@ public class ArrayVariable implements Variable {
 	public void setIndexIsAdaptedToSolver(boolean turnOn) {
 		this.isIndexAdaptedToSolver = turnOn;
 	}
+	
+	public ArrayVariable adaptOffsetToIndices(int[] offsets) 
+		throws Exception {
+		
+		if(this.isIndexAdaptedToSolver)
+			return this;
+		
+		if(offsets.length != this.intIndices.length)
+			throw new Exception("Internal error. Trying to adapt unequal amount of offsets to integer indices of:"+this);
+		
+		for(int i=0; i<this.intIndices.length; i++) {
+			this.intIndices[i] -= offsets[i];
+		}
+		this.isIndexAdaptedToSolver = true;
+		
+		return this;
+	}
 }

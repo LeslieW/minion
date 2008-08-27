@@ -113,8 +113,8 @@ public class Gecode extends GeneralTargetSolver {
 		// (set to true, if the constraint allows other constraints nested
 		//  as parameter)
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_NEGATION), new Boolean(false));
-		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_DISJUNCTION), new Boolean(false)); // true befoire
-		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_CONJUNCTION), new Boolean(false)); // true before
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_DISJUNCTION), new Boolean(true)); // true befoire
+		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_CONJUNCTION), new Boolean(true)); // true before
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_IF), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_IFF), new Boolean(false));
 		featureMap.put(new Integer(CONSTRAINT_NESTED_IN_EQ), new Boolean(false));
