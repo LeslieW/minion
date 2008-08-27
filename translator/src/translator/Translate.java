@@ -254,9 +254,11 @@ public class Translate {
 	
 	private static void runNewGUI() {
 		
+		JFrame.setDefaultLookAndFeelDecorated(true);
 		JFrame frame = new TailorGUI();
 		frame.setVisible(true);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    	
 	}
 	
 	

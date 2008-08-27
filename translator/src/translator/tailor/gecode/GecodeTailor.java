@@ -736,10 +736,38 @@ public class GecodeTailor {
 	private GecodeArrayVariable tailorToGecodeIntArray(Array array) 
 		throws GecodeException {
 		
-		
-		
+	
 		if(array instanceof SimpleArray) {
+			SimpleArray simpleArray = (SimpleArray) array;
+			BasicDomain[] indexDomains = simpleArray.getIndexDomains();
 			
+			if(indexDomains.length > 1)
+				throw new GecodeException("Cannot tailor multi-dimensional arrays like '"+array+"' yet, sorry.");
+			
+			if(!(indexDomains[0] instanceof ConstantDomain))
+				throw new GecodeException("Expected constant index domain instead of:"+indexDomains[0]);
+			
+			ConstantDomain indexDomain = (ConstantDomain) indexDomains[0];
+			int length = indexDomain.getRange()[1] - indexDomain.getRange()[0] + 1; 
+			
+			Domain baseDomain = simpleArray.getBaseDomain();
+			
+			if(baseDomain instanceof BoolDomain) {
+				return new GecodeBoolVarArray(simpleArray.getArrayName(),
+ 											  length);
+			}
+			else {
+				if(!(baseDomain instanceof ConstantDomain)) 
+					throw new GecodeException("Expected constant index domain instead of:"+baseDomain);
+				
+				ConstantDomain constBaseDomain = (ConstantDomain) baseDomain;
+				
+				
+				return new GecodeIntVarArray(simpleArray.getArrayName(),
+				     						length,
+				     						constBaseDomain.getRange()[0],
+				     						constBaseDomain.getRange()[1]);
+			}
 		}
 		
 		throw new GecodeException("Cannot tailor array '"+array+"' of type "+array.getClass().getSimpleName()+

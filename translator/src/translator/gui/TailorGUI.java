@@ -268,6 +268,11 @@ public class TailorGUI extends javax.swing.JFrame {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+    	
+    	String path = "tailorLogo.png";
+    	java.net.URL imgURL = getClass().getResource(path);
+    	this.setIconImage(new javax.swing.ImageIcon(imgURL).getImage());
+    	
         java.awt.GridBagConstraints gridBagConstraints;
 
         this.setBackground(this.bgColor);

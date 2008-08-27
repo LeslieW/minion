@@ -46,6 +46,10 @@ public class GecodeBoolVarArray implements GecodeArrayVariable, BooleanVariable 
 		return false;
 	}
 	
+	public String toString() {
+		return name;
+	}
+	
 	// ============ ADDITONAL METHODS =================
 	
 	public void increaseLength() {
