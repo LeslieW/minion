@@ -254,7 +254,7 @@ public class Translate {
 	
 	private static void runNewGUI() {
 		
-		JFrame.setDefaultLookAndFeelDecorated(true);
+		//JFrame.setDefaultLookAndFeelDecorated(true);
 		JFrame frame = new TailorGUI();
 		frame.setVisible(true);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -486,6 +486,8 @@ public class Translate {
 		System.out.println("\tTranslates input files to solver Minion (default).");
 		System.out.println("-"+GECODE_TRANSLATION+" or -g");
 		System.out.println("\tTranslates input files to solver Gecode (not stable yet).");
+		System.out.println("-"+OUTPUT+" FILENAME");
+		System.out.println("\tWrites solver input into FILENAME");
 		
 		System.out.println("\n\nTranslation flags:");
 		System.out.println("-"+NO_COMMON_SUBEXPRS);

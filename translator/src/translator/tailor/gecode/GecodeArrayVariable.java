@@ -15,4 +15,9 @@ public interface GecodeArrayVariable extends GecodeVariable {
 	public int getUpperBound();
 	/** get the upper bound representing the array */
 	public int getLowerBound();
+	/** get the ranges of each of the arrays indices/dimensions */
+	public int[] getLengths();
+	/** returns true when the array has a dimension greater than 1*/
+	public boolean isMultiDimensional();
+	
 }

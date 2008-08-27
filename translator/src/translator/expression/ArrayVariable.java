@@ -430,7 +430,7 @@ public class ArrayVariable implements Variable {
 			throw new Exception("Internal error. Trying to adapt unequal amount of offsets to integer indices of:"+this);
 		
 		for(int i=0; i<this.intIndices.length; i++) {
-			this.intIndices[i] -= offsets[i];
+			this.intIndices[i] += offsets[i];
 		}
 		this.isIndexAdaptedToSolver = true;
 		

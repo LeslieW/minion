@@ -1,6 +1,6 @@
 package translator.tailor.gecode;
 
-public class GecodeIntVarArgs implements GecodeIntArray, ArgsVariable {
+public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
 
 	private GecodeAtom[] variables;
 	private String name;

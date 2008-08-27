@@ -166,7 +166,7 @@ public class TailorGUI extends javax.swing.JFrame {
     private void setColors() {
     	
     	// Color lightGreenish = new java.awt.Color(211,245,177);
-		Color lightBlueish = new java.awt.Color(220,220,245);
+		Color lightBlueish = new java.awt.Color(220,220,245);//(190,230,240); //220,220,245
     	//Color darkRed = new java.awt.Color(142,5,5);
     	//Color reallyDarkRed = new java.awt.Color(82,10,5);
 		//Color cheekyOrange = new java.awt.Color(252,105,20);

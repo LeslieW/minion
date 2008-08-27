@@ -42,23 +42,41 @@ public class GecodeIntArrayElem implements GecodeIntAtomVariable {
 
 	public String toString() {
 		
-		StringBuffer s = new StringBuffer(this.name+"[");
+		StringBuffer s = new StringBuffer(this.name);
 		
-		for(int i=0; i<this.indices.length-1; i++)
-			s.append(indices[i]+",");
+		// we can dereference when the array is 1-dimensional
+		if(indices.length == 1) {
+			s.append("["+indices[0]+"]");
+		}
 		
-		s.append(indices[indices.length-1]+"]");
+		// if it is multidimensional, we have to call a method, hence we use (,)
+		else {
+			s.append("(");
+			for(int i=0; i<this.indices.length-1; i++)
+				s.append(indices[i]+",");
+		
+			s.append(indices[indices.length-1]+")");
+		}
 		
 		return s.toString();
 	}
 	
 	public String toDeclarationCCString() {
-		StringBuffer s = new StringBuffer(this.name+"[");
+		StringBuffer s = new StringBuffer(this.name);
 		
-		for(int i=0; i<this.indices.length-1; i++)
-			s.append(indices[i]+",");
+		// we can dereference when the array is 1-dimensional
+		if(indices.length == 1) {
+			s.append("["+indices[0]+"]");
+		}
 		
-		s.append(indices[indices.length-1]+"]");
+		// if it is multidimensional, we have to call a method, hence we use (,)
+		else {
+			s.append("(");
+			for(int i=0; i<this.indices.length-1; i++)
+				s.append(indices[i]+",");
+		
+			s.append(indices[indices.length-1]+")");
+		}
 		
 		return s.toString();
 	}

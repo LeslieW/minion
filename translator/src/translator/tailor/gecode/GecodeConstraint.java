@@ -4,6 +4,8 @@ public interface GecodeConstraint {
 
 	
 	public final String BUFFERARRAY_NAME = "_buffer";
+	/** the prefix that flattened arrays have */
+	public final String FLATTENED_ARRAY_PREFIX = "_";
 	
 	/** Consistency levels for each constraint */
 	/** value consistency level (naive) */

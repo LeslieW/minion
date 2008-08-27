@@ -154,7 +154,7 @@ public class AllDifferent implements UnaryRelationalExpression {
 	}
 	
 	public boolean isLinearExpression() {
-		return true;
+		return false;
 	}
 	
 	public String toSolverExpression(translator.solver.TargetSolver solver) 

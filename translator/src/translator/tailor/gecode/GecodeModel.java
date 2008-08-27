@@ -21,6 +21,8 @@ public class GecodeModel {
 	private ArrayList<GecodeArrayVariable> variableList;
 	/** arrays that buffer single vars */
 	private ArrayList<GecodeArrayVariable> bufferArrays;
+	/** multi-dimensional arrays */
+	private ArrayList<GecodeArrayVariable> multiDimensionalArrays;
 	/** arrays that buffer auxiliary vars */
 	private ArrayList<GecodeArrayVariable> auxBufferArrays;
 	/** buffered single int variables*/
@@ -47,7 +49,8 @@ public class GecodeModel {
 					   ArrayList<GecodeBoolVar> singleBoolVars, 
 					   ArrayList<GecodeArrayVariable> auxBufferArrays, 
 					   ArrayList<GecodeIntVar> auxIntVarNames, 
-					   ArrayList<GecodeBoolVar> auxBoolVarNames) {
+					   ArrayList<GecodeBoolVar> auxBoolVarNames, 
+					   ArrayList<GecodeArrayVariable> multiDimensionalArrays) {
 		
 		this.settings = settings;
 		this.variableList = variables;
@@ -64,6 +67,9 @@ public class GecodeModel {
 		this.bufferArrays = bufferArrays;
 		this.singleIntVarNames = singleIntVars;
 		this.singleBoolVarNames = singleBoolVars;
+		
+		// multi-dimensional arrays
+		this.multiDimensionalArrays = multiDimensionalArrays;
 		
 		// auxiliary variables
 		this.auxBufferArrays = auxBufferArrays;
@@ -149,6 +155,7 @@ public class GecodeModel {
 		s.append(variableDeclarationToString()+"\n");
 		
 		s.append("public: \n\n");
+		s.append(this.multiDimensionalFunctions());
 		s.append(actualProblemConstructorToString()+"\n");
 		
 		s.append(printingMethodToString()+"\n\n");
@@ -190,6 +197,9 @@ public class GecodeModel {
 		for(int i=0; i<this.variableList.size(); i++)
 			s.append("   "+variableList.get(i).toDeclarationCCString()+";\n");
 		
+		for(int i=0; i<this.multiDimensionalArrays.size(); i++)
+			s.append("   "+multiDimensionalArrays.get(i).toDeclarationCCString()+";\n");
+		
 		for(int i=0; i<this.bufferArrays.size(); i++)
 			s.append("   "+bufferArrays.get(i).toDeclarationCCString()+";\n");
 		
@@ -224,6 +234,10 @@ public class GecodeModel {
 			s.append("\t"+variableList.get(i)+".update(this, share, s."+variableList.get(i)+");\n");
 		}
 		
+		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
+			s.append("\t"+multiDimensionalArrays.get(i)+".update(this, share, s."+variableList.get(i)+");\n");
+		}
+		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			s.append("\t"+bufferArrays.get(i)+".update(this, share, s."+bufferArrays.get(i)+");\n");
 		}
@@ -253,6 +267,33 @@ public class GecodeModel {
 		}
 		
 		s.append("\n");
+		
+		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
+			GecodeArrayVariable var = multiDimensionalArrays.get(i);
+			int[] lengths = var.getLengths();
+			
+			if(lengths.length == 2) {
+				int rows = lengths[0];
+				s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
+				s.append("\tfor(int i=0; i<"+var.getLength()+"; i++) {\n");
+				s.append("\t       "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";\n");
+				s.append("\t   if(i % "+rows+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
+				s.append("\t"+osStreamName+" << std::endl;\n\n");
+			}
+			
+			if(lengths.length == 3) {
+				int rows = lengths[1];
+				int elemsPerMatrix = lengths[1]*lengths[0];
+				s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
+				s.append("\tfor(int i=0; i<"+var.getLength()+"; i++) {\n");
+				s.append("\t       "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";\n");
+				s.append("\t   if(i % "+rows+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
+				s.append("\t   if(i % "+elemsPerMatrix+" == 0 && i!=0) "+osStreamName+" << \"\\n\\n\";\n\t}\n");
+				s.append("\t"+osStreamName+" << std::endl;\n\n");
+			}
+			// higher than 3 is not allowed anyway
+		}
+		
 		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			GecodeArrayVariable var = bufferArrays.get(i);
@@ -415,6 +456,9 @@ public class GecodeModel {
 		for(int i=0; i<this.variableList.size(); i++) {
 			s.append("\tbranch(this, "+variableList.get(i)+", "+variableBranching+", "+valueBranching+");\n");
 		}
+		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
+			s.append("\tbranch(this, "+multiDimensionalArrays.get(i)+", "+variableBranching+", "+valueBranching+");\n");
+		}
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			s.append("\tbranch(this, "+bufferArrays.get(i)+", "+variableBranching+", "+valueBranching+");\n");
 		}
@@ -439,9 +483,16 @@ public class GecodeModel {
 			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
 		
+		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
+			if(i > 0) s.append(",\n\t\t");
+			GecodeArrayVariable var = multiDimensionalArrays.get(i);
+			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
+		}
+		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
 			if(i > 0) s.append(",\n\t\t");
-			else if(this.variableList.size() > 0) s.append(",\n\t\t");
+			else if(this.variableList.size() > 0 
+					|| this.multiDimensionalArrays.size() > 0) s.append(",\n\t\t");
 			GecodeArrayVariable var = bufferArrays.get(i);
 			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
@@ -449,6 +500,7 @@ public class GecodeModel {
 		for(int i=0; i<this.auxBufferArrays.size(); i++) {
 			if(i > 0) s.append(",\n\t\t");
 			else if(this.variableList.size() > 0 
+					|| this.multiDimensionalArrays.size() > 0
 					|| this.bufferArrays.size() > 0) 
 				s.append(",\n\t\t");
 			
@@ -472,4 +524,41 @@ public class GecodeModel {
 	}
 	
 
+	/**
+	 * Define methods to access multi-dimensional arrays by several indices
+	 * @return
+	 */
+	private String multiDimensionalFunctions() {
+		
+		StringBuffer s = new StringBuffer("  ");
+		if(this.multiDimensionalArrays.size() == 0)
+			return s.toString();
+		
+		s.append("// Defining methods to access multi-dimensional variables\n");
+		
+		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
+			GecodeArrayVariable array = this.multiDimensionalArrays.get(i);
+			String realArrayName = array.getVariableName();
+			realArrayName = realArrayName.substring(GecodeConstraint.FLATTENED_ARRAY_PREFIX.length()-1, realArrayName.length()-1);
+			
+			int[] indexLengths = array.getLengths();
+			
+			s.append("\n");
+			
+			if(indexLengths.length == 2) {
+				s.append("   IntVar& "+realArrayName+"(int row, int col) {\n");
+				s.append("\tif(row < 0 || row >= "+indexLengths[0]+
+						")\n\t   std::err \"Row index of "+realArrayName+
+						"[\" << row << \",\" << col << \"] out of bounds:\" << row << std::endl;\n");
+				s.append("\tif(col < 0 || col >= "+indexLengths[1]+
+						")\n\t   std::err \"Column index of "+realArrayName+
+						"[\" << row << \",\" << col << \"]  out of bounds:\" << col << std::endl;\n");
+				s.append("\treturn "+array.getVariableName()+"[row*"+indexLengths[0]+" + col];\n");
+				s.append("   }\n");
+			}
+		}
+		
+		
+		return s.toString();
+	}
 }
