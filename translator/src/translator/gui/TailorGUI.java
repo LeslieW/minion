@@ -122,8 +122,9 @@ public class TailorGUI extends javax.swing.JFrame {
     	this.settings = new TranslationSettings();
     	this.translator = new Translator(settings);
     	this.skinType = this.CLASSIC_SKIN;
-        setColors();
+    	setColors();
         initComponents();
+        updateColors();
         solver = settings.getTargetSolver();
     }
     
@@ -133,6 +134,7 @@ public class TailorGUI extends javax.swing.JFrame {
     	this.skinType = this.CLASSIC_SKIN;
     	setColors();
         initComponents();
+        updateColors();
         solver = settings.getTargetSolver();
     }
     
@@ -166,7 +168,7 @@ public class TailorGUI extends javax.swing.JFrame {
     private void setColors() {
     	
     	// Color lightGreenish = new java.awt.Color(211,245,177);
-		Color lightBlueish = new java.awt.Color(220,220,245);//(190,230,240); //220,220,245
+		Color lightBlueish = new java.awt.Color(177,210,240);//(225,242,253);//(220,220,245);//(190,230,240); //220,220,245
     	//Color darkRed = new java.awt.Color(142,5,5);
     	//Color reallyDarkRed = new java.awt.Color(82,10,5);
 		//Color cheekyOrange = new java.awt.Color(252,105,20);
@@ -194,7 +196,7 @@ public class TailorGUI extends javax.swing.JFrame {
     		this.textAreaFontColor = java.awt.Color.black;
     		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
     		this.outputFont = new java.awt.Font("DialogInput", 0, 12);
-    		this.buttonColor = UIManager.getColor(new JButton());
+    		this.buttonColor = new JButton().getBackground();//UIManager.getColor(new JButton());
     		
     	}
     	
@@ -203,8 +205,8 @@ public class TailorGUI extends javax.swing.JFrame {
     		this.textAreaColor = java.awt.Color.black;
     		this.textAreaFontColor = java.awt.Color.white; // or green?
     		this.bgColor = lightBlueish; //lightGreenish;
-    		this.inputBgColor = lightBlueish; //lightGreenish;
-    		this.outputBgColor =lightBlueish; //lightGreenish;
+    		this.inputBgColor = new JPanel().getBackground(); //lightBlueish; //lightGreenish;
+    		this.outputBgColor = new JPanel().getBackground();//lightBlueish; //lightGreenish;
     		//this.textAreaColor = new java.awt.Color(240,240,240);
     		//this.textAreaFontColor = java.awt.Color.black;
     		this.inputFont = new java.awt.Font("DialogInput", 0, 12);
