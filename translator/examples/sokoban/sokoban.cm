@@ -38,15 +38,18 @@ given noInvalidMoves : int
 given noGoals : int
 given noCrates : int
 
+letting WALLINDICES be domain int(0..noWalls-1)
+letting INVALIDMOVEINDICES be domain int(0..noInvalidMoves-1)
+letting GOALINDICES be domain int(0..noGoals-1)
+letting CRATEINDICES be domain int(0..noCrates-1)
+letting POSITIONS be domain int(0..n-1)
+
 given walls : matrix indexed by [WALLINDICES] of POSITIONS
 given invalidMoves : matrix indexed by [INVALIDMOVEINDICES] of MOVES
 given goals : matrix indexed by [GOALINDICES] of int(0..n-1)
 given crates : matrix indexed by [CRATEINDICES] of int(0..n-1)
 
-letting WALLINDICES be domain int(0..noWalls-1)
-letting INVALIDMOVEINDICES be domain int(0..noInvalidMoves-1)
-letting GOALINDICES be domain int(0..noGoals-1)
-letting CRATEINDICES be domain int(0..noCrates-1)
+
 
 letting MOVES be domain int(-w..w)
 
@@ -89,7 +92,7 @@ forall ck : int(0..noCrates-1) .
 crateGoalPosns[0,ck] = crates[ck],
 
 forall s : STEPS .
-	alldifferent(crateGoalPosns[s]),
+	alldifferent(crateGoalPosns[s,..]),
 	
 $$ pushing the crates
 

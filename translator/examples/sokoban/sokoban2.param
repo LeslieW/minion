@@ -27,46 +27,14 @@ letting pInit be 13
 
 letting stps be 5
 
-where
+letting walls be
+[0,1,2,3,4,5,6,7,8,10,11,12,17,18,23,24,29,30,31,32,33,34,35]
 
-walls[0] = 0,
-walls[1] = 1,
-walls[2] = 2,
-walls[3] = 3,
-walls[4] = 4,
-walls[5] = 5,
-walls[6] = 6,
-walls[7] = 7,
-walls[8] = 8,
-walls[9] = 10,
-walls[10] = 11,
-walls[11] = 12,
-walls[12] = 17,
-walls[13] = 18,
-walls[14] = 23,
-walls[15] = 24,
-walls[16] = 29,
-walls[17] = 30,
-walls[18] = 31,
-walls[19] = 32,
-walls[20] = 33,
-walls[21] = 34,
-walls[22] = 35,
+letting invalidMoves be [5,4,3,2,0,-1,-3,-4,-5]
 
-invalidMoves[0] = 5,
-invalidMoves[1] = 4,
-invalidMoves[2] = 3,
-invalidMoves[3] = 2,
-invalidMoves[4] = 0,
-invalidMoves[5] = -2,
-invalidMoves[6] = -3,
-invalidMoves[7] = -4,
-invalidMoves[8] = -5,
+letting crates be [15,20]
 
-crates[0] = 15,
-crates[1] = 20,
+letting goals be [9,26]
 
-goals[0] = 9,
-goals[1] = 26
 
 

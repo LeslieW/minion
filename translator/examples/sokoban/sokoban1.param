@@ -23,19 +23,10 @@ letting pInit be 3
 
 letting stps be 2
 
-where
+letting walls be [0,1,2,6,7,8]
 
-walls[0] = 0,
-walls[1] = 1,
-walls[2] = 2,
-walls[3] = 6,
-walls[4] = 7,
-walls[5] = 8,
+letting invalidMoves be [2,0,-2]
 
-invalidMoves[0] = 2,
-invalidMoves[1] = 0,
-invalidMoves[2] = -2,
+letting crates be [4]
 
-crates[0] = 4,
-
-goals[0] = 5
+letting goals be [5]
