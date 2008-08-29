@@ -31,7 +31,13 @@ public class GecodeMult extends RelationalConstraint {
 	
 	public String toCCString() {
 		
-		String s =  "mult(this, "+this.argument1+", "+this.argument2+", "+this.result;
+		String s;
+		
+		if(this.argument1 instanceof BooleanVariable && 
+		   this.argument2 instanceof BooleanVariable)
+			s = "post(this, tt( eqv("+this.argument1+" && "+this.argument2+", "+this.result+") )";
+		
+		else  s =  "mult(this, "+this.argument1+", "+this.argument2+", "+this.result;
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF)
@@ -45,7 +51,16 @@ public class GecodeMult extends RelationalConstraint {
 	
 	public String toString() {
 		
-		String s =  "mult(this, "+this.argument1+", "+this.argument2+", "+this.result;
+		String s;
+		
+		//System.out.println("Arg1: "+this.argument1+" has type: "+this.argument1.getClass().getSimpleName());
+		//System.out.println("Arg2: "+this.argument2+" has type: "+this.argument2.getClass().getSimpleName());
+		
+		if(this.argument1 instanceof BooleanVariable && 
+		   this.argument2 instanceof BooleanVariable)
+			s = "post(this, tt( eqv("+this.argument1+" && "+this.argument2+", "+this.result+") )";
+		
+		else  s =  "mult(this, "+this.argument1+", "+this.argument2+", "+this.result;
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF)

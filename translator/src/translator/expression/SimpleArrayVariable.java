@@ -89,6 +89,8 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 			
 		if(this.arrayName.equals(variableName)) {
 			
+			//System.out.println("Inserting domain '"+domain+"' for variable "+variableName+" in variable "+this);
+			
 			if(!(domain instanceof MatrixDomain))
 				throw new Exception("Infeasible variable indexing: "+this+". The variable has not been declared of type matrix domain, but:"
 				+domain);
@@ -137,14 +139,14 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 			/* case: simple array variable, like x[1,2] */
 			if(allIndicesAreInts) {
 				
-				//System.out.println("ALL indices are integers of "+this);
+				//System.out.println("ALL indices are integers of "+this+" and base domain type is:"+domain.getClass().getSimpleName());
 				
 				int[] intIndices = new int[this.indices.size()];
 				for(int i=intIndices.length-1; i>=0; i--) {
 					intIndices[i] = ((SingleIntRange) indices.remove(i)).getSingleRange();
 				}
 					
-				if(domain instanceof BoolDomain) 
+				if(arrayDomain.getBaseDomain() instanceof BoolDomain) 
 					return new RelationalAtomExpression(new ArrayVariable(arrayName,
 																		  intIndices,
 																		  domain));
@@ -158,7 +160,7 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 			/* case: simple array variable with expression in index, like x[y,z+1] */
 			else if(allIndicesAreSingleExpressions) {
 				
-				//System.out.println("All index expressions of "+this+" are expressions. ");
+				//System.out.println("All index expressions of "+this+" are expressions and base domain type is:"+domain.getClass().getSimpleName());
 				
 				Expression[] exprIndices = new Expression[this.indices.size()];
 				
@@ -167,7 +169,7 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 					exprIndices[i] = ((SingleRange) indices.remove(i)).getSingleExpressionRange();
 				}
 				
-				if(domain instanceof BoolDomain) 
+				if(arrayDomain.getBaseDomain() instanceof BoolDomain) 
 					return new RelationalAtomExpression(new ArrayVariable(arrayName,
 																		  exprIndices,
 																		  domain));
@@ -180,7 +182,7 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 			/* case: we have ranges in the index, hence we are dealing with an array */
 			else {
 				
-				//System.out.println("The indices of "+this+" are not only expressions.. ");
+				//System.out.println("The indices of "+this+" are not only expressions..and base domain type is:"+domain.getClass().getSimpleName() );
 				
 				BasicDomain[] arrayIndices = new BasicDomain[this.indices.size()];
 				

@@ -180,7 +180,8 @@ public class QuantifiedSum implements ArithmeticExpression {
 	}
     
     public boolean isLinearExpression() {
-		return this.quantifiedExpression.isLinearExpression();
+		//return this.quantifiedExpression.isLinearExpression();
+    	return false;
 	}
     
     public String toSolverExpression(translator.solver.TargetSolver solver) 

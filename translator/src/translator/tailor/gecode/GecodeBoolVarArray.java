@@ -79,7 +79,7 @@ public class GecodeBoolVarArray implements GecodeArrayVariable, BooleanVariable 
 	}
 
 	public boolean isMultiDimensional() {
-		return this.lengths == null;
+		return this.lengths != null;
 	}
 	
 	public int[] getLengths() {

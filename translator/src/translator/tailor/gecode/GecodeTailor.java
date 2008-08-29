@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 public class GecodeTailor {
 
+	
 	private TranslationSettings settings;
 	private NormalisedModel essencePmodel;
 	
@@ -43,9 +44,9 @@ public class GecodeTailor {
 	private ArrayList<GecodeBoolVar> auxBoolVariableList;
 	
 	/** works as container for all integer auxiliary variables*/
-	private GecodeIntVarArray auxIntVariableBuffer;
+	private GecodeIntVarArgs auxIntVariableBuffer;
 	/** works as container for all boolean auxiliary variables*/
-	private GecodeBoolVarArray auxBoolVariableBuffer;
+	private GecodeBoolVarArgs auxBoolVariableBuffer;
 	
 	/** contains all single integer variables */
 	private GecodeIntVarArray integerVariableBuffer;
@@ -74,9 +75,9 @@ public class GecodeTailor {
 															0,0,0);
 		this.booleanVariableBuffer = new GecodeBoolVarArray(  ((Gecode) settings.getTargetSolver()).SINGLE_BOOL_VAR_ARRAY_NAME, 0);
 															
-		this.auxIntVariableBuffer = new GecodeIntVarArray(  ((Gecode) settings.getTargetSolver()).AUX_INT_VAR_ARRAY_NAME,
+		this.auxIntVariableBuffer = new GecodeIntVarArgs(  ((Gecode) settings.getTargetSolver()).AUX_INT_VAR_ARRAY_NAME,
 				0,0,0);
-		this.auxBoolVariableBuffer = new GecodeBoolVarArray(  ((Gecode) settings.getTargetSolver()).AUX_BOOL_VAR_ARRAY_NAME, 0);
+		this.auxBoolVariableBuffer = new GecodeBoolVarArgs(  ((Gecode) settings.getTargetSolver()).AUX_BOOL_VAR_ARRAY_NAME, 0);
 															
 	}
 	
@@ -110,17 +111,16 @@ public class GecodeTailor {
 			this.bufferArrays.add(this.booleanVariableBuffer);
 		if(this.integerVariableBuffer.getLength() > 0)
 			this.bufferArrays.add(this.integerVariableBuffer);
-		// TODO: add multidimensional arrays
+		
 		
 		
 		// collect auxiliary variables
 		tailorAuxiliaryVariables();
-		ArrayList<GecodeArrayVariable> auxBufferArrays = new ArrayList<GecodeArrayVariable>();
+		ArrayList<ArgsArrayVariable> auxBufferArrays = new ArrayList<ArgsArrayVariable>();
 		if(this.auxBoolVariableBuffer.getLength() > 0)
 			auxBufferArrays.add(this.auxBoolVariableBuffer);
 		if(this.auxIntVariableBuffer.getLength() > 0)
 			auxBufferArrays.add(this.auxIntVariableBuffer);
-		
 		
 		// merge constraints
 		for(int i=0; i<this.additionalBoundsConstraintsBuffer.size(); i++)
@@ -134,7 +134,8 @@ public class GecodeTailor {
 							   this.singleBoolVariableList, 
 							   auxBufferArrays, 
 							   this.auxIntVariableList, 
-							   this.auxBoolVariableList, multiDimensionalArrays);
+							   this.auxBoolVariableList, 
+							   multiDimensionalArrays);
 		//System.out.println("==================================");
 		//System.out.println("CC print:\n"+gecodeModel.toString()+"\n\n");
 		//System.out.println("==================================");
@@ -156,9 +157,9 @@ public class GecodeTailor {
 		
 		
 		// linear expressions can be mapped directly
-		if(e.isLinearExpression()) {
-			return tailorLinearExpression(e);
-		}
+		//if(e.isLinearExpression()) {
+		//	return tailorLinearExpression(e);
+		//}
 		
 		if(e instanceof AbsoluteValue) {
 			throw new GecodeException("Flattening error. Gecode does not support Absolute Values, such as:"+e);
@@ -486,12 +487,20 @@ public class GecodeTailor {
 		if(arguments[0] instanceof ArithmeticAtomExpression) {
 			leftArg = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[0]);
 		}
-		else throw new GecodeException("Cannot tailor '"+arguments[0]+"' in expression '"+product+"' to Gecode because it is not an integer atom.");
+		else if(arguments[0] instanceof RelationalAtomExpression) 
+			leftArg = tailorRelationalAtom((RelationalAtomExpression) arguments[0]);
+			
+		else throw new GecodeException("Cannot tailor '"+arguments[0]+"' in expression '"+product+
+				"' to Gecode:\nit is not an atom but of type: "+arguments[0].getClass().getSimpleName());
 		
 		if(arguments[1] instanceof ArithmeticAtomExpression) {
 			rightArg = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[1]);
 		}
-		else throw new GecodeException("Cannot tailor '"+arguments[1]+"' in expression '"+product+"' to Gecode because it is not an integer atom.");
+		else if(arguments[1] instanceof RelationalAtomExpression) 
+			rightArg = tailorRelationalAtom((RelationalAtomExpression) arguments[1]);
+			
+		else throw new GecodeException("Cannot tailor '"+arguments[1]+"' in expression '"+product+
+				"' to Gecode:\nit is not an atom but of type: "+arguments[1].getClass().getSimpleName());
 		
 		
 		// result expression
@@ -499,7 +508,10 @@ public class GecodeTailor {
 		if(resultOld instanceof ArithmeticAtomExpression) {
 			result = tailorArithmeticAtom((ArithmeticAtomExpression) resultOld);
 		}
-		else throw new GecodeException("Cannot tailor '"+resultOld+"' in expression '"+product+"' to Gecode because it is not an integer atom.");
+		else if(resultOld instanceof RelationalAtomExpression) 
+			result = tailorRelationalAtom((RelationalAtomExpression) resultOld);
+		else throw new GecodeException("Cannot tailor '"+resultOld+"' in expression '"+product+
+				"' to Gecode:\nit is not an atom but of type: "+resultOld.getClass().getSimpleName());
 		
 		
 		return new GecodeMult(leftArg,rightArg,result);
@@ -537,14 +549,129 @@ public class GecodeTailor {
 	 * @return
 	 * @throws GecodeException
 	 */
-	private GecodePostConstraint tailorSumConstraint(SumConstraint e) 
-		throws GecodeException {
+	private GecodeConstraint tailorSumConstraint(SumConstraint e) 
+		throws GecodeException, Exception {
 		
 		// we can simply post a linear constraint, since the 
 		// expression has been linearised by flattening
-		StringBuffer sumConstraint = new StringBuffer(e.toGecodeString());
+		if(settings.getUseGecodeMinimodelPostConstraints()) {
+			StringBuffer sumConstraint = new StringBuffer(e.toGecodeString());
+			return new GecodePostConstraint(sumConstraint.toString());
+		}
 		
-		return new GecodePostConstraint(sumConstraint.toString());
+		
+		
+		// otherwise map to linear constraint
+		Expression[] positiveArgs = e.getPositiveArguments();
+		Expression[] negativeArgs = e.getNegativeArguments();
+		Expression resultOld = e.getResult();
+		
+		// ---- check if its an un-weighted sum
+		if(negativeArgs.length == 0) {
+			boolean noMultiplication = true;
+			boolean allAtomExpressions = true;
+			for(int i=0; i<positiveArgs.length; i++) {
+				noMultiplication &= !(positiveArgs[i] instanceof Multiplication);
+				allAtomExpressions &= (positiveArgs[i] instanceof AtomExpression);
+			}
+			if(noMultiplication) {
+				
+				if(!allAtomExpressions) 
+					throw new GecodeException("Flattening error. There is a non-atomic argument in the sum constraint: "+e);
+				
+				GecodeAtom[] args = new GecodeAtom[positiveArgs.length];
+				for(int i=0; i<args.length; i++) {
+					args[i] = (positiveArgs[i] instanceof ArithmeticAtomExpression) ? 
+							tailorArithmeticAtom((ArithmeticAtomExpression) positiveArgs[i]) : 
+								tailorRelationalAtom((RelationalAtomExpression) positiveArgs[i])	;
+				}
+				
+				if(!(resultOld instanceof AtomExpression))
+					throw new GecodeException("Flattening error. Expected atom as result in "+e+" instead of: "+resultOld);
+				
+				GecodeAtom result = (resultOld instanceof ArithmeticAtomExpression) ? 
+						tailorArithmeticAtom((ArithmeticAtomExpression) resultOld) : 
+							tailorRelationalAtom((RelationalAtomExpression) resultOld)	;
+						
+                return new GecodeLinear(args,
+                						mapOperatorToGecode(e.getOperator()),
+                						result);						
+			}
+			// end(if the sum is not weighted)
+		} // end(if the sum is not weighted (no negative args))
+		
+		
+		// ------ else it is a weighted sum
+		
+		int weights[] = new int[positiveArgs.length + negativeArgs.length];
+		GecodeAtom[] variables = new GecodeAtom[weights.length];
+		
+		// first positive arguments
+		for(int i=0; i<positiveArgs.length; i++) {
+			if(positiveArgs[i] instanceof Multiplication) {
+				ArrayList<Expression> multArgs = ((Multiplication) positiveArgs[i]).getArguments();
+				if(multArgs.size() > 2) 
+					throw new GecodeException("Flattening error. Expected binary multiplication instead of "+positiveArgs[i]+" in :"+e);
+				if(multArgs.get(0).getType() != Expression.INT) 
+					throw new GecodeException("Flattening error. Expected linear multiplication instead of "+positiveArgs[i]+" in :"+e);
+				weights[i] = ((ArithmeticAtomExpression) multArgs.get(0)).getConstant();
+				
+				Expression variable = multArgs.get(1);
+				if(!(variable instanceof AtomExpression))
+						throw new GecodeException("Flattening error. There is a non-atomic argument "+variable+" in the sum constraint: "+e);
+				
+				variables[i] = (variable instanceof ArithmeticAtomExpression) ? 
+						tailorArithmeticAtom((ArithmeticAtomExpression) variable) : 
+							tailorRelationalAtom((RelationalAtomExpression) variable)	;
+			}
+			else if(positiveArgs[i] instanceof AtomExpression){
+				weights[i] = 1;
+				variables[i] = (positiveArgs[i] instanceof ArithmeticAtomExpression) ? 
+						tailorArithmeticAtom((ArithmeticAtomExpression) positiveArgs[i]) : 
+							tailorRelationalAtom((RelationalAtomExpression) positiveArgs[i])	;
+			}
+			else throw new GecodeException("Flattening error. Expected atom as result in "+e+" instead of: "+positiveArgs[i]);
+		}
+		// then negative arguments
+		for(int i=0; i<negativeArgs.length; i++) {
+			if(negativeArgs[i] instanceof Multiplication) {
+				ArrayList<Expression> multArgs = ((Multiplication) negativeArgs[i]).getArguments();
+				if(multArgs.size() > 2) 
+					throw new GecodeException("Flattening error. Expected binary multiplication instead of "+negativeArgs[i]+" in :"+e);
+				if(multArgs.get(0).getType() != Expression.INT) 
+					throw new GecodeException("Flattening error. Expected linear multiplication instead of "+negativeArgs[i]+" in :"+e);
+				weights[i+positiveArgs.length] = -((ArithmeticAtomExpression) multArgs.get(0)).getConstant();
+				
+				Expression variable = multArgs.get(1);
+				if(!(variable instanceof AtomExpression))
+						throw new GecodeException("Flattening error. There is a non-atomic argument "+variable+" in the sum constraint: "+e);
+				
+				variables[i+positiveArgs.length] = (variable instanceof ArithmeticAtomExpression) ? 
+						tailorArithmeticAtom((ArithmeticAtomExpression) variable) : 
+							tailorRelationalAtom((RelationalAtomExpression) variable)	;
+			}
+			else if(negativeArgs[i] instanceof AtomExpression){
+				weights[i+positiveArgs.length] = -1;
+				variables[i+positiveArgs.length] = (negativeArgs[i] instanceof ArithmeticAtomExpression) ? 
+						tailorArithmeticAtom((ArithmeticAtomExpression) negativeArgs[i]) : 
+							tailorRelationalAtom((RelationalAtomExpression) negativeArgs[i])	;
+			}
+			else throw new GecodeException("Flattening error. Expected atom as result in "+e+" instead of: "+negativeArgs[i]);
+		}
+		
+		// map the result
+		if(!(resultOld instanceof AtomExpression))
+			throw new GecodeException("Flattening error. Expected atom as result in "+e+" instead of: "+resultOld);
+		
+		GecodeAtom result = (resultOld instanceof ArithmeticAtomExpression) ? 
+				tailorArithmeticAtom((ArithmeticAtomExpression) resultOld) : 
+					tailorRelationalAtom((RelationalAtomExpression) resultOld)	;
+		
+		return new GecodeLinear(variables, 
+								weights, 
+								mapOperatorToGecode(e.getOperator()), 
+								result);	
+		
 	}
 	
 	/**
@@ -1029,8 +1156,7 @@ public class GecodeTailor {
 			}
 			args = sum.getNegativeArguments();
 			for(int i=0; i<args.length; i++) {
-				if(i > 0) s.append(" - ");
-				s.append(adaptLinearExpression(args[i]));
+				s.append("-"+adaptLinearExpression(args[i]));
 			}
 			s.append(" "+this.relationalOperatorToString(mapOperatorToGecode(sum.getOperator()))+
 					" "+adaptLinearExpression(sum.getResult()));
@@ -1039,6 +1165,13 @@ public class GecodeTailor {
 		
 		else if(e instanceof CommutativeBinaryRelationalExpression) {
 			CommutativeBinaryRelationalExpression expr = (CommutativeBinaryRelationalExpression) e;
+			return this.adaptLinearExpression(expr.getLeftArgument())+" "
+				+relationalOperatorToString(mapOperatorToGecode(expr.getOperator()))+
+				" "+adaptLinearExpression(expr.getRightArgument());
+		}
+		
+		else if(e instanceof NonCommutativeRelationalBinaryExpression) {
+			NonCommutativeRelationalBinaryExpression expr = (NonCommutativeRelationalBinaryExpression) e;
 			return this.adaptLinearExpression(expr.getLeftArgument())+" "
 				+relationalOperatorToString(mapOperatorToGecode(expr.getOperator()))+
 				" "+adaptLinearExpression(expr.getRightArgument());
@@ -1054,13 +1187,41 @@ public class GecodeTailor {
 			}
 			args = sum.getNegativeArguments();
 			for(int i=0; i<args.size(); i++) {
-				if(i > 0) s.append(" - ");
-				s.append(adaptLinearExpression(args.get(i)));
+				s.append("-"+adaptLinearExpression(args.get(i)));
 			}
 			return s.toString();
 		}
 		
-		throw new GecodeException("Cannot tailor linear expression "+e+" of type "+e.getClass().getSimpleName()+" yet, sorry.");
+		else if(e instanceof Multiplication) {
+			ArrayList<Expression> args = ((Multiplication) e).getArguments();
+			StringBuffer s = new StringBuffer("");
+			for(int i=0; i<args.size(); i++) {
+				if(i > 0) s.append("*");
+				s.append(this.adaptLinearExpression(args.get(i)));
+			}
+			
+			return s.toString();
+		}
+		
+		else if(e instanceof ProductConstraint) {
+			ProductConstraint product = (ProductConstraint) e;
+			Expression[] args = product.getArguments();
+			StringBuffer s = new StringBuffer("");
+			for(int i=0; i<args.length; i++) {
+				if(i > 0) s.append("*");
+				s.append(this.adaptLinearExpression(args[i]));
+			}
+			s.append(" == "+this.adaptLinearExpression(product.getResult()));	
+			return s.toString();
+		}
+		
+		//else if(e instanceof QuantifiedSum) {
+			//Expression e = flattenQuantifiedSum((QuantifiedSum) e);
+			
+		//}
+		
+		else 
+			throw new GecodeException("Cannot tailor linear expression "+e+" of type "+e.getClass().getSimpleName()+" yet, sorry.");
 	}
 	
 	/**

@@ -588,7 +588,7 @@ public class SumConstraint implements GlobalConstraint {
 		if(solver instanceof translator.solver.Gecode &&
 				this.isLinearExpression()) {
 			
-			return this.toString();
+			return this.toGecodeString();
 		}
 		
 

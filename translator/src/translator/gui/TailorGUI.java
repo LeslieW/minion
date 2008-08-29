@@ -45,6 +45,10 @@ import java.awt.Color;
  */
 public class TailorGUI extends javax.swing.JFrame {
     
+	
+	public final char MINION_ID = 1;
+	public final char GECODE_ID = 2;
+	
 	static final long serialVersionUID = 11;
 	   // actionCommands
 	final String SAVE_PROBLEM = "save_problem";
@@ -113,7 +117,7 @@ public class TailorGUI extends javax.swing.JFrame {
 	JFileChooser fileChooser;
 	JTextArea normaliseOutput;
 	JTextArea flatOutput;
-	JTextArea minionOutput;
+	JTextArea solverOutput;
 	JTextArea solutionOutput;
 	JTabbedPane outputTabbedPanel;
 	
@@ -723,10 +727,17 @@ public class TailorGUI extends javax.swing.JFrame {
         JMenuItem setPathToMinion = new JMenuItem("Set Path to Minion ...");
         setPathToMinion.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
-		           changePath();   
+		           changePath(MINION_ID);   
+			  }
+			});
+        JMenuItem setPathToGecode = new JMenuItem("Set Path to Gecode ...");
+        setPathToGecode.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		           changePath(GECODE_ID);   
 			  }
 			});
         settingsMenu.add(setPathToMinion);
+        //settingsMenu.add(setPathToGecode);
         //settingsMenu.addSeparator();
         
         
@@ -758,6 +769,22 @@ public class TailorGUI extends javax.swing.JFrame {
 			  }
 			});
         
+        //JMenu minionTranslationSettings = new JMenu("Minion");
+        
+        JMenu gecodeTranslationSettings = new JMenu("Gecode");
+        JMenuItem minimodelPostConstraint = new JCheckBoxMenuItem("Use MiniModel's post constraints");
+        minimodelPostConstraint.setSelected(this.settings.getUseGecodeMinimodelPostConstraints());
+        minimodelPostConstraint.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          if(item.isSelected())
+		        	  settings.setUseGecodeMinimodelPostConstraints(true);
+		          else settings.setUseGecodeMinimodelPostConstraints(false);
+			  }
+			});
+        gecodeTranslationSettings.add(minimodelPostConstraint);
+        
+        //translationSettings.add(gecodeTranslationSettings);
         translationSettings.add(cseDetection);
         translationSettings.add(ecseDetection);
         translationSettings.add(directVarReusage);
@@ -880,18 +907,18 @@ public class TailorGUI extends javax.swing.JFrame {
 		
 		
 		// minion output text area 
-		this.minionOutput = new JTextArea("",width, outputHeight);
-		JScrollPane minionOutputScrollPane = new JScrollPane(minionOutput);
-		this.minionOutput.setEditable(true);
-		this.minionOutput.setBackground(this.textAreaColor);
-		this.minionOutput.setForeground(this.textAreaFontColor);
-		minionOutput.setFont(this.outputFont);
+		this.solverOutput = new JTextArea("",width, outputHeight);
+		JScrollPane minionOutputScrollPane = new JScrollPane(solverOutput);
+		this.solverOutput.setEditable(true);
+		this.solverOutput.setBackground(this.textAreaColor);
+		this.solverOutput.setForeground(this.textAreaFontColor);
+		solverOutput.setFont(this.outputFont);
 		minionOutputScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		minionOutputScrollPane.setPreferredSize(new Dimension(width, outputHeight));
 
 		JLabel outputLabel = new JLabel("Minion format");
-		outputLabel.setLabelFor(minionOutput);
+		outputLabel.setLabelFor(solverOutput);
 		
 		
 		// solution text area
@@ -963,8 +990,8 @@ public class TailorGUI extends javax.swing.JFrame {
 		this.normaliseOutput.setForeground(this.textAreaFontColor);
 		this.flatOutput.setBackground(this.textAreaColor);
 		this.flatOutput.setForeground(this.textAreaFontColor);
-		this.minionOutput.setBackground(this.textAreaColor);
-		this.minionOutput.setForeground(this.textAreaFontColor);
+		this.solverOutput.setBackground(this.textAreaColor);
+		this.solverOutput.setForeground(this.textAreaFontColor);
 		this.solutionOutput.setBackground(this.textAreaColor);
 		this.solutionOutput.setForeground(this.textAreaFontColor);
 		
@@ -984,17 +1011,28 @@ public class TailorGUI extends javax.swing.JFrame {
 		
     }
     
-    private void changePath() {
+    private void changePath(char solver) {
 		
+    	this.fileChooser.setDialogTitle("Change path to "+((solver == MINION_ID) ? "Minion" : "Gecode"));
 		int returnVal = this.fileChooser.showSaveDialog(this);
+		
+		//System.out.println("Opened the dialog now... ");
+		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 			try {
+				String path = file.getAbsolutePath();
 				
-				String minionPath = file.getAbsolutePath();
+				if(solver == MINION_ID) {	
 				//this.minionPathField.setText(minionPath);
-				this.settings.setPathToMinion(minionPath);
-				this.writeOnMessageOutput("Changed Minion path to "+minionPath);
+					this.settings.setPathToMinion(path);
+					this.writeOnMessageOutput("Changed Minion path to "+path);
+				}
+				
+				else if(solver == GECODE_ID) {
+					this.settings.setPathToGecode(path);
+					this.writeOnMessageOutput("Changed Gecode path to "+path);
+				}
   			
 			} catch(Exception e) {
 				System.out.println("Could not change path to Minion:\n"+e.getMessage()+"\n");
@@ -1116,14 +1154,14 @@ public class TailorGUI extends javax.swing.JFrame {
 							int selection = this.outputTabbedPanel.getSelectedIndex();
 							
 							if(selection == this.SOLVER_INPUT_TAB_NR)
-								text = this.minionOutput.getText();
+								text = this.solverOutput.getText();
 							else if(selection == this.FLAT_TAB_NR)
 								text = this.flatOutput.getText();
 							else if(selection == this.SOLUTION_TAB_NR)
 								text = this.solutionOutput.getText();
 							else if(selection == this.NORMALISE_TAB_NR)
 								text = this.normaliseOutput.getText();
-							else text = this.minionOutput.getText();
+							else text = this.solverOutput.getText();
 							
 							
 							writer.write(text);
@@ -1407,7 +1445,7 @@ protected void translate(String command) {
 			else if(!file.canWrite())
 				writeOnMessageOutput("Cannot write file: \n "+file.toString()+"\nPlease change writing permissions.");
 
-			writer.write(this.minionOutput.getText());
+			writer.write(this.solverOutput.getText());
 			String message = "Saved Minion input in file: \n " + file.getName() + "." +"\n";
 			writeOnMessageOutput(message);
 			
@@ -1480,6 +1518,152 @@ protected void translate(String command) {
 	}
 	
 	
+	
+	protected void runGecode() {
+		
+		try {
+			//String outputFileName = this.settings.getSolverInputFileName();
+			//if(outputFileName == null)
+			String	outputFileName = "out."+this.settings.getTargetSolver().getSolverInputExtension();
+			
+			//-------------- write the output into a file --------------- 
+			String gecodeExamplePath = this.settings.getPathToGecode()+"examples/"; 
+			writeOnMessageOutput("Creating Gecode file: "+outputFileName+"\n");
+			File file  = new File(gecodeExamplePath+outputFileName);
+		    if(file.createNewFile()) ;
+			FileWriter writer = new FileWriter(file);
+        
+			if(!file.canRead())
+				writeOnMessageOutput("Cannot read file: \n "+file.toString()+"\nPlease change reading permissions.");
+			else if(!file.canWrite())
+				writeOnMessageOutput("Cannot write file: \n "+file.toString()+"\nPlease change writing permissions.");
+
+			writer.write(this.solverOutput.getText());
+			String message = "Saved Gecode input in file: \n " + file.getName() + "." +"\n";
+			writeOnMessageOutput(message);
+			
+			writer.flush();
+            writer.close();
+            
+            // ------- change to the directory of Gecode ----------
+          
+            
+            // ----- compile the c++ file -------------------------
+            String[] compileCommand = new String[] { "make", "examples/"+outputFileName };
+            
+            Process process = Runtime.getRuntime().exec(compileCommand);
+            
+            // first read the input and the error stream
+            InputStream inputStream = process.getInputStream();
+            InputStream errorStream = process.getErrorStream();
+            BufferedReader input =new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader error =new BufferedReader(new InputStreamReader(errorStream));
+            
+            String line;
+            String compileMessage = "";
+            while ((line = input.readLine()) != null) {
+            	compileMessage = compileMessage+line+"\n";
+            }
+            line = "";
+            StringBuffer compileErrorMessage = new StringBuffer("");
+            while ((line = error.readLine()) != null) {
+              	compileErrorMessage.append(line+"\n");
+            }              
+            
+            // then wait for process (to conform with Microsoft Windows) 
+            process.waitFor();
+            
+            int exitValue = process.exitValue();
+              
+            
+            if(exitValue == 0) {
+                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(compileMessage));
+                  input.close();
+            }
+            else {
+                writeOnOutput(this.SOLUTION_TAB_NR, "$ Error in compiling.\n$ See system messages below for details.\n");
+           
+                if(compileMessage.length() > 1)
+                	this.writeOnMessageOutput("Your C++ compiler returned the following error message:\n"+compileMessage);
+                input.close(); 
+       
+                this.writeOnMessageOutput("Your C++ compiler returned the following error message:\n"+compileErrorMessage);
+                error.close();
+                return;
+            }
+            
+            
+            
+            // --------------- then execute the binary --------------------- 
+            
+            gecodeExamplePath += "out"; 
+            
+            String[] commandArguments;
+            int noOfSolutions = this.settings.getNoOfSolutions();
+            writeOnMessageOutput(message+"\n\nSearch for "+
+            		((noOfSolutions == settings.FIND_ALL_SOLUTIONS) ? "all" : noOfSolutions)+" solution(s)" +
+            				". This might take a while.");
+            
+            if(noOfSolutions == 1) {
+            	commandArguments = new String[] { gecodeExamplePath, "-solutions 1" };
+            }
+            else if(noOfSolutions == this.settings.FIND_ALL_SOLUTIONS){
+            	commandArguments = new String[] {gecodeExamplePath, "-solutions 0"};
+            }
+            else {
+            	commandArguments = new String[] {gecodeExamplePath, "-solutions "+noOfSolutions};
+            }
+            
+            process = Runtime.getRuntime().exec(commandArguments);
+            
+            // first read the input and the error stream
+            inputStream = process.getInputStream();
+            errorStream = process.getErrorStream();
+            input =new BufferedReader(new InputStreamReader(inputStream));
+            error =new BufferedReader(new InputStreamReader(errorStream));
+            
+            String solverOutputString = "";
+            while ((line = input.readLine()) != null) {
+            	solverOutputString = solverOutputString+line+"\n";
+            }
+            line = "";
+            StringBuffer solverErrorMessage = new StringBuffer("");
+            while ((line = error.readLine()) != null) {
+              	solverErrorMessage.append(line+"\n");
+            }              
+            
+            // then wait for process (to conform with Microsoft Windows)
+            process.waitFor();
+            
+            exitValue = process.exitValue();
+              
+            
+            if(exitValue == 0) {
+                  writeOnOutput(this.SOLUTION_TAB_NR, this.translator.getEssenceSolution(solverOutputString));
+                  input.close();
+            }
+            else {
+                writeOnOutput(this.SOLUTION_TAB_NR, "$ Error in executing Minion.\n$ See system messages below for details.\n");
+           
+                if(solverOutputString.length() > 1)
+                	this.writeOnMessageOutput("Minion returned the following error message:\n"+solverOutputString);
+                input.close(); 
+       
+                this.writeOnMessageOutput("Minion returned the following error message:\n"+solverErrorMessage);
+                error.close();
+            }
+		
+            
+            // --------- change back to Tailor's directory -----------------
+            
+            
+		} catch(Exception e) {
+			writeOnMessageOutput("Could not run Minion:\n"+e.getMessage()+"\n"+
+					"You can change the path to your Minion executable in 'Settings'.\n");
+			return;
+		}	
+	}
+	
 	/**
 	 * Write a String on the tab with number 'tabNumber'. 
 	 * There are tabs for normalised E', flat E', solver input
@@ -1503,7 +1687,7 @@ protected void translate(String command) {
 		}
 		
 		else if(tabNumber == this.SOLVER_INPUT_TAB_NR) {
-			this.minionOutput.setText(text);
+			this.solverOutput.setText(text);
 			this.outputTabbedPanel.setTitleAt(this.SOLVER_INPUT_TAB_NR, 
 					this.settings.getTargetSolver().getSolverName()+" Input");
 			this.outputTabbedPanel.setEnabledAt(this.SOLVER_INPUT_TAB_NR, true);
@@ -1539,7 +1723,7 @@ protected void translate(String command) {
 		}
 		
 		else if(tabNumber == this.SOLVER_INPUT_TAB_NR) {
-			this.minionOutput.setCaretPosition(position);
+			this.solverOutput.setCaretPosition(position);
 			this.outputTabbedPanel.setEnabledAt(this.SOLVER_INPUT_TAB_NR, true);
 			this.outputTabbedPanel.setSelectedIndex(this.SOLVER_INPUT_TAB_NR);
 		}

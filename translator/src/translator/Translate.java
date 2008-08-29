@@ -588,10 +588,18 @@ public class Translate {
 	private static TranslationSettings readModelName(String filename, TranslationSettings settings) {
 		
 		int positionOfDot = 0;
+		int startOfName = 0;
+		
+		for(int i = 0; i < filename.length(); i++) {
+			if(filename.charAt(i) == '/') {
+				startOfName = i;
+			}
+		}
+		
 		
 		for(positionOfDot = 0; positionOfDot < filename.length(); positionOfDot++) {
 			if(filename.charAt(positionOfDot) == '.') {
-				settings.setModelName(filename.substring(0,positionOfDot));
+				settings.setModelName(filename.substring(startOfName+1,positionOfDot));
 				return settings;
 			}
 		}

@@ -2,10 +2,12 @@ package translator.tailor.gecode;
 
 public interface GecodeConstraint {
 
-	
 	public final String BUFFERARRAY_NAME = "_buffer";
 	/** the prefix that flattened arrays have */
 	public final String FLATTENED_ARRAY_PREFIX = "_";
+	
+	/** it should be less than 256 which is standard in C++ */
+	public final int MAX_VARIABLE_LENGTH = 24; 
 	
 	/** Consistency levels for each constraint */
 	/** value consistency level (naive) */

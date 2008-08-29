@@ -1,17 +1,18 @@
 package translator.tailor.gecode;
 
-public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
+public class GecodeIntVarArgs implements IntegerVariable, ArgsArrayVariable {
 
-	private GecodeAtom[] variables;
+	//private GecodeAtom[] variables;
 	private String name;
+	private int length;
 	private int ub;
 	private int lb;
 	
 	public GecodeIntVarArgs(String name,
-			                GecodeAtom[] variables,
+			                int length,
 			                int lb, 
 			                int ub) {
-		this.variables = variables;
+		this.length = length;
 		this.name = name;
 		this.lb = lb;
 		this.ub = ub;
@@ -33,7 +34,7 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
 	}
 	
 	public int getLength() {
-		return this.variables.length;
+		return this.length;
 	}
 	
 	public boolean isArgsVariable() {
@@ -52,20 +53,35 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsVariable {
 		return this.name;
 	}
 	
-	public GecodeAtom[] getVariables() {
-		return this.variables;
-	}
-	
-	public GecodeAtom getVariableAt(int index) 
-		throws GecodeException {
-		
-		if(index < 0 || index >= this.variables.length)
-			throw new GecodeException("Index "+index+" out of bounds for:"+this.toString());
-		else return 
-			this.variables[index];
-	}
 	
 	public String toDeclarationCCString() {
-		return "IntVarArgs "+name;
+		return "IntVarArgs "+name+"("+this.length+")";
 	}
+	
+	 // ============= ADDITIONAL METHODS =================
+	
+	
+	public void addLowerBound(int newLb) {
+		if(newLb < lb)
+			this.lb = newLb;
+	}
+
+	
+	public void addUpperBound(int newUb) {
+		if(newUb > ub)
+			this.ub = newUb;
+	}
+	
+	public void increaseLength() {
+		this.length++;
+	}
+	
+	public void setLowerBound(int lb) {
+		this.lb = lb;
+	}
+	
+	public void setUpperBound(int ub) {
+		this.ub = ub;
+	}
+	
 }

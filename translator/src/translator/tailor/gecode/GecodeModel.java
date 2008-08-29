@@ -24,7 +24,7 @@ public class GecodeModel {
 	/** multi-dimensional arrays */
 	private ArrayList<GecodeArrayVariable> multiDimensionalArrays;
 	/** arrays that buffer auxiliary vars */
-	private ArrayList<GecodeArrayVariable> auxBufferArrays;
+	private ArrayList<ArgsArrayVariable> auxBufferArrays;
 	/** buffered single int variables*/
 	private ArrayList<GecodeIntVar> singleIntVarNames;
 	/** buffered single bool variables*/
@@ -47,7 +47,7 @@ public class GecodeModel {
 					   ArrayList<GecodeConstraint> constraints, 
 					   ArrayList<GecodeIntVar> singleIntVars, 
 					   ArrayList<GecodeBoolVar> singleBoolVars, 
-					   ArrayList<GecodeArrayVariable> auxBufferArrays, 
+					   ArrayList<ArgsArrayVariable> auxBufferArrays, 
 					   ArrayList<GecodeIntVar> auxIntVarNames, 
 					   ArrayList<GecodeBoolVar> auxBoolVarNames, 
 					   ArrayList<GecodeArrayVariable> multiDimensionalArrays) {
@@ -155,7 +155,7 @@ public class GecodeModel {
 		s.append(variableDeclarationToString()+"\n");
 		
 		s.append("public: \n\n");
-		s.append(this.multiDimensionalFunctions());
+		s.append(this.multiDimensionalFunctionsToString());
 		s.append(actualProblemConstructorToString()+"\n");
 		
 		s.append(printingMethodToString()+"\n\n");
@@ -175,7 +175,7 @@ public class GecodeModel {
 		StringBuffer s = new StringBuffer("   // actual problem\n   "+this.modelName+"(const Options& opt) : "+
 				variableInitialisationToString());
 		
-		s.append(" {\n\n");
+		s.append(" {\n");
 		s.append(bufferArraysDeclaration()+"\n");
 		s.append(constraintsToString()+"\n");
 		s.append(branchingToString()+"\n");
@@ -203,12 +203,24 @@ public class GecodeModel {
 		for(int i=0; i<this.bufferArrays.size(); i++)
 			s.append("   "+bufferArrays.get(i).toDeclarationCCString()+";\n");
 		
-		for(int i=0; i<this.auxBufferArrays.size(); i++)
+		/*for(int i=0; i<this.auxBufferArrays.size(); i++)
 			s.append("   "+auxBufferArrays.get(i).toDeclarationCCString()+";\n");
-		
+		*/
 		return s.toString();
 	}
 	
+	/**
+	 * Declare the Args Arrays that represent the aux variables
+	 * @return
+	 */
+	private String auxVariableDeclarationToString() {
+		
+		StringBuffer s = new StringBuffer("");
+		for(int i=0; i<this.auxBufferArrays.size(); i++)
+			s.append("\t"+auxBufferArrays.get(i).toDeclarationCCString()+";\n");
+		return s.toString();
+	
+	}
 	
 	private String copyMethodToString() {
 		
@@ -235,7 +247,7 @@ public class GecodeModel {
 		}
 		
 		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
-			s.append("\t"+multiDimensionalArrays.get(i)+".update(this, share, s."+variableList.get(i)+");\n");
+			s.append("\t"+multiDimensionalArrays.get(i)+".update(this, share, s."+multiDimensionalArrays.get(i)+");\n");
 		}
 		
 		for(int i=0; i<this.bufferArrays.size(); i++) {
@@ -387,15 +399,22 @@ public class GecodeModel {
 		// then again for the auxiliary variables
 		// -------------------------------------------------
 		
-		if(auxBufferArrays.size() > 0) {
-			s.append("      // mapping auxiliary variables to the array\n");
-		}
+		if(auxBufferArrays.size() == 0) 
+			return s.toString();
+		
+		// declare aux var containers
+		s.append("      // defining the ArgsVarArrays that hold the aux variables\n");
+		s.append(this.auxVariableDeclarationToString());
+		s.append("\n\n");
+		
+		
+		//s.append("      // mapping auxiliary variables to the array\n");
 		
 		// Define the variables: IntVar a(this,1,10), ...
 		for(int i=0; i<this.auxBufferArrays.size(); i++) {
-			GecodeArrayVariable array = auxBufferArrays.get(i);
+			ArgsArrayVariable array = auxBufferArrays.get(i);
 			
-			if(array instanceof GecodeIntVarArray) {
+			if(array instanceof GecodeIntVarArgs) {
 				s.append("      // defining auxiliary integer variables\n\tIntVar");
 				for(int j=0; j<array.getLength(); j++) {
 					GecodeIntVar variable = this.auxIntVarNames.get(j);
@@ -404,7 +423,7 @@ public class GecodeModel {
 					s.append(variable.getVariableName()+"(this, "+variable.getBounds()[0]+", "+variable.getBounds()[1]+")");
 				}				
 			}
-			else if(array instanceof GecodeBoolVarArray) {
+			else if(array instanceof GecodeBoolVarArgs) {
 				s.append("      // defining auxiliary boolean variables\n\tBoolVar");
 				for(int j=0; j<array.getLength(); j++) {
 					GecodeBoolVar variable = this.auxBoolVarNames.get(j);
@@ -417,21 +436,24 @@ public class GecodeModel {
 		}
 		
 		
+		
 		// assign each auxiliart variable to a place in the corresponding buffer/container
 		for(int i=0; i<this.auxBufferArrays.size(); i++) {
-			GecodeArrayVariable array = auxBufferArrays.get(i);
+			ArgsArrayVariable array = auxBufferArrays.get(i);
 			s.append("      // assigning each auxilary variable to the corresponding container/buffer\n");
 			
-			if(array instanceof GecodeIntVarArray) {
+			if(array instanceof GecodeIntVarArgs) {
 				String arrayName = array.getVariableName();
 				for(int j=0; j<array.getLength(); j++) {
-					s.append("\t"+this.auxIntVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];\n");
+					if(j != 0 && j % 3 == 0) s.append("\n");
+					s.append("\t"+arrayName+"["+j+"] = "+this.auxIntVarNames.get(j).getVariableName()+";"); // = "+arrayName+"["+j+"];");
 				}				
 			}
-			else if(array instanceof GecodeBoolVarArray) {
+			else if(array instanceof GecodeBoolVarArgs) {
 				String arrayName = array.getVariableName();
 				for(int j=0; j<array.getLength(); j++) {
-					s.append("\t"+this.auxBoolVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];");
+					if(j != 0 && j % 3 == 0) s.append("\n");
+					s.append("\t"+arrayName+"["+j+"] = "+this.auxBoolVarNames.get(j).getVariableName()+";"); // = "+arrayName+"["+j+"];");
 				}	
 			}
 			s.append("\n\n");
@@ -497,16 +519,18 @@ public class GecodeModel {
 			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
 		
-		for(int i=0; i<this.auxBufferArrays.size(); i++) {
+		// we need not define auxiliary variables
+		/* for(int i=0; i<this.auxBufferArrays.size(); i++) {
 			if(i > 0) s.append(",\n\t\t");
 			else if(this.variableList.size() > 0 
 					|| this.multiDimensionalArrays.size() > 0
 					|| this.bufferArrays.size() > 0) 
 				s.append(",\n\t\t");
 			
-			GecodeArrayVariable var = auxBufferArrays.get(i);
+			ArgsArrayVariable var = auxBufferArrays.get(i);
 			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
+		*/
 		
 		return s.toString();
 	}
@@ -528,30 +552,32 @@ public class GecodeModel {
 	 * Define methods to access multi-dimensional arrays by several indices
 	 * @return
 	 */
-	private String multiDimensionalFunctions() {
+	private String multiDimensionalFunctionsToString() {
 		
-		StringBuffer s = new StringBuffer("  ");
+		StringBuffer s = new StringBuffer("");
 		if(this.multiDimensionalArrays.size() == 0)
 			return s.toString();
 		
-		s.append("// Defining methods to access multi-dimensional variables\n");
+		//s.append("// Defining methods to access multi-dimensional variables\");
+		s.append("\n\n   ");
 		
 		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
 			GecodeArrayVariable array = this.multiDimensionalArrays.get(i);
 			String realArrayName = array.getVariableName();
-			realArrayName = realArrayName.substring(GecodeConstraint.FLATTENED_ARRAY_PREFIX.length()-1, realArrayName.length()-1);
+			realArrayName = realArrayName.substring(GecodeConstraint.FLATTENED_ARRAY_PREFIX.length(), realArrayName.length());
 			
 			int[] indexLengths = array.getLengths();
 			
-			s.append("\n");
+			s.append("// Defining method to access multi-dimensional array "+realArrayName+" \n");
 			
 			if(indexLengths.length == 2) {
-				s.append("   IntVar& "+realArrayName+"(int row, int col) {\n");
+				String type = (array instanceof GecodeIntVarArray) ? "IntVar" : "BoolVar";
+				s.append("   "+type+"& "+realArrayName+"(int row, int col) {\n");
 				s.append("\tif(row < 0 || row >= "+indexLengths[0]+
-						")\n\t   std::err \"Row index of "+realArrayName+
+						")\n\t   std::cerr << \"Row index of "+realArrayName+
 						"[\" << row << \",\" << col << \"] out of bounds:\" << row << std::endl;\n");
 				s.append("\tif(col < 0 || col >= "+indexLengths[1]+
-						")\n\t   std::err \"Column index of "+realArrayName+
+						")\n\t   std::cerr << \"Column index of "+realArrayName+
 						"[\" << row << \",\" << col << \"]  out of bounds:\" << col << std::endl;\n");
 				s.append("\treturn "+array.getVariableName()+"[row*"+indexLengths[0]+" + col];\n");
 				s.append("   }\n");

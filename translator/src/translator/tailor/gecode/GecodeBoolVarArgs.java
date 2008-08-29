@@ -1,13 +1,13 @@
 package translator.tailor.gecode;
 
-public class GecodeBoolVarArgs implements ArgsVariable, BooleanVariable {
+public class GecodeBoolVarArgs implements ArgsArrayVariable, BooleanVariable {
 
 	private String name;
-	private GecodeAtom[] variables;
+	private int length;
 	
 	public GecodeBoolVarArgs(String name,
-							 GecodeAtom[] variables) {
-		this.variables = variables;
+							 int length) {
+		this.length = length;
 		this.name = name;
 	}
 	
@@ -31,20 +31,25 @@ public class GecodeBoolVarArgs implements ArgsVariable, BooleanVariable {
 		return this.name;
 	}
 	
-	public GecodeAtom[] getVariables() {
-		return this.variables;
+	public int getLength() {
+		return this.length;
 	}
 	
-	public GecodeAtom getVariableAt(int index) 
-		throws GecodeException {
-		
-		if(index < 0 || index >= this.variables.length)
-			throw new GecodeException("Index "+index+" out of bounds for:"+this.toString());
-		else return 
-			this.variables[index];
+	public int getLowerBound() {
+		return 0;
+	}
+	
+	public int getUpperBound() {
+		return 1;
 	}
 	
 	public String toDeclarationCCString() {
-		return "BoolVarArgs "+name;
+		return "BoolVarArgs "+name+"("+this.length+")";
+	}
+	
+	// ============= ADDITIONAL METHODS ===============
+	
+	public void increaseLength() {
+		this.length++;
 	}
 }
