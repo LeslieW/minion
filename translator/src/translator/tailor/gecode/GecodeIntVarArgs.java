@@ -10,7 +10,7 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsArrayVariable {
 	
 	// we need this to represent parts of an existing array (for instance the row of an array)
 	private int[] indexDomains;
-	private int[] referencedIndices; 
+	private int[][] referencedIndices; 
 	private String originalName;
 	
 	public GecodeIntVarArgs(String name,
@@ -27,12 +27,16 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsArrayVariable {
 	/** constructor for parts of arrays (translator.expression.IndexedArray)*/
 	public GecodeIntVarArgs(String name,
 							int[] indices,
-							int[] indexRanges,
+							int[][] indexRanges,
 							int lb, 
 							int ub) {
 		this.indexDomains = indices;
 		this.referencedIndices = indexRanges;
-		this.length = indices.length;
+		this.length = 1;
+		for(int i=0; i<indices.length; i++) {
+			if(this.referencedIndices[i][0] != this.referencedIndices[i][1]) 
+				length *= this.referencedIndices[i][1] - this.referencedIndices[i][0] + 1;
+		}
 		
 		this.originalName = name;
 		this.name = this.computePartialArrayName(name);
@@ -90,7 +94,7 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsArrayVariable {
 		return this.indexDomains;
 	}
 	
-	public int[] getReferencedIndex() {
+	public int[][] getReferencedIndex() {
 		return this.referencedIndices;
 	}
 	
@@ -102,41 +106,37 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsArrayVariable {
 			return s.toString(); //throw new GecodeException("Internal error. Cannot compute arra definition of non-partial array "+this);
 		
 		// the declaration of the args variable
-		s.append("\tIntVarArgs "+this.name+"("+this.length+");\n");
+		s.append("IntVarArgs "+this.name+"("+this.length+");\n");
 	
 		// assigning the values to the args array
-		if(this.length == 1) {
-			if(this.referencedIndices[0] == GecodeConstraint.WHOLE_RANGE_REFERENCED) {
-				s.append("\tfor(int i=0; i<"+this.indexDomains[0]+"; i++)\n");
+		if(this.indexDomains.length == 1) {
+				s.append("\tfor(int i="+this.referencedIndices[0][0]+"; i<="+this.referencedIndices[0][1]+"; i++)\n");
 				s.append("\t   "+this.name+"[i] = "+this.originalName+"[i];\n");
-			}
-			else return ""; //throw new GecodeException("Internal error. No whole range specified in args array:"+this);
 		}
-		else if(this.length == 2) {
+		else if(this.indexDomains.length == 2) {
 		
-			if(this.referencedIndices[0] == GecodeConstraint.WHOLE_RANGE_REFERENCED) {
-				s.append("\tfor(int i=0; i<"+this.indexDomains[0]+"; i++)\n");
+			if(this.referencedIndices[0][0] != this.referencedIndices[0][1]) {
+				s.append("\tfor(int i="+this.referencedIndices[0][0]+"; i<="+this.referencedIndices[0][1]+"; i++)\n");
 				
 				// M[..,..]
-				if(this.referencedIndices[1] == GecodeConstraint.WHOLE_RANGE_REFERENCED) {
-					s.append("\t   for(int j=0; j<"+this.indexDomains[1]+"; j++)\n");
-					s.append("\t       "+this.name+"[i*"+this.indexDomains[0]+" +j)] = "+this.originalName+"[i][j];\n");
+				if(this.referencedIndices[1][0] != this.referencedIndices[1][1]) {
+					s.append("\t   for(int j="+this.referencedIndices[0][0]+"; j<="+this.referencedIndices[0][1]+"; j++)\n");
+					s.append("\t       "+this.name+"[i*"+this.indexDomains[0]+" +j)] = "+this.originalName+"(i,j);\n");
 				}
 				// M[..,c]
 				else {
-					s.append("\t   "+this.name+"[i] = "+this.originalName+"[i]["+this.referencedIndices[1]+"];\n");
+					s.append("\t   "+this.name+"[i] = "+this.originalName+"(i,"+this.referencedIndices[1][0]+");\n");
 				}
 			}
 			
 			// M[c,..]
-			else if(this.referencedIndices[1] == GecodeConstraint.WHOLE_RANGE_REFERENCED) {
-				s.append("\tfor(int i=0; i<"+this.indexDomains[1]+"; i++)\n");
-				s.append("\t   "+this.name+"[i] = "+this.originalName+"["+this.referencedIndices[1]+"][i];\n");
+			else  {
+				s.append("\tfor(int i="+this.referencedIndices[1][0]+"; i<="+this.referencedIndices[1][1]+"; i++)\n");
+				s.append("\t   "+this.name+"[i] = "+this.originalName+"("+this.referencedIndices[0][0]+",i);\n");
 			}
 			
-			else return ""; //throw new GecodeException("Internal error. No whole range specified in args array:"+this);
 		}
-		else return ""; //throw new GecodeException("Cannot write array definition of 3 or multi-dimensional array "+this+" yet. sorry.");	
+		else return "oioioi"; //throw new GecodeException("Cannot write array definition of 3 or multi-dimensional array "+this+" yet. sorry.");	
 		
 		return s.toString();
 	}
@@ -177,20 +177,20 @@ public class GecodeIntVarArgs implements IntegerVariable, ArgsArrayVariable {
 		
 		String name = origArrayName+GecodeConstraint.ARRAY_PARTS_SUFFIX;
 		
-		/*StringBuffer s = new StringBuffer("_");
+		StringBuffer s = new StringBuffer("");
 		if(this.referencedIndices != null) {
 			for(int i=0; i<this.referencedIndices.length; i++ )
-				if(referencedIndices[i] == GecodeConstraint.WHOLE_RANGE_REFERENCED)
-					s.append("_");
-				else s.append(referencedIndices[i]);
+				if(referencedIndices[i][0] != referencedIndices[i][1])
+					s.append(referencedIndices[i][0]+this.referencedIndices[i][1]);
+				else s.append(referencedIndices[i][0]);
 		}
-		name +=s.toString(); */
+		name +=s.toString()+"_";
 		
-		java.util.Random randomGenerator = new java.util.Random(GecodeConstraint.RANDOM_MAXIMUM);
-		name += randomGenerator.nextInt();
+		java.util.Random randomGenerator = new java.util.Random();
+		name += randomGenerator.nextInt(GecodeConstraint.RANDOM_MAXIMUM);
 		
-		if(name.length() > GecodeConstraint.MAX_VARIABLE_LENGTH) {
-			return name.toString().substring(name.length()-GecodeConstraint.MAX_VARIABLE_LENGTH);
+		if(name.length() > GecodeConstraint.MAX_VARIABLE_LENGTH-1) {
+			return "_"+name.toString().substring(name.length()-GecodeConstraint.MAX_VARIABLE_LENGTH-1);
 		}
 		
 		return name;

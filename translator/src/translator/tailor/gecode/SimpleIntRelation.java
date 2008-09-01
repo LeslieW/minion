@@ -156,15 +156,23 @@ public class SimpleIntRelation extends RelationalConstraint {
 		if(this.rightArgument instanceof ArgsArrayVariable) {
 			ArgsArrayVariable argsArray = (ArgsArrayVariable) rightArgument;
 			if(argsArray.isIndexedArray()) {
+				//System.out.println("Array Definition: "+argsArray.getArrayDefinition());
 				s.append(argsArray.getArrayDefinition());
 			}
 		}
+		
+		if(s.length() != 0)
+			s.append("\t");
+		
 		if(this.leftArgument instanceof ArgsArrayVariable) {
 			ArgsArrayVariable argsArray = (ArgsArrayVariable) leftArgument;
 			if(argsArray.isIndexedArray()) {
 				s.append(argsArray.getArrayDefinition());
 			}
 		}
+		
+		if(s.length() != 0)
+			s.append("\t");
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF) {

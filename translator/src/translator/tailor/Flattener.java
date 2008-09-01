@@ -2466,15 +2466,20 @@ public class Flattener {
 				//System.out.println("We have to flatten the multiplication:"+multiplication);
 				Multiplication binaryMultiplication = flattenToBinaryMultiplication(((Multiplication) multiplication.copy()).getArguments(), null);
 				
-				ArithmeticAtomExpression auxVariable = null;
+				AtomExpression auxVariable = null;
 				
 				if(hasCommonSubExpression(binaryMultiplication)) {
 					auxVariable = getCommonSubExpression(binaryMultiplication);
 				}
 				else {
-					auxVariable = new ArithmeticAtomExpression(
-														 createAuxVariable(multiplication.getDomain()[0], multiplication.getDomain()[1])
-														 );
+					int lb = multiplication.getDomain()[0];
+					int ub = multiplication.getDomain()[1];
+					auxVariable = (lb == 0 && ub == 1) ? 
+							new RelationalAtomExpression(
+														 createAuxVariable(lb, ub)
+														 ) :
+							new ArithmeticAtomExpression(createAuxVariable(lb, ub)
+																	 );
 					this.addToSubExpressions(binaryMultiplication, auxVariable);
 				}
 				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().get(0),
@@ -3139,12 +3144,12 @@ public class Flattener {
 								 }
 							}
 
-							ArithmeticAtomExpression auxVariable = null;
+							RelationalAtomExpression auxVariable = null;
 							if(hasCommonSubExpression(atom)) {
-								auxVariable = getCommonSubExpression(atom);
+								auxVariable = getCommonSubExpression(atom).toRelationalAtomExpression();
 							}
 							else {
-							        auxVariable = new ArithmeticAtomExpression(createAuxVariable(0,1));
+							        auxVariable = new RelationalAtomExpression(createAuxVariable(0,1));
 								addToSubExpressions(atom,auxVariable);
 							}
 							

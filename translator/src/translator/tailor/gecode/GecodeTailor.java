@@ -531,9 +531,69 @@ public class GecodeTailor {
 	private GecodeArray tailorIndexedArray(IndexedArray indexedArray) 
 		throws GecodeException {
 		
-		// TODO
-		int f;
-		throw new GecodeException("Cannot tailor indexed array "+indexedArray+" yet, sorry.");
+		// array name
+		String arrayName = indexedArray.getArrayName();
+		
+		// baseDomain
+		Domain aDomain = indexedArray.getBaseDomain();
+		aDomain = aDomain.evaluate();
+		if(!(aDomain instanceof ConstantArrayDomain)) 
+			throw new GecodeException("Cannot tailor array "+indexedArray+" because its baseDomain "+
+					aDomain+" is not constant but of type: "+aDomain.getClass().getSimpleName());
+		ConstantArrayDomain arrayDomain = (ConstantArrayDomain) aDomain;
+		ConstantDomain baseDomain = arrayDomain.getBaseDomain();
+		ConstantDomain[] indexDomains = arrayDomain.getIndexDomains();
+		for(int i=0; i<indexDomains.length; i++)
+			indexDomains[i] = (ConstantDomain) indexDomains[i].evaluate();
+		int[] indexUb = new int[indexDomains.length];
+		for(int i=0; i<indexUb.length; i++) {
+			indexUb[i] = indexDomains[i].getRange()[1] - indexDomains[i].getRange()[0];
+		}
+		
+		// index ranges
+		BasicDomain[] iRanges = indexedArray.getIndexRanges();
+		
+		for(int i=0; i<iRanges.length; i++) {
+			iRanges[i] = (BasicDomain) iRanges[i].evaluate();
+			if(!(iRanges[i] instanceof ConstantDomain))
+				throw new GecodeException("Cannot tailor array "+indexedArray+" because its index domain "+iRanges[i]+" is not constant.");
+		}
+			
+		ConstantDomain[] indexRanges = new ConstantDomain[iRanges.length];
+		for(int i=0; i<indexRanges.length; i++)
+			indexRanges[i] = (ConstantDomain) iRanges[i];
+		
+		// process index ranges 
+		int[][] ranges = new int[indexRanges.length][2];
+		//int[] ranges = new int[indexRanges.length];
+		for(int i=0; i<ranges.length; i++) {
+			// single value
+			if(indexRanges[i] instanceof SingleIntRange) {
+				// adapt the value to the offset from Gecode (arrays are indexed starting from 0)
+				ranges[i][0] = ((SingleIntRange) indexRanges[i]).getSingleRange() - indexDomains[i].getRange()[0];
+				ranges[i][1] = ranges[i][0];
+			}
+			else if(indexRanges[i] instanceof BoundedIntRange) {
+				ranges[i][0] = ((BoundedIntRange) indexRanges[i]).getRange()[0] - indexDomains[i].getRange()[0];
+				ranges[i][1] = ((BoundedIntRange) indexRanges[i]).getRange()[1] - indexDomains[i].getRange()[0];
+			}
+			else throw new GecodeException("Cannot tailor indexed array "+indexedArray+
+					".\nThe index "+indexRanges[i]+" has an unexpected type: "+indexRanges[i].getClass().getSimpleName());
+		}
+		
+		
+		if(baseDomain instanceof BoolDomain) {
+			return new GecodeBoolVarArgs(arrayName,
+					 					indexUb,
+					 					ranges);
+		}
+			
+		else return new GecodeIntVarArgs(arrayName,
+										 indexUb,
+										 ranges,
+										 baseDomain.getRange()[0],
+										 baseDomain.getRange()[1]);
+		
 	}
 	
 	
@@ -627,9 +687,11 @@ public class GecodeTailor {
 		// else:  we don't need to care about 1 argument only -> evaluation should have taken care of that
 		
 		GecodeAtom leftArg, rightArg;
+		boolean boolMultiplication = true;
 		
 		if(arguments[0] instanceof ArithmeticAtomExpression) {
 			leftArg = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[0]);
+			boolMultiplication = false;
 		}
 		else if(arguments[0] instanceof RelationalAtomExpression) 
 			leftArg = tailorRelationalAtom((RelationalAtomExpression) arguments[0]);
@@ -639,6 +701,7 @@ public class GecodeTailor {
 		
 		if(arguments[1] instanceof ArithmeticAtomExpression) {
 			rightArg = tailorArithmeticAtom((ArithmeticAtomExpression) arguments[1]);
+			boolMultiplication = false;
 		}
 		else if(arguments[1] instanceof RelationalAtomExpression) 
 			rightArg = tailorRelationalAtom((RelationalAtomExpression) arguments[1]);
@@ -651,12 +714,16 @@ public class GecodeTailor {
 		GecodeAtom result;
 		if(resultOld instanceof ArithmeticAtomExpression) {
 			result = tailorArithmeticAtom((ArithmeticAtomExpression) resultOld);
+			boolMultiplication = false;
 		}
 		else if(resultOld instanceof RelationalAtomExpression) 
 			result = tailorRelationalAtom((RelationalAtomExpression) resultOld);
 		else throw new GecodeException("Cannot tailor '"+resultOld+"' in expression '"+product+
 				"' to Gecode:\nit is not an atom but of type: "+resultOld.getClass().getSimpleName());
 		
+		if(boolMultiplication) {
+			
+		}
 		
 		return new GecodeMult(leftArg,rightArg,result);
 	}
@@ -677,8 +744,8 @@ public class GecodeTailor {
 					alldiff+"' instead of: "+e);
 		
 		GecodeArray array = tailorArray((SingleArray) e);
-		if(array instanceof GecodeIntArray)
-			return new GecodeDistinct((GecodeIntArray) array);
+		if(array instanceof GecodeArray)
+			return new GecodeDistinct((GecodeArray) array);
 		
 		else throw new GecodeException("Expected integer array instead of '"+
 				array+"' with basic domain:"+((Array) e).getBaseDomain().getClass().getSimpleName());
@@ -941,7 +1008,11 @@ public class GecodeTailor {
 		
 		else if(leftArgument instanceof GecodeConstant) {
 				if(rightArgument instanceof GecodeIntAtomVariable) {
-					return new SimpleIntRelation((GecodeIntAtomVariable) rightArgument,
+					if(this.isCommutativeOperator(operator))
+						return new SimpleIntRelation((GecodeIntAtomVariable) rightArgument,
+			  					  operator,
+			  					  (GecodeConstant) leftArgument);
+					else return new SimpleIntRelation((GecodeIntAtomVariable) rightArgument,
 												  this.invertRelationalOperator(operator),
 												   (GecodeConstant) leftArgument);
 				}
@@ -987,7 +1058,12 @@ public class GecodeTailor {
 		
 		else if(leftArgument instanceof GecodeConstant) {
 				if(rightArgument instanceof GecodeBoolAtomVariable) {
-					return new SimpleBoolRelation((GecodeBoolAtomVariable) rightArgument,
+					if(isCommutativeOperator(operator))
+						return new SimpleBoolRelation((GecodeBoolAtomVariable) rightArgument,
+			  					  operator,
+			  					  (GecodeConstant) leftArgument);
+					else 
+						return new SimpleBoolRelation((GecodeBoolAtomVariable) rightArgument,
 												  this.invertRelationalOperator(operator),
 												   (GecodeConstant) leftArgument);
 				}
@@ -1399,6 +1475,30 @@ public class GecodeTailor {
 		throw new GecodeException("Internal error. Cannot convert unknown operator: "+operator+".");
 	}
 	
+	private boolean isCommutativeOperator(char operator) 
+		throws GecodeException {
+		
+		if(operator == GecodeConstraint.IRT_EQ) 
+			return true;
+		
+		else if (operator == GecodeConstraint.IRT_GQ)
+			return false;
+		
+		else if (operator == GecodeConstraint.IRT_LQ)
+			return false;
+		
+		else if (operator == GecodeConstraint.IRT_LE)
+			return false;
+		
+		else if (operator == GecodeConstraint.IRT_GR)
+			return false;
+		
+		else if (operator == GecodeConstraint.IRT_NQ)
+			return true;
+		
+		throw new GecodeException("Internal error. Cannot convert unknown operator: "+operator+".");
+		
+	}
 	
 	private String relationalOperatorToString(int operator) 
 		throws GecodeException {

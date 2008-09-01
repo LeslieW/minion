@@ -293,7 +293,7 @@ public class GecodeModel {
 				s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
 				s.append("\tfor(int i=0; i<"+var.getLength()+"; i++) {\n");
 				s.append("\t       "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";\n");
-				s.append("\t   if(i % "+rows+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
+				s.append("\t   if((i+1) % "+rows+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
 				s.append("\t"+osStreamName+" << std::endl;\n\n");
 			}
 			
@@ -303,8 +303,8 @@ public class GecodeModel {
 				s.append("\t"+osStreamName+"  << \" "+var.getVariableName()+":\" << std::endl;\n");
 				s.append("\tfor(int i=0; i<"+var.getLength()+"; i++) {\n");
 				s.append("\t       "+osStreamName+"  << "+var.getVariableName()+"[i] << \",  \";\n");
-				s.append("\t   if(i % "+rows+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
-				s.append("\t   if(i % "+elemsPerMatrix+" == 0 && i!=0) "+osStreamName+" << \"\\n\\n\";\n\t}\n");
+				s.append("\t   if((i+1) % "+rows+" == 0 && i!=0) "+osStreamName+" << \"\\n\";\n\t}\n");
+				s.append("\t   if((i+1) % "+(elemsPerMatrix-1)+" == 0 && i!=0) "+osStreamName+" << \"\\n\\n\";\n\t}\n");
 				s.append("\t"+osStreamName+" << std::endl;\n\n");
 			}
 			// higher than 3 is not allowed anyway

@@ -180,14 +180,14 @@ public class GecodeLinear extends RelationalConstraint {
 		}	
 		
 		
-		// we need to do the IntVarArgs thing...
+		// we need to do the  ArgsVar thing...
 		else {
 			
 			// declare the args variable
 			if(this.variables[0] instanceof IntegerVariable || 
-					this.variables[0] instanceof GecodeConstant) 			
+					this.variables[0] instanceof GecodeConstant) {
 				s.append("IntVarArgs "+this.argVarName+"("+this.variables.length+");\n");
-		
+			}
 			// boolean sum
 			else s.append("BoolVarArgs "+this.argVarName+"("+this.variables.length+");\n");
 			
@@ -316,16 +316,20 @@ public class GecodeLinear extends RelationalConstraint {
 		// remove [ and ] from arrays 
 		for(int i=0; i<argVarName.length(); i++) {
 			if(argVarName.charAt(i) == '[' ||
-					argVarName.charAt(i) == ']') {
+					argVarName.charAt(i) == ']' || 
+					argVarName.charAt(i) == '('  ||
+					argVarName.charAt(i) == ')') {
 				argVarName.replace(i, i+1, "_");
 			}
+			else if(argVarName.charAt(i) == ',') 
+				argVarName.deleteCharAt(i);
 		}
 		//add a random number to the end
 		java.util.Random randomNumberGenerator = new java.util.Random();
 		argVarName.append(randomNumberGenerator.nextInt(GecodeConstraint.RANDOM_MAXIMUM));
 		
-		if(argVarName.length() > GecodeConstraint.MAX_VARIABLE_LENGTH)
-			return argVarName.toString().substring(argVarName.length()-GecodeConstraint.MAX_VARIABLE_LENGTH);
+		if(argVarName.length() > GecodeConstraint.MAX_VARIABLE_LENGTH-1)
+			return "_"+argVarName.toString().substring(argVarName.length()-GecodeConstraint.MAX_VARIABLE_LENGTH-1);
 		
 		return argVarName.toString();
 	}

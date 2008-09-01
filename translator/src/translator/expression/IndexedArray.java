@@ -49,6 +49,8 @@ public class IndexedArray implements SingleArray {
 		for(int i=0; i<this.indexRanges.length; i++)
 			this.indexRanges[i] = (BasicDomain) this.indexRanges[i].evaluate();
 	
+		this.baseDomain = this.baseDomain.evaluate();
+		
 		return this;
 	}
 
