@@ -33,6 +33,9 @@ public class GecodeModel {
 	private ArrayList<GecodeIntVar> auxIntVarNames;
 	/** buffered auxiliary bool variables*/
 	private ArrayList<GecodeBoolVar> auxBoolVarNames;
+	/** contains the list of partial arrays (e.g. a row of a matrix) that have already
+	 * been declared. we need this to make shure that no partial array has been declared twice */
+	private ArrayList<String> declaredPartialArrayNames;
 	private HashMap<GecodeVariable, Domain> variableDomains = new HashMap<GecodeVariable, Domain>();
 	private ArrayList<GecodeConstraint> constraints;
 	private TranslationSettings settings;
@@ -70,6 +73,7 @@ public class GecodeModel {
 		
 		// multi-dimensional arrays
 		this.multiDimensionalArrays = multiDimensionalArrays;
+		this.declaredPartialArrayNames = new ArrayList<String>();
 		
 		// auxiliary variables
 		this.auxBufferArrays = auxBufferArrays;

@@ -7,7 +7,7 @@ package translator.tailor.gecode;
  * 
  */
 
-public interface GecodeArrayVariable extends GecodeVariable {
+public interface GecodeArrayVariable extends GecodeArray {
 	
 	/** get the length of the array */
 	public int getLength();

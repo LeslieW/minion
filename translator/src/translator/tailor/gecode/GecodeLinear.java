@@ -1,8 +1,6 @@
 package translator.tailor.gecode;
 
 public class GecodeLinear extends RelationalConstraint {
-
-	private int randomMaximum = 111;
 	
 	private ArgsArrayVariable variableArray;
 	private GecodeAtom[] variables;
@@ -324,7 +322,7 @@ public class GecodeLinear extends RelationalConstraint {
 		}
 		//add a random number to the end
 		java.util.Random randomNumberGenerator = new java.util.Random();
-		argVarName.append(randomNumberGenerator.nextInt(this.randomMaximum));
+		argVarName.append(randomNumberGenerator.nextInt(GecodeConstraint.RANDOM_MAXIMUM));
 		
 		if(argVarName.length() > GecodeConstraint.MAX_VARIABLE_LENGTH)
 			return argVarName.toString().substring(argVarName.length()-GecodeConstraint.MAX_VARIABLE_LENGTH);

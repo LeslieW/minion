@@ -153,9 +153,7 @@ public class GecodeTailor {
 	 */
 	protected GecodeConstraint tailorToGecode(Expression e) 
 		throws GecodeException, Exception {
-		
-		
-		
+			
 		// linear expressions can be mapped directly
 		//if(e.isLinearExpression()) {
 		//	return tailorLinearExpression(e);
@@ -188,8 +186,10 @@ public class GecodeTailor {
 		}
 		else if( e instanceof Disjunction) {
 			return new GecodePostConstraint(e.toSolverExpression(settings.getTargetSolver()), 
-					                        true);
-			
+					                        true);	
+		}
+		else if(e instanceof LexConstraint) {
+			return tailorLexConstraint((LexConstraint) e);
 		}
 		
 		
@@ -453,6 +453,12 @@ public class GecodeTailor {
 		case Expression.IF : return GecodeConstraint.BOT_IMP;
 		case Expression.IFF : return GecodeConstraint.BOT_EQV;
 		
+		// lex operators
+		case Expression.LEX_GEQ : return GecodeConstraint.IRT_GQ;
+		case Expression.LEX_GREATER : return GecodeConstraint.IRT_GR;
+		case Expression.LEX_LEQ : return GecodeConstraint.IRT_LQ;
+		case Expression.LEX_LESS : return GecodeConstraint.IRT_LE;
+		
 		default:
 			throw new GecodeException("Cannot map Essence' operator with number '"+essencePOperator+"' because it is unknown.");
 		}
@@ -467,6 +473,144 @@ public class GecodeTailor {
 			this.variableList.add(this.bufferArrays.remove(i));
 		}
 	}*/
+	
+	
+	private GecodeConstraint tailorLexConstraint(LexConstraint e) 
+		throws GecodeException {
+		
+		Expression leftArg = e.getLeftArray();
+		Expression rightArg = e.getRightArray();
+		
+		if(!(leftArg instanceof SingleArray)) throw new GecodeException("Infeasible argument for lex constraint "+e+".\nExpected array instead of "+leftArg+" of type "+leftArg.getClass().getSimpleName());
+		if(!(rightArg instanceof SingleArray)) throw new GecodeException("Infeasible argument for lex constraint "+e+".\nExpected array instead of :"+rightArg+" of type "+rightArg.getClass().getSimpleName());
+			
+		// 3 types of SingleArrays : SimpleArray, IndexedArray, VariableArray
+		GecodeArray leftArray = tailorArray((SingleArray) leftArg);
+		GecodeArray rightArray = tailorArray((SingleArray) rightArg);
+		
+		if(leftArray instanceof GecodeBoolVarArgs && 
+				rightArray instanceof GecodeBoolVarArgs) 
+			return new SimpleBoolRelation((GecodeBoolVarArgs) leftArray,
+										this.mapOperatorToGecode(e.getOperator()),
+										(GecodeBoolVarArgs) rightArray);
+		
+		else if(leftArray instanceof GecodeIntVarArgs && 
+				rightArray instanceof GecodeIntVarArgs) 
+			return new SimpleIntRelation((GecodeIntVarArgs) leftArray,
+										this.mapOperatorToGecode(e.getOperator()),
+										(GecodeIntVarArgs) rightArray);
+		
+		
+		
+		throw new GecodeException("Cannot tailor lex constraint "+e+" yet, sorry.");
+	}
+	
+	/**
+	 * tailors different kinds of arrays (Simple, Indexed or VariableArray)
+	 * to Gecode representation
+	 * 
+	 * @param array
+	 * @return
+	 * @throws GecodeException
+	 */
+	private GecodeArray tailorArray(SingleArray array) 
+		throws GecodeException {
+		
+		
+		if(array instanceof SimpleArray) 
+			return tailorSimpleArray((SimpleArray) array);
+	
+		else if(array instanceof IndexedArray) {
+			return tailorIndexedArray((IndexedArray) array);
+		}
+		
+		throw new GecodeException("Cannot tailor array "+array+" yet, sorry.");
+	}
+	
+	
+	private GecodeArray tailorIndexedArray(IndexedArray indexedArray) 
+		throws GecodeException {
+		
+		// TODO
+		int f;
+		throw new GecodeException("Cannot tailor indexed array "+indexedArray+" yet, sorry.");
+	}
+	
+	
+	/**
+	 * tailors a simple array to the corresponding Gecode representation
+	 * 
+	 * @param simpleArray
+	 * @return
+	 * @throws GecodeException
+	 */
+	private GecodeArray tailorSimpleArray(SimpleArray simpleArray)
+		throws GecodeException {
+		
+		String variableName = simpleArray.getArrayName();
+		
+		BasicDomain[] iDomains = simpleArray.getIndexDomains();
+		ConstantDomain[] indexDomains = new ConstantDomain[iDomains.length];
+		for(int i=0; i<indexDomains.length; i++) {
+			if(iDomains[i] instanceof ConstantDomain)
+				indexDomains[i] = (ConstantDomain) iDomains[i];
+			else throw new GecodeException("Cannot tailor array "+simpleArray+" because index-domain "+indexDomains[i]+" is not constant.");
+		}
+		
+		Domain bDomain = simpleArray.getBaseDomain();
+		if(!(bDomain instanceof ConstantDomain))
+			throw new GecodeException("Cannot tailor array "+simpleArray+" with non-constant domain yet, sorry.");
+		ConstantDomain baseDomain = (ConstantDomain) bDomain;
+		
+		int dimension = indexDomains.length;
+		
+		int[] indexLengths = new int[dimension];
+		for(int i=0; i<indexDomains.length; i++) 
+			indexLengths[i] = indexDomains[i].getFullDomain().length;
+				
+			
+		if(baseDomain.getType() == Domain.BOOL) {
+			if(dimension == 1)
+				return new GecodeBoolVarArray(variableName,
+										      	  indexLengths[0]);
+			else {
+				return new GecodeBoolVarArray(variableName,
+				      	  						   indexLengths);
+			}
+		}
+		else if(baseDomain.getType() == Domain.SINGLE_INT ||
+				baseDomain.getType() == Domain.INT_SPARSE) {
+			if(dimension == 1)
+				return new GecodeIntVarArray(variableName, 
+											 indexLengths[0],
+											 baseDomain.getFullDomain());
+			else  { 
+				
+				return new GecodeIntVarArray(variableName, 
+						 						indexLengths,
+						 						baseDomain.getFullDomain());
+			}
+		}
+			
+		else if(baseDomain.getType() == Domain.INT_BOUNDS) {
+			if(dimension == 1)
+				return new GecodeIntVarArray(variableName,
+											 indexLengths[0],
+											 baseDomain.getRange()[0],
+											 baseDomain.getRange()[1]);
+			else { 
+				return new  GecodeIntVarArray(variableName,
+						 						indexLengths,
+						 						baseDomain.getRange()[0],
+						 						baseDomain.getRange()[1]);
+			}
+		}
+			
+		else throw new GecodeException("Sorry, cannot tailor array '"+variableName+"' with base-domain "+baseDomain+" to Gecode (yet).");
+		
+		
+	}
+	
 	
 	/**
 	 * Translates a product constraint to Gecode's mult constraint
@@ -528,11 +672,11 @@ public class GecodeTailor {
 		throws GecodeException {
 		
 		Expression e = alldiff.getArgument();
-		if(!(e instanceof Array)) 
+		if(!(e instanceof SingleArray)) 
 			throw new GecodeException("Expected array as argument of alldifferent '"+
 					alldiff+"' instead of: "+e);
 		
-		GecodeArrayVariable array = tailorToGecodeIntArray((Array) e);
+		GecodeArray array = tailorArray((SingleArray) e);
 		if(array instanceof GecodeIntArray)
 			return new GecodeDistinct((GecodeIntArray) array);
 		

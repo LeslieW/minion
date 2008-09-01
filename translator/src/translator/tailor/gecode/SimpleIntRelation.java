@@ -124,7 +124,7 @@ public class SimpleIntRelation extends RelationalConstraint {
 	
 	public String toCCString() {
 		
-		if(this.rightArgument == null) {
+		/* if(this.rightArgument == null) {
 			return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "
 			+consistencyToString(this.consistencyLevel)+","
 			+propagationToString(this.propagationKind)+")";
@@ -138,6 +138,8 @@ public class SimpleIntRelation extends RelationalConstraint {
 		else return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+","
 			+consistencyToString(this.consistencyLevel)+","
 			+propagationToString(this.propagationKind)+")";
+			*/
+		return this.toString();
 	}
 
 	public String toString() {
@@ -148,14 +150,30 @@ public class SimpleIntRelation extends RelationalConstraint {
 			+propagationToString(this.propagationKind)+")";
 		}
 		
-		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
-				this.propagationKind == GecodeConstraint.PK_DEF) {
-			return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+", opt.icl())";
+		StringBuffer s = new StringBuffer("");
+		
+		// if this is just an args variable, we need to declare and define it first
+		if(this.rightArgument instanceof ArgsArrayVariable) {
+			ArgsArrayVariable argsArray = (ArgsArrayVariable) rightArgument;
+			if(argsArray.isIndexedArray()) {
+				s.append(argsArray.getArrayDefinition());
+			}
+		}
+		if(this.leftArgument instanceof ArgsArrayVariable) {
+			ArgsArrayVariable argsArray = (ArgsArrayVariable) leftArgument;
+			if(argsArray.isIndexedArray()) {
+				s.append(argsArray.getArrayDefinition());
+			}
 		}
 		
-		else return "rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+"," +
+		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
+				this.propagationKind == GecodeConstraint.PK_DEF) {
+			return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+", opt.icl())").toString();
+		}
+		
+		else return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+"," +
 				""+consistencyToString(this.consistencyLevel)+","
-				+propagationToString(this.propagationKind)+")";
+				+propagationToString(this.propagationKind)+")").toString();
 	}
 	
 	//=========== ADDITIONAL METHODS ===============

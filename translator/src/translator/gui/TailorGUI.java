@@ -38,7 +38,7 @@ import translator.solver.Minion;
 import translator.solver.Gecode;
 import translator.solver.TargetSolver;
 import javax.swing.*;
-import java.awt.Color;
+//import java.awt.Color;
 /**
  *
  * @author  andrea
@@ -172,7 +172,7 @@ public class TailorGUI extends javax.swing.JFrame {
     private void setColors() {
     	
     	// Color lightGreenish = new java.awt.Color(211,245,177);
-		Color lightBlueish = new java.awt.Color(177,210,240);//(225,242,253);//(220,220,245);//(190,230,240); //220,220,245
+		Color lightBlueish = new Color(177,210,240);//(225,242,253);//(220,220,245);//(190,230,240); //220,220,245
     	//Color darkRed = new java.awt.Color(142,5,5);
     	//Color reallyDarkRed = new java.awt.Color(82,10,5);
 		//Color cheekyOrange = new java.awt.Color(252,105,20);
@@ -275,9 +275,9 @@ public class TailorGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
     	
-    	String path = "tailorLogo3.png";
-    	java.net.URL imgURL = getClass().getResource(path);
-    	this.setIconImage(new javax.swing.ImageIcon(imgURL).getImage());
+    	//String path = "tailorLogo3.png";
+    	//java.net.URL imgURL = getClass().getResource(path);
+    	//this.setIconImage(new javax.swing.ImageIcon(imgURL).getImage());
     	
         java.awt.GridBagConstraints gridBagConstraints;
 

@@ -3,11 +3,15 @@ package translator.tailor.gecode;
 public interface GecodeConstraint {
 
 	public final String BUFFERARRAY_NAME = "_buffer";
+	/** suffix that parts of arrays have */
+	public final String ARRAY_PARTS_SUFFIX = "_part";
 	/** the prefix that flattened arrays have */
 	public final String FLATTENED_ARRAY_PREFIX = "_";
 	
+	public final int RANDOM_MAXIMUM = 1111;
 	/** it should be less than 256 which is standard in C++ */
 	public final int MAX_VARIABLE_LENGTH = 24; 
+	public final int WHOLE_RANGE_REFERENCED = -100;
 	
 	/** Consistency levels for each constraint */
 	/** value consistency level (naive) */
