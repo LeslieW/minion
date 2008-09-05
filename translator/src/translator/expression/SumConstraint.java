@@ -71,6 +71,25 @@ public class SumConstraint implements GlobalConstraint {
 		if(this.negativeArguments == null)
 			this.negativeArguments = new Expression[0];
 	}
+	
+	
+	public SumConstraint(java.util.ArrayList<Expression> positiveArgs,
+						 java.util.ArrayList<Expression> negativeArgs,
+						 int relationalOperator,
+						 Expression result) {
+		
+		this.positiveArguments = new Expression[positiveArgs.size()];
+		this.negativeArguments = new Expression[negativeArgs.size()];
+		
+		for(int i=this.positiveArguments.length-1; i>=0; i--)
+			this.positiveArguments[i] = positiveArgs.remove(i);
+		
+		for(int i=this.negativeArguments.length-1; i>=0; i--)
+			this.negativeArguments[i] = negativeArgs.remove(i);
+		
+		this.relationalOperator = relationalOperator;
+		this.result = result;
+	}
 
 	
 	// =========== ADDITIONAL METHODS ======================

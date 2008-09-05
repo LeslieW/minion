@@ -72,7 +72,7 @@ public class Gecode extends GeneralTargetSolver {
 		featureMap.put(new Integer(NESTED_EXPRESSIONS),new Boolean(false));
 		featureMap.put(new Integer(NESTED_LINEAR_EXPRESSIONS),new Boolean(true));
 		// can we express an objective directly?
-		featureMap.put(new Integer(TargetSolver.SUPPORTS_OBJECTIVE), new Boolean(false));
+		featureMap.put(new Integer(TargetSolver.SUPPORTS_OBJECTIVE), new Boolean(true));
 		// can the objective be an expression(true) or does it have to be a variable(false)?
 		featureMap.put(new Integer(TargetSolver.CONSTRAINT_OBJECTIVE), new Boolean(false));
 		
@@ -96,7 +96,7 @@ public class Gecode extends GeneralTargetSolver {
 		featureMap.put(new Integer(NARY_WEIGHTED_SUM),new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_PRODUCT_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMEQ_CONSTRAINT), new Boolean(true));  // this is wrong but for testing set to this value
-		featureMap.put(new Integer(TargetSolver.NARY_SUMNEQ_CONSTRAINT), new Boolean(true));
+		featureMap.put(new Integer(TargetSolver.NARY_SUMNEQ_CONSTRAINT), new Boolean(false));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMGEQ_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMLEQ_CONSTRAINT), new Boolean(true));
 		featureMap.put(new Integer(TargetSolver.NARY_SUMGREATER_CONSTRAINT), new Boolean(true));

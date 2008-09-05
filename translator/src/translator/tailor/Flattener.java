@@ -465,6 +465,7 @@ public class Flattener {
 		else return partWiseSumConstraint;
 	}
 	else if(rightExpression instanceof Sum) {
+		
 		Sum rightSum = (Sum) rightExpression;
 		Sum processedSum = (Sum) rightSum.copy();
 		processedSum.setWillBeConvertedToSumConstraint(true);
@@ -686,8 +687,6 @@ public class Flattener {
 		if(rightExpression instanceof QuantifiedSum ||
 				rightExpression instanceof QuantifiedExpression) {
 			
-			//if(expression.isGonnaBeFlattenedToVariable()) 
-				//rightExpression.willBeFlattenedToVariable(true);
 			
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 				rightExpression.willBeFlattenedToVariable(true);
@@ -716,13 +715,96 @@ public class Flattener {
 			leftExpression = flattenExpression(leftExpression);
 		}
 		
-		
-		
+
 		//System.out.println("We have an equality between(after qsum): "+leftExpression+" == "+rightExpression);
 		
-		// 1. detect sum expressions (we can only have 1 sum expression on one side due to normalisation)
+		// 1. detect sum expressions 
 		if(rightExpression instanceof Sum) {
 			//System.out.println("We have a sum on the right hand side: "+rightExpression);
+			
+			// sum1 OP sum2
+			if(leftExpression instanceof Sum) {
+				// if the solver supports the n-ary linear constraint
+				if(expression.getOperator() == Expression.NEQ) {
+					if(this.targetSolver.supportsConstraint(Expression.NARY_SUMNEQ_CONSTRAINT)) {
+						Sum leftSum = (Sum) leftExpression; 
+						Sum rightSum = (Sum) rightExpression;
+						ArrayList<Expression> positiveArgs = leftSum.getPositiveArguments();
+						ArrayList<Expression> negativeArgs = leftSum.getNegativeArguments();
+						ArrayList<Expression> rightPosArgs = rightSum.getPositiveArguments();
+						ArrayList<Expression> rightNegArgs = rightSum.getNegativeArguments();
+					
+					// put right sum on the other side
+						for(int i=rightPosArgs.size()-1; i >= 0; i--) 
+							negativeArgs.add(rightPosArgs.remove(i));
+						for(int i=rightNegArgs.size()-1; i >= 0; i--) 
+							positiveArgs.add(rightNegArgs.remove(i));
+					
+						Sum newSum = new Sum(positiveArgs, negativeArgs);
+						newSum.orderExpression();
+						newSum = (Sum) newSum.evaluate();
+						newSum = (Sum) newSum.restructure();
+						positiveArgs = newSum.getPositiveArguments();
+						for(int i=0; i<positiveArgs.size(); i++) {
+							positiveArgs.add(i, flattenExpression(positiveArgs.remove(i)));
+						}
+						negativeArgs = newSum.getNegativeArguments();
+						for(int i=0; i<negativeArgs.size(); i++) {
+							negativeArgs.add(i, flattenExpression(negativeArgs.remove(i)));
+						}
+						return new SumConstraint(positiveArgs, negativeArgs, expression.getOperator(), new ArithmeticAtomExpression(0));
+					}
+					// the solver does not support this
+					else {
+						Sum lSum = (Sum) leftExpression;
+						Sum rSum = (Sum) rightExpression;
+						
+						// start with right sum
+						Expression rightPart;
+						//System.out.println("right Sum "+rSum+" has Common subexpression? "+hasCommonSubExpression(rSum));
+						
+						if(this.hasCommonSubExpression(rSum)) 
+							rightPart = this.getCommonSubExpression(rSum);
+						else {
+							rightPart = new ArithmeticAtomExpression(this.createAuxVariable(rSum.getDomain()[0], rSum.getDomain()[1]));
+							this.addToSubExpressions(rSum, rightPart);
+							
+							Sum rightSum = (Sum) rSum.copy();
+							rightSum.setWillBeConvertedToSumConstraint(true);
+							SumConstraint partWiseRightSumConstraint = (SumConstraint) flattenSum(rightSum);
+							partWiseRightSumConstraint.setResult(rightPart, Expression.EQ, true);
+							this.constraintBuffer.add(partWiseRightSumConstraint);
+						}
+						
+						// continue with left sum
+						Expression leftPart;
+						if(this.hasCommonSubExpression(lSum)) 
+							leftPart = this.getCommonSubExpression(lSum);
+						else {
+							leftPart = new ArithmeticAtomExpression(this.createAuxVariable(rSum.getDomain()[0], rSum.getDomain()[1]));
+							this.addToSubExpressions(lSum, leftPart);
+							
+							Sum leftSum = (Sum) lSum.copy();
+							leftSum.setWillBeConvertedToSumConstraint(true);
+							SumConstraint partWiseLeftSumConstraint = (SumConstraint) flattenSum(leftSum);
+							partWiseLeftSumConstraint.setResult(leftPart, Expression.EQ, true);
+							this.constraintBuffer.add(partWiseLeftSumConstraint);
+						}
+						
+						if(expression.isGonnaBeFlattenedToVariable())
+							this.reifyConstraint(new CommutativeBinaryRelationalExpression(leftPart, 
+																		 Expression.NEQ,
+																		 rightPart));
+						
+						return new CommutativeBinaryRelationalExpression(leftPart, 
+																		 Expression.NEQ,
+																		 rightPart);
+					}
+				
+				}
+			}
+			
+			
 			rightExpression.reduceExpressionTree();
 			Sum rSum = (Sum) rightExpression;
 			Sum rightSum = (Sum) rSum.copy();

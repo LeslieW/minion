@@ -126,6 +126,9 @@ public class GecodeTailor {
 		for(int i=0; i<this.additionalBoundsConstraintsBuffer.size(); i++)
 			this.constraintBuffer.add(this.additionalBoundsConstraintsBuffer.get(i));
 		
+		
+		
+		
 		GecodeModel gecodeModel = new GecodeModel(settings,
 							   variableList,
 							   bufferArrays,
@@ -136,11 +139,26 @@ public class GecodeTailor {
 							   this.auxIntVariableList, 
 							   this.auxBoolVariableList, 
 							   multiDimensionalArrays);
+		
+		// tailor objective
+		Expression objective = essencePmodel.getObjectiveExpression() ;
+		if(objective != null) {
+			if(objective instanceof AtomExpression) {
+				GecodeAtom objectiveAtom = (objective instanceof RelationalExpression) ?
+							tailorRelationalAtom((RelationalAtomExpression) objective) :
+								tailorArithmeticAtom((ArithmeticAtomExpression) objective);
+				gecodeModel.setObjective(objectiveAtom);
+				gecodeModel.setIsMinimisingObjective(!this.essencePmodel.isObjectiveMaximising());
+			} else throw new GecodeException("Flattening error. Expected atom as objective expression instead of:"+objective);
+		}
+		
 		//System.out.println("==================================");
 		//System.out.println("CC print:\n"+gecodeModel.toString()+"\n\n");
 		//System.out.println("==================================");
 		//System.out.println("Simple print:\n"+gecodeModel.toSimpleString()+"\n\n");
 		//System.out.println("==================================");
+		gecodeModel.setCommonSubexpressions(this.essencePmodel.getAmountOfCommonSubExpressionsUsed());
+		
 		return gecodeModel;
 	}
 	
@@ -155,9 +173,10 @@ public class GecodeTailor {
 		throws GecodeException, Exception {
 			
 		// linear expressions can be mapped directly
-		//if(e.isLinearExpression()) {
-		//	return tailorLinearExpression(e);
-		//}
+		if(e.isLinearExpression() && 
+				this.settings.getUseGecodeLinearMinimodelPostConstraints()) {
+			return tailorLinearExpression(e);
+		}
 		
 		if(e instanceof AbsoluteValue) {
 			throw new GecodeException("Flattening error. Gecode does not support Absolute Values, such as:"+e);
@@ -192,7 +211,9 @@ public class GecodeTailor {
 			return tailorLexConstraint((LexConstraint) e);
 		}
 		
-		
+		else if(e instanceof Reification) {
+			return tailorReification((Reification) e);
+		}
 		else throw new GecodeException("Cannot tailor constraint to Gecode (yet):"+e);
 	}
 		
@@ -475,6 +496,68 @@ public class GecodeTailor {
 	}*/
 	
 	
+	private GecodeConstraint tailorReification(Reification e) 
+		throws GecodeException, Exception {
+		
+		
+		Expression reifiedConstraint = e.getReifiedConstraint();
+		
+		if(reifiedConstraint instanceof CommutativeBinaryRelationalExpression) {
+			CommutativeBinaryRelationalExpression commExpr = ((CommutativeBinaryRelationalExpression) reifiedConstraint);
+			Expression left = commExpr.getLeftArgument();
+			Expression right = commExpr.getRightArgument();
+			if(!(left instanceof AtomExpression)) 
+				throw new GecodeException("Flattening error. Expected an atom expression instead of "+left+" in "+e);
+			if(!(right instanceof AtomExpression)) 
+				throw new GecodeException("Flattening error. Expected an atom expression instead of "+right+" in "+e);
+			
+			GecodeAtom leftArg = (left instanceof RelationalAtomExpression) ? 
+									tailorRelationalAtom((RelationalAtomExpression) left) : 
+										tailorArithmeticAtom((ArithmeticAtomExpression) left);
+			GecodeAtom rightArg = (right instanceof RelationalAtomExpression) ? 
+											tailorRelationalAtom((RelationalAtomExpression) right) : 
+												tailorArithmeticAtom((ArithmeticAtomExpression) right);
+			GecodeAtom reifiedVar = tailorRelationalAtom(e.getReifiedVariable());
+			char relop = this.mapOperatorToGecode(commExpr.getOperator());
+			
+			if(leftArg instanceof IntegerVariable) {
+				if(leftArg instanceof GecodeIntVar)
+					return new SimpleIntRelation((GecodeIntVar) leftArg,
+											  relop,
+											  rightArg, 
+											  reifiedVar);
+				else return new SimpleIntRelation((GecodeIntVar) rightArg,
+						  							relop,
+						  							leftArg, 
+						  							reifiedVar);
+			}
+			else {
+				if(leftArg instanceof GecodeVariable)
+					return new SimpleBoolRelation((GecodeVariable) leftArg,
+					  							relop,
+					  							rightArg, 
+					  							reifiedVar);
+				else return new SimpleBoolRelation((GecodeVariable) rightArg,
+													relop,
+													leftArg, 
+													reifiedVar);
+			}
+											
+		}
+		
+		
+		throw new GecodeException("Cannot tailor reification "+e+" yet, sorry.");
+	}
+	
+	
+	
+	/**
+	 * Tailors Lex constraints to Gecode's rel constraint
+	 * 
+	 * @param e
+	 * @return
+	 * @throws GecodeException
+	 */
 	private GecodeConstraint tailorLexConstraint(LexConstraint e) 
 		throws GecodeException {
 		
@@ -765,7 +848,7 @@ public class GecodeTailor {
 		
 		// we can simply post a linear constraint, since the 
 		// expression has been linearised by flattening
-		if(settings.getUseGecodeMinimodelPostConstraints()) {
+		if(settings.getUseGecodeLinearMinimodelPostConstraints()) {
 			StringBuffer sumConstraint = new StringBuffer(e.toGecodeString());
 			return new GecodePostConstraint(sumConstraint.toString());
 		}

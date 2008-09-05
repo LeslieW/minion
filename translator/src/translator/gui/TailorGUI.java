@@ -773,13 +773,13 @@ public class TailorGUI extends javax.swing.JFrame {
         
         JMenu gecodeTranslationSettings = new JMenu("Gecode");
         JMenuItem minimodelPostConstraint = new JCheckBoxMenuItem("Use MiniModel's post constraints");
-        minimodelPostConstraint.setSelected(this.settings.getUseGecodeMinimodelPostConstraints());
+        minimodelPostConstraint.setSelected(this.settings.getUseGecodeLinearMinimodelPostConstraints());
         minimodelPostConstraint.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
 		          if(item.isSelected())
-		        	  settings.setUseGecodeMinimodelPostConstraints(true);
-		          else settings.setUseGecodeMinimodelPostConstraints(false);
+		        	  settings.setUseGecodeLinearMinimodelPostConstraints(true);
+		          else settings.setUseGecodeLinearMinimodelPostConstraints(false);
 			  }
 			});
         gecodeTranslationSettings.add(minimodelPostConstraint);

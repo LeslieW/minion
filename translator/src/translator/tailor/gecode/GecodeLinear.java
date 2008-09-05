@@ -193,9 +193,13 @@ public class GecodeLinear extends RelationalConstraint {
 			
 			
 			// assign the variables to the args vector
-			for(int i=0; i<this.variables.length; i++) 
-				s.append("\t  "+argVarName+"["+i+"] = "+variables[i]+";\n");
-			
+			for(int i=0; i<this.variables.length; i++) {
+				if(variables[i] instanceof GecodeConstant) {
+					s.append("\t  "+argVarName+"["+i+"] = IntVar(this, "+variables[i]+", "+variables[i]+");\n");
+				}
+				else s.append("\t  "+argVarName+"["+i+"] = "+variables[i]+";\n");
+			}
+				
 			if(this.weights != null) {
 				weightsArgsName = "int_"+this.argVarName;
 				// declare weights 

@@ -5,6 +5,7 @@ public class SimpleBoolRelation extends RelationalConstraint {
 	private GecodeVariable leftArgument;
 	private char operator;
 	private GecodeAtom rightArgument;
+	private GecodeAtom reifiedVariable; 
 	
 	/**
 	 * First case:  x0 intOp x1  where x1 and x2 are BoolVars
@@ -123,6 +124,25 @@ public class SimpleBoolRelation extends RelationalConstraint {
 		this.isReifiable = false;
 	}
 	
+	
+	/**
+	 * Reification version of rel
+	 * @param leftArg
+	 * @param op
+	 * @param rightArg
+	 * @param reifiedVar
+	 */
+	public SimpleBoolRelation(GecodeVariable leftArg,
+							char op,
+							GecodeAtom rightArg,
+							GecodeAtom reifiedVar) {
+
+		this.leftArgument = leftArg;
+		this.rightArgument = rightArg;
+		this.operator = op;
+		this.reifiedVariable = reifiedVar;
+	}
+	
 	// =========== INHERITED METHODS ===================================================================
 	
 	public String toCCString() {
@@ -176,9 +196,11 @@ public class SimpleBoolRelation extends RelationalConstraint {
 		if(s.length() != 0)
 			s.append("\t");
 			
+		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF) {
-			return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+")").toString();
+			return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+
+					((this.reifiedVariable ==null) ? "" : ", "+this.reifiedVariable)+", opt.icl())").toString();
 		}
 		
 		else return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+"," +

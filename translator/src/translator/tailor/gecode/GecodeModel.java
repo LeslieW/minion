@@ -36,6 +36,11 @@ public class GecodeModel {
 	/** contains the list of partial arrays (e.g. a row of a matrix) that have already
 	 * been declared. we need this to make shure that no partial array has been declared twice */
 	private ArrayList<String> declaredPartialArrayNames;
+	
+	private GecodeAtom objective;
+	/** is true if the objective is supposed to be minimised and false if it is maximised */
+	private boolean isMinimising;
+	
 	private HashMap<GecodeVariable, Domain> variableDomains = new HashMap<GecodeVariable, Domain>();
 	private ArrayList<GecodeConstraint> constraints;
 	private TranslationSettings settings;
@@ -43,6 +48,7 @@ public class GecodeModel {
 	private String modelName;
 	private int solutionBreak = 10;
 	
+	private int commonSubexpressions = 0;
 	
 	public GecodeModel(TranslationSettings settings,
 					   ArrayList<GecodeArrayVariable> variables,
@@ -99,6 +105,14 @@ public class GecodeModel {
 	}
 	
 	
+	public void setObjective(GecodeAtom objective) {
+		this.objective = objective;
+	}
+	
+	public void setIsMinimisingObjective(boolean minimising) {
+		this.isMinimising = minimising;
+	}
+	
 	// ============== PRINT METHODS ==========================
 	
 	/**
@@ -124,6 +138,8 @@ public class GecodeModel {
 	public String toString() {
 		
 		StringBuffer s = new StringBuffer("/** \n *  "+this.settings.OUTPUTFILE_HEADER+
+										((this.commonSubexpressions > 0) ? 
+												"\n *  amount of common subexpressions eliminated: "+this.commonSubexpressions : "")+
 				                         "\n *  "+this.settings.OUTPUTFILE_HEADER_BUGS+"\n */\n\n");
 		// s.append(printStatistics()); TODO!!
 		
@@ -145,7 +161,7 @@ public class GecodeModel {
 		s.append("   opt.solutions(0);\n");
 		s.append("   opt.iterations(2000);\n");
 		s.append("   opt.parse(argc, argv);\n");
-		s.append("   Example::run<"+modelName+", DFS, Options>(opt);\n");
+		s.append("   Example::run<"+modelName+", "+((this.objective != null) ? "BAB" : "DFS" )+", Options>(opt);\n");
 		s.append("   return 0;\n}\n\n");
 		
 		return s.toString();
@@ -161,6 +177,9 @@ public class GecodeModel {
 		s.append("public: \n\n");
 		s.append(this.multiDimensionalFunctionsToString());
 		s.append(actualProblemConstructorToString()+"\n");
+	
+		if(this.objective != null)
+			s.append(objectiveToString()+"\n");
 		
 		s.append(printingMethodToString()+"\n\n");
 		
@@ -225,6 +244,15 @@ public class GecodeModel {
 		return s.toString();
 	
 	}
+	
+	private String objectiveToString() {
+		StringBuffer s = new StringBuffer("   // Method to state the objective\n   void\n   constrain(Space* s) {\n");
+		s.append("\trel(this, "+this.objective+", "+((this.isMinimising) ? "IRT_LE" : "IRT_GR")+
+				 ", static_cast<"+this.modelName+"*>(s)->"+this.objective+".val());\n   }\n");
+		
+		return s.toString();
+	}
+	
 	
 	private String copyMethodToString() {
 		
@@ -590,5 +618,11 @@ public class GecodeModel {
 		
 		
 		return s.toString();
+	}
+	
+	
+	
+	public void setCommonSubexpressions(int noOfCSE) {
+		this.commonSubexpressions = noOfCSE;
 	}
 }

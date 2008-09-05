@@ -229,6 +229,10 @@ public abstract class GeneralTargetSolver implements TargetSolver {
 			
 		case Expression.MAX:
 			return this.featureMap.get(TargetSolver.BINARY_MAX_CONSTRAINT);
+			
+			
+			default: System.out.println("Could not match the constraint type: "
+					+constraint+" so I don;t know if the target solver supports it");
 		}
 		
 		

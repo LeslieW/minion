@@ -5,7 +5,7 @@ public class SimpleIntRelation extends RelationalConstraint {
 	private char operator;
 	private GecodeVariable leftArgument;
 	private GecodeAtom rightArgument;
-
+	private GecodeAtom reifiedVariable;
 	
 	/**
 	 * First case: x0 ~r x1  where x0,x1 are both IntVars
@@ -118,6 +118,25 @@ public class SimpleIntRelation extends RelationalConstraint {
 		this.supportedConsistencyLevels = new char[] {GecodeConstraint.ICL_DOM };
 	}
 	
+	/**
+	 * Constructor for reification 
+	 * 
+	 * @param leftArg
+	 * @param op
+	 * @param rightArg
+	 * @param reifiedVar
+	 */
+	public SimpleIntRelation(GecodeIntVar leftArg,
+			                 char op,
+			                 GecodeAtom rightArg,
+			                 GecodeAtom reifiedVar) {
+		
+		this.leftArgument = leftArg;
+		this.rightArgument = rightArg;
+		this.operator = op;
+		this.reifiedVariable = reifiedVar;
+	}
+	
 	//============= INHERITED METHODS =====================================
 	
 	
@@ -176,7 +195,8 @@ public class SimpleIntRelation extends RelationalConstraint {
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF &&
 				this.propagationKind == GecodeConstraint.PK_DEF) {
-			return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+", opt.icl())").toString();
+			return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+
+					((this.reifiedVariable ==null) ? "" : ", "+this.reifiedVariable)+", opt.icl())").toString();
 		}
 		
 		else return s.append("rel(this,"+leftArgument+", "+operatorToString(this.operator)+", "+rightArgument+"," +

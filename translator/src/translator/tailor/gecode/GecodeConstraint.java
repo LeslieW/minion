@@ -8,7 +8,7 @@ public interface GecodeConstraint {
 	/** the prefix that flattened arrays have */
 	public final String FLATTENED_ARRAY_PREFIX = "_";
 	
-	public final int RANDOM_MAXIMUM = 1111;
+	public final int RANDOM_MAXIMUM = 11111;
 	/** it should be less than 256 which is standard in C++ */
 	public final int MAX_VARIABLE_LENGTH = 24; 
 	public final int WHOLE_RANGE_REFERENCED = -100;

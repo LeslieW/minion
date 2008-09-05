@@ -71,7 +71,8 @@ public class TranslationSettings {
 	String modelName;
 	
 	// solver dependent settings
-	private boolean useGecodeMiniModelConstraints;
+	private boolean useGecodeLinearMiniModelPost;
+	private boolean useGecodeBooleanMiniModelPost;
 	
 	
 	
@@ -110,7 +111,8 @@ public class TranslationSettings {
 		this.noOfSolutions = this.DEFAULT_NO_OF_SOLUTIONS;
 		//this.solverInputFileName = "out."+targetSolver.getSolverInputExtension();
 		this.branchOverAuxVariables = this.BRANCH_OVER_AUX_VARIABLES;
-		this.useGecodeMiniModelConstraints = false;
+		this.useGecodeLinearMiniModelPost = false;
+		this.useGecodeBooleanMiniModelPost = false;
 	}
 	
 	
@@ -476,11 +478,19 @@ public class TranslationSettings {
 		this.branchOverAuxVariables = turnOn;
 	}
 	
-	public boolean getUseGecodeMinimodelPostConstraints() {
-		return this.useGecodeMiniModelConstraints;
+	public boolean getUseGecodeLinearMinimodelPostConstraints() {
+		return this.useGecodeLinearMiniModelPost;
 	}
 	
-	public void setUseGecodeMinimodelPostConstraints(boolean turnOn) {
-		this.useGecodeMiniModelConstraints = turnOn;
+	public void setUseGecodeLinearMinimodelPostConstraints(boolean turnOn) {
+		this.useGecodeLinearMiniModelPost = turnOn;
+	}
+	
+	public boolean getUseGecodeBooleanMinimodelPostConstraints() {
+		return this.useGecodeBooleanMiniModelPost;
+	}
+	
+	public void setUseGecodeBooleanMinimodelPostConstraints(boolean turnOn) {
+		this.useGecodeBooleanMiniModelPost = turnOn;
 	}
 }
