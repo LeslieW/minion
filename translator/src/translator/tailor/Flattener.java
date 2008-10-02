@@ -781,7 +781,7 @@ public class Flattener {
 						if(this.hasCommonSubExpression(lSum)) 
 							leftPart = this.getCommonSubExpression(lSum);
 						else {
-							leftPart = new ArithmeticAtomExpression(this.createAuxVariable(rSum.getDomain()[0], rSum.getDomain()[1]));
+							leftPart = new ArithmeticAtomExpression(this.createAuxVariable(lSum.getDomain()[0], lSum.getDomain()[1]));
 							this.addToSubExpressions(lSum, leftPart);
 							
 							Sum leftSum = (Sum) lSum.copy();
@@ -2703,6 +2703,7 @@ public class Flattener {
 	private Expression flattenSum(Sum sum) 
 		throws TailorException,Exception {
 	
+		//System.out.println("START");
 		//System.out.println("About to flattening the sum:"+sum);
 		
 		// if there are any quantified sums as arguments, flatten them immediately
@@ -2713,6 +2714,8 @@ public class Flattener {
 		// convert to a sum constraint
 		if(sum.willBeConvertedToASumConstraint()) {		
 			return flattenSumPartToSumConstraint(sum);
+			//System.out.println("END");
+			//return e;
 		}
 		// treat it as a normal sum -> might be flattened to a variable
 		else {
@@ -2726,6 +2729,7 @@ public class Flattener {
 					for(int i=0; i<sum.getNegativeArguments().size(); i++) {
 						sum.getNegativeArguments().add(i,flattenExpression(sum.getNegativeArguments().remove(i)));
 					}
+				 //System.out.println("END");
 				//System.out.println("Finished flattening the sum:"+sum);
 				return sum;
 			}
@@ -2733,6 +2737,7 @@ public class Flattener {
 			else {
 				// if it has a common subexpression
 				if(hasCommonSubExpression(sum)) {
+					//System.out.println("END");
 					return getCommonSubExpression(sum);
 				}
 				
@@ -2755,6 +2760,7 @@ public class Flattener {
 				this.constraintBuffer.add(sumConstraint);
                 addToSubExpressions(sum,auxVariable);
                 //System.out.println("Finished flattening the sum:"+sum);
+                //System.out.println("END");
 				return auxVariable;
 			}
 			
