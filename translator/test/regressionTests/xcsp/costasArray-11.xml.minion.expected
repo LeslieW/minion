@@ -106,10 +106,10 @@ aux0,aux1]
 
 **CONSTRAINTS**
 
-weightedsumgeq([1,-1], [V0,V9], aux0)
-weightedsumleq([1,-1], [V0,V9], aux0)
-weightedsumgeq([1,-1], [V1,V10], aux1)
-weightedsumleq([1,-1], [V1,V10], aux1)
+weightedsumgeq([1,-1], [V1,V10], aux0)
+weightedsumleq([1,-1], [V1,V10], aux0)
+weightedsumgeq([1,-1], [V0,V9], aux1)
+weightedsumleq([1,-1], [V0,V9], aux1)
 diseq(aux1, aux0)
 gacalldiff([ V60, V61, V62])
 weightedsumgeq([1,-1], [V2,V10], V62)

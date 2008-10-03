@@ -598,7 +598,7 @@ public class TailorGUI extends javax.swing.JFrame {
 			  }
 			});
 		//this.gecodeButton.setEnabled(false);
-		//solverButtonPanel.add(gecodeButton);
+		solverButtonPanel.add(gecodeButton);
 		
 		middlePanel.add(solverButtonPanel);
 		middlePanel.setBackground(this.bgColor);
@@ -737,7 +737,7 @@ public class TailorGUI extends javax.swing.JFrame {
 			  }
 			});
         settingsMenu.add(setPathToMinion);
-        //settingsMenu.add(setPathToGecode);
+        settingsMenu.add(setPathToGecode);
         //settingsMenu.addSeparator();
         
         
@@ -784,7 +784,7 @@ public class TailorGUI extends javax.swing.JFrame {
 			});
         gecodeTranslationSettings.add(minimodelPostConstraint);
         
-        //translationSettings.add(gecodeTranslationSettings);
+        translationSettings.add(gecodeTranslationSettings);
         translationSettings.add(cseDetection);
         translationSettings.add(ecseDetection);
         translationSettings.add(directVarReusage);

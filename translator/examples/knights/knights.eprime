@@ -22,10 +22,10 @@ $ the row values range from (0..n-1).
 
 given n: int
 given startCol,startRow : int(0..n-1)
-given noKnights : int(1..n)
+given tourLength : int(1..n*n)
 
 letting FIELDS be domain int(0..n*n-1)
-letting KNIGHTS be domain int(0..noKnights-1)
+letting KNIGHTS be domain int(0..tourLength-1)
 find tour : matrix indexed by [KNIGHTS] of FIELDS
 
 
@@ -49,12 +49,12 @@ forall i,j : KNIGHTS .
        ),
    
 $ make it a tour
-    (     (  ( |tour[0]%(n)  - tour[noKnights-1]%(n)| = 1) /\
-             ( |tour[0]/(n)  - tour[noKnights-1]/(n)| = 2) 
+    (     (  ( |tour[0]%(n)  - tour[tourLength-1]%(n)| = 1) /\
+             ( |tour[0]/(n)  - tour[tourLength-1]/(n)| = 2) 
            )
          \/
-           (  ( |tour[0]%(n)  - tour[noKnights-1]%(n)| = 2) /\             	 
-              ( |tour[0]/(n)  - tour[noKnights-1]/(n)| = 1) 
+           (  ( |tour[0]%(n)  - tour[tourLength-1]%(n)| = 2) /\             	 
+              ( |tour[0]/(n)  - tour[tourLength-1]/(n)| = 1) 
            )
      )
  

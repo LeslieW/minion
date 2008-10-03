@@ -237,10 +237,10 @@ aux0,aux1]
 
 **CONSTRAINTS**
 
-weightedsumgeq([1,-1], [V0,V16], aux0)
-weightedsumleq([1,-1], [V0,V16], aux0)
-weightedsumgeq([1,-1], [V1,V17], aux1)
-weightedsumleq([1,-1], [V1,V17], aux1)
+weightedsumgeq([1,-1], [V1,V17], aux0)
+weightedsumleq([1,-1], [V1,V17], aux0)
+weightedsumgeq([1,-1], [V0,V16], aux1)
+weightedsumleq([1,-1], [V0,V16], aux1)
 diseq(aux1, aux0)
 gacalldiff([ V165, V166, V167])
 weightedsumgeq([1,-1], [V2,V17], V167)
