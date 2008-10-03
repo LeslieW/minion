@@ -2159,26 +2159,49 @@ public class Flattener {
 		if(expression.getType() == Expression.NEGATION) {
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION)) 
 				argument.willBeFlattenedToVariable(true);
-			this.flatteningNegatedArgument = true;
-			argument = flattenExpression(argument);
-			this.flatteningNegatedArgument = false;
+			//System.out.println("About to flatten negation: "+expression);
+			
+			Expression r;
+			
+			// if it is !(E1 relop E2) ---> E1 neg(relop) E2
+			if(argument instanceof CommutativeBinaryRelationalExpression ||
+					argument instanceof NonCommutativeRelationalBinaryExpression) {
+				Reification negattedExpression = new Reification(argument,
+                    new RelationalAtomExpression(false));
+			
+				r = negattedExpression.evaluate();
+				//System.out.println("Negated expression: "+argument);
+				r.willBeFlattenedToVariable(false);
+				r = flattenExpression(r);
+			}
+			else { 
+				argument = flattenExpression(argument);
+				r = new CommutativeBinaryRelationalExpression(new ArithmeticAtomExpression(0),
+						                                          Expression.EQ,
+						                                          argument);
+				
+			}
+			
+			// we have evaluated it to 
+			//if(r instanceof Reification) throw new TailorException("Internal error, expected relational expression instead of "+r);
+			
+			
+			//System.out.println("Flattened argument of negation to: "+r);
 			
 			// we have to flatten !E to an aux variable: aux != E
 			if(expression.isGonnaBeFlattenedToVariable()) {	
 				ArithmeticAtomExpression auxVariable = null;
 				
 				// if we have a common subexpression, use the corresponding variable
-				if(hasCommonSubExpression(expression)) 
-					auxVariable = getCommonSubExpression(expression);
+				if(hasCommonSubExpression(r)) 
+					auxVariable = getCommonSubExpression(r);
 					
-				else if(hasEqualSubExpression(expression)) {
-					auxVariable = getEqualSubExpression(expression);
-					addToSubExpressions(expression, auxVariable);
+				else if(hasEqualSubExpression(r)) {
+					auxVariable = getEqualSubExpression(r);
+					addToSubExpressions(r, auxVariable);
 		
 					// add the flattened constraint to the constraint buffer
-					this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(argument,
-																					   Expression.NEQ,
-							                                                           auxVariable.toRelationalAtomExpression()));
+					this.constraintBuffer.add(new Reification(r,auxVariable.toRelationalAtomExpression()));
 				}
 				// if we have no common subexpression, create a new auxiliary variable
 				// and add the constraint to the list of subexpressions
@@ -2187,9 +2210,7 @@ public class Flattener {
 					addToSubExpressions(expression, auxVariable);
 				    
 					// add the flattened constraint to the constraint buffer
-					this.constraintBuffer.add(new CommutativeBinaryRelationalExpression(argument,
-							   															Expression.NEQ,
-							   															auxVariable.toRelationalAtomExpression()));
+					this.constraintBuffer.add(new Reification(r,auxVariable.toRelationalAtomExpression()));
 				}
 				
 				return auxVariable.toRelationalAtomExpression();
@@ -4656,22 +4677,34 @@ public class Flattener {
 		//System.out.println("Reifying constraint "+constraint+" that has a CSE? "+hasCommonSubExpression(constraint));
 		
 		// the constraint is false
-		if(this.flatteningNegatedArgument) {
+		/*if(this.flatteningNegatedArgument) {
+			System.out.println("Flattening negation: "+constraint);
+			RelationalAtomExpression auxVar = new RelationalAtomExpression(this.createAuxVariable(0, 1));
 			auxVariable = new ArithmeticAtomExpression(0);
-			addToSubExpressions(constraint, auxVariable);
 			
-			Reification reification = new Reification(constraint,
+			
+			Reification negattedExpression = new Reification(constraint,
                     auxVariable.toRelationalAtomExpression());
 			
-			Expression r = reification.evaluate();
+			Expression r = negattedExpression.evaluate();
+			System.out.println("Negated expression: "+constraint);
 			
-			System.out.println("Reified constraint to: "+r);
+			if(!(r instanceof Reification)) {
+				Reification reification = new Reification(r, auxVar);
+				addToSubExpressions(r, auxVar);
+				System.out.println("Reified negated expression: "+reification);
+				this.constraintBuffer.add(reification);
+				return auxVar;
+			}
+			else throw new TailorException("Internal error. Expected relational constraint instead of:"+r);
 			
-			this.constraintBuffer.add(r);
-		}
+			//System.out.println("Reified constraint to: "+r);
+			
+			//this.constraintBuffer.add(r);
+		}*/
 			
 		// if we have a common subexpression, use the corresponding variable
-		else if(hasCommonSubExpression(constraint)) 
+		if(hasCommonSubExpression(constraint)) 
 			auxVariable = getCommonSubExpression(constraint);
 			
 		else if(hasEqualSubExpression(constraint)) {
