@@ -744,9 +744,9 @@ public class TailorGUI extends javax.swing.JFrame {
         
         // translation settings
         JMenu translationSettings = new JMenu("Translation");
-        JMenuItem cseDetection = new JCheckBoxMenuItem("Basic Common Subexpression Elimination");
-        JMenuItem ecseDetection = new JCheckBoxMenuItem("Derived Common Subexpressions' Elimination");
-        JMenuItem directVarReusage = new JCheckBoxMenuItem("Directly reuse variables");
+        JMenuItem cseDetection = new JCheckBoxMenuItem("Common Subexpression Elimination during Flattening");
+        JMenuItem ecseDetection = new JCheckBoxMenuItem("Elimination of Compound Common Subexpressions");
+        JMenuItem directVarReusage = new JCheckBoxMenuItem("Directly Reuse Equivalent Variables");
         cseDetection.setSelected(this.settings.useCommonSubExpressions());
         ecseDetection.setSelected(this.settings.useEqualCommonSubExpressions());
         directVarReusage.setSelected(this.settings.applyDirectVariableReusage());
@@ -772,14 +772,14 @@ public class TailorGUI extends javax.swing.JFrame {
         //JMenu minionTranslationSettings = new JMenu("Minion");
         
         JMenu gecodeTranslationSettings = new JMenu("Gecode");
-        JMenuItem minimodelPostConstraint = new JCheckBoxMenuItem("Use MiniModel's post constraints");
-        minimodelPostConstraint.setSelected(this.settings.getUseGecodeLinearMinimodelPostConstraints());
+        JMenuItem minimodelPostConstraint = new JCheckBoxMenuItem("Use linear constraint (instead of post)");
+        minimodelPostConstraint.setSelected(!(this.settings.getUseGecodeLinearMinimodelPostConstraints()));
         minimodelPostConstraint.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
 		          if(item.isSelected())
-		        	  settings.setUseGecodeLinearMinimodelPostConstraints(true);
-		          else settings.setUseGecodeLinearMinimodelPostConstraints(false);
+		        	  settings.setUseGecodeLinearMinimodelPostConstraints(false);
+		          else settings.setUseGecodeLinearMinimodelPostConstraints(true);
 			  }
 			});
         gecodeTranslationSettings.add(minimodelPostConstraint);

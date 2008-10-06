@@ -188,6 +188,7 @@ public class SumConstraint implements GlobalConstraint {
 			}
 		}	
 			
+		
 		if(noZeros > 0) {
 			Expression[] newPositiveArgs = new Expression[this.positiveArguments.length - noZeros];
 			int j = 0;
@@ -238,7 +239,14 @@ public class SumConstraint implements GlobalConstraint {
 		
 		this.result = this.result.evaluate();
 		
-		//ystem.out.println("After evaluating sum constraint:"+this);
+		// all arguments are evaluated to zero
+		if(this.positiveArguments.length == 0 
+				&& this.negativeArguments.length == 0)
+			return new CommutativeBinaryRelationalExpression(new ArithmeticAtomExpression(0),
+															  Expression.EQ,
+					                                          result);
+		
+		//System.out.println("After evaluating sum constraint:"+this+"\n");
 		return this;
 	}
 

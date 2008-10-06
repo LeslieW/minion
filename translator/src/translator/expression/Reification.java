@@ -34,9 +34,12 @@ public class Reification implements RelationalExpression {
 				if(this.reifiedExpression instanceof CommutativeBinaryRelationalExpression) {
 					return ((CommutativeBinaryRelationalExpression) reifiedExpression).invertExpression();
 				}
+				else if(this.reifiedExpression instanceof NonCommutativeRelationalBinaryExpression) {
+					return ((NonCommutativeRelationalBinaryExpression) reifiedExpression).invertExpression();
+				}
 			}
-			
 		}
+
 		
 		return this;
 	}

@@ -295,9 +295,10 @@ public class Sum extends NaryArithmeticExpression {
 		
 		// constant is 0: don't add it back to the list -> only do this if 
 		//                we have some other elements      
-		else if(newConstant == 0)
+		else if(newConstant == 0) {
+			//System.out.println("After evaluating sum with zero constant:"+this);
 			return this; 
-		
+		}
 		else if(newConstant > 0){	
 		    // add the constant to the beginning of the list, since it is smallest for sure
 			this.positiveArguments.add(0,new ArithmeticAtomExpression(newConstant));

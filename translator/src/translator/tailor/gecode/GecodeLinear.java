@@ -217,7 +217,7 @@ public class GecodeLinear extends RelationalConstraint {
 			
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF && 
 				this.propagationKind == GecodeConstraint.PK_DEF) 
-			s.append(", opt.icl())");
+			s.append(")");
 		else {
 			s.append(", "+consistencyToString(this.consistencyLevel)+", "+propagationToString(this.propagationKind)+")");
 		}
@@ -280,7 +280,7 @@ public class GecodeLinear extends RelationalConstraint {
 			
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF && 
 				this.propagationKind == GecodeConstraint.PK_DEF) 
-			s.append(", opt.icl())");
+			s.append(")");
 		else {
 			s.append(", "+consistencyToString(this.consistencyLevel)+", "+propagationToString(this.propagationKind)+")");
 		}

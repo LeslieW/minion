@@ -436,4 +436,34 @@ public class NonCommutativeRelationalBinaryExpression implements
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());
 	}
+	
+	public void setType(int type) {
+		this.type = type;
+	}
+	
+	public Expression invertExpression() {
+		
+		switch(this.type) {
+		case LESS:
+			this.setType(GEQ);
+			return this;
+
+		case GEQ:  
+			this.setType(LESS);
+			return this;
+		
+		case LEQ:  
+			this.setType(GREATER);
+			return this;
+			
+		case GREATER: 
+			this.setType(LEQ);
+			return this;
+			
+		
+		default:
+			return new Negation(this); 
+		}
+
+	}
 }

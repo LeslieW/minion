@@ -1004,7 +1004,7 @@ public class Flattener {
 			Multiplication processedMultiplication = (Multiplication) multiplication.copy();
 			processedMultiplication.setWillBeConverteredToProductConstraint(true);
 			ProductConstraint productConstraint = (ProductConstraint) flattenMultiplication(processedMultiplication);
-			
+		
 			
 			if(expression.getOperator() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable()) {
 				leftExpression.willBeFlattenedToVariable(this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator()));
@@ -2159,20 +2159,22 @@ public class Flattener {
 		if(expression.getType() == Expression.NEGATION) {
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION)) 
 				argument.willBeFlattenedToVariable(true);
-			//System.out.println("About to flatten negation: "+expression);
+			System.out.println("About to flatten negation: "+expression);
 			
 			Expression r;
+			boolean isAlreadyNegated = false;
 			
 			// if it is !(E1 relop E2) ---> E1 neg(relop) E2
 			if(argument instanceof CommutativeBinaryRelationalExpression ||
 					argument instanceof NonCommutativeRelationalBinaryExpression) {
 				Reification negattedExpression = new Reification(argument,
-                    new RelationalAtomExpression(false));
+                                                                new RelationalAtomExpression(false));
 			
 				r = negattedExpression.evaluate();
-				//System.out.println("Negated expression: "+argument);
+				System.out.println("Negated expression: "+r);
 				r.willBeFlattenedToVariable(false);
 				r = flattenExpression(r);
+				isAlreadyNegated = true;
 			}
 			else { 
 				argument = flattenExpression(argument);
@@ -2215,7 +2217,10 @@ public class Flattener {
 				
 				return auxVariable.toRelationalAtomExpression();
 			} // end if: we need to flatten to a variable
-			else return new Negation(argument);	
+			else if(isAlreadyNegated)
+				return r;
+			
+			else return new Negation(r);	
 		    
 			
 		} // end: if(negation)
@@ -2633,6 +2638,95 @@ public class Flattener {
 		else if (arguments.size() < 2 && argument == null) 
 			throw new TailorException("Internal error: Cannot flatten product to binary sum with less than 2 arguments:"+arguments.toString()); 	
 
+		
+		// a * b * c * d   =====>  (a * b) * (c * d) 
+		else if(arguments.size() >= 4) {
+			
+			
+			// a * b 
+			Expression arg1 = arguments.remove(0);
+			Expression arg2 = arguments.remove(0);
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.BINARY_PRODUCT_CONSTRAINT)) {
+				arg1.willBeFlattenedToVariable(true);
+				arg2.willBeFlattenedToVariable(true);
+			}
+			arg1 = flattenExpression(arg1);
+			arg2 = flattenExpression(arg2);
+			
+			Multiplication mult = new Multiplication(new Expression[] {arg1, arg2});
+			AtomExpression mult1;
+			
+			if(this.hasCommonSubExpression(mult)) {
+				mult1 = this.getCommonSubExpression(mult);
+			}
+			else {
+				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {arg1, arg2});
+					int lb = mult.getDomain()[0];
+					int ub = mult.getDomain()[1];
+					mult1 = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
+					this.addToSubExpressions(mult, mult1);
+				
+				
+				productConstraint.setResult(mult1);
+				this.constraintBuffer.add(productConstraint);
+			}
+			
+			
+			//			 c  * d 
+			Expression arg3 = arguments.remove(0);
+			Expression arg4 = arguments.remove(0);
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.BINARY_PRODUCT_CONSTRAINT)) {
+				arg3.willBeFlattenedToVariable(true);
+				arg4.willBeFlattenedToVariable(true);
+			}
+			arg3 = flattenExpression(arg3);
+			arg4 = flattenExpression(arg4);
+			
+			Multiplication mult_ = new Multiplication(new Expression[] {arg3, arg4});
+			AtomExpression mult2;
+			
+			if(this.hasCommonSubExpression(mult_)) {
+				mult2 = this.getCommonSubExpression(mult_);
+			}
+			else {
+				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {arg3, arg4});
+					int lb = mult_.getDomain()[0];
+					int ub = mult_.getDomain()[1];
+					mult2 = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
+					this.addToSubExpressions(mult_, mult2);
+				
+				
+				productConstraint.setResult(mult2);
+				this.constraintBuffer.add(productConstraint);
+			}
+			
+			if(arguments.size() == 0)
+				return new Multiplication(new Expression[] {mult1, mult2});
+			
+			else {
+				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {mult1, mult2});
+				
+				
+				Multiplication m_ = new Multiplication(new Expression[] {mult1, mult2} );
+				ArithmeticAtomExpression auxVariable;
+				
+				if(this.hasCommonSubExpression(m_)) {
+					auxVariable = this.getCommonSubExpression(m_);
+				}
+				else {
+					int lb = m_.getDomain()[0];
+					int ub = m_.getDomain()[1];
+					auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
+					this.addToSubExpressions(m_, auxVariable);
+				}
+				
+				productConstraint.setResult(auxVariable);
+				this.constraintBuffer.add(productConstraint);
+				
+				return flattenToBinaryMultiplication(arguments, auxVariable);
+			}
+		}
+		
 		else {
 			Expression arg1 = null;
 			if(argument == null)
@@ -2656,10 +2750,18 @@ public class Flattener {
 				
 			
 			Multiplication m = new Multiplication(new Expression[] {arg1, arg2} );
-			int lb = m.getDomain()[0];
-			int ub = m.getDomain()[1];
-			ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
-
+			ArithmeticAtomExpression auxVariable;
+			
+			if(this.hasCommonSubExpression(m)) {
+				auxVariable = this.getCommonSubExpression(m);
+			}
+			else {
+				int lb = m.getDomain()[0];
+				int ub = m.getDomain()[1];
+				auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
+				this.addToSubExpressions(m, auxVariable);
+			}
+			
 			productConstraint.setResult(auxVariable);
 			this.constraintBuffer.add(productConstraint);
 			
@@ -2689,6 +2791,7 @@ public class Flattener {
 			return new ProductConstraint(arguments);
 		}
 		else {
+			//multiplication = (Multiplication) multiplication.reduceExpressionTree();
 			Multiplication binaryMultiplication = flattenToBinaryMultiplication(multiplication.getArguments(), null);
 			
 			return new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().remove(0),

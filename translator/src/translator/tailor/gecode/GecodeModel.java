@@ -159,7 +159,7 @@ public class GecodeModel {
 		StringBuffer s = new StringBuffer("int\nmain(int argc, char* argv[]) {\n");
 		s.append("   Options opt(\""+modelName+"\");\n");
 		s.append("   opt.solutions(0);\n");
-		s.append("   opt.iterations(2000);\n");
+		//s.append("   opt.iterations(2000);\n");
 		s.append("   opt.parse(argc, argv);\n");
 		s.append("   Example::run<"+modelName+", "+((this.objective != null) ? "BAB" : "DFS" )+", Options>(opt);\n");
 		s.append("   return 0;\n}\n\n");
@@ -198,7 +198,7 @@ public class GecodeModel {
 		StringBuffer s = new StringBuffer("   // actual problem\n   "+this.modelName+"(const Options& opt) : "+
 				variableInitialisationToString());
 		
-		s.append(" {\n");
+		s.append(" {\n\n");
 		s.append(bufferArraysDeclaration()+"\n");
 		s.append(constraintsToString()+"\n");
 		s.append(branchingToString()+"\n");
@@ -414,25 +414,27 @@ public class GecodeModel {
 			if(array instanceof GecodeIntVarArray) {
 				String arrayName = array.getVariableName();
 				for(int j=0; j<array.getLength(); j++) {
-					s.append("\t"+this.singleIntVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];\n");
+					s.append("\t"+arrayName+"["+j+"] = "+this.singleIntVarNames.get(j).getVariableName()+";\n");
 				}				
 			}
 			else if(array instanceof GecodeBoolVarArray) {
 				String arrayName = array.getVariableName();
 				for(int j=0; j<array.getLength(); j++) {
-					s.append("\t"+this.singleBoolVarNames.get(j).getVariableName()+" = "+arrayName+"["+j+"];");
+					s.append("\t"+arrayName+"["+j+"] = "+this.singleBoolVarNames.get(j).getVariableName()+";");
 				}	
 			}
-			s.append("\n\n");
+			s.append("\n");
 		}
 		
-		s.append("\n");
+		
 		// -------------------------------------------------
 		// then again for the auxiliary variables
 		// -------------------------------------------------
 		
 		if(auxBufferArrays.size() == 0) 
 			return s.toString();
+		
+		s.append("\n");
 		
 		// declare aux var containers
 		s.append("      // defining the ArgsVarArrays that hold the aux variables\n");
@@ -548,7 +550,7 @@ public class GecodeModel {
 			else if(this.variableList.size() > 0 
 					|| this.multiDimensionalArrays.size() > 0) s.append(",\n\t\t");
 			GecodeArrayVariable var = bufferArrays.get(i);
-			s.append("\t"+var+"(this, "+var.getLength()+", "+var.getLowerBound()+", "+var.getUpperBound()+")");
+			s.append("\t"+var+"(this, "+var.getLength()+")"); //+var.getLowerBound()+", "+var.getUpperBound()+")");
 		}
 		
 		// we need not define auxiliary variables
@@ -591,7 +593,7 @@ public class GecodeModel {
 			return s.toString();
 		
 		//s.append("// Defining methods to access multi-dimensional variables\");
-		s.append("\n\n   ");
+		s.append("   ");
 		
 		for(int i=0; i<this.multiDimensionalArrays.size(); i++) {
 			GecodeArrayVariable array = this.multiDimensionalArrays.get(i);
