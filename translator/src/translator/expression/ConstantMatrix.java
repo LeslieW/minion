@@ -44,7 +44,7 @@ public class ConstantMatrix implements ConstantArray {
 			}
 		}
 		this.domain = domain;
-		
+		//System.out.println("Created constant matrix with domain:"+domain);	
 	}
 	
 	// =========== INHERITED METHODS ===========

@@ -58,6 +58,23 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 			this.indices.add(i, this.indices.remove(i).evaluate());
 		
 		// TODO: if all indices are expressions/ints => return ArrayVariabke
+		/*boolean allIndicesAreExpressions = true;
+		Expression[] exprIndices = new Expression[indices.size()];
+		
+	    for(int i=0; i<this.indices.size(); i++) {
+	    	if(!(this.indices.get(i) instanceof SingleIntRange ||
+	    		  this.indices.get(i) instanceof SingleExpressionRange))
+	    		allIndicesAreExpressions = false;
+	    	else exprIndices[i] = ((SingleRange) indices.get(i)).getSingleExpressionRange();
+	    }
+	    
+	    if(allIndicesAreExpressions) {
+	    	ArrayVariable arrayVar = new ArrayVariable(this.arrayName,
+	    												exprIndices,
+	    												new InfiniteDomain());
+	    	return arrayVar;
+	    }
+	    */	
 		
 		return this;
 	}
@@ -445,5 +462,11 @@ public class SimpleArrayVariable implements Variable, AtomExpression {
 
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());
+	}
+	
+	// ============ OTHER METHODS =====================
+	
+	public ArrayList<Domain> getIndices() {
+		return this.indices;
 	}
 }

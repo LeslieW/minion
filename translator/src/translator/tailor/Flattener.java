@@ -191,9 +191,94 @@ public class Flattener {
 		else if(expression instanceof Array)
 			return expression;  // TODO: here we will need to flatten in case the target solver does not support arrays
 		
+		//else if(expression instanceof ArrayVariable) {
+		//	return flattenSimpleArrayVariable((ArrayVariable) expression);
+		//}
+		
 		else throw new TailorException("Unknown variable/expression: "+expression+" (expression with no domain associated). Type:"
 				+expression.getClass().getSimpleName());
 	}
+	
+	
+	/*
+	protected Expression flattenSimpleArrayVariable(ArrayVariable arrayVariable) 
+		throws TailorException, Exception {
+		
+		//Expression aVar = arrayVar.evaluate();
+		//if(!(aVar instanceof ArrayVariable)) 
+		//	throw new TailorException("Unexpected or unknown variable: "+arrayVar);
+		
+		//ArrayVariable arrayVariable = (ArrayVariable) aVar;
+		Expression[] indices = arrayVariable.getExpressionIndices();
+		
+		if(this.normalisedModel.constantArrays.containsKey( arrayVariable.getArrayNameOnly() )) {
+			
+			ConstantArray constArray = this.normalisedModel.constantArrays.get(arrayVariable.getArrayNameOnly());
+		
+			int[] intIndices = null;
+			
+			// the indices might be another constant-array...
+			if(indices != null) {
+				
+				intIndices = new int[indices.length];
+				boolean allAreInteger = true;
+				
+				for(int i=0; i<indices.length; i++) {
+					Expression newIndex = flattenExpression(indices[i]).evaluate();
+					if(newIndex.getType() == Expression.INT) {
+						intIndices[i] = ((ArithmeticAtomExpression) newIndex).getConstant();
+					}
+					else allAreInteger = false;
+				}
+				
+				if(!allAreInteger) 
+					throw new TailorException("Could not tailor indexed constant array '"+arrayVariable+
+							"' to a constant, because not all indices could be derived to a constant value:"+indices);
+				
+			}
+			else intIndices = arrayVariable.getIntegerIndices();
+			
+			
+			// we have a vector
+			if(intIndices.length == 1) {
+				if(constArray instanceof ConstantVector) {
+					ConstantVector vector = (ConstantVector) constArray;
+					int rowOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(vector.getArrayName(), 0);
+					return new ArithmeticAtomExpression(vector.getElementAt(intIndices[0]-rowOffsetFromZero));
+				}
+				else throw new TailorException("Illegal index dimensions of constant array element '"+arrayVariable+
+						"' that dereferences the array '"+constArray+
+						"'.\nPlease make sure you have an index for every dimension of the array.");
+			}
+			// matrix
+			else if(intIndices.length == 2) {
+				if(constArray instanceof ConstantMatrix) {
+					ConstantMatrix matrix = (ConstantMatrix) constArray;
+					//System.out.println("Flattening constant matrix variable "+atom+" to "+matrix.getElementAt(intIndices[0]-this.CONSTANT_ARRAY_OFFSET_FROM_ZERO, 
+                     //       intIndices[1]-this.CONSTANT_ARRAY_OFFSET_FROM_ZERO));
+					int rowOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(matrix.getArrayName(), 0);
+					int colOffsetFromZero = this.normalisedModel.getOffsetFromZeroAt(matrix.getArrayName(), 1);
+					
+					return new ArithmeticAtomExpression(matrix.getElementAt(intIndices[0]-rowOffsetFromZero, 
+							                                                intIndices[1]-colOffsetFromZero));
+					
+				}
+				else throw new TailorException("Illegal index dimensions of constant array element '"+arrayVariable+
+						"' that dereferences the array '"+constArray+
+						"'.\nPlease make sure you have an index for every dimension of the array.");
+				
+			}
+			// cube
+			//else if(intIndices.length == 3) 
+			else throw new TailorException("Cannot tailor constant elements with more than 2 dimensions yet, sorry:"+arrayVariable);
+			
+		} // end if(variable is a constant array)
+		
+		
+		else throw new TailorException("Cannot tailor expression, sorry:"+arrayVariable);
+		
+	} */
+	
 	
 	/**
 	 * Flatten a relational expression
@@ -1853,7 +1938,7 @@ public class Flattener {
 		
 		for(int i=unfoldedExpressions.size()-1; i>=0; i--) {
 			Expression expression = unfoldedExpressions.remove(i).evaluate();
-			
+			expression = this.insertConstantArraysInExpression(expression);
 			//if(expression.getType() == Expression.INT) {
 			//	if(((ArithmeticAtomExpression) expression).getConstant() != 0) {
 			//		positiveElements.add(expression);
@@ -2159,7 +2244,7 @@ public class Flattener {
 		if(expression.getType() == Expression.NEGATION) {
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.NEGATION)) 
 				argument.willBeFlattenedToVariable(true);
-			System.out.println("About to flatten negation: "+expression);
+			//System.out.println("About to flatten negation: "+expression);
 			
 			Expression r;
 			boolean isAlreadyNegated = false;
@@ -2171,7 +2256,7 @@ public class Flattener {
                                                                 new RelationalAtomExpression(false));
 			
 				r = negattedExpression.evaluate();
-				System.out.println("Negated expression: "+r);
+				//System.out.println("Negated expression: "+r);
 				r.willBeFlattenedToVariable(false);
 				r = flattenExpression(r);
 				isAlreadyNegated = true;
@@ -4447,7 +4532,8 @@ public class Flattener {
 					
 						
 						ConstantArray constArray = this.normalisedModel.constantArrays.get(((ArrayVariable) arrayVariable).getArrayNameOnly());
-					
+						//System.out.println("Matching constant array \n"+constArray+"\nto expression "+arrayVariable);
+						
 						if(indices != null) 
 							throw new TailorException("Sorry, cannot tailor constant arrays that are indexed by decision variables yet.");
 						
@@ -4488,25 +4574,17 @@ public class Flattener {
 						//else if(intIndices.length == 3) 
 						else throw new TailorException("Cannot tailor constant elements with more than 2 dimensions yet, sorry:"+atom);
 						
-					}
-				}
+					}  
+				} // end if type is array variable
 				else if(arrayVariable.getType() == Expression.SIMPLE_ARRAY_VARIABLE) {
 					
-					//System.out.println("Inserting the constant shit in simple array var:"+expression);
+					System.out.println("Inserting the constant shit in simple array var:"+expression);
 					SimpleArrayVariable simpleVar = (SimpleArrayVariable) expression;
-					
-					if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
-						ConstantArray constArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
-						
-						//System.out.println("1 inserting constArray "+simpleVar.getVariableName()+" in "+expression);
-						Expression e = simpleVar.replaceVariableWithExpression(simpleVar.getVariableName(), constArray);
-						//System.out.println("2 inserted constArray "+simpleVar.getVariableName()+" in "+expression+": "+e);
-						return e;
-					}
+					return insertConstantDomainIntoSimpleArrayVariable(simpleVar);
 					
 				}
-			}
-		}
+			}  // end if type is Int var array
+		} // end if ArithmeticAtomExpression
 		
 		
 		
@@ -4598,39 +4676,20 @@ public class Flattener {
 					
 					//System.out.println("Inserting the constant shit in simple array var:"+expression);
 					SimpleArrayVariable simpleVar = (SimpleArrayVariable) expression;
+					return insertConstantDomainIntoSimpleArrayVariable(simpleVar);
 					
-					if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
-						ConstantArray constArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
-						
-						//System.out.println("1 inserting constArray "+simpleVar.getVariableName()+" in "+expression);
-						Expression e = simpleVar.replaceVariableWithExpression(simpleVar.getVariableName(), constArray);
-						//System.out.println("2 inserted constArray "+simpleVar.getVariableName()+" in "+expression+": "+e);
-						return e;
-					}
-					
-				}
-			}
-		}
+				}  // end if is simple array variable
+
+			} // if the type is Bool var array
 		
 		
-		
-		
-		
-		
+		} /// end else if RelationalAtomExpression
 		
 		else if(expression instanceof SimpleArrayVariable) {
 			
 				//System.out.println("Inserting the constant shit in simple array var:"+expression);
 				SimpleArrayVariable simpleVar = (SimpleArrayVariable) expression;
-				
-				if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
-					ConstantArray constArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
-					
-					//System.out.println("1 inserting constArray "+simpleVar.getVariableName()+" in "+expression);
-					Expression e = simpleVar.replaceVariableWithExpression(simpleVar.getVariableName(), constArray);
-					//System.out.println("2 inserted constArray "+simpleVar.getVariableName()+" in "+expression+": "+e);
-					return e;
-				}
+				return insertConstantDomainIntoSimpleArrayVariable(simpleVar);
 			
 		}
 		
@@ -4639,6 +4698,113 @@ public class Flattener {
 	
 	
 	
+	/**
+	 * 
+	 * @param simpleVar
+	 * @return
+	 * @throws TailorException
+	 */
+	private Expression insertConstantDomainIntoSimpleArrayVariable(SimpleArrayVariable simpleVar)
+	throws TailorException,Exception {
+		
+		
+		ArrayList<Domain> indices = simpleVar.getIndices();
+		String variableName = simpleVar.getVariableName();
+		
+		if(this.normalisedModel.constantArrays.containsKey(simpleVar.getVariableName())) {
+			ConstantArray constantArray = this.normalisedModel.constantArrays.get(simpleVar.getVariableName());
+			
+			if(constantArray.getDimension() != indices.size())
+				throw new Exception("I cannot match a constant value from constant array "+variableName+" to variable "+simpleVar+
+						",\n because the dimensions don't match: "+simpleVar+" is "+indices.size()+"-dimensionial and "
+						+simpleVar+" is "+constantArray.getDimension()+"-dimensionial.");
+			
+			boolean allIndicesAreInts = true;
+			boolean allIndicesAreSingleExpressions = true;
+			
+			for(int i=indices.size()-1; i>=0; i--) {
+				
+				Domain index = indices.get(i);	
+				index = indices.remove(i).evaluate();
+				
+				if(!(index instanceof SingleIntRange)) 
+					allIndicesAreInts = false;
+				
+				if(!(index instanceof SingleRange)) 
+					//System.out.println("Index "+index+" is not a SingleRange but "+index.getClass());
+					allIndicesAreSingleExpressions = false;
+						
+				if(!(index instanceof BasicDomain)) 
+					throw new Exception("Cannot translate array element '"+simpleVar+"' that is indexed by :"+index+
+							". Expected an integer, expression, or range.");
+				
+				indices.add(i, index);
+			}
+		
+			if(allIndicesAreInts) {
+				int[] intIndices = new int[indices.size()];
+				for(int i=intIndices.length-1; i>=0; i--) {
+					intIndices[i] = ((SingleIntRange) indices.remove(i)).getSingleRange();
+				}
+				if(constantArray.getArrayDomain() != null) {
+					if(!(constantArray.getArrayDomain() instanceof MatrixDomain))
+						throw new Exception("Infeasible domain for constant array "+variableName+": "+constantArray.getArrayDomain()+
+								".\nExpected an array domain.");
+				}
+				
+				int[] offsets = new int[constantArray.getDimension()];
+				for(int i=0; i<offsets.length; i++)
+					offsets[i] = this.normalisedModel.getOffsetFromZeroAt(constantArray.getArrayName(), i);
+				
+				if(offsets.length > 0) {
+					if(offsets.length != intIndices.length)
+						throw new Exception("Domains of constant array element "+simpleVar+" and constant array "+variableName+" don't match.\n"+
+								simpleVar+" is "+intIndices.length+"-dimensional and "+variableName+" is defined as "+offsets.length+"-dimensional.");
+					for(int i=0; i<offsets.length; i++) {
+						//System.out.println("Dereferenced "+variableName+" : index "+intIndices[i]+" - "+offsets[i]+"(offset)");
+						intIndices[i] = intIndices[i]-offsets[i];
+					}
+				}
+				//else System.out.println("No offsets for constArray:"+constantArray.getArrayName());
+				
+				if(constantArray instanceof ConstantVector) {
+					return new ArithmeticAtomExpression( ((ConstantVector) constantArray).getElementAt(intIndices[0]) );
+				}
+				
+				else if(constantArray instanceof ConstantMatrix) {
+					//System.out.println("Dereferenced "+variableName+" : adapted index "+intIndices[0]+","+intIndices[1]);
+					return new ArithmeticAtomExpression( ((ConstantMatrix) constantArray).getElementAt(intIndices[0],
+																										intIndices[1]) );
+				}
+			}
+			
+			if(allIndicesAreSingleExpressions) {
+				
+				Expression[] indexExpressions = new Expression[indices.size()];
+				for(int i=indexExpressions.length-1; i>=0;i--)
+					indexExpressions[i] = ((SingleRange) indices.remove(i)).getSingleExpressionRange();
+				
+				return new ArithmeticAtomExpression(new ArrayVariable(variableName, 
+															          indexExpressions,
+															          new InfiniteDomain()));
+			}
+			//	throw new Exception("Cannot translate indexing constant arrays with non-integer values, as in "+expression+" yet, sorry.");
+			
+			else
+				throw new TailorException("Cannot translate indexing constant arrays with integer ranges, as in "+simpleVar+" yet, sorry.");
+		//}
+		}
+		else return simpleVar;
+		
+		
+	}
+	
+/**
+ * 
+ * @param leftExpression
+ * @param rightExpression
+ * @throws TailorException
+ */
 	
 	private void addToDirectlyEqualAtoms(Expression leftExpression, Expression rightExpression) 
 		throws TailorException {
