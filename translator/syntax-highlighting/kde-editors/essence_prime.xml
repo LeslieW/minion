@@ -17,7 +17,7 @@
 	     You should have received a copy of the GNU General Public License
 	     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<language name="EssencePrime" version="0.1" kateversion="2.5.9" section="Other" extensions="*.eprime"  mimetype="text/eprime" casesensitive="1" author="Jan de Muijnck-Hughes" license="">
+<language name="EssencePrime" version="0.1" kateversion="2.5.9" section="Other" extensions="*.eprime;*.param;*.cm"  mimetype="text/eprime" casesensitive="1" author="Jan de Muijnck-Hughes" license="">
 	<!-- Specifiy items from source file that need to be highlighted-->
 	<highlighting>
 		<list name="preproc">
@@ -34,11 +34,15 @@
 			<item> min</item>
 			<item> given </item>
 			<item> letting </item>
+			<item> parameter </item>
 			<item> indexed </item>	
 			<item> by </item>
 			<item> be </item>
 			<item> of </item>
+			<item> is </item>
+			<item> domain </item>
 			<item> forall </item>
+			<item> exists </item>
 			<item> sum </item>
 		</list>
 		<list name="misc">

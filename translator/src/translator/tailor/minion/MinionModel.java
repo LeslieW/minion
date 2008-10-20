@@ -484,8 +484,9 @@ public class MinionModel {
 					domainString.append("SPARSEBOUND");
 					int[] range = ((SparseIntRange) baseDomain).getFullDomain();
 					rangeString.append("{"+range[0]);
-					for(int j=1; i<range.length; j++)
-						rangeString.append(","+range[j]);
+					if(range.length > 1)
+						for(int j=1; j<range.length; j++)
+							rangeString.append(","+range[j]);
 					rangeString.append("}");
 				}
 				else if(baseDomain instanceof BoundedIntRange) {
