@@ -444,10 +444,13 @@ public class MinionTailor {
 		throws MinionException {
 		
 		int[] bounds = elementConstraint.getArguments()[0].getDomain();
+		//System.out.println("Converting element constraint:\t"+elementConstraint);
 		
 		MinionArray indexedArray = toMinionArray((Array) elementConstraint.getArguments()[0]);
 		Expression indexExpression = elementConstraint.getArguments()[1];
 		Expression resultExpression = elementConstraint.getArguments()[2];
+		
+		//System.out.println("Created indexed array:\t"+indexedArray+" during convertion");
 		
 		// check if the index is an atom
 		if(!(indexExpression instanceof ArithmeticAtomExpression) &&
@@ -652,11 +655,15 @@ public class MinionTailor {
 			ConstantDomain[] indices = new ConstantDomain[indexRanges.length];
 			boolean[] indexIsWholeDomain = new boolean[indexRanges.length];
 			
-			int[] indexOffsets = null;
-			if(this.offsetsFromZero.containsKey(arrayName))
-				indexOffsets = this.offsetsFromZero.get(arrayName);
-			else throw new MinionException("Internal error: did not find any index-offsets for array:"+arrayName+
-					". Maybe the array is undefined?");
+			// We don't want to set the offset here at this level
+			//int[] indexOffsets = null; 
+			int[] indexOffsets = new int[indices.length];
+			for(int i=0; i<indexOffsets.length; i++)
+				indexOffsets[i] = 0;
+			//if(this.offsetsFromZero.containsKey(arrayName))
+			//	indexOffsets = this.offsetsFromZero.get(arrayName);
+			//else throw new MinionException("Internal error: did not find any index-offsets for array:"+arrayName+
+			//		". Maybe the array is undefined?");
 			
  			for(int i=0; i<indexRanges.length; i++) {
  				indexRanges[i] = (BasicDomain) indexRanges[i].evaluate();

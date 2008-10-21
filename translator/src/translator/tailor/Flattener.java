@@ -22,6 +22,9 @@ public class Flattener {
 	/** the list of all flattened constraints. constraints are added on the fly. */
 	ArrayList<Expression> constraintBuffer;
 	
+	/** contains the offsets from zero for all decision variables' indices */
+	HashMap<String, int[]> variableArrayOffsetsFromZero;
+	
 	/** contains every (flattened) subexpression and it's corresponding variable*/
 	HashMap<String,ArithmeticAtomExpression> subExpressions;
 	//HashMap<Expression,ArithmeticAtomExpression> subExpressions;
@@ -1558,6 +1561,7 @@ public class Flattener {
 						if(this.normalisedModel.constantArrays.containsKey(arrayVar.getArrayNameOnly())) {
 							rightExpression = flattenArithmeticAtomExpression((ArithmeticAtomExpression) rightExpression);
 					    }
+						
 						else if(arrayVar.isIndexedBySomethingNotConstant()) {
 
 								arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
@@ -1565,6 +1569,7 @@ public class Flattener {
 								ElementConstraint elementConstraint = //flattenToPartwiseElementConstraint(new ArithmeticAtomExpression(arrayVar));
 																	flattenToPartwiseElementConstraint(rightExpression.copy());
 							
+								//System.out.println("Flattened to partwise element constraint: "+elementConstraint);
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 									leftExpression.willBeFlattenedToVariable(true);
 								leftExpression = flattenExpression(leftExpression);
@@ -4108,10 +4113,16 @@ public class Flattener {
 						if(rowIndexExpression.getType() == Expression.INT) {
 							
 							int row = ((ArithmeticAtomExpression) rowIndexExpression).getConstant();
+							
 							Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
 							domain = domain.evaluate();
 							
 							if(domain instanceof ConstantArrayDomain) {
+								
+								int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(), 0);
+								//System.out.println("COmputed row OFFSET:"+offset);
+								row = row - offset;
+								
 							    //	 creating m[row,..]   (indexedArray)
 								BasicDomain[] arrayIndices = new BasicDomain[2];
 								arrayIndices[0] = new SingleIntRange(row);
@@ -4120,7 +4131,10 @@ public class Flattener {
 										                                     arrayIndices,
 										                                     ((ConstantArrayDomain) domain).getBaseDomain());
 									
-								// prepare  index expression
+								// prepare  index expression: index-offset
+								colIndexExpression = new Sum(new Expression[] { colIndexExpression},
+	                                       					 new Expression[] {new ArithmeticAtomExpression(offset)});
+								colIndexExpression = colIndexExpression.evaluate();
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 									colIndexExpression.willBeFlattenedToVariable(true);
 								colIndexExpression = flattenExpression(colIndexExpression);
@@ -4144,6 +4158,11 @@ public class Flattener {
 								//	" and it is of Type: "+domain.getType());
 							
 							if(domain instanceof ConstantArrayDomain) {
+								
+								int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(), 1);
+								//System.out.println("COmputed col OFFSET:"+offset+" and column:"+col);
+								col = col - offset;
+								
 							    //	 creating m[row,..]   (indexedArray)
 								BasicDomain[] arrayIndices = new BasicDomain[2];
 								arrayIndices[0] = ((ConstantArrayDomain) domain).getIndexDomains()[0]; 
@@ -4153,7 +4172,10 @@ public class Flattener {
 										                                     ((ConstantArrayDomain) domain).getBaseDomain());
 								
 								
-								// prepare  index expression
+								// prepare  index expression: index-offset
+								rowIndexExpression = new Sum(new Expression[] { rowIndexExpression},
+                      					 	                 new Expression[] {new ArithmeticAtomExpression(offset)});
+								rowIndexExpression = rowIndexExpression.evaluate();
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT)) 
 									rowIndexExpression.willBeFlattenedToVariable(true);
 								
@@ -5032,6 +5054,24 @@ public class Flattener {
 		return auxVariable;
 	}
 	 
+	
+	
+	private void computeArrayOffsets() {
+		
+		
+		HashMap<String,Domain> decisionVars = this.normalisedModel.getDecisionVariables();
+		
+		// if we have to adapt to zero
+		if(this.targetSolver.getArrayIndexingStartValue() == 0) {
+			
+			
+			
+		}
+		// else just add 0 as offset
+		else {
+			
+		}
+	}
 	
 	/*private int max(int value1, int value2) {
 		

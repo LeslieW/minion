@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 import translator.expression.ArithmeticAtomExpression;
+import translator.expression.ConstantArrayDomain;
+import translator.expression.ConstantDomain;
 import translator.expression.Domain;
 import translator.expression.Expression;
 import translator.expression.Variable;
@@ -18,6 +20,7 @@ public class NormalisedModel {
 	because they occur in quantifications */
 	public HashMap<String, ConstantArray> constantArrays;
 	HashMap<String, int[]> constantOffsetsFromZero;
+	HashMap<String, int[]> variableOffsetsFromZero;
 	
 	/** decision variables and their corresponding domain */
 	HashMap<String, Domain> decisionVariables;
@@ -59,9 +62,12 @@ public class NormalisedModel {
 		this.usedEqualSubExpressions = 0;
 		this.constantArrays = new HashMap<String, ConstantArray>();
 		this.constantOffsetsFromZero = new HashMap<String,int[]>();
+		this.variableOffsetsFromZero = new HashMap<String,int[]>();
 		this.subExpressions = new HashMap<String,ArithmeticAtomExpression> ();
 		this.equalAtoms = new HashMap<String, ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
+		
+		this.computeVariableArrayOffsets();
 	}
 	
 	public NormalisedModel(HashMap<String, Domain> decisionVariables,
@@ -76,14 +82,15 @@ public class NormalisedModel {
 		this.constraintList = constraints;
 		this.constantArrays = constantArrays;
 		this.constantOffsetsFromZero = constantArrayOffsets;
-		
+		this.variableOffsetsFromZero = new HashMap<String,int[]>();
 		this.objective = objective;
 		this.auxiliaryVariables = new ArrayList<Variable>();
 		this.usedCommonSubExpressions = 0;
 		this.subExpressions = new HashMap<String,ArithmeticAtomExpression> ();
 		this.equalAtoms = new HashMap<String, ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
-	
+
+		this.computeVariableArrayOffsets();
 	}
 	 
 	// =============== METHODS =======================================
@@ -118,7 +125,41 @@ public class NormalisedModel {
 	}
 	
 	
+	public void setVariableOffsetsFromZero(HashMap<String, int[]> varOffsets) {
+		this.variableOffsetsFromZero = varOffsets;
+	}
 	
+	
+	/**
+	 * Returns the offset from zero of the variable array's 
+	 * index 'dimension'. Hence, if a variable array's index 
+	 * domains are 
+	 * 
+	 * x : [2..7, 1..4]
+	 *    
+	 * then the offset from zero at dimension 0 is 2 and 
+	 * at dimension 1 is 1. 
+	 * 
+	 * @param varName
+	 * @param dimension
+	 * @return
+	 * @throws NormaliserException
+	 */
+	public int getVariableOffsetAt(String varName, int dimension) 
+		throws NormaliserException {
+		
+		int[] offsets = this.variableOffsetsFromZero.get(varName);
+		
+		if(offsets == null) 
+			throw new NormaliserException("Trying to get offset from unknown decision variable array: "+varName);
+		
+		
+		else if(dimension > offsets.length || dimension < 0) 
+			throw new NormaliserException("Trying to get offset from zero of constant array '"+
+					varName+"' at index out of bounds :"+dimension);
+			
+		return offsets[dimension];
+	}
 	
 
 	public Variable getLastAddedAuxiliaryVariable() {
@@ -364,5 +405,31 @@ public StringBuffer toStringBuffer() {
 	
 	public HashMap<String, Domain> getDecisionVariables() {
 		return this.decisionVariables;
+	}
+	
+	
+	
+	private void computeVariableArrayOffsets() {
+		
+		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
+			String varName = decisionVariablesNames.get(i);
+			Domain domain = this.decisionVariables.get(varName);
+			
+			if(domain instanceof ConstantArrayDomain) {
+				ConstantArrayDomain arrayDomain = (ConstantArrayDomain) domain;
+				ConstantDomain[] indexDomains = arrayDomain.getIndexDomains();
+				
+				int[] offsetsFromZero = new int[indexDomains.length];
+				for(int j=0; j<offsetsFromZero.length; j++) {
+					int lb_j = indexDomains[j].getRange()[0];
+					offsetsFromZero[j] = lb_j;
+				}
+				
+				//System.out.println("Adding index offset of variable array :"+varName);
+				this.variableOffsetsFromZero.put(varName, offsetsFromZero);
+				//System.out.println("Added index offset of variable array :"+varName);
+			}
+		}
+		
 	}
 }

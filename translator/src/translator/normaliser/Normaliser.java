@@ -26,6 +26,8 @@ public class Normaliser implements NormaliserSpecification {
 	HashMap<String, ConstantArray> constantArrays;
 	ArrayList<String> constantArrayNames;
 	HashMap<String, int[]> constantArrayOffsets;
+	/** decision variable's indices offsets from zero*/
+	HashMap<String, int[]> variableArrayOffsets;
 	HashMap<String, Domain> parameterDomains;
 	
 	
@@ -39,6 +41,7 @@ public class Normaliser implements NormaliserSpecification {
 		this.constantArrays = new HashMap<String, ConstantArray> ();
 		this.constantArrayNames = new ArrayList<String>();
 		this.constantArrayOffsets = new HashMap<String, int[]>();
+		this.variableArrayOffsets = new HashMap<String, int[]>();
 		this.parameterDomains = new HashMap<String, Domain> ();
 	}
 	  
@@ -113,6 +116,7 @@ public class Normaliser implements NormaliserSpecification {
 		
 		Objective objective = (Objective) constraints.remove(0);
 		
+		
 		NormalisedModel normalisedModel;
 		
 		
@@ -134,7 +138,7 @@ public class Normaliser implements NormaliserSpecification {
 	}
 	
 
-	public NormalisedModel normalise(NormalisedModel model) 
+	/*public NormalisedModel normalise(NormalisedModel model) 
 		throws NormaliserException, Exception {
 		
 		ArrayList<Expression> constraints = model.constraintList;
@@ -168,7 +172,7 @@ public class Normaliser implements NormaliserSpecification {
 		model.constraintList = constraints;
 		
 		return model;
-	}
+	}*/
 	
 	/**
 	 * Normalise the expressions only to a certain extent: either full, evaluate only,
@@ -991,4 +995,7 @@ public class Normaliser implements NormaliserSpecification {
 		
 		return reduceExpressions(constraints);	
 	}
+	
+	
+	
 }
