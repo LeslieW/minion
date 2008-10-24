@@ -296,6 +296,9 @@ public class Sum extends NaryArithmeticExpression {
 		// constant is 0: don't add it back to the list -> only do this if 
 		//                we have some other elements      
 		else if(newConstant == 0) {
+			if(this.positiveArguments.size() == 1 && 
+					this.negativeArguments.size() == 0)
+				return positiveArguments.remove(0);
 			//System.out.println("After evaluating sum with zero constant:"+this);
 			return this; 
 		}

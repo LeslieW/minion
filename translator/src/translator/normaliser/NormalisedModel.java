@@ -12,6 +12,7 @@ import translator.expression.Variable;
 import translator.expression.ConstantArray;
 import translator.expression.Objective;
 import translator.expression.SingleIntRange;
+import translator.expression.BoundedIntRange;
 import translator.expression.Conjunction;
 
 public class NormalisedModel {
@@ -414,6 +415,9 @@ public StringBuffer toStringBuffer() {
 		for(int i=0; i<this.decisionVariablesNames.size(); i++) {
 			String varName = decisionVariablesNames.get(i);
 			Domain domain = this.decisionVariables.get(varName);
+			domain = domain.evaluate();
+			
+			//System.out.println("Adding index offset of variable array :"+varName);
 			
 			if(domain instanceof ConstantArrayDomain) {
 				ConstantArrayDomain arrayDomain = (ConstantArrayDomain) domain;
@@ -423,13 +427,32 @@ public StringBuffer toStringBuffer() {
 				for(int j=0; j<offsetsFromZero.length; j++) {
 					int lb_j = indexDomains[j].getRange()[0];
 					offsetsFromZero[j] = lb_j;
+					
+					if(indexDomains[j] instanceof SingleIntRange) {
+						int range = ((SingleIntRange) indexDomains[j]).getSingleRange();
+						indexDomains[j] = new SingleIntRange(range - offsetsFromZero[j]);
+					}
+					else if(indexDomains[j] instanceof BoundedIntRange) {
+						int[] bounds = ((BoundedIntRange) indexDomains[j]).getRange();
+						indexDomains[j] = new BoundedIntRange(bounds[0]-offsetsFromZero[j],
+								                              bounds[1]-offsetsFromZero[j]);
+					}
+					
+					
 				}
+				
+				arrayDomain.setIndexDomains(indexDomains);
 				
 				//System.out.println("Adding index offset of variable array :"+varName);
 				this.variableOffsetsFromZero.put(varName, offsetsFromZero);
 				//System.out.println("Added index offset of variable array :"+varName);
+				this.decisionVariables.put(varName, arrayDomain);
 			}
 		}
 		
 	}
+	
+	
+
+	
 }

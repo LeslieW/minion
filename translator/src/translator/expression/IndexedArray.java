@@ -226,4 +226,9 @@ public class IndexedArray implements SingleArray {
 		return this.indexRanges;
 	}
 	
+	
+	public void setIndexRanges(BasicDomain[] newIndices) {
+		if(newIndices.length == this.indexRanges.length)
+			this.indexRanges = newIndices;
+	}
 }

@@ -95,4 +95,11 @@ public class ConstantArrayDomain  implements ConstantDomain,MatrixDomain {
 
 		return this.indexDomains[index].getRange()[0];
 	}
+	
+	public void setIndexDomains(ConstantDomain[] indexDoms) {
+		
+		if(this.indexDomains.length == indexDoms.length) {
+			this.indexDomains = indexDoms;
+		}
+	}
 }

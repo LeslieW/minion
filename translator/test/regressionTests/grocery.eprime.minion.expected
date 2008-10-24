@@ -17,7 +17,7 @@ BOUND item4 {0..711}
 
 # auxiliary variables
 BOUND aux0 {0..505521}
-BOUND aux1 {0..359425431}
+BOUND aux1 {0..505521}
 
 # aliases
 
@@ -37,8 +37,8 @@ ineq(item4,item3,-1)
 ineq(item3,item2,-1)
 ineq(item2,item1,-1)
 product(item1,item2, aux0)
-product(aux0,item3, aux1)
-product(aux1,item4, 711000000)
+product(item3,item4, aux1)
+product(aux0,aux1, 711000000)
 sumleq([item1,item2,item3,item4], 711)
 sumgeq([item1,item2,item3,item4], 711)
 

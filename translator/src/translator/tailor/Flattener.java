@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import translator.expression.*;
 import translator.normaliser.NormalisedModel;
+import translator.normaliser.NormaliserException;
 import translator.TranslationSettings;
 
 public class Flattener {
@@ -441,6 +442,8 @@ public class Flattener {
 		Array leftArray = (Array) flattenExpression(lexConstraint.getLeftArray());
 		Array rightArray = (Array) flattenExpression(lexConstraint.getRightArray());
 		
+		leftArray = adaptArrayIndicesToSolver(leftArray);
+		rightArray = adaptArrayIndicesToSolver(rightArray);
 		
 		if(lexConstraint.isGonnaBeFlattenedToVariable()) {
 			if(this.targetSolver.supportsReificationOf(lexConstraint.getOperator())) 			
@@ -451,6 +454,7 @@ public class Flattener {
 			else throw new TailorException("Cannot reify lex constraint since the reification is not supported by the target solver:"+lexConstraint);
 			
 		}
+		
 		return new LexConstraint(leftArray, 
 				                 lexConstraint.getOperator(), 
 				                 rightArray);
@@ -1572,8 +1576,11 @@ public class Flattener {
 								//System.out.println("Flattened to partwise element constraint: "+elementConstraint);
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 									leftExpression.willBeFlattenedToVariable(true);
+								
+								//System.out.println("Left expression is: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
 								leftExpression = flattenExpression(leftExpression);
-							
+								//System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
+								
 								addToSubExpressions(rightExpression, leftExpression);
 								elementConstraint.setResultExpression(leftExpression);
 								//System.out.println("Flattened to element constraint: "+elementConstraint);
@@ -2320,13 +2327,17 @@ public class Flattener {
 			if(!(argument instanceof Array)) 
 				throw new TailorException("Internal error: flattening of argument of alldifferent, '"+argument+
 						"' did not result in an array.");
-				
 			
+			Array array = (Array) argument;
+			array = this.adaptArrayIndicesToSolver(array);
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
-                return reifyConstraint(new AllDifferent((Array) argument));	
+                return reifyConstraint(new AllDifferent(array));	
 			}
-			else return new AllDifferent((Array) argument);
+			else {
+				//System.out.println("Generated alldifferent: "+new AllDifferent(array));
+				return new AllDifferent(array);
+			}
 		}
 		
 		else throw new TailorException("Unknown unary relational expression:"+expression); 
@@ -3503,20 +3514,18 @@ public class Flattener {
 						//System.out.print("Adapted index at array variable "+atom);
 						
 						int[] intIndices = arrayVariable.getIntegerIndices();			
-						int solver_lb = this.targetSolver.getArrayIndexingStartValue();
-						Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
+						/*Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
 						if(!(domain instanceof ArrayDomain) && !(domain instanceof ConstantArrayDomain))
 							throw new TailorException
 							("Indexed variable '"+arrayVariable.getArrayNameOnly()+"' is not an array:"+atom);
 						ConstantDomain[] indexDomains = ((ConstantArrayDomain) domain).getIndexDomains();
+						*/
 						for(int i=0; i<intIndices.length; i++) {
-							int i_lb = indexDomains[i].getRange()[0];
-							if(solver_lb != i_lb) {
-								int offset = i_lb - solver_lb;
-								intIndices[i] -= offset;
-							}
+							
+							int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(),i);
+							intIndices[i] -= offset;
+							
 						}
-					
 						
 						ArrayVariable newArrayVariable = new ArrayVariable(arrayVariable.getArrayNameOnly(),
 																			intIndices,
@@ -3793,8 +3802,12 @@ public class Flattener {
 								domain = domain.evaluate();
 								
 								if(domain instanceof ConstantArrayDomain) {
-								   
-									if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
+									
+									int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(), 0);
+									//System.out.println("COmputed row OFFSET:"+offset);
+									row = row - offset;
+									
+									/*if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
 										 ConstantDomain rowDomain = ((ConstantArrayDomain) domain).getIndexDomains()[0];
 										 int row_lb = rowDomain.getRange()[0];
 										 int solver_lb = this.targetSolver.getArrayIndexingStartValue();
@@ -3803,15 +3816,30 @@ public class Flattener {
 											 // index ===> index - offset
 											 row = row - offset; 
 										 }
-									}
+									}*/
 									
-									 //	 creating m[row,..]   (indexedArray)
+									
+//									 creating m[row,..]   (indexedArray)
 									BasicDomain[] arrayIndices = new BasicDomain[2];
-									arrayIndices[0] = new SingleIntRange(row); //-offsetFromZero);
+									arrayIndices[0] = new SingleIntRange(row);
 									arrayIndices[1] = ((ConstantArrayDomain) domain).getIndexDomains()[1]; 
 									IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 											                                     arrayIndices,
 											                                     ((ConstantArrayDomain) domain).getBaseDomain());
+								
+									//indexedArray = (IndexedArray) this.adaptArrayIndicesToSolver(indexedArray);	
+									
+									// prepare  index expression: index-offset
+									/* colIndexExpression = new Sum(new Expression[] { colIndexExpression},
+		                                       					 new Expression[] {new ArithmeticAtomExpression(offset)});
+									colIndexExpression = colIndexExpression.evaluate();
+									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+										colIndexExpression.willBeFlattenedToVariable(true);
+									colIndexExpression = flattenExpression(colIndexExpression);
+									*/
+									
+									
+									
 									// creating aux variable
 									ArithmeticAtomExpression auxVariable = null;
 									if(hasCommonSubExpression(atom)) {
@@ -3831,7 +3859,16 @@ public class Flattener {
 									
 									// prepare  index expression
 									// if the solver indexes its array-elements starting from a particular value
-									if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
+									colIndexExpression = new Sum(new Expression[] { colIndexExpression},
+                          					 new Expression[] {new ArithmeticAtomExpression(offset)});
+									colIndexExpression = colIndexExpression.evaluate();
+									if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
+										colIndexExpression.willBeFlattenedToVariable(true);
+									colIndexExpression = flattenExpression(colIndexExpression);
+									
+									
+									
+									/*if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
 										 ConstantDomain colDomain = ((ConstantArrayDomain) domain).getIndexDomains()[1];
 										 int lb = colDomain.getRange()[0];
 										 int solver_lb = this.targetSolver.getArrayIndexingStartValue();
@@ -3852,6 +3889,7 @@ public class Flattener {
 										colIndexExpression.willBeFlattenedToVariable(true);
 									
 									colIndexExpression = flattenExpression(colIndexExpression);
+									*/
 									
 									// return element constraint
 									if(atom.isGonnaBeFlattenedToVariable()) {
@@ -3883,7 +3921,39 @@ public class Flattener {
 								
 								if(domain instanceof ConstantArrayDomain) {
 							
-									if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
+									int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(), 1);
+									//System.out.println("COmputed col OFFSET:"+offset+" and column:"+col);
+									col = col - offset;
+									
+								    //	 creating m[row,..]   (indexedArray)
+									BasicDomain[] arrayIndices = new BasicDomain[2];
+									arrayIndices[0] = ((ConstantArrayDomain) domain).getIndexDomains()[0]; 
+									arrayIndices[1] = new SingleIntRange(col);
+									IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
+											                                     arrayIndices,
+											                                     ((ConstantArrayDomain) domain).getBaseDomain());
+	
+									// prepare  index expression: index-offset
+									//System.out.println("Row index before offset stuff:"+rowIndexExpression);
+									rowIndexExpression = new Sum(new Expression[] { rowIndexExpression},
+	                      					 	                 new Expression[] {new ArithmeticAtomExpression(offset)});
+									rowIndexExpression = rowIndexExpression.evaluate();
+									//System.out.println("Row index after offset and eval:"+rowIndexExpression+" with type: "
+									//		+rowIndexExpression.getClass().getSimpleName());
+									if(!(rowIndexExpression instanceof AtomExpression) && 
+											!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT)) 
+										rowIndexExpression.willBeFlattenedToVariable(true);
+									
+									//System.out.println("Row index "+rowIndexExpression+" will be flattened to variable? "+rowIndexExpression.isGonnaBeFlattenedToVariable());
+									rowIndexExpression = flattenExpression(rowIndexExpression);
+									
+									
+									
+									
+									
+									
+									
+									/*if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
 										 ConstantDomain rowDomain = ((ConstantArrayDomain) domain).getIndexDomains()[1];
 										 int col_lb = rowDomain.getRange()[0];
 										 int solver_lb = this.targetSolver.getArrayIndexingStartValue();
@@ -3901,6 +3971,8 @@ public class Flattener {
 									IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 											                                     arrayIndices,
 											                                     ((ConstantArrayDomain) domain).getBaseDomain());
+											                                     */
+											                                     
 									// creating aux variable
 									ArithmeticAtomExpression auxVariable = null;
 									if(hasCommonSubExpression(atom)) {
@@ -3923,7 +3995,7 @@ public class Flattener {
 									
 									// prepare  index expression
 									// if the solver indexes its array-elements starting from a particular value
-									if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
+									/*if(this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
 										 ConstantDomain rowDomain = ((ConstantArrayDomain) domain).getIndexDomains()[0];
 										 int lb = rowDomain.getRange()[0];
 										 int solver_lb = this.targetSolver.getArrayIndexingStartValue();
@@ -3945,6 +4017,7 @@ public class Flattener {
 										//System.out.println("We have to flatten the row index expression to a variable");
 									}
 									rowIndexExpression = flattenExpression(rowIndexExpression);
+									*/
 									
 									//System.out.println("have an atom expression: "+atom+" with INT col:"+col+" and flattened row:"+rowIndexExpression);
 									
@@ -3982,23 +4055,17 @@ public class Flattener {
 					if(!arrayVariable.isIndexAdaptedToSolver() && 
 							this.targetSolver.supportsFeature(TargetSolver.ARRAY_INDEX_START_VALUE)) {
 						
-						//System.out.print("Adapted index at array variable "+atom);
+						//System.out.print("Adapting index at array variable "+atom);
 						
 						int[] intIndices = arrayVariable.getIntegerIndices();			
-						int solver_lb = this.targetSolver.getArrayIndexingStartValue();
-						Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
-						if(!(domain instanceof ArrayDomain) && !(domain instanceof ConstantArrayDomain))
-							throw new TailorException
-							("Indexed variable '"+arrayVariable.getArrayNameOnly()+"' is not an array:"+atom);
-						ConstantDomain[] indexDomains = ((ConstantArrayDomain) domain).getIndexDomains();
-						for(int i=0; i<intIndices.length; i++) {
-							int i_lb = indexDomains[i].getRange()[0];
-							if(solver_lb != i_lb) {
-								int offset = i_lb - solver_lb;
-								intIndices[i] -= offset;
-							}
-						}
 					
+						for(int i=0; i<intIndices.length; i++) {
+							
+							int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(),i);
+							intIndices[i] -= offset;
+							
+						}
+						
 						
 						ArrayVariable newArrayVariable = new ArrayVariable(arrayVariable.getArrayNameOnly(),
 																			intIndices,
@@ -4007,8 +4074,8 @@ public class Flattener {
 						//System.out.println("to variable "+newArrayVariable);
 						return new ArithmeticAtomExpression(newArrayVariable);
 						
+						
 					}
-					
 				}
 			
 			
@@ -4098,7 +4165,7 @@ public class Flattener {
 							SimpleArray array = new SimpleArray((arrayVariable).getArrayNameOnly(),
 								                            indexDomains,
 								                            (arrayVariable).getBaseDomain());
-						
+						    
 						
 							return new ElementConstraint(array,
 												     index);
@@ -4130,7 +4197,9 @@ public class Flattener {
 								IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 										                                     arrayIndices,
 										                                     ((ConstantArrayDomain) domain).getBaseDomain());
-									
+							
+								//indexedArray = (IndexedArray) this.adaptArrayIndicesToSolver(indexedArray);	
+								
 								// prepare  index expression: index-offset
 								colIndexExpression = new Sum(new Expression[] { colIndexExpression},
 	                                       					 new Expression[] {new ArithmeticAtomExpression(offset)});
@@ -4170,19 +4239,25 @@ public class Flattener {
 								IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 										                                     arrayIndices,
 										                                     ((ConstantArrayDomain) domain).getBaseDomain());
-								
+								//indexedArray = (IndexedArray) this.adaptArrayIndicesToSolver(indexedArray);	
 								
 								// prepare  index expression: index-offset
+								//System.out.println("Row index before offset stuff:"+rowIndexExpression);
 								rowIndexExpression = new Sum(new Expression[] { rowIndexExpression},
                       					 	                 new Expression[] {new ArithmeticAtomExpression(offset)});
 								rowIndexExpression = rowIndexExpression.evaluate();
-								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT)) 
+								//System.out.println("Row index after offset and eval:"+rowIndexExpression+" with type: "
+								//		+rowIndexExpression.getClass().getSimpleName());
+								if(!(rowIndexExpression instanceof AtomExpression) && 
+										!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT)) 
 									rowIndexExpression.willBeFlattenedToVariable(true);
 								
 								//System.out.println("Row index "+rowIndexExpression+" will be flattened to variable? "+rowIndexExpression.isGonnaBeFlattenedToVariable());
 								rowIndexExpression = flattenExpression(rowIndexExpression);
-								//System.out.println("Flattened roIndex >"+rowIndexExpression);
+								//System.out.println("Flattened roIndex"+rowIndexExpression);
 								
+								//System.out.println("Created partwise element constraint:"+new ElementConstraint(indexedArray,
+				                 //          rowIndexExpression));
 								// return element constraint
 								return new ElementConstraint(indexedArray,
 										                           rowIndexExpression);
@@ -4301,10 +4376,16 @@ public class Flattener {
 						if(rowIndexExpression.getType() == Expression.INT) {
 							
 							int row = ((ArithmeticAtomExpression) rowIndexExpression).getConstant();
+							
 							Domain domain = this.normalisedModel.getDomainOfVariable(arrayVariable.getArrayNameOnly());
 							domain = domain.evaluate();
 							
 							if(domain instanceof ConstantArrayDomain) {
+								
+								int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(), 0);
+								//System.out.println("COmputed row OFFSET:"+offset);
+								row = row - offset;
+								
 							    //	 creating m[row,..]   (indexedArray)
 								BasicDomain[] arrayIndices = new BasicDomain[2];
 								arrayIndices[0] = new SingleIntRange(row);
@@ -4312,11 +4393,18 @@ public class Flattener {
 								IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 										                                     arrayIndices,
 										                                     ((ConstantArrayDomain) domain).getBaseDomain());
-									
-								// prepare  index expression
+								//indexedArray = (IndexedArray) this.adaptArrayIndicesToSolver(indexedArray);		
+								
+								
+								// prepare  index expression: index-offset
+								colIndexExpression = new Sum(new Expression[] { colIndexExpression},
+	                                       					 new Expression[] {new ArithmeticAtomExpression(offset)});
+								colIndexExpression = colIndexExpression.evaluate();
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 									colIndexExpression.willBeFlattenedToVariable(true);
 								colIndexExpression = flattenExpression(colIndexExpression);
+								
+								
 								
 								// return element constraint
 								return new ElementConstraint(indexedArray,
@@ -4337,6 +4425,11 @@ public class Flattener {
 							//		" and it is of Type: "+domain.getType());
 							
 							if(domain instanceof ConstantArrayDomain) {
+								
+								int offset = this.normalisedModel.getVariableOffsetAt(arrayVariable.getArrayNameOnly(), 1);
+								//System.out.println("COmputed col OFFSET:"+offset+" and column:"+col);
+								col = col - offset;
+								
 							    //	 creating m[row,..]   (indexedArray)
 								BasicDomain[] arrayIndices = new BasicDomain[2];
 								arrayIndices[0] = ((ConstantArrayDomain) domain).getIndexDomains()[0]; 
@@ -4344,9 +4437,12 @@ public class Flattener {
 								IndexedArray indexedArray = new IndexedArray(arrayVariable.getArrayNameOnly(),
 										                                     arrayIndices,
 										                                     ((ConstantArrayDomain) domain).getBaseDomain());
-								
+								//indexedArray = (IndexedArray) this.adaptArrayIndicesToSolver(indexedArray);	
 								
 								// prepare  index expression
+								rowIndexExpression = new Sum(new Expression[] { rowIndexExpression},
+ 					 	                 new Expression[] {new ArithmeticAtomExpression(offset)});
+			                    rowIndexExpression = rowIndexExpression.evaluate();
 								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.ELEMENT_CONSTRAINT))
 									rowIndexExpression.willBeFlattenedToVariable(true);
 								rowIndexExpression = flattenExpression(rowIndexExpression);
@@ -5055,22 +5151,59 @@ public class Flattener {
 	}
 	 
 	
+
 	
-	private void computeArrayOffsets() {
+	
+	
+	private Array adaptArrayIndicesToSolver(Array array)
+		throws NormaliserException {
 		
-		
-		HashMap<String,Domain> decisionVars = this.normalisedModel.getDecisionVariables();
-		
-		// if we have to adapt to zero
-		if(this.targetSolver.getArrayIndexingStartValue() == 0) {
+		if(array instanceof IndexedArray) {
 			
+			array = (Array) array.evaluate();
+			IndexedArray indexedArray = (IndexedArray) array;
+			//System.out.println("About to adapt the array index of array: "+indexedArray);
 			
+			// extract the index domains
+			BasicDomain[] indexDom = indexedArray.getIndexRanges();
+			ConstantDomain[] indexDomain = new ConstantDomain[indexDom.length];
+			for(int i=0; i<indexDomain.length; i++) {
+				//System.out.println("Looking at index domain: "+indexDom[i]+" of type: "+(indexDom[i].getClass().getSimpleName()));
+				if(indexDom[i] instanceof ConstantDomain)
+					indexDomain[i] = (ConstantDomain) indexDom[i];
+				// else we can't do much with it anyway if it;s not constant
+				else return array;
+			}
 			
+			String arrayName = indexedArray.getArrayName();
+			for(int i=0; i<indexDomain.length; i++) {
+				int offset = this.normalisedModel.getVariableOffsetAt(arrayName, i);
+				
+				// if we have to adapt to the solver
+				if(offset != 0) {
+					if(indexDomain[i] instanceof SingleIntRange) {
+						int index = ((SingleIntRange) indexDomain[i]).getSingleRange();
+						indexDomain[i] = new SingleIntRange(index-offset);
+					}
+					else if(indexDomain[i] instanceof BoundedIntRange) {
+						int[] bounds = ((BoundedIntRange) indexDomain[i]).getRange();
+						bounds[0] = bounds[0] - offset;
+						bounds[1] = bounds[1] - offset;
+						indexDomain[i] = new BoundedIntRange(bounds[0], bounds[1]);
+					}
+				}
+				
+			}
+			
+			indexedArray.setIndexRanges(indexDomain);
+			//System.out.println("Adapted array index of array to: "+indexedArray);
+			return indexedArray;
 		}
-		// else just add 0 as offset
-		else {
-			
-		}
+		
+		
+		
+		
+		return array;
 	}
 	
 	/*private int max(int value1, int value2) {
