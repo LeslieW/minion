@@ -1568,6 +1568,16 @@ public class Flattener {
 						
 						else if(arrayVar.isIndexedBySomethingNotConstant()) {
 
+							//System.out.println("Array var is:"+arrayVar+" of rightExoression:"+rightExpression);
+							
+							if(this.hasCommonSubExpression(arrayVar)) {
+								//System.out.println("The variable has a common subexpression: "+arrayVar);
+								Expression cse = this.getCommonSubExpression(arrayVar);
+								leftExpression = flattenExpression(leftExpression);
+								return new CommutativeBinaryRelationalExpression(leftExpression, expression.getOperator(),cse);
+							}
+							else {
+							
 								arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
 								//System.out.println("Array var is:"+arrayVar+" of rightExoression:"+rightExpression);
 								ElementConstraint elementConstraint = //flattenToPartwiseElementConstraint(new ArithmeticAtomExpression(arrayVar));
@@ -1590,6 +1600,8 @@ public class Flattener {
 									return leftExpression;
 								}
 								else return elementConstraint;
+								
+							} // end else: there are no CSE
 							
 						}
 						} // else : we have a SimpleArrayVariable in an arithmetic atom expression
@@ -1649,6 +1661,15 @@ public class Flattener {
 							}
 							else if(arrayVar.isIndexedBySomethingNotConstant()) {
 						 
+								
+								if(this.hasCommonSubExpression(arrayVar)) {
+									//System.out.println("The variable has a common subexpression: "+arrayVar);
+									Expression cse = this.getCommonSubExpression(arrayVar);
+									leftExpression = flattenExpression(leftExpression);
+									return new CommutativeBinaryRelationalExpression(leftExpression, expression.getOperator(),cse);
+								}
+								else {
+								
 									arrayVar.setWillBeFlattenedToPartwiseElementConstraint(true);
 									ElementConstraint elementConstraint = flattenToPartwiseElementConstraint(rightExpression.copy());
 							
@@ -1664,7 +1685,7 @@ public class Flattener {
 									}
 									else return elementConstraint;
 							
-								
+								}
 							}
 						}
 					}
