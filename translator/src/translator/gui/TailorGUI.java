@@ -27,6 +27,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import java.awt.event.KeyEvent;
 import javax.swing.text.Element;
 //import javax.swing.filechooser.FileFilter;
 //import javax.swing.filechooser.*;
@@ -399,7 +400,7 @@ public class TailorGUI extends javax.swing.JFrame {
         problemButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
         Dimension buttonSize = (new JButton()).getPreferredSize(); //new Dimension(20,30);
         
-        saveProblemButton.setText("save");
+        saveProblemButton.setText("Save File");
         saveProblemButton.setActionCommand(SAVE_PROBLEM);
         saveProblemButton.setBackground(this.buttonColor);
         //saveProblemButton.setPreferredSize(buttonSize);
@@ -408,10 +409,11 @@ public class TailorGUI extends javax.swing.JFrame {
 		           save(e.getActionCommand());   
 			  }
 			});
+		saveProblemButton.setMnemonic(KeyEvent.VK_S);
         problemButtonPanel.add(saveProblemButton);
         
 
-        loadProblemButton.setText("load");
+        loadProblemButton.setText("Open File");
         loadProblemButton.setActionCommand(LOAD_PROBLEM);
         loadProblemButton.setBackground(this.buttonColor);
         //loadProblemButton.setPreferredSize(buttonSize);
@@ -420,9 +422,10 @@ public class TailorGUI extends javax.swing.JFrame {
 		           load(e.getActionCommand());   
 			  }
 			});	
+        loadProblemButton.setMnemonic(KeyEvent.VK_O);
         problemButtonPanel.add(loadProblemButton);
 
-        clearProblemButton.setText("clear");
+        clearProblemButton.setText("Clear");
         clearProblemButton.setActionCommand(this.CLEAR_PROBLEM);
         clearProblemButton.setBackground(this.buttonColor);
         //clearProblemButton.setPreferredSize(buttonSize);
@@ -497,7 +500,7 @@ public class TailorGUI extends javax.swing.JFrame {
         //parameterButtonPanel.setLayout(new java.awt.GridLayout(1, 0));
         parameterButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
         
-        saveParameterButton.setText("save");
+        saveParameterButton.setText("Save File");
         saveParameterButton.setActionCommand(SAVE_PARAMETER);
         saveParameterButton.setBackground(this.buttonColor);
         //saveParameterButton.setPreferredSize(buttonSize);
@@ -506,9 +509,10 @@ public class TailorGUI extends javax.swing.JFrame {
 		           save(e.getActionCommand());   
 			  }
 			});	
+		this.saveParameterButton.setMnemonic(KeyEvent.VK_A);
         parameterButtonPanel.add(saveParameterButton);
 
-        loadParameterButton.setText("load");
+        loadParameterButton.setText("Open File");
         loadParameterButton.setActionCommand(LOAD_PARAMETER);
         loadParameterButton.setBackground(this.buttonColor);
         //loadParameterButton.setPreferredSize(buttonSize);
@@ -517,9 +521,10 @@ public class TailorGUI extends javax.swing.JFrame {
 		           load(e.getActionCommand());   
 			  }
 			});	
+		this.loadParameterButton.setMnemonic(KeyEvent.VK_P);
         parameterButtonPanel.add(loadParameterButton);
 
-        clearParameterButton.setText("clear");
+        clearParameterButton.setText("Clear");
         clearParameterButton.setActionCommand(this.CLEAR_PARAMETER);
         clearParameterButton.setBackground(this.buttonColor);
         //clearParameterButton.setPreferredSize(buttonSize);
@@ -586,6 +591,7 @@ public class TailorGUI extends javax.swing.JFrame {
 		           translate(e.getActionCommand());   
 			  }
 			});
+		minionButton.setMnemonic(KeyEvent.VK_M);
 		solverButtonPanel.add(minionButton);
 		
 		this.gecodeButton = new JButton("> to Gecode >");
@@ -597,6 +603,7 @@ public class TailorGUI extends javax.swing.JFrame {
 		           translate(e.getActionCommand());   
 			  }
 			});
+		gecodeButton.setMnemonic(KeyEvent.VK_G);
 		//this.gecodeButton.setEnabled(false);
 		solverButtonPanel.add(gecodeButton);
 		
@@ -639,7 +646,7 @@ public class TailorGUI extends javax.swing.JFrame {
         //outputButtonPanel.setLayout(new java.awt.GridLayout(1, 0));
         outputButtonPanel.setLayout(new java.awt.GridLayout(1, 0, 30, 0));
 
-        saveOutputButton.setText("save");
+        saveOutputButton.setText("Save Tab");
         saveOutputButton.setActionCommand(this.SAVE_OUTPUT);
         saveOutputButton.setBackground(this.buttonColor);
         //saveOutputButton.setPreferredSize(buttonSize);
@@ -648,14 +655,15 @@ public class TailorGUI extends javax.swing.JFrame {
 		           save(e.getActionCommand());   
 			  }
 			});
+        saveOutputButton.setMnemonic(KeyEvent.VK_T);
         outputButtonPanel.add(saveOutputButton);
 
-        clearOutputButton.setText("clear");
+        clearOutputButton.setText("Clear");
         clearOutputButton.setBackground(this.buttonColor);
         //clearOutputButton.setPreferredSize(buttonSize);
         outputButtonPanel.add(clearOutputButton);
 
-        runMinionButton.setText("run Minion");
+        runMinionButton.setText("Run Minion");
         runMinionButton.setBackground(this.buttonColor);
         //runMinionButton.setPreferredSize(buttonSize);
         runMinionButton.addActionListener(new java.awt.event.ActionListener() {
@@ -664,6 +672,7 @@ public class TailorGUI extends javax.swing.JFrame {
 			  }
 			});
         runMinionButton.setEnabled(false);
+        runMinionButton.setMnemonic(KeyEvent.VK_R);
         outputButtonPanel.add(runMinionButton);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
