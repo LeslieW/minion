@@ -1,0 +1,43 @@
+Peg Solitaire test instances
+============================
+
+
+Problem model
+-------------
+
+Files:
+pegSolitaireState.eprime 	state-based Essence' model
+pegSolitaireAction.eprime 	action-based Essence' model
+
+Description:
+Each Essence' model takes 2 parameters as input:
+the amount of steps (always 31) and the intially empty
+hole. We start from field 17,10 and 5 - the field enumeration
+is given below.
+
+$ 00000  1  2  3 00000
+$ 00000  4  5  6 00000
+$  7  8  9 10 11 12 13 
+$ 14 15 16 17 18 19 20
+$ 21 22 23 24 25 26 27  
+$ 00000 28 29 30 00000 
+$ 00000 31 32 33 00000
+
+We have a parameter file for every testrun, and the generated Minion
+file is written into parameterFile.param.minion.
+For every problem instance, we have 2 parameter files: one for a test-run with
+and one for a test-run without common subexpression detection.
+
+examples:
+ps31-5State.param		parameterfile for test-run on
+				state-based model, starting from
+				field 5, with CSE detection
+ps31-17ActionNoCSE.param	parameterfile for test-run on 
+				action-based model, starting from
+				field 17 without CSE detection
+	 
+pegSolTailor.out:
+The experiment script writes translation-statistics into the file
+pegSolTailor.out where you can find information about amount of 
+constraints, auxiliary variables, common subexpressions and
+times for each step in the translation process (e.g. flattening).

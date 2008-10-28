@@ -1,0 +1,64 @@
+$  # - Wall
+$  . - Target Position
+$  @ - Porter
+$  $ - Crate
+$    - Empty Cell
+$
+$
+$
+$ Third instance from 
+$ http://users.bentonrea.com/~sasquatch/sokoban/m1
+$  
+$  012345678
+$ 0  ####
+$ 1###  ####
+$ 2#     $ #
+$ 3# #  #$ #
+$ 4# . .#@ #
+$ 5#########
+$
+$
+$ width: 9
+$ height: 6
+
+$ Minion cannot solve this!
+
+language ESSENCE' 1.b.a
+
+letting w be 9
+letting n be 54
+
+letting noCrates be 2
+letting noGoals be 2
+
+letting pInit be 42
+letting stps be 49 $ don't know how many?
+
+letting walls be [ 0,  1,  2,  3,  4,  5,  6,  7,  8,    $  9
+
+                   9, 10, 11,         14, 15, 16, 17,    $  7
+    
+                  18,                             26,    $  2
+              
+                  27,     29,         32,         35,    $  4
+  
+                  36,                 41,         44,    $  3
+
+                  45, 46, 47, 48, 49, 50, 51, 52, 53 ]   $  9
+
+                                               $       --------
+                                               $ noWalls:  34
+letting noWalls be 34
+
+letting crates be [24, 33]
+letting goals be [38, 40] 
+
+
+
+
+
+
+
+
+
+                  
