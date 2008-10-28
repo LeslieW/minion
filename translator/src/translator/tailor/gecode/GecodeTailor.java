@@ -214,6 +214,11 @@ public class GecodeTailor {
 		else if(e instanceof Reification) {
 			return tailorReification((Reification) e);
 		}
+		
+		else if(e instanceof ElementConstraint) {
+			return tailorElement((ElementConstraint) e);
+		}
+		
 		else throw new GecodeException("Cannot tailor constraint to Gecode (yet):"+e);
 	}
 		
@@ -617,21 +622,23 @@ public class GecodeTailor {
 		// array name
 		String arrayName = indexedArray.getArrayName();
 		
-		// baseDomain
-		Domain aDomain = indexedArray.getBaseDomain();
+		
+		Domain aDomain = this.essencePmodel.getDomainOfVariable(arrayName);
 		aDomain = aDomain.evaluate();
 		if(!(aDomain instanceof ConstantArrayDomain)) 
-			throw new GecodeException("Cannot tailor array "+indexedArray+" because its baseDomain "+
-					aDomain+" is not constant but of type: "+aDomain.getClass().getSimpleName());
-		ConstantArrayDomain arrayDomain = (ConstantArrayDomain) aDomain;
-		ConstantDomain baseDomain = arrayDomain.getBaseDomain();
-		ConstantDomain[] indexDomains = arrayDomain.getIndexDomains();
+			throw new GecodeException("Cannot tailor array "+indexedArray+" because its domain "+
+					aDomain+" is not a constant array domain but of type: "+aDomain.getClass().getSimpleName());
+	
+		ConstantDomain[] indexDomains = ((ConstantArrayDomain) aDomain).getIndexDomains();
 		for(int i=0; i<indexDomains.length; i++)
 			indexDomains[i] = (ConstantDomain) indexDomains[i].evaluate();
 		int[] indexUb = new int[indexDomains.length];
 		for(int i=0; i<indexUb.length; i++) {
 			indexUb[i] = indexDomains[i].getRange()[1] - indexDomains[i].getRange()[0];
 		}
+		
+		// baseDomain
+		ConstantDomain baseDomain = (ConstantDomain) indexedArray.getBaseDomain();
 		
 		// index ranges
 		BasicDomain[] iRanges = indexedArray.getIndexRanges();
@@ -653,12 +660,12 @@ public class GecodeTailor {
 			// single value
 			if(indexRanges[i] instanceof SingleIntRange) {
 				// adapt the value to the offset from Gecode (arrays are indexed starting from 0)
-				ranges[i][0] = ((SingleIntRange) indexRanges[i]).getSingleRange() - indexDomains[i].getRange()[0];
+				ranges[i][0] = ((SingleIntRange) indexRanges[i]).getSingleRange();// - indexDomains[i].getRange()[0];
 				ranges[i][1] = ranges[i][0];
 			}
 			else if(indexRanges[i] instanceof BoundedIntRange) {
-				ranges[i][0] = ((BoundedIntRange) indexRanges[i]).getRange()[0] - indexDomains[i].getRange()[0];
-				ranges[i][1] = ((BoundedIntRange) indexRanges[i]).getRange()[1] - indexDomains[i].getRange()[0];
+				ranges[i][0] = ((BoundedIntRange) indexRanges[i]).getRange()[0];// - indexDomains[i].getRange()[0];
+				ranges[i][1] = ((BoundedIntRange) indexRanges[i]).getRange()[1];// - indexDomains[i].getRange()[0];
 			}
 			else throw new GecodeException("Cannot tailor indexed array "+indexedArray+
 					".\nThe index "+indexRanges[i]+" has an unexpected type: "+indexRanges[i].getClass().getSimpleName());
@@ -832,6 +839,76 @@ public class GecodeTailor {
 		
 		else throw new GecodeException("Expected integer array instead of '"+
 				array+"' with basic domain:"+((Array) e).getBaseDomain().getClass().getSimpleName());
+	}
+	
+	
+	private GecodeElement tailorElement(ElementConstraint elementOld) 
+		throws GecodeException, Exception {
+		
+		// first get the array
+		Expression arrayExpr = elementOld.getArray();
+		if(!(arrayExpr instanceof SingleArray ))
+			throw new GecodeException("Cannot tailor element constraint "+elementOld+
+					" because the array "+arrayExpr+" is not of type SingleArray.");
+		GecodeArray array = tailorArray((SingleArray) arrayExpr);
+		
+		
+		// then get the index expression
+		Expression indexExpression = elementOld.getIndexExpression();
+		if(!(indexExpression instanceof AtomExpression))
+			throw new GecodeException("Flattening error. Expected atom expression instead of "
+					+indexExpression+" as index in element constraint: "+elementOld);
+		GecodeAtom index = (indexExpression instanceof ArithmeticAtomExpression) ? 
+		                          tailorArithmeticAtom((ArithmeticAtomExpression) indexExpression) :
+		                        	  tailorRelationalAtom((RelationalAtomExpression) indexExpression) ;
+		
+		// then deal with the value
+        Expression valueExpr = elementOld.getValueExpression();
+        if(!(valueExpr instanceof AtomExpression))
+			throw new GecodeException("Flattening error. Expected atom expression instead of "
+					+valueExpr+" as value in element constraint: "+elementOld);
+		GecodeAtom value = (valueExpr instanceof ArithmeticAtomExpression) ? 
+		                          tailorArithmeticAtom((ArithmeticAtomExpression) valueExpr) :
+		                        	  tailorRelationalAtom((RelationalAtomExpression) valueExpr) ;
+		                          
+        // integer array
+        if(array instanceof GecodeIntVarArgs) {
+        	GecodeIntVarArgs intArray = (GecodeIntVarArgs) array;
+        	
+        	if(index instanceof GecodeIntVar) {		
+        		if(value instanceof GecodeIntVar) 
+        			return new GecodeElement(intArray, (GecodeIntVar) index, (GecodeIntVar) value);
+        		else if(value instanceof GecodeConstant) 
+        			return new GecodeElement(intArray, (GecodeIntVar) index, (GecodeConstant) value);
+        		else throw new GecodeException("Cannot tailor element constraint "+elementOld+" to Gecode."+
+                		" The value "+value+" has an infeasible type: "+value.getClass().getSimpleName()+". Expecting an IntVar or a constant.");
+        	}
+        	else throw new GecodeException("Cannot tailor element constraint "+elementOld+" to Gecode."+
+        		" The index "+index+" has an infeasible type: "+index.getClass().getSimpleName()+". Expecting an IntVar.");	
+        	
+        }
+		    
+        // boolean array
+        else if (array instanceof GecodeBoolVarArgs) {
+        	GecodeBoolVarArgs boolArray = (GecodeBoolVarArgs) array;
+            	
+        	if(index instanceof GecodeBoolVar) {		
+        		if(value instanceof GecodeBoolVar) 
+        			return new GecodeElement(boolArray, (GecodeIntVar) index, (GecodeBoolVar) value);
+        		else if(value instanceof GecodeConstant) 
+        			return new GecodeElement(boolArray, (GecodeIntVar) index, (GecodeConstant) value);
+        		else throw new GecodeException("Cannot tailor element constraint "+elementOld+" to Gecode."+
+                		" The value "+value+" has an infeasible type: "+value.getClass().getSimpleName()+". Expecting a BoolVar or a constant.");
+        	}
+        	else throw new GecodeException("Cannot tailor element constraint "+elementOld+" to Gecode."+
+        		" The index "+index+" has an infeasible type: "+index.getClass().getSimpleName()+". Expecting an IntVar.");	
+        }
+        
+        else throw new GecodeException("Cannot tailor element constraint "+elementOld+" to Gecode."+
+        		" The array "+array+" has an infeasible type: "+array.getClass().getSimpleName());
+		                          
+		//throw new GecodeException("Cannot tailor element constraint "+elementOld+" to Gecode.");
+		
 	}
 	
 	/**
@@ -1239,6 +1316,7 @@ public class GecodeTailor {
 		throw new GecodeException("Cannot tailor array '"+array+"' of type "+array.getClass().getSimpleName()+
 				" yet, sorry.");
 	}
+	
 	
 	/**
 	 * Tailors arithmetic atom expressions to Gecode atom

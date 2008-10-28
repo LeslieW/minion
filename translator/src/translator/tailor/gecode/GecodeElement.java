@@ -153,7 +153,40 @@ public class GecodeElement extends RelationalConstraint {
 
 	public String toCCString() {
 		
-		StringBuffer s = new StringBuffer("element(this, ");
+		StringBuffer s = new StringBuffer("");
+		
+		// Declare and define args variables
+		if(this.array instanceof ArgsArrayVariable) {
+		
+			if(array instanceof GecodeIntVarArgs)
+				s.append(((GecodeIntVarArgs) array).getArrayDefinition());
+			
+			else s.append(((GecodeBoolVarArgs) array).getArrayDefinition());
+			
+		/*	int length = (array instanceof GecodeIntVarArgs) ? ((GecodeIntVarArgs) this.array).getLength() : 
+				                                               ((GecodeBoolVarArgs) this.array).getLength();
+		   // declare the args variable
+	     	if(this.array instanceof IntegerVariable || 
+				this.array instanceof GecodeConstant) {
+			     s.append("IntVarArgs "+this.array+"("+length+");\n");
+		    }
+		   // boolean sum
+		   else s.append("BoolVarArgs "+this.array+"("+length+");\n");
+		
+	       // assign values to it	
+	     	for(int i=0; i<length; i++) {
+	     		if(array instanceof GecodeIntVarArgs) {
+				  s.append("\t  "+((GecodeIntVarArgs) array).getVariableName()+"["+i+"] = "+((GecodeIntVarArgs) array)+";\n");
+	     		}
+	     		else {
+	     			
+	     		}
+			}
+			*/
+	     	
+		}	
+		
+		s.append("\telement(this, ");
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF && 
 				this.propagationKind == GecodeConstraint.ICL_DEF) {
@@ -169,6 +202,10 @@ public class GecodeElement extends RelationalConstraint {
 	
 	public String toString() {
 		
+		
+		return toCCString(); 
+		
+		/*
 		StringBuffer s = new StringBuffer("element(this, ");
 		
 		if(this.consistencyLevel == GecodeConstraint.ICL_DEF && 
@@ -181,6 +218,7 @@ public class GecodeElement extends RelationalConstraint {
 		}
 		
 		return s.toString();
+		*/
 	}
 
 }

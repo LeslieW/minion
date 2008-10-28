@@ -204,4 +204,8 @@ public class ElementConstraint implements GlobalConstraint {
 	public Expression getIndexExpression() {
 		return this.index;
 	}
+	
+	public Expression getArray() {
+		return this.variableArray;
+	}
 }
