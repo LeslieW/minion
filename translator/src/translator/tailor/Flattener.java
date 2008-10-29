@@ -4301,12 +4301,17 @@ public class Flattener {
 																			((ConstantArrayDomain) domain).getIndexDomains(),
 																			((ConstantArrayDomain) domain).getBaseDomain());
 									
-								    int noRows = ((ConstantArrayDomain) domain).getIndexDomains()[0].getRange()[1] - 
-								    	         ((ConstantArrayDomain) domain).getIndexDomains()[0].getRange()[0] + 1;
+								    //int noRows = ((ConstantArrayDomain) domain).getIndexDomains()[0].getRange()[1] - 
+								    //	         ((ConstantArrayDomain) domain).getIndexDomains()[0].getRange()[0] + 1;
+									
+									
+									int noCols = ((ConstantArrayDomain) domain).getIndexDomains()[1].getRange()[1] - 
+								    	         ((ConstantArrayDomain) domain).getIndexDomains()[1].getRange()[0] + 1;
 								    
-								    // index = noRows*rowExpr + colExpr
+								    // index = noRows*rowExpr + colExpr  ==> not true!!
+									// index = noCols*rowExpr + colExpr
 								    Sum indexExpression = new Sum(new Expression[] { new Multiplication(
-								    		                                             new Expression[] {new ArithmeticAtomExpression(noRows),
+								    		                                             new Expression[] {new ArithmeticAtomExpression(noCols),
 								    		                                            		           rowIndexExpression}
 								    		                                             ),
 								    		                                        colIndexExpression},
