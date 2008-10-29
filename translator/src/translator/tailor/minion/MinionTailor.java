@@ -873,10 +873,16 @@ public class MinionTailor {
 			arguments[i] = (MinionAtom) toMinion(conjointArg);
 		}
 		
-		if(conjunction.isGonnaBeFlattenedToVariable()) {
-			return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(arguments.length)));
-		}
-		else return new SumGeqConstraint(arguments, new MinionConstant(arguments.length), !conjunction.isNested()); // make it a watched sum!
+		//System.out.println("Flattening conjunction "+conjunction+" that will be flattened? "+conjunction.isGonnaBeFlattenedToVariable());
+		
+		//if(conjunction.isGonnaBeFlattenedToVariable()) {
+			//return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(arguments.length)));
+		//}
+		//else 
+		
+		// we can be sure that this conjunction is gonna be reified because otherwise
+		// it would have been split into separate constraints by the flattener
+		return new SumGeqConstraint(arguments, new MinionConstant(arguments.length)); // make it a watched sum!
 		
 		
 	}
@@ -912,7 +918,8 @@ public class MinionTailor {
 		if(disjunction.isGonnaBeFlattenedToVariable()) {
 			return reifyMinionConstraint(new SumGeqConstraint(arguments, new MinionConstant(1)));
 		}
-		else return new SumGeqConstraint(arguments, new MinionConstant(1), !disjunction.isNested()); // make it a watched sum!
+		else 
+		return new SumGeqConstraint(arguments, new MinionConstant(1), !disjunction.isNested()); // make it a watched sum!
 	}
 	
 	
@@ -930,6 +937,7 @@ public class MinionTailor {
 		//System.out.println("Generating reified constraint:"+reification);
 		
 		Expression constraint = reification.getReifiedConstraint();
+		//constraint.willBeFlattenedToVariable(true);
 		MinionConstraint reifiedConstraint;
 		
 		// still need to flatten if we have a sum as an argument
@@ -956,7 +964,7 @@ public class MinionTailor {
 		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
 		addToSubExpressions(reifiedConstraint, reifiedVariable);
 		
-		//System.out.println("Mapped it now to :"+reifiedConstraint+" with var:"+reifiedVariable);
+		//System.out.println("Mapped it now to constraint :"+reifiedConstraint+" reified with var:"+reifiedVariable);
 		
 		if(reification.isGonnaBeFlattenedToVariable()) {
 			this.minionModel.addConstraint(reifiedConstraint);
