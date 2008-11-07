@@ -409,20 +409,25 @@ letting_block ::= LETTING IDENTIFIER:id BE expression:e
 		| LETTING IDENTIFIER:id BE constant_matrix:constant_matrix 
 		{: 
 		  RESULT = new ExpressionDefinition( (String) id,
-		                                      new ConstantMatrix( (String) id,
+		                                     (ConstantMatrix) constant_matrix
+		                                      /*new ConstantMatrix( (String) id,
 		                                                          (Integer[][]) constant_matrix
 		                                                         )
+		                                                         */
 		                                   );
 		                                                          
 		:}
 		
 		| LETTING IDENTIFIER:id COLON domain:d BE constant_matrix:constant_matrix 
 		{: 
+		  ConstantMatrix cm = (ConstantMatrix) constant_matrix;
+		  cm.setArrayDomain((ArrayDomain) d);
 		  RESULT = new ExpressionDefinition( (String) id,
-		                                      new ConstantMatrix( (String) id,
+		  		                              cm
+		                                      /*new ConstantMatrix( (String) id,
 		                                                          (Integer[][]) constant_matrix,
 		                                                           (Domain) d
-		                                                         )
+		                                                         )*/
 		                                   );
 		                                                          
 		:}
@@ -1091,18 +1096,20 @@ quantified_expression ::= EXISTS identifier_list:id_list COLON domain:d DOT expr
 
 			       | TABLE LPAREN variable_array:va COMMA constant_matrix:ca RPAREN 
 			        {: 
-			            System.out.println("Parsing the right thing");
-			            Expression vva = (Expression) va;
-			            System.out.println("Got the variable array:"+vva);
-			            Expression cca = (Expression) ca;
-			            System.out.println("Got the value array:"+cca);
+			            //System.out.println("Parsing the right thing");
+			            //Expression vva = (Expression) va;
+			            //System.out.println("Got the variable array:"+vva);
+			            //Expression cca = (Expression) ca;
+			            //System.out.println("Got the value array:"+cca);
 			            RESULT = new TableConstraintNew( (Expression) va, 
 			                                             (Expression) ca); 
 			                                      
 			        :}
 			        
 			        | TABLE LPAREN variable_array:va COMMA atom_expression:ca RPAREN 
-			        {: RESULT = new TableConstraintNew( (Expression) va, 
+			        {: 
+			           System.out.println("Parsing table");
+			           RESULT = new TableConstraintNew( (Expression) va, 
 			                                             (Expression) ca); 
 			                                      
 			        :}
