@@ -293,6 +293,9 @@ public class MinionTailor {
 		if(constraint instanceof TableConstraint)
 			return toMinion((TableConstraint) constraint);
 		
+		if(constraint instanceof TableConstraintNew) 
+			return toMinionTable(constraint);
+		
 		if(constraint instanceof AbsoluteValue) 
 			return toMinion((AbsoluteValue) constraint);
 		
@@ -306,6 +309,57 @@ public class MinionTailor {
 			return toMinion(( MinimumConstraint) constraint);
 		
 		throw new MinionException("Cannot tailor expression of type "+constraint.getClass()+" to Minion yet:"+constraint);
+	}
+	
+	
+	/**
+	 * Tailors new table constraints
+	 * 
+	 * @param constraint
+	 * @return
+	 * @throws MinionException
+	 */
+	private MinionConstraint toMinionTable(Expression constraint) 
+		throws MinionException {
+		
+		
+		if(constraint instanceof TableConstraintNew) {
+			
+			TableConstraintNew table = (TableConstraintNew) constraint;
+			
+			 AtomExpression[] oldVars = table.getVariables();
+			MinionAtom[] variables = new MinionAtom[oldVars.length];
+			for(int i=0; i<oldVars.length; i++) {
+				oldVars[i].willBeFlattenedToVariable(true);
+				variables[i] = toMinion((ArithmeticAtomExpression) oldVars[i]);
+				this.variableIsDiscrete.put(variables[i].getVariableName(), new Boolean(true));
+			}
+			
+			
+			if(table.isGonnaBeFlattenedToVariable()){
+				if(this.solverSettings.supportsReificationOf(Expression.TABLE_CONSTRAINT)) {
+					Table tableConstraint = new Table(variables, table.getTupleList());
+					tableConstraint.setIsNegative(table.isConflictingTableConstraint());
+					return reifyMinionConstraint(new Table(variables, table.getTupleList()));
+				}
+				else throw new MinionException("Cannot tailor TABLE constraint to Minion:"+table+
+						"\ntable is not reifiable.");
+			}
+			else {
+				Table tableConstraint = new Table(variables, table.getTupleList());
+				tableConstraint.setIsNegative(table.isConflictingTableConstraint());
+				//System.out.println("Tailoring the table. is it conflicting? old:"+table.isConflictingTableConstraint()+
+				//		" and new :"+tableConstraint.isNegative);
+				return tableConstraint;
+			}
+			
+			
+			
+			
+		}
+		
+		
+		throw new MinionException("Cannot tailor constraint:"+constraint);
 	}
 	
 	

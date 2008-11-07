@@ -334,11 +334,52 @@ public class Flattener {
 		else if(expression instanceof TableConstraint)
 			return flattenTableConstraint((TableConstraint) expression);
 		
+		else if(expression instanceof TableConstraintNew) 
+			return flattenTableConstraintNew(expression);
+		
 		else return expression;
 		//else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
 	}
 	
 	
+	private Expression flattenTableConstraintNew(Expression expression) 
+		throws TailorException,Exception {
+		
+		TableConstraintNew table = (TableConstraintNew) expression;
+		
+		if(this.targetSolver.supportsConstraint(Expression.TABLE_CONSTRAINT)) {
+			
+			//table.setVariables((VariableArray) flattenExpression(table.getVariableArray()));
+			
+			AtomExpression[] flattenedVars = table.getVariables();
+			
+			for(int i=0; i<flattenedVars.length; i++) {
+				flattenedVars[i].willBeFlattenedToVariable(true);
+				flattenedVars[i] = ((ArithmeticAtomExpression) flattenExpression(flattenedVars[i]));
+			}
+			
+			if(table.isGonnaBeFlattenedToVariable()) {
+				if( this.targetSolver.supportsReificationOf(Expression.TABLE_CONSTRAINT)) {
+				
+					table.setVariables(new VariableArray(flattenedVars));
+					return reifyConstraint(table);
+					
+				}
+				else throw new TailorException("Cannot tailor TABLECONSTRAINT '"+table+"' to "+targetSolver.getSolverName()+":\n"+
+						"The solver does not support reification of tables.");
+			}
+			
+			else { 
+				table.setVariables(new VariableArray(flattenedVars));
+				return table;
+			}
+			
+		}
+		else 		
+		throw new TailorException
+		("Cannot tailor TABLE constraint: it is not supported by "
+					+this.targetSolver.getSolverName());
+	}
 	
 	/**
 	 * Flattens a table constraint: only variables are flattened.

@@ -16,6 +16,10 @@ public class TableConstraint implements RelationalExpression {
 	//private Expression variableExpression;
 	//private Expression constantExpression;
 	
+	// variable array and const matrix
+	
+	
+	
 	
 	private Variable[] variableList;
 	private ConstantTuple[] tupleList;
@@ -34,11 +38,7 @@ public class TableConstraint implements RelationalExpression {
 	}
 	
 	
-	public TableConstraint(VariableArray variableArray,
-						   ConstantMatrix constMatrix) {
-		
-		
-	}
+	
 	
 	public TableConstraint(ArrayList<Variable> idents,
 			               ArrayList<ConstantTuple> tuples) {

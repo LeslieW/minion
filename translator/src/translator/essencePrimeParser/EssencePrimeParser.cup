@@ -677,10 +677,10 @@ expression ::= 	  LPAREN expression:e RPAREN
 			
 	    	| lex_expression:le
 		    {: RESULT = le;  :}
-		    /*
+		    
 		    |  table_constraint:tab_constraint
 	        {: RESULT = tab_constraint;:}	
-	       */
+	       
 ;
 
 
@@ -990,6 +990,7 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 variable_array ::=  LBRACK atom_list:list  RBRACK
                     {:  
                     	RESULT = new VariableArray( (ArrayList<AtomExpression>) list);  
+                    	
                     
                     :} 
                    /* | LBRACK expression_list:list RBRACK
@@ -1062,7 +1063,7 @@ quantified_expression ::= EXISTS identifier_list:id_list COLON domain:d DOT expr
 
 
 
-/* table_constraint ::= TABLE LPAREN variable_array:va COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
+ table_constraint ::= /*TABLE LPAREN variable_array:va COMMA LBRACK constant_tuple_list:t_list RBRACK  RPAREN
                    {:  
                   
                     AtomExpression[] variables = ((VariableArray) va).getVariables();
@@ -1077,28 +1078,37 @@ quantified_expression ::= EXISTS identifier_list:id_list COLON domain:d DOT expr
                        } 
                        else report_error("Unfeasible argument for table constraint: "+va+". Expected a variable.");
                     }  	
-  	
-  	
-  	               
-  	               
-  	               
-  	
+  	       
                    RESULT = new TableConstraint(vars,
                                                 t_array);
                    :}
+                   */
                    
                    
-                   
-                   TABLE LPAREN atom_expression:e COMMA atom_expression RPAREN
-					{: RESULT = new AllDifferent( (Expression) e); :}
+                   TABLE LPAREN atom_expression:e1 COMMA atom_expression:e2 RPAREN
+					{: RESULT = new TableConstraintNew( (Expression) e1,
+					                                     (Expression) e2); :}
 
 			       | TABLE LPAREN variable_array:va COMMA constant_matrix:ca RPAREN 
-			        {: RESULT = new AllDifferent( (VariableArray) va, 
-			                                      ); :}
-
+			        {: 
+			            System.out.println("Parsing the right thing");
+			            Expression vva = (Expression) va;
+			            System.out.println("Got the variable array:"+vva);
+			            Expression cca = (Expression) ca;
+			            System.out.println("Got the value array:"+cca);
+			            RESULT = new TableConstraintNew( (Expression) va, 
+			                                             (Expression) ca); 
+			                                      
+			        :}
+			        
+			        | TABLE LPAREN variable_array:va COMMA atom_expression:ca RPAREN 
+			        {: RESULT = new TableConstraintNew( (Expression) va, 
+			                                             (Expression) ca); 
+			                                      
+			        :}
 ;
 
-*/
+
 
 
 atom_list ::=    atom_expression:atom 
@@ -1194,7 +1204,7 @@ constant_matrix ::= LBRACK constant_vector_list:list RBRACK
                     {:      
                       ArrayList<ArrayList<Integer>> vectorList = (ArrayList<ArrayList<Integer>>) list;     
                      ArrayList<Integer> vector0 =  vectorList.get(0);
-                  
+                  	//System.out.println("");
                      
                      Integer[][] matrix = new Integer[vectorList.size()][vector0.size()];
                    
@@ -1210,9 +1220,9 @@ constant_matrix ::= LBRACK constant_vector_list:list RBRACK
                      
                      }
                      
-                      RESULT = matrix;
+                      RESULT = new ConstantMatrix(new String("hugsi"), matrix);
                     
-                      :}
+                   :}
 ;
 
 	
