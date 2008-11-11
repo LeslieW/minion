@@ -408,8 +408,10 @@ letting_block ::= LETTING IDENTIFIER:id BE expression:e
 		
 		| LETTING IDENTIFIER:id BE constant_matrix:constant_matrix 
 		{: 
+		  ConstantMatrix cm = (ConstantMatrix) constant_matrix;
+		  cm.setArrayName(id);
 		  RESULT = new ExpressionDefinition( (String) id,
-		                                     (ConstantMatrix) constant_matrix
+		                                     cm
 		                                      /*new ConstantMatrix( (String) id,
 		                                                          (Integer[][]) constant_matrix
 		                                                         )
@@ -422,6 +424,7 @@ letting_block ::= LETTING IDENTIFIER:id BE expression:e
 		{: 
 		  ConstantMatrix cm = (ConstantMatrix) constant_matrix;
 		  cm.setArrayDomain((ArrayDomain) d);
+		  cm.setArrayName(id);
 		  RESULT = new ExpressionDefinition( (String) id,
 		  		                              cm
 		                                      /*new ConstantMatrix( (String) id,

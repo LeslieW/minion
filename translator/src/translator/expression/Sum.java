@@ -107,19 +107,19 @@ public class Sum extends NaryArithmeticExpression {
 
 	public String toString() {
 		
-		String s = "";
+		StringBuffer s = new StringBuffer("");
 		
 		 // first the positive arguments
 		if(this.positiveArguments.size() > 0)
-			s = s.concat(positiveArguments.get(0).toString());
+			s.append(positiveArguments.get(0).toString());
 		for(int i=1; i<this.positiveArguments.size(); i++) {
-			s = s.concat(" + "+this.positiveArguments.get(i));
+			s.append(" + "+this.positiveArguments.get(i));
 		}
 		
 		for(int i=0; i< this.negativeArguments.size(); i++)
-			s = s.concat("-"+this.negativeArguments.get(i));
+			s.append("-"+this.negativeArguments.get(i));
 				
-		return s;
+		return s.toString();
 		
 		
 		/*

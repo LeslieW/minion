@@ -245,4 +245,8 @@ public class ConstantMatrix implements ConstantArray {
 		}
 		return new int[0];
 	}
+	
+	public void setArrayName(String arrayName) {
+		this.arrayName = arrayName;
+	}
 }

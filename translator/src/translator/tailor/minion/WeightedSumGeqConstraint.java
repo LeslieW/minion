@@ -18,7 +18,7 @@ public class WeightedSumGeqConstraint implements MinionConstraint {
 	
 	
 	public String toString() {
-		String s = "weightedsumgeq(";
+		StringBuffer s = new StringBuffer("weightedsumgeq(");
 	
 		StringBuffer constants = new StringBuffer(""+this.weights[0]);
 		for(int i=1; i<this.weights.length; i++) {

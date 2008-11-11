@@ -23,14 +23,14 @@ public class SumLeqConstraint implements MinionConstraint {
 	
 	
 	public String toString() {
-		String s = (isWatched) ? 
-				"watchsumleq([" :
-					"sumleq([";
+		StringBuffer s = (isWatched) ? 
+				new StringBuffer("watchsumleq([") :
+					new StringBuffer("sumleq([");
 		
 		
 		for(int i=0; i<this.arguments.length; i++) {
-			if(i >0) s = s.concat(",");
-			s = s.concat(arguments[i].toString());
+			if(i >0) s.append(",");
+			s.append(arguments[i].toString());
 		}
 		return s+"], "+this.result+")";
 	}

@@ -181,10 +181,10 @@ public class ProductConstraint implements GlobalConstraint {
 		
 		return s+" = "+this.result;*/
 		
-		String s = "product("+this.arguments[0];
+		StringBuffer s = new StringBuffer("product("+this.arguments[0]);
 
 		for(int i=1; i<this.arguments.length; i++)
-			s = s.concat("* "+arguments[i]);
+			s.append("* "+arguments[i]);
 		
 		return s+", "+this.result+")";
 		

@@ -88,7 +88,13 @@ public class QuantifiedExpression implements RelationalExpression {
 		
 		// if we have the same amount of quantifiers, we compare the expressions
 		if(this.quantifiedVariables.length == otherQuantification.quantifiedVariables.length){
-			return this.quantifiedExpression.isSmallerThanSameType(otherQuantification.quantifiedExpression);
+			if(this.quantifiedExpression.getType() == 
+				otherQuantification.quantifiedExpression.getType())	
+			return this.quantifiedExpression.isSmallerThanSameType
+				(otherQuantification.quantifiedExpression);
+			else return (this.quantifiedExpression.getType() < 
+				otherQuantification.quantifiedExpression.getType()) ?
+						SMALLER : BIGGER;
 		}
 		
 		else return (this.quantifiedVariables.length < otherQuantification.quantifiedVariables.length) ?

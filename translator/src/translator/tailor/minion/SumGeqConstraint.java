@@ -23,13 +23,13 @@ public class SumGeqConstraint implements MinionConstraint {
 	}
 	
 	public String toString() {
-		String s = (isWatched) ? 
-				"watchsumgeq([" :
-					"sumgeq([";
+		StringBuffer s = (isWatched) ? 
+				new StringBuffer("watchsumgeq([") :
+					new StringBuffer("sumgeq([");
 		
 		for(int i=0; i<this.arguments.length; i++) {
-			if(i >0) s = s.concat(",");
-			s = s.concat(arguments[i].toString());
+			if(i >0) s.append(",");
+			s.append(arguments[i].toString());
 		}
 		return s+"], "+this.result+")";
 	}

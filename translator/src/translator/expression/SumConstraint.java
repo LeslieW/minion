@@ -444,16 +444,16 @@ public class SumConstraint implements GlobalConstraint {
 		
 		}
 		
-		String sumPart = "";
+		StringBuffer sumPart = new StringBuffer("");
 		
 		if(this.positiveArguments.length > 0)
-			sumPart = ""+this.positiveArguments[0];
+			sumPart.append(""+this.positiveArguments[0]);
 		
 		for(int i=1; i<this.positiveArguments.length; i++)
-			sumPart = sumPart.concat(" + "+positiveArguments[i]);
+			sumPart.append(" + "+positiveArguments[i]);
 		
 		for(int i=0; i<this.negativeArguments.length; i++)
-			sumPart = sumPart.concat(" - "+negativeArguments[i]);
+			sumPart.append(" - "+negativeArguments[i]);
 		
 		String resultPart = (this.result == null) ? "" : this.result.toString();
 		

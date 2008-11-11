@@ -127,8 +127,8 @@ public class Reification implements RelationalExpression {
 	}
 
 	public String toString(){
-		String s ="reify( ";
-		s = s.concat(this.reifiedExpression+", "+this.reifiedVariable);
+		StringBuffer s = new StringBuffer("reify( ");
+		s.append(this.reifiedExpression+", "+this.reifiedVariable);
 		
 		return s+")";
 	}

@@ -395,11 +395,11 @@ public class MinionModel {
 	
 	private String printStatistics() {
 		
-		return "# amount of common subexpressions used:"+this.usedCommonSubExpressions+"\n" +
-				"# amount of inferred common subexpressions used:"+this.usedInferredEqualSubExpressions+"\n"+
-				"# amount of original variables saved (over direct equality):"+this.equalAtoms.size()+"\n"+
-				"# amount of constraints:"+this.constraintList.size()+"\n"+
-				"# amount of auxiliary variables: "+this.auxVariables.size();
+		return "# number of common subexpressions used:"+this.usedCommonSubExpressions+"\n" +
+				"# number of inferred common subexpressions used:"+this.usedInferredEqualSubExpressions+"\n"+
+				"# number of original variables saved (over direct equality):"+this.equalAtoms.size()+"\n"+
+				"# number of constraints:"+this.constraintList.size()+"\n"+
+				"# number of auxiliary variables: "+this.auxVariables.size();
 	}
 	private String printConstraints() {
 		

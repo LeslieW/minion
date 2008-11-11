@@ -1016,7 +1016,7 @@ public class MinionTailor {
 		
 		
 		MinionAtom reifiedVariable = (MinionAtom) toMinion(reification.getReifiedVariable());
-		addToSubExpressions(reifiedConstraint, reifiedVariable);
+		//addToSubExpressions(reifiedConstraint, reifiedVariable);
 		
 		//System.out.println("Mapped it now to constraint :"+reifiedConstraint+" reified with var:"+reifiedVariable);
 		
@@ -2124,7 +2124,7 @@ public class MinionTailor {
 	protected void addToSubExpressions(Expression constraint, ArithmeticAtomExpression representative) {
 		if(!this.useCommonSubexpressions)
 			return;
-		//System.out.println("PUTTING "+representative+" to represent "+constraint+" into common subexpressions");
+		//System.out.println("XXXXXX PUTTING "+representative+" to represent "+constraint+" into common subexpressions");
 		this.essenceSubExpressions.put(constraint.toString(), representative);
 	}
 	
@@ -2132,7 +2132,8 @@ public class MinionTailor {
 	protected void addToSubExpressions(MinionConstraint constraint, MinionAtom representative) {
 		if(!this.useCommonSubexpressions)
 			return;
-		
+		//System.out.println("PUTTING "+representative+" to represent "
+		//+constraint+" into common subexpressions");
 		this.minionSubExpressions.put(constraint.toString(), representative);
 	}
 	

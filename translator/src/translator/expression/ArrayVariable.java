@@ -204,17 +204,17 @@ public class ArrayVariable implements Variable {
 
 	
 	public String toString() {
-		String s = this.arrayName+"[";
+		StringBuffer s = new StringBuffer(this.arrayName+"[");
 		
 		if(this.intIndices!=null) {
-			s = s.concat(intIndices[0]+"");
+			s.append(intIndices[0]+"");
 			for(int i=1; i<intIndices.length; i++)
-				s = s.concat(","+intIndices[i]);
+				s.append(","+intIndices[i]);
 		}
 		else {
-			s = s.concat(exprIndices[0].toString());
+			s.append(exprIndices[0].toString());
 			for(int i=1; i<exprIndices.length; i++)
-				s = s.concat(","+exprIndices[i].toString());			
+				s.append(","+exprIndices[i].toString());			
 		}
 		return s+"]";//+((this.isIndexAdaptedToSolver) ? "T" : "F");
 	}
