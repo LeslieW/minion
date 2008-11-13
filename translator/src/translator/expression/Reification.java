@@ -176,4 +176,7 @@ public class Reification implements RelationalExpression {
 		return this.reifiedVariable;
 	}
 	
+	public void setReifiedVariable(RelationalAtomExpression newVar) {
+		this.reifiedVariable = newVar;
+	}
 }

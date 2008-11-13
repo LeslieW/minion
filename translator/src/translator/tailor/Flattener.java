@@ -95,8 +95,11 @@ public class Flattener {
 			flattenedConstraints.add(this.constraintBuffer.get(i));
 			
 		for(int i=0; i<constraints.size(); i++) {
+			//System.out.println("Flattening constraint: "+constraints.get(i));
 			ArrayList<Expression> flatExpression = flattenConstraint(constraints.get(i));
+			//System.out.println("...to "+flatExpression);
 			for(int j=flatExpression.size()-1; j>=0; j--) {
+				//System.out.println("Flattening constraints: "+flatExpression.get(i));
 				Expression constraint = flatExpression.remove(j);
 				//System.out.println("Evaluating constraint: "+constraint);
 				constraint = constraint.evaluate();
@@ -763,9 +766,10 @@ public class Flattener {
 		expression.orderExpression();
 		Expression leftExpression = expression.getLeftArgument();
 		Expression rightExpression = expression.getRightArgument();
+		Expression ee = expression.copy();
 		boolean leftAndRightAreEqual = false;
 		
-		if(expression.getType() == Expression.EQ)
+		if(expression.getType() == Expression.EQ && !expression.isGonnaBeFlattenedToVariable())
 			addStrongEqualityToSubExpressions(leftExpression,rightExpression);
 		
 		// case: ATOM EQ ATOM where ATOM is not a constant!
@@ -1538,7 +1542,9 @@ public class Flattener {
 		
 		// --------------------------------------------
 		
-		//System.out.println("Right expr is: "+rightExpression);
+		//System.out.println("Right expr is: "+rightExpression+" of type:"+
+		//		rightExpression.getType()+" of class:"+
+		//		rightExpression.getClass().getSimpleName());
 		
 		//3. Detect element constraints
 		if(!this.targetSolver.supportsVariableArrayIndexing()) {
@@ -1596,8 +1602,10 @@ public class Flattener {
 								arrayVar = new ArrayVariable(arrayVar.getArrayNameOnly(),
 		                                											intIndices,
 		                                											arrayVar.getBaseDomain());
-								arrayVar.setIndexIsAdaptedToSolver(true);					
+								arrayVar.setIndexIsAdaptedToSolver(true);
+								
 								rightExpression = new ArithmeticAtomExpression(arrayVar);
+								System.out.println("RIGHT just an array variable: "+rightExpression);
 							}
 							
 						}
@@ -1898,7 +1906,7 @@ public class Flattener {
 		//    in the target solver
 		
 		//if(expression.getOperator() == Expression.IFF)
-	//		System.out.print("Flattening expression with left "+leftExpression+" and right expression: "+rightExpression);
+		//	System.out.println("#### NOSPECIAL CASE Flattening expression with left "+leftExpression+" and right expression: "+rightExpression);
 		
 		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator())) {
 			leftExpression.willBeFlattenedToVariable(true);
@@ -1907,16 +1915,81 @@ public class Flattener {
 		
 		//leftExpression = flattenExpression(leftExpression);
 		
+		//Expression lExpression  = leftExpression.copy();
+		//Expression rExpression = rightExpression.copy();
 		leftExpression = flattenExpression(leftExpression);
+		//System.out.println("Constraint Buffer after flattening LEFT:"+leftExpression+" we get last constraint left:"+this.constraintBuffer);
+		Expression lastConstraintLeft = new RelationalAtomExpression(true);
+		if(this.constraintBuffer.size() > 0) {
+			lastConstraintLeft = this.constraintBuffer.
+				remove(this.constraintBuffer.size()-1);
+		}
+		//System.out.println("Constraint Buffer after flattening LEFT:"+
+		//		leftExpression+" we get last constraint left:"+lastConstraintLeft);
 		
-		if(leftAndRightAreEqual && leftExpression.getType() != Expression.INT && leftExpression.getType() != Expression.BOOL) {
+		boolean leftReification = true;
+		if(!(lastConstraintLeft instanceof Reification)) {
+			this.constraintBuffer.add(lastConstraintLeft);
+			leftReification = false;
+		}
+		
+		//System.out.println("Flattened left expression:"+leftExpression);
+		
+		rightExpression = flattenExpression(rightExpression);
+		Expression lastConstraintRight = this.constraintBuffer.
+		remove(this.constraintBuffer.size()-1);
+		
+		boolean rightReification = true;
+		if(!(lastConstraintRight instanceof Reification)) {
+			this.constraintBuffer.add(lastConstraintRight);
+			leftReification = false;
+		}
+		//System.out.println("After flattening RIGHT:"+
+		//rightExpression+" we get last constraint left:"+lastConstraintRight);
+		
+		
+		//System.out.println("Left is reification? "+leftReification+" and right is reification? "+rightReification);
+		
+		/*if(leftAndRightAreEqual && 
+				leftExpression.getType() != Expression.INT && 
+						leftExpression.getType() != Expression.BOOL) {
+			//if(expression.getOperator() == Expression.IFF)
+			System.out.println("Adding  left expression "+leftExpression+" as equal to right expression: "+rightExpression);
+			addToSubExpressions(rightExpression, leftExpression);
+			//addToEqualExpressions(rightExpression, leftExpression);
+			
+		}*/
+		
+		if((expression.getType() == Expression.EQ || expression.getType() == Expression.IFF) 
+				&& leftReification && rightReification) {
+			
+			Reification l = (Reification) lastConstraintLeft;
+			Reification r = (Reification) lastConstraintRight;
+			if(!(l.getReifiedVariable().toString().equals(r.getReifiedVariable().toString()))) {
+				this.normalisedModel.deleteLastAuxVariable();
+				this.noAuxVariables--;
+				r.setReifiedVariable(l.getReifiedVariable());
+				this.constraintBuffer.add(l);
+				this.constraintBuffer.add(r);
+				//System.out.println("Removed aux var and created new left: "+leftExpression+" and right: "+rightExpression);
+				addToSubExpressions(l.getReifiedConstraint(), l.getReifiedVariable());
+				addToSubExpressions(r.getReifiedConstraint(), l.getReifiedVariable());
+				return new RelationalAtomExpression(true);
+			}
+			else if(leftReification && rightReification) {
+				this.constraintBuffer.add(l);
+				this.constraintBuffer.add(r);
+			}
+			else if(leftReification)
+				this.constraintBuffer.add(l);
+			else if(rightReification)
+				this.constraintBuffer.add(r);
 			//if(expression.getOperator() == Expression.IFF)
 			//System.out.println("Adding  left expression "+leftExpression+" as equal to right expression: "+rightExpression);
 			//addToSubExpressions(rightExpression, leftExpression);
-			addToEqualExpressions(rightExpression, leftExpression);
+			//addToEqualExpressions(rightExpression, leftExpression);
 		}
 		
-		rightExpression = flattenExpression(rightExpression);
 		
 		//rightExpression = flattenExpression(rightExpression);
 		
@@ -1942,6 +2015,11 @@ public class Flattener {
 		//System.out.println("Flattened left expression of relation:"+leftExpression+"\nand right expression:"+rightExpression);
 		
 		if(expression.isGonnaBeFlattenedToVariable()) {
+			/*if(this.hasCommonSubExpression(ee)) {
+				this.constraintBuffer.add( new Reification(expression,
+						this.getCommonSubExpression(ee).toRelationalAtomExpression()));
+				return this.getCommonSubExpression(ee);
+			}*/
 			return reifyConstraint(new CommutativeBinaryRelationalExpression(leftExpression, 
 				                                         expression.getOperator(),
 				                                         rightExpression));
@@ -5126,10 +5204,13 @@ public class Flattener {
 	
 	
 	private boolean hasCommonSubExpression(Expression expression) {
-		//System.out.println("Checking if '"+expression+"' has a common subexpression in:"+this.subExpressions);
+		//System.out.println("????? Checking if '"+expression+
+		//		"' has a common subexpression? "+
+		//		this.subExpressions.containsKey(expression.toString()));
 		
 		if(!this.useCommonSubExpressions)
 			return false;
+		
 		
 		return this.subExpressions.containsKey(expression.toString());
 	}

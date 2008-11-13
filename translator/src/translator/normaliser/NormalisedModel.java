@@ -313,6 +313,10 @@ public class NormalisedModel {
 		this.auxiliaryVariables.add(variable);
 	}
 	
+	public void deleteLastAuxVariable() {
+		this.auxiliaryVariables.remove(this.auxiliaryVariables.size()-1);
+	}
+	
 	public ArrayList<Variable> getAuxVariables() {
 		return this.auxiliaryVariables;
 	}
