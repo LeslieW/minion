@@ -4,7 +4,7 @@ MINION 3
 #bug-reports: andrea@cs.st-and.ac.uk
 
 # amount of common subexpressions used:0
-# amount of inferred common subexpressions used:1
+# amount of inferred common subexpressions used:0
 # amount of original variables saved (over direct equality):0
 # amount of constraints:2
 # amount of auxiliary variables: 1

@@ -314,6 +314,8 @@ public class NormalisedModel {
 	}
 	
 	public void deleteLastAuxVariable() {
+		//System.out.println("Removing last aux var: "+
+			//	this.auxiliaryVariables.get(this.auxiliaryVariables.size()-1));
 		this.auxiliaryVariables.remove(this.auxiliaryVariables.size()-1);
 	}
 	
