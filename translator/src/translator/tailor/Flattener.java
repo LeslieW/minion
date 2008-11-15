@@ -518,6 +518,9 @@ public class Flattener {
 		if(!this.applyStrongCopyPropagation)
 			return;
 		
+		//System.out.println("Adding strong equality between atom and int. left "
+		//		+leftExpression+" === right: "+rightExpression);
+		
 		if(leftExpression.getType() == Expression.INT) {
 			addToSubExpressions(rightExpression,leftExpression);
 		}
@@ -723,12 +726,18 @@ public class Flattener {
 	//System.out.println("FLATTENED left expression: "+leftExpression+" and right expression:"+rightExpression+" with op:"+expression.getOperator());
 	// BOOL => E
 	if(leftExpression.getType() == Expression.BOOL && expression.getOperator() == Expression.IF) {
-		if(!((RelationalAtomExpression) leftExpression).getBool())
+		if(!((RelationalAtomExpression) leftExpression).getBool()) {
 			return new RelationalAtomExpression(true);
-		else return flattenExpression(rightExpression);
+		}
+		else {
+			if(!expression.isGonnaBeFlattenedToVariable())
+				rightExpression.willBeFlattenedToVariable(false);
+			return flattenExpression(rightExpression);
+		}
 	}
 	
 	rightExpression = flattenExpression(rightExpression);
+	rightExpression = rightExpression.evaluate();
 	
 	// E => BOOL
 	//if(rightExpression.getType() == Expression.BOOL && expression.getOperator() == Expression.IF) {
@@ -737,6 +746,15 @@ public class Flattener {
 	//	}
 	//	else return flattenExpression(new Negation(leftExpression));
 	//}
+	
+	if(leftExpression.getType() == Expression.INT && 
+			rightExpression.getType() == Expression.INT) {
+		Expression eee = new NonCommutativeRelationalBinaryExpression(leftExpression, 
+									                                 expression.getOperator(),
+									                                 rightExpression);
+		return eee.evaluate();	                                 
+	}
+	
 	
 	if(expression.isGonnaBeFlattenedToVariable()) {
 		return reifyConstraint(new NonCommutativeRelationalBinaryExpression(leftExpression,

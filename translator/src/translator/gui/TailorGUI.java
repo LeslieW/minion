@@ -756,9 +756,11 @@ public class TailorGUI extends javax.swing.JFrame {
         JMenuItem cseDetection = new JCheckBoxMenuItem("Common Subexpression Elimination during Flattening");
         JMenuItem ecseDetection = new JCheckBoxMenuItem("Elimination of Compound Common Subexpressions");
         JMenuItem directVarReusage = new JCheckBoxMenuItem("Directly Reuse Equivalent Variables");
+        JMenuItem propagateIntValues = new JCheckBoxMenuItem("Propagate equalities with integer values");
         cseDetection.setSelected(this.settings.useCommonSubExpressions());
         ecseDetection.setSelected(this.settings.useEqualCommonSubExpressions());
         directVarReusage.setSelected(this.settings.applyDirectVariableReusage());
+        propagateIntValues.setSelected(this.settings.applyStrictCopyPropagation());
         cseDetection.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
@@ -775,6 +777,12 @@ public class TailorGUI extends javax.swing.JFrame {
 			  public void actionPerformed (ActionEvent e) {
 		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
 		          settings.setApplyDirectVariableReusage(item.isSelected());
+			  }
+			});
+        propagateIntValues.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          settings.setApplyStrictCopyPropagation(item.isSelected());
 			  }
 			});
         
@@ -797,6 +805,7 @@ public class TailorGUI extends javax.swing.JFrame {
         translationSettings.add(cseDetection);
         translationSettings.add(ecseDetection);
         translationSettings.add(directVarReusage);
+        translationSettings.add(propagateIntValues);
         //settingsMenu.add(translationSettings);
         menuBar.add(translationSettings);
         
