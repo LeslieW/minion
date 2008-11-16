@@ -22,6 +22,10 @@ public class Table implements MinionConstraint {
 		this.tuples = tuples;
 	}
 	
+	public Table(MinionAtom[] atoms, int[] ints) {
+		
+	}
+	
 	public void setIsNegative(boolean isNegative) {
 		this.isNegative = isNegative;
 	}

@@ -94,7 +94,7 @@ public class TranslationSettings {
 		this.useCommonSubExpressions = true;
 		this.useEqualSubExpressions =true;
 		this.useExplicitCommonSubExpressions = true;
-		this.applyStrictCopyPropagation = true;
+		this.applyStrictCopyPropagation = false;
 		this.giveTranslationTimeInfo = false;
 		this.giveTranslationInfo = true;
 		this.applyDirectVariableReusage = false;

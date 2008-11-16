@@ -1458,6 +1458,7 @@ public class Flattener {
 			else {
 				//System.out.println("About to flatten left expression "+leftExpression+" of nl constraint "+expression);
 				leftExpression = flattenExpression(leftExpression);
+				//leftExpression = leftExpression.evaluate();
 				//System.out.println("Flattenend left (result) expression of nl Constriant:"+leftExpression);
 				if(!expression.isNested()) {
 					addToSubExpressions(rightExpression, leftExpression);
@@ -1475,12 +1476,16 @@ public class Flattener {
 			rightArgument = flattenExpression(rightArgument);
 			
 			
-			BinaryNonLinearConstraint nonLinearConstraint = new BinaryNonLinearConstraint(leftArgument,
+			Expression nonLinearConstraint = new BinaryNonLinearConstraint(leftArgument,
 																							e.getOperator(),
 																							rightArgument,
 																							leftExpression);
 			
 			//System.out.println("Flattenend expression to absConstriant:"+nonLinearConstraint);
+			
+			nonLinearConstraint = nonLinearConstraint.evaluate();
+			if(nonLinearConstraint instanceof AtomExpression)
+				return nonLinearConstraint;
 			
 			if(expression.isGonnaBeFlattenedToVariable()) {
 				//this.constraintBuffer.add(nonLinearConstraint);
@@ -2807,13 +2812,28 @@ public class Flattener {
 			return aux;
 		}
 		
+		leftArgument = flattenExpression(leftArgument);
+		leftArgument = leftArgument.evaluate();
+		rightArgument = flattenExpression(rightArgument);
+		rightArgument = rightArgument.evaluate();
+		//System.out.println("Nonlinear expression after flattening args and bvefpre eval:"+e+
+		//		" where arg1:"+leftArgument+" and right: "+rightArgument);
+		Expression ee = 
+			new NonCommutativeArithmeticBinaryExpression(leftArgument, e.getOperator(),rightArgument);
+		ee = ee.evaluate();
+		//System.out.println("After evaluation of the whole:"+ee);
+		
+		if(ee instanceof AtomExpression) {
+			return ee;
+		}
+		
 		aux = new ArithmeticAtomExpression(this.createAuxVariable(e.getDomain()[0], e.getDomain()[1]));
 		this.addToSubExpressions(e, aux);
 		
 		//System.out.println("Expression 's type:"+e.getType()+" of "+e.toString()+" and class:"+e.getClass());
 		
-		leftArgument = flattenExpression(leftArgument);
-		rightArgument = flattenExpression(rightArgument);
+		//leftArgument = flattenExpression(leftArgument);
+		//rightArgument = flattenExpression(rightArgument);
 		
 		BinaryNonLinearConstraint nonLinConstraint = new BinaryNonLinearConstraint(leftArgument,
 																					e.getType(),
@@ -5241,7 +5261,7 @@ public class Flattener {
 	
 	private ArithmeticAtomExpression getCommonSubExpression(Expression expression) {
 		this.usedCommonSubExpressions++;
-		//System.out.println("Using common subexpression: "+expression);
+		System.out.println("Using common subexpression for: "+expression);
 		return this.subExpressions.get(expression.toString());
 	}
 	
