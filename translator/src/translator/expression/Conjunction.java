@@ -8,6 +8,7 @@ public class Conjunction extends NaryRelationalExpression {
 	private ArrayList<Expression> conjointExpressions;
 	private boolean isNested = true;
 	private boolean willBeReified = false;
+	private boolean isNestedInConjunction = false;
 	
 	//============== Constructors ==================
 	
@@ -278,5 +279,14 @@ public class Conjunction extends NaryRelationalExpression {
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());
 	}
+	
+	public boolean isNestedInConjunction() {
+		return this.isNestedInConjunction;
+	}
+	
+	public void setIsNestedInConjunction(boolean turnOn) {
+		this.isNestedInConjunction = turnOn;
+	}
+	
 }
 

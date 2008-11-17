@@ -38,6 +38,10 @@ public class NormalisedModel {
 	
 	/** normalised models subexpressions */
 	HashMap<String,ArithmeticAtomExpression> subExpressions;
+	/** stores the number of times a subexpression has been eliminated*/
+	HashMap<String,Integer> subexpressionCount;
+	/** stores all the subexpressions that have been eliminated*/
+	ArrayList<String> subexpressionList;
 	
 	HashMap<String,ArithmeticAtomExpression> equalAtoms;
 	ArrayList<ArithmeticAtomExpression> replaceableVariables;
@@ -65,6 +69,8 @@ public class NormalisedModel {
 		this.constantOffsetsFromZero = new HashMap<String,int[]>();
 		this.variableOffsetsFromZero = new HashMap<String,int[]>();
 		this.subExpressions = new HashMap<String,ArithmeticAtomExpression> ();
+		this.subexpressionList = new ArrayList<String>();
+		this.subexpressionCount = new HashMap<String,Integer>();
 		this.equalAtoms = new HashMap<String, ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
 		
@@ -315,7 +321,7 @@ public class NormalisedModel {
 	
 	public void deleteLastAuxVariable() {
 		//System.out.println("Removing last aux var: "+
-			//	this.auxiliaryVariables.get(this.auxiliaryVariables.size()-1));
+		//		this.auxiliaryVariables.get(this.auxiliaryVariables.size()-1));
 		this.auxiliaryVariables.remove(this.auxiliaryVariables.size()-1);
 	}
 	
@@ -459,6 +465,20 @@ public StringBuffer toStringBuffer() {
 	}
 	
 	
+	public void setSubexpressionCount(HashMap<String,Integer> count) {
+		this.subexpressionCount = count;
+	}
+	
+	public void setSubexpressionList(ArrayList<String> list) {
+		this.subexpressionList = list;
+	}
 
 	
+	public HashMap<String,Integer> getSubexpressionCount() {
+		return this.subexpressionCount;
+	}
+	
+	public ArrayList<String> getSubexpressionList() {
+		return this.subexpressionList;
+	}
 }

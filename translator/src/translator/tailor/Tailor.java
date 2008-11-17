@@ -1,6 +1,9 @@
 package translator.tailor;
 
 //import translator.expression.Expression;
+import java.io.File;
+import java.io.FileWriter;
+
 import translator.normaliser.NormalisedModel;
 import translator.solver.TargetSolver;
 import translator.TranslationSettings;
@@ -18,6 +21,7 @@ public class Tailor {
 	TranslationSettings settings;
 	
 	MinionTailor minionTailor;
+	private String cseInfo;
 	
 	// =================== CONSTRUCTOR ========================
 	
@@ -49,6 +53,9 @@ public class Tailor {
 			if(this.settings.giveTranslationTimeInfo()) {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Minion Model toString Time: "+(stopTime - startTime)/1000.0+"sec");
+			}
+			if(this.settings.getCseDetails()) {
+				this.cseInfo = minionTailor.getCseInfo();
 			}
 			return minionInput;
 		}
@@ -124,5 +131,9 @@ public class Tailor {
 	private void writeTimeInfo(String info) {
 		if(this.settings.giveTranslationTimeInfo())
 			System.out.println(info);
+	}
+	
+	public String getCseInfo() {
+		return this.cseInfo;
 	}
 }

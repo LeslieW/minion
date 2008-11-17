@@ -23,6 +23,8 @@ public class MinionTailor {
 	NormalisedModel normalisedModel;
 	Minion solverSettings;
 	HashMap<String, MinionAtom> minionSubExpressions;
+	HashMap<String, Integer> subexpressionCount;
+	ArrayList<String> subexpressionList;
 	HashMap<String, ArithmeticAtomExpression> essenceSubExpressions;
 	HashMap<String, Boolean> variableIsDiscrete = new HashMap<String, Boolean>();
 	TranslationSettings settings;
@@ -55,6 +57,9 @@ public class MinionTailor {
 				                           this.normalisedModel.getAuxVariables(),
 				                           this.solverSettings, settings
 				                           );
+		
+		this.subexpressionCount = this.normalisedModel.getSubexpressionCount();
+		this.subexpressionList = this.normalisedModel.getSubexpressionList();
 		
 		tailorObjective();
 		if(this.settings.giveTranslationTimeInfo()) {
@@ -2140,6 +2145,21 @@ public class MinionTailor {
 	
 	protected ArithmeticAtomExpression getCommonSubExpression(Expression constraint) {
 		this.usedCommonSubExpressions++;
+		
+		String s = constraint.toString();
+		
+		if(this.settings.getCseDetails()) {
+			if(this.subexpressionCount.containsKey(s)) {
+				Integer i = this.subexpressionCount.get(s);
+				this.subexpressionCount.put(s,++i);
+			}
+			else {
+				this.subexpressionList.add(s);
+				this.subexpressionCount.put(s, new Integer(1));
+			}
+		//	System.out.println("Using common subexpression for: "+expression);
+		}
+		
 		//System.out.println("Used common subexpression:"+constraint);
 		return this.essenceSubExpressions.get(constraint.toString());
 		
@@ -2147,6 +2167,20 @@ public class MinionTailor {
 	
 	protected MinionAtom getCommonSubExpression(MinionConstraint constraint) {
 		this.usedCommonSubExpressions++;
+		
+		String s = constraint.toString();
+		
+		if(this.settings.getCseDetails()) {
+			if(this.subexpressionCount.containsKey(s)) {
+				Integer i = this.subexpressionCount.get(s);
+				this.subexpressionCount.put(s,++i);
+			}
+			else {
+				this.subexpressionList.add(s);
+				this.subexpressionCount.put(s, new Integer(1));
+			}
+		//	System.out.println("Using common subexpression for: "+expression);
+		}
 		return this.minionSubExpressions.get(constraint.toString());
 		
 	}
@@ -2172,5 +2206,43 @@ public class MinionTailor {
 	private void writeTimeInfo(String info) {
 		if(this.settings.giveTranslationTimeInfo())
 			System.out.println(info);
+	}
+	
+	public String getCseInfo() {
+		
+		StringBuffer s = new StringBuffer("");
+		
+		if(!this.settings.getCseDetails())
+			return s.toString();
+	
+		ArrayList<String> subexpressionList = normalisedModel.
+														getSubexpressionList();
+		if(subexpressionList.size() == 0) {
+			s.append("No common subexpression eliminated\n");
+			return s.toString();
+		}
+		
+		s.append("#Common Subexpressions Eliminated: "+
+				this.usedCommonSubExpressions+"\n");
+		s.append("#Common Subexpressions: "+subexpressionList.size()+"\n\n");
+		
+		
+		HashMap<String,Integer> subexpressionCount = normalisedModel.
+														getSubexpressionCount();
+		s.append("<#Occurrences>\t<Common Subexpression>\n\n");
+		
+		for(int i=0; i<subexpressionList.size(); i++) {
+			String se = subexpressionList.get(i);
+			//System.out.println("Adding "+se+" with number:"+subexpressionCount.get(se));
+			s.append("<"+subexpressionCount.get(se)+">"+"\t<"+se+">\n");
+		}
+		
+		int count = 0;
+		for(int i=0; i<this.subexpressionList.size(); i++) {
+			count = count+this.subexpressionCount.get(this.subexpressionList.get(i));
+		}
+		s.append("\nSUM: "+count+"\n");
+		s.append("END\n");
+		return s.toString();
 	}
 }

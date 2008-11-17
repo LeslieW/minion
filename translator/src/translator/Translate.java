@@ -43,6 +43,7 @@ public class Translate {
 	public static final String DISCRETE_VAR_UPPER_BOUND = "discrete-ub"; // maximum domain size for when to use discrete vars
 	public static final String OUTPUT = "out"; //set the output file name/directory
 	public static final String NO_OF_SOLUTIONS = "sols";
+	public static final String CSE_DETAILS = "cse-info"; // get information about the CSEs
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -91,6 +92,10 @@ public class Translate {
 				
 				else if(args[i].equalsIgnoreCase("-"+WRITE_EP_MODEL_TO_FILE)) {
 					settings.setWriteEssencePrimeModelIntoFile(true);
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+CSE_DETAILS)) {
+					settings.setCseDetails(true);
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
@@ -312,9 +317,18 @@ public class Translate {
 			
 			File solverInputFile = writeStringIntoFile(outFileName,
 					                              solverInstance);
+			if(settings.cseDetails) {
+				writeStringIntoFile(outFileName+".cseinfo", translator.getCseInfo());
+				System.out.println("Written CSE info into file: "
+						+outFileName+".cseinfo");
+			}
+			
 			writeInfo("Translated '"+filename+"' to "+settings.targetSolver.getSolverName()
 					+" and written solver input\n into '"+solverInputFile.getAbsolutePath()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
+			
+			
+			
 	    	
 		} catch(Exception e) {
 			System.out.println(ERROR);
@@ -382,10 +396,19 @@ public class Translate {
 			else outFileName = settings.getSolverInputFileName();
 			File solverInputFile = writeStringIntoFile(outFileName,
 												  solverInstance);
+			
+			if(settings.cseDetails) {
+				writeStringIntoFile(outFileName+".cseinfo", translator.getCseInfo());
+				System.out.println("Written CSE info into file: "
+							+outFileName+".cseinfo");
+			}
+			
 			writeInfo("Translated '"+problemFileName+"' and '"+parameterFileName+
 					"' to "+settings.targetSolver.getSolverName()+
 					" and written solver-input\n into '"+solverInputFile.getName()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
+			
+			
 			
 		} catch(Exception e) {
 			System.out.println(ERROR);
@@ -437,10 +460,20 @@ public class Translate {
 				minionString = "# Translation Time: "+translationTime+"\n"+minionString;
 			
 			File solverInputFile = writeStringIntoFile(outputFileName, minionString);
+			
+			if(settings.cseDetails) {
+				writeStringIntoFile(outputFileName+".cseinfo", translator.getCseInfo());				
+				System.out.println("Written CSE info into file: "
+							+outputFileName+".cseinfo");
+				
+			}
+			
 			writeInfo("Translated '"+inputFileName+
 					"' to "+settings.targetSolver.getSolverName()
 					+" and written solver input\n into '"+solverInputFile.getAbsolutePath()+"'.\n");
 			writeTimeInfo("Translation Time: "+translationTime+" sec");
+			
+			
 			
 		} catch(Exception e) {
 			System.out.println(ERROR);
@@ -534,6 +567,9 @@ public class Translate {
 		System.out.println("-"+WRITE_EP_MODEL_TO_FILE);
 		System.out.println("\tWrite the generated Essence' model into a file.");
 		System.out.println("\tDefault: off");
+		System.out.println("-"+CSE_DETAILS);
+		System.out.println("\tGive detailed information about common subexpression elimination");
+		System.out.println("\tDefault: off.");
 
 	}
 	

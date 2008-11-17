@@ -12,6 +12,8 @@ public class QuantifiedExpression implements RelationalExpression {
 	private Expression quantifiedExpression;
 	private boolean isNested = true;
 	private boolean willBeReified = false;
+	private boolean isNestedInConjunction = false;
+	private boolean isNestedInDisjunction = false;
 	
 	// ===================== CONSTRUCTORS =======================
 	
@@ -275,5 +277,20 @@ public class QuantifiedExpression implements RelationalExpression {
 		throw new Exception("Internal error. Cannot give direct solver representation of expression '"+this
 			+"' for solver "+solver.getSolverName());
 	}
+
+	public boolean isNestedInConjunction() {
+		return this.isNestedInConjunction;
+	}
 	
+	public boolean isNestedInDisjunction() {
+		return this.isNestedInDisjunction;
+	}
+	
+	public void setIsNestedInConjunction(boolean turnOn) {
+		this.isNestedInConjunction = turnOn;
+	}
+	
+	public void setIsNestedInDisjunction(boolean turnOn) {
+		this.isNestedInDisjunction = turnOn;
+	}
 }

@@ -49,10 +49,11 @@ public class TranslationSettings {
 	boolean applyDirectVariableReusage;
 	boolean giveTranslationTimeInfo;
 	boolean  giveTranslationInfo;
-	boolean debugMode; // print stack trace when exceptions are thrown etc
+	public boolean debugMode; // print stack trace when exceptions are thrown etc
 	boolean writeTimeInfoIntoFile;
 	boolean writeEssencePIntoFile; // for xcsp conversion
 	boolean propagateSingleIntRanges;
+	boolean cseDetails;
 	
 	// if set to true, then parse errors, such as m[5][4] are accepted and recovered from
 	boolean allowParseErrorRecovery;
@@ -113,6 +114,7 @@ public class TranslationSettings {
 		this.branchOverAuxVariables = this.BRANCH_OVER_AUX_VARIABLES;
 		this.useGecodeLinearMiniModelPost = false;
 		this.useGecodeBooleanMiniModelPost = false;
+		this.cseDetails = false;
 	}
 	
 	
@@ -492,5 +494,13 @@ public class TranslationSettings {
 	
 	public void setUseGecodeBooleanMinimodelPostConstraints(boolean turnOn) {
 		this.useGecodeBooleanMiniModelPost = turnOn;
+	}
+	
+	public boolean getCseDetails() {
+		return this.cseDetails;
+	}
+	
+	public void setCseDetails(boolean turnOn) {
+		this.cseDetails = turnOn;
 	}
 }

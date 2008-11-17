@@ -28,6 +28,8 @@ public class Flattener {
 	
 	/** contains every (flattened) subexpression and it's corresponding variable*/
 	HashMap<String,ArithmeticAtomExpression> subExpressions;
+	HashMap<String,Integer> subExpressionCount;
+	ArrayList<String> subexpressionList;
 	//HashMap<Expression,ArithmeticAtomExpression> subExpressions;
 	
 	/** contains expressions that are equal -*/
@@ -61,6 +63,8 @@ public class Flattener {
 		this.normalisedModel = normalisedModel;
 		this.constraintBuffer = new ArrayList<Expression>();
 		this.subExpressions = new HashMap<String,ArithmeticAtomExpression>();
+		this.subExpressionCount = new HashMap<String,Integer>();
+		this.subexpressionList = new ArrayList<String>();
 		this.equalSubExpressions = new HashMap<String,ArithmeticAtomExpression>();
 		this.noAuxVariables = 0;
 		this.usedCommonSubExpressions = 0;
@@ -134,6 +138,11 @@ public class Flattener {
 		if(this.settings.applyDirectVariableReusage())
 			this.normalisedModel.setEqualAtoms(this.equalAtomsMap, this.replaceableVariables);
 		
+		if(this.settings.getCseDetails()) {
+			this.normalisedModel.setSubexpressionCount(this.subExpressionCount);
+			this.normalisedModel.setSubexpressionList(this.subexpressionList);
+		}
+			
 		
 		//System.out.println("Common subexpressions:\n"+this.subExpressions);
 		//System.out.println("Constraints:"+flattenedConstraints);
@@ -827,10 +836,10 @@ public class Flattener {
 				(expression.getOperator() == Expression.IFF ||
 				  expression.getOperator() == Expression.EQ)) {
 			if(hasCommonSubExpression(leftExpression)) {
-				addToEqualExpressions(rightExpression, getCommonSubExpression(leftExpression));
+				addToEqualExpressions(rightExpression, this.subExpressions.get(leftExpression.toString()));
 			}
 			else if(hasCommonSubExpression(rightExpression)) {
-				addToEqualExpressions(leftExpression, getCommonSubExpression(rightExpression));
+				addToEqualExpressions(leftExpression, this.subExpressions.get(rightExpression.toString()));
 			}
 			else 
 				leftAndRightAreEqual = true;
@@ -1231,60 +1240,17 @@ public class Flattener {
 				expression.getOperator() == Expression.EQ &&
 				 (!expression.isGonnaBeFlattenedToVariable() || 
 						 this.targetSolver.supportsReificationOf(Expression.ABS))) {
-			
-			Expression argument = ((AbsoluteValue) rightExpression).getArgument();
-			
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT)
-					|| expression.isGonnaBeFlattenedToVariable())
-				leftExpression.willBeFlattenedToVariable(true);
-			
-			
-			if(hasCommonSubExpression(leftExpression))
-				leftExpression = getCommonSubExpression(leftExpression);
-			
-			else {
-				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
-				leftExpression = flattenExpression(leftExpression);
-				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
-				addToSubExpressions(rightExpression, leftExpression);
-			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
-			}
-			
-			
-			// check if the solver supports variables only as result of absolute value
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT))
-				argument.willBeFlattenedToVariable(true);
-			
-			argument = flattenExpression(argument);
-			
-			// add subexpression after flattening
-			if(!hasCommonSubExpression(argument)) {
-				addToSubExpressions(argument, leftExpression);
-			}
-			
-			AbsoluteConstraint absConstraint = new AbsoluteConstraint(argument, leftExpression);
-			
-			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
-			
-			if(expression.isGonnaBeFlattenedToVariable()) {
-				//this.constraintBuffer.add(absConstraint);
-				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
-				//return leftExpression;
-				return reifyConstraint(absConstraint);
-			}
-			else  {
-				if(!expression.isNested())
-					absConstraint.setIsNotNested();
-				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
-				return absConstraint;
-			}
+			return this.flattenDirectAbsoluteValue(leftExpression, rightExpression, expression);
 		}
+		
 		else if(leftExpression instanceof AbsoluteValue && 
 				expression.getOperator() == Expression.EQ &&
 				 (!expression.isGonnaBeFlattenedToVariable() || 
 						 this.targetSolver.supportsReificationOf(Expression.ABS))) {
+			return this.flattenDirectAbsoluteValue(rightExpression, leftExpression, expression);
+		}
 		
-			Expression argument = ((AbsoluteValue) leftExpression).getArgument();
+		/*	Expression argument = ((AbsoluteValue) leftExpression).getArgument();
 			
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT)
 					|| expression.isGonnaBeFlattenedToVariable())
@@ -1317,7 +1283,7 @@ public class Flattener {
 			}
 			else return absConstraint;
 			
-		}
+		} */
 		
 		
 		
@@ -1326,104 +1292,15 @@ public class Flattener {
 				expression.getOperator() == Expression.EQ &&
 				(!expression.isGonnaBeFlattenedToVariable() ||
 						this.targetSolver.supportsReificationOf(Expression.MIN))) {
-			
-			Expression argument = ((Minimum) rightExpression).getArgument();
-			
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN)
-					|| expression.isGonnaBeFlattenedToVariable())
-				leftExpression.willBeFlattenedToVariable(true);
-			
-			
-			if(hasCommonSubExpression(leftExpression))
-				leftExpression = getCommonSubExpression(leftExpression);
-			
-			else {
-				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
-				leftExpression = flattenExpression(leftExpression);
-				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
-				addToSubExpressions(rightExpression, leftExpression);
-			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
-			}
-			
-			
-			// check if the solver supports variables only as result of absolute value
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
-				argument.willBeFlattenedToVariable(true);
-			
-			argument = flattenExpression(argument);
-			
-			// add subexpression after flattening
-			if(!hasCommonSubExpression(argument)) {
-				addToSubExpressions(argument, leftExpression);
-			}
-			
-			if(!(argument instanceof Array))
-				throw new TailorException("Invalid argument of "+rightExpression+": "+argument+" is not an array.");
-			
-			MinimumConstraint minConstraint = new MinimumConstraint((Array) argument, 
-																	leftExpression, 
-																	((Minimum) rightExpression).isMaximum());
-			
-			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
-			
-			if(expression.isGonnaBeFlattenedToVariable()) {
-				//this.constraintBuffer.add(minConstraint);
-				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
-				return reifyConstraint(minConstraint);
-			}
-			else  {
-				if(!expression.isNested())
-					minConstraint.setIsNotNested();
-				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
-				return minConstraint;
-			}
+			return this.flattenDirectMinimum(leftExpression, rightExpression, expression);
+	
 		}
 		else if(leftExpression instanceof Minimum && 
 				expression.getOperator() == Expression.EQ && 
 				(!expression.isGonnaBeFlattenedToVariable() ||
 						this.targetSolver.supportsReificationOf(Expression.MIN))) {
 		
-			Expression argument = ((Minimum) leftExpression).getArgument();
-			
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN)
-					|| expression.isGonnaBeFlattenedToVariable())
-				rightExpression.willBeFlattenedToVariable(true);
-			rightExpression = flattenExpression(rightExpression);
-			
-			if(!hasCommonSubExpression(leftExpression)) {
-				addToSubExpressions(leftExpression, rightExpression);
-			}
-			
-			// check if the solver supports variables only as result of absolute value
-			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
-				argument.willBeFlattenedToVariable(true);
-			
-			argument = flattenExpression(argument);
-			
-			// add subexpression after flattening
-			if(!hasCommonSubExpression(argument)) {
-				addToSubExpressions(argument, rightExpression);
-			}
-			
-			
-			if(!(argument instanceof Array))
-				throw new TailorException("Invalid argument of "+leftExpression+": "+argument+" is not an array.");
-			
-			MinimumConstraint minConstraint = new MinimumConstraint((Array) argument, 
-																	rightExpression, 
-																	((Minimum) leftExpression).isMaximum());
-			
-			
-			if(!expression.isNested())
-				minConstraint.setIsNotNested();
-			
-			if(expression.isGonnaBeFlattenedToVariable()) {
-				//this.constraintBuffer.add(minConstraint);
-				//return rightExpression;
-				return reifyConstraint(minConstraint);
-			}
-			else return minConstraint;
-			
+			return this.flattenDirectMinimum(rightExpression, leftExpression, expression);
 		}
 		
 		
@@ -1942,6 +1819,7 @@ public class Flattener {
 		
 		//Expression lExpression  = leftExpression.copy();
 		//Expression rExpression = rightExpression.copy();
+		//leftExpression = leftExpression.reduceExpressionTree();
 		leftExpression = flattenExpression(leftExpression);
 		//System.out.println("Constraint Buffer after flattening LEFT:"+leftExpression+" we get last constraint left:"+this.constraintBuffer);
 		
@@ -1964,7 +1842,7 @@ public class Flattener {
 		}
 		
 		//System.out.println("Flattened left expression:"+leftExpression);
-		
+		//rightExpression = rightExpression.reduceExpressionTree();
 		rightExpression = flattenExpression(rightExpression);
 		Expression lastConstraintRight = this.constraintBuffer.
 		remove(this.constraintBuffer.size()-1);
@@ -1975,7 +1853,7 @@ public class Flattener {
 				getReifiedVariable().toString().equals(rightExpression.toString())))
 		{
 			this.constraintBuffer.add(lastConstraintRight);
-			leftReification = false;
+			rightReification = false;
 		}
 		//System.out.println("After flattening RIGHT:"+
 		//rightExpression+" we get last constraint left:"+lastConstraintRight);
@@ -2016,35 +1894,74 @@ public class Flattener {
 			
 			Reification l = (Reification) lastConstraintLeft;
 			Reification r = (Reification) lastConstraintRight;
-			if(!(l.getReifiedVariable().toString().equals(r.getReifiedVariable().toString()))) {
-				if(r.getReifiedVariable().getVariable().getVariableName().startsWith("aux")) {
-					this.normalisedModel.deleteLastAuxVariable();
-					this.noAuxVariables--;
-		//			System.out.println("Removed aux var");
-				}
+			String leftVar = l.getReifiedVariable().toString();
+			String rightVar = r.getReifiedVariable().toString();
+			
+			int diff =leftVar.compareTo(rightVar);
+			if(diff != 0 && 
+					(leftVar.startsWith("aux") &&
+							rightVar.startsWith("aux"))) {
 				
+				boolean leftShorter= leftVar.length() < rightVar.length();
+	
+				// left Var is smaller than right var
+				if(diff < 0 || leftShorter) {
+						this.normalisedModel.deleteLastAuxVariable();
+						this.noAuxVariables--;
+						//String ss = r.getReifiedVariable().getVariable().getVariableName();
+						r.setReifiedVariable(l.getReifiedVariable());
+						//System.out.println("Removed aux var "+ss+" that reified right, now left:"+l+" and right:"+r);
+					
+				} 	
+				// right var is smaller than left var
+				else if(diff > 0 ) {
+						this.normalisedModel.deleteLastAuxVariable();
+						this.noAuxVariables--;
+						//String ss = r.getReifiedVariable().getVariable().getVariableName();
+						l.setReifiedVariable(r.getReifiedVariable());
+						//System.out.println("Removed aux var "+ss+" that reified right, now left:"+l+" and right:"+r);
+					
+				}
+			}
+			
+			else if(diff != 0 && leftVar.startsWith("aux")) {
+				this.normalisedModel.deleteLastAuxVariable();
+				this.noAuxVariables--;
+				//String ss = r.getReifiedVariable().getVariable().getVariableName();
+				l.setReifiedVariable(r.getReifiedVariable());
+			}
+			else if(diff != 0 && rightVar.startsWith("aux")) {
+				this.normalisedModel.deleteLastAuxVariable();
+				this.noAuxVariables--;
+				//String ss = r.getReifiedVariable().getVariable().getVariableName();
 				r.setReifiedVariable(l.getReifiedVariable());
-				this.constraintBuffer.add(l);
-				this.constraintBuffer.add(r);
+			}
+			
+		
+			this.constraintBuffer.add(l);
+			this.constraintBuffer.add(r);
+			
+			
+		
 				//System.out.println("Removed aux var when flattening "+expression
 				//		+" and created new left reiofication: "+l+" and right reification: "+r);
-				addToSubExpressions(l.getReifiedConstraint(), l.getReifiedVariable());
-				addToSubExpressions(r.getReifiedConstraint(), l.getReifiedVariable());
-				return new RelationalAtomExpression(true);
-			}
-			else if(leftReification && rightReification) {
-				this.constraintBuffer.add(l);
-				this.constraintBuffer.add(r);
-			}
-			else if(leftReification)
-				this.constraintBuffer.add(l);
-			else if(rightReification)
-				this.constraintBuffer.add(r);
+			addToSubExpressions(l.getReifiedConstraint(), l.getReifiedVariable());
+			addToSubExpressions(r.getReifiedConstraint(), r.getReifiedVariable());
+			return new RelationalAtomExpression(true);
+		}
+		else if(leftReification && rightReification) {
+				this.constraintBuffer.add(lastConstraintLeft);
+				this.constraintBuffer.add(lastConstraintRight);
+		}
+		else if(leftReification)
+			this.constraintBuffer.add(lastConstraintLeft);
+		else if(rightReification)
+			this.constraintBuffer.add(lastConstraintRight);
 			//if(expression.getOperator() == Expression.IFF)
 			//System.out.println("Adding  left expression "+leftExpression+" as equal to right expression: "+rightExpression);
 			//addToSubExpressions(rightExpression, leftExpression);
 			//addToEqualExpressions(rightExpression, leftExpression);
-		}
+		
 		
 		
 		//rightExpression = flattenExpression(rightExpression);
@@ -2087,6 +2004,139 @@ public class Flattener {
 	}
 	
 	
+	/**
+	 * 
+	 * @param leftExpression
+	 * @param rightExpression
+	 * @param expression
+	 * @return
+	 * @throws TailorException
+	 * @throws Exception
+	 */
+	private Expression flattenDirectMinimum(Expression leftExpression, 
+											Expression rightExpression,
+											CommutativeBinaryRelationalExpression expression) 
+	throws TailorException, Exception { 
+		
+		
+		Expression argument = ((Minimum) rightExpression).getArgument();
+		
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN)
+				|| expression.isGonnaBeFlattenedToVariable())
+			leftExpression.willBeFlattenedToVariable(true);
+		
+		
+		if(hasCommonSubExpression(leftExpression))
+			leftExpression = getCommonSubExpression(leftExpression);
+		
+		else {
+			//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+			leftExpression = flattenExpression(leftExpression);
+			//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
+			addToSubExpressions(rightExpression, leftExpression);
+		//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+		}
+		
+		
+		// check if the solver supports variables only as result of absolute value
+		if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_MIN))
+			argument.willBeFlattenedToVariable(true);
+		
+		argument = flattenExpression(argument);
+		
+		// add subexpression after flattening
+		if(!hasCommonSubExpression(argument)) {
+			addToSubExpressions(argument, leftExpression);
+		}
+		
+		if(!(argument instanceof Array))
+			throw new TailorException("Invalid argument of "+rightExpression+": "+argument+" is not an array.");
+		
+		MinimumConstraint minConstraint = new MinimumConstraint((Array) argument, 
+																leftExpression, 
+																((Minimum) rightExpression).isMaximum());
+		
+		//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+		
+		if(expression.isGonnaBeFlattenedToVariable()) {
+			//this.constraintBuffer.add(minConstraint);
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
+			return reifyConstraint(minConstraint);
+		}
+		else  {
+			if(!expression.isNested())
+				minConstraint.setIsNotNested();
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
+			return minConstraint;
+		}
+	}
+	
+
+	/**
+	 * 
+	 * @param leftExpression
+	 * @param rightExpression
+	 * @param expression
+	 * @return
+	 * @throws TailorException
+	 * @throws Exception
+	 */
+	private Expression flattenDirectAbsoluteValue(Expression leftExpression, 
+												Expression rightExpression, 
+							CommutativeBinaryRelationalExpression expression) 
+		throws TailorException, Exception { 
+		
+			
+			Expression argument = ((AbsoluteValue) rightExpression).getArgument();
+			
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_RESULT)
+					|| expression.isGonnaBeFlattenedToVariable())
+				leftExpression.willBeFlattenedToVariable(true);
+			
+			
+			if(hasCommonSubExpression(leftExpression))
+				leftExpression = getCommonSubExpression(leftExpression);
+			
+			else {
+				//System.out.println("About to flatten left expression "+leftExpression+" of abs constraint "+expression);
+				leftExpression = flattenExpression(leftExpression);
+				//System.out.println("Flattenend left (result) expression of absConstriant:"+leftExpression);
+				addToSubExpressions(rightExpression, leftExpression);
+			//	System.out.println("Added d left (result) expression "+leftExpression+" to CSE of:"+rightExpression);
+			}
+			
+			
+			// check if the solver supports variables only as result of absolute value
+			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(TargetSolver.CONSTRAINT_NESTED_IN_ABSOLUTE_VALUE_ARGUMENT))
+				argument.willBeFlattenedToVariable(true);
+			
+			argument = flattenExpression(argument);
+			
+			// add subexpression after flattening
+			if(!hasCommonSubExpression(argument)) {
+				addToSubExpressions(argument, leftExpression);
+			}
+			
+			AbsoluteConstraint absConstraint = new AbsoluteConstraint(argument, leftExpression);
+			
+			//System.out.println("Flattenend expression to absConstriant:"+absConstraint);
+			
+			if(expression.isGonnaBeFlattenedToVariable()) {
+				//this.constraintBuffer.add(absConstraint);
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" and will return result-expression :"+leftExpression);
+				//return leftExpression;
+				return reifyConstraint(absConstraint);
+			}
+			else  {
+				if(!expression.isNested())
+					absConstraint.setIsNotNested();
+				//System.out.println("Flattenend expression to absConstriant:"+absConstraint+" which i am returning now");
+				return absConstraint;
+			}
+		
+	}
+
+
 	/**
 	 * Flatten a quantified sum into a sum representation by unfolding the
 	 * quantification (if necessary for the solver).
@@ -2235,6 +2285,13 @@ public class Flattener {
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = disjunction.getArguments();
+		
+		// reverse the list?
+		//for(int i=0; i<arguments.size(); i++) {
+		//	arguments.add(i,arguments.remove(arguments.size()-i-1));
+		//}
+		
+		
 		for(int i=arguments.size()-1; i>=0; i--) {
 			if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.OR))
 				arguments.get(i).willBeFlattenedToVariable(true);
@@ -2288,11 +2345,20 @@ public class Flattener {
 	private Expression flattenConjunction(Conjunction conjunction) 
 		throws TailorException,Exception {
 	
+		//if(conjunction.isNestedInConjunction()) 
+		//	return conjunction;
+		
+		
 		
 		Expression equalExpression = null;
+		/*Expression ee  = (Conjunction) conjunction.reduceExpressionTree();
+		if(ee instanceof Conjunction)
+			conjunction = (Conjunction) ee;
+		else return flattenExpression(ee);*/
 		
 		if(conjunction.isGonnaBeFlattenedToVariable()) {
 			if(hasEqualSubExpression(conjunction)) {
+				//System.out.println("Conjunction "+conjunction+" has a equal subexpression:"+getEqualSubExpression(conjunction));
 				equalExpression = getEqualSubExpression(conjunction);
 				//this.usedEqualSubExpressions--; // this does not count as re-using a subexpression
 			}
@@ -2313,6 +2379,10 @@ public class Flattener {
 			
 			Expression flatArgument;
 			Expression constraint = arguments.remove(i);
+			/*if(constraint instanceof QuantifiedExpression &&
+		 ((QuantifiedExpression) constraint).getType() == Expression.FORALL) {
+				((QuantifiedExpression) constraint).setIsNestedInConjunction(true);
+			}*/
 			
 			/*if(this.targetSolver.supportsFeature(TargetSolver.NESTED_LINEAR_EXPRESSIONS) &&
 					constraint.isLinearExpression()) {
@@ -2320,15 +2390,45 @@ public class Flattener {
 			}
 			else*/ 
 			flatArgument = flattenExpression(constraint); //.evaluate();
+			//flatArgument = flatArgument.evaluate();
+			//System.out.println("Flattened "+i+". element to '"+flatArgument+
+			//		"' of type "+flatArgument.getType()+" of conjunction :\n###"+conjunction);
 			
+			/** in case it's a nested conjunction, flatten the elements of the 
+			 * conjunction */
+			/*if(flatArgument instanceof Conjunction) {
+				ArrayList<Expression> argsi = ((Conjunction) flatArgument).getArguments();
+				for(int j=0; j<argsi.size(); j++) {
+					if(conjunction.isGonnaBeFlattenedToVariable() &&
+							!this.targetSolver.supportsConstraintsNestedAsArgumentOf(Expression.AND))
+							argsi.get(j).willBeFlattenedToVariable(true);
+					if(!conjunction.isNested())
+						argsi.get(j).setIsNotNested();
+					Expression flatArg;
+					Expression ct = argsi.remove(j);
+					flatArg = flattenExpression(ct);
+					
+					if(flatArg.getType() == Expression.BOOL) {
+						if(!((RelationalAtomExpression) flatArg).getBool())
+							return new RelationalAtomExpression(false);
+					}
+					else arguments.add(flatArg);
+				}
+			}
+			else {
+			*/
 			if(flatArgument.getType() == Expression.BOOL) {
 				if(!((RelationalAtomExpression) flatArgument).getBool())
 					return new RelationalAtomExpression(false);
 			}
 			else arguments.add(i, flatArgument);
+			//}
 		}
 		
 		//System.out.println("Flattened conjunction:"+conjunction);
+		
+		//Expression ew = conjunction.copy().evaluate();
+		//System.out.println("Evaluated conjunction "+conjunction+" to "+ew);
 		
 		if(arguments.size() == 0)
 			return new RelationalAtomExpression(true);
@@ -2639,6 +2739,10 @@ public class Flattener {
 				for(int i=conjunction.getArguments().size()-1; i>=0; i--) 
 					conjunction.getArguments().get(i).willBeFlattenedToVariable(true);
 			}
+			
+			if(quantification.isNestedInConjunction()) 
+				conjunction.setIsNestedInConjunction(true);
+			
 	 		
 			if(quantification.isGonnaBeFlattenedToVariable())
 				conjunction.willBeFlattenedToVariable(true);
@@ -5261,8 +5365,24 @@ public class Flattener {
 	
 	private ArithmeticAtomExpression getCommonSubExpression(Expression expression) {
 		this.usedCommonSubExpressions++;
-		System.out.println("Using common subexpression for: "+expression);
-		return this.subExpressions.get(expression.toString());
+		
+		String s = expression.toString();
+		
+		if(this.settings.getCseDetails()) {
+			if(this.subExpressionCount.containsKey(s)) {
+				Integer i = this.subExpressionCount.get(s);
+				this.subExpressionCount.put(s,++i);
+				//if(i >= 3) {
+				//	System.out.println("Eliminated subexpression "+s+" for "+i+" times.");
+				//}
+			}
+			else {
+				this.subexpressionList.add(s);
+				this.subExpressionCount.put(s, new Integer(1));
+			}
+		//	System.out.println("Using common subexpression for: "+expression);
+		}
+		return this.subExpressions.get(s);
 	}
 	
 	private ArithmeticAtomExpression getEqualSubExpression(Expression expression) {
@@ -5371,8 +5491,11 @@ public class Flattener {
 		}*/
 			
 		// if we have a common subexpression, use the corresponding variable
-		if(hasCommonSubExpression(constraint)) 
+		if(hasCommonSubExpression(constraint)) {
+			//System.out.println("Getting CS during reification: "+
+			//		constraint+" and var:"+this.subExpressions.get(constraint.toString()));
 			auxVariable = getCommonSubExpression(constraint);
+		}
 			
 		else if(hasEqualSubExpression(constraint)) {
 			auxVariable = getEqualSubExpression(constraint);

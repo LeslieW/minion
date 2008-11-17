@@ -162,13 +162,15 @@ forall step : int(0..noSteps-1) .
 
       (bState[step, f] = bState[step+1,f]) <=>
 
-      forall f1 : FIELDS .
+      (forall f1 : FIELDS .
             (moves[step] != transitionNumber[f,f1]) /\
             (moves[step] != transitionNumber[f1,f]) /\
 
             forall f2 : FIELDS .
-             
-            (( transitionNumber[f1,f2] != 0) => 
+      
+            (f1 < f2) =>
+       
+            ((( transitionNumber[f1,f2] != 0) => 
                 ((f = transitionStep[transitionNumber[f1,f2],2]) =>
                   (moves[step] != transitionNumber[f1,f2])
                 )
@@ -178,7 +180,8 @@ forall step : int(0..noSteps-1) .
                 ( (f = transitionStep[transitionNumber[f2,f1],2]) => 
                   (moves[step] != transitionNumber[f2,f1])
 		)
-           ),
+           ))
+      ),
 
 
 
@@ -201,16 +204,21 @@ forall step : int(0..noSteps-1) .
         (bState[step,f] > bState[step+1,f]) <=>
       
 
-	    exists f1 : FIELDS .
-
-               $ start peg
-               ((transitionNumber[f,f1] != 0) /\
-               (moves[step] = transitionNumber[f,f1]))   
-               
-                  \/
+	    (exists f1 : FIELDS .
            
                $ middle peg
-               exists f2 : FIELDS .
+               (exists f2 : FIELDS . 
+                    (moves[step] = transitionNumber[f1,f2]) /\
 		    ( transitionNumber[f1,f2] != 0) /\
                     (f = transitionStep[transitionNumber[f1,f2],2]) /\
-                    (moves[step] = transitionNumber[f1,f2])
+                   (f1 != f2) /\ (f != f2) 
+               )
+                  \/
+
+               $ start peg
+               ( (f != f) /\
+                 ((transitionNumber[f,f1] != 0) /\
+                 (moves[step] = transitionNumber[f,f1]))   
+               )              
+             
+           )

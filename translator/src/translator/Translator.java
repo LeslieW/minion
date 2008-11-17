@@ -47,6 +47,7 @@ public class Translator {
     
 	String errorMessage;
     String debug;
+    String cseInfo;
   
     TranslationSettings settings;
     
@@ -262,6 +263,8 @@ public class Translator {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
+			if(this.settings.getCseDetails())
+				this.cseInfo = this.tailor.getCseInfo();
 			
 		} catch(Exception e) {
 			if(settings.debugMode)
@@ -297,6 +300,8 @@ public class Translator {
 					long stopTime = System.currentTimeMillis();
 					writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 				}
+				if(this.settings.getCseDetails())
+					this.cseInfo = this.tailor.getCseInfo();
 				return true;
 				
 			} catch (Exception e) {
@@ -391,6 +396,8 @@ public class Translator {
 				long stopTime = System.currentTimeMillis();
 				writeTimeInfo("Tailoring Time: "+(stopTime - startTime)/1000.0+"sec");
 			}
+			if(this.settings.getCseDetails())
+				this.cseInfo = this.tailor.getCseInfo();
 			return true;			
 			
 		}
@@ -520,6 +527,9 @@ public class Translator {
 		return this.settings.getPrintedVariables();
 	}
 	
+	public String getCseInfo() {
+		return this.cseInfo;
+	}
 	
 	private void writeTimeInfo(String info) {
 		if(this.settings.giveTranslationInfo)
