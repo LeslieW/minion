@@ -2349,7 +2349,7 @@ public class Flattener {
 		//	return conjunction;
 		
 		
-		
+		conjunction.orderExpression();
 		Expression equalExpression = null;
 		/*Expression ee  = (Conjunction) conjunction.reduceExpressionTree();
 		if(ee instanceof Conjunction)
@@ -2368,6 +2368,22 @@ public class Flattener {
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
+		
+		// reverse list
+		//for(int i=0; i<arguments.size(); i++) {
+		//		arguments.add(i,arguments.remove(arguments.size()-i-1));
+		//}
+		
+		//System.out.println("####### Arguments of conjunction before reversing: "+arguments);
+		
+		//ArrayList<Expression> args = new ArrayList<Expression>();
+		//for(int i=0; i<arguments.size(); i++) {
+		//			args.add(i,arguments.get(arguments.size()-i-1));
+		//}
+		//arguments = args;
+		
+		//System.out.println("####### Arguments of conjunction after reversing: "+arguments);
+		
 		for(int i=arguments.size()-1; i>=0; i--) {
 			
 			if(conjunction.isGonnaBeFlattenedToVariable() &&
@@ -2378,6 +2394,7 @@ public class Flattener {
 				arguments.get(i).setIsNotNested();
 			
 			Expression flatArgument;
+			//Expression eee = arguments.get(i).copy();
 			Expression constraint = arguments.remove(i);
 			/*if(constraint instanceof QuantifiedExpression &&
 		 ((QuantifiedExpression) constraint).getType() == Expression.FORALL) {
@@ -2391,7 +2408,7 @@ public class Flattener {
 			else*/ 
 			flatArgument = flattenExpression(constraint); //.evaluate();
 			//flatArgument = flatArgument.evaluate();
-			//System.out.println("Flattened "+i+". element to '"+flatArgument+
+			//System.out.println("Flattened "+i+". element from "+eee+" to '"+flatArgument+
 			//		"' of type "+flatArgument.getType()+" of conjunction :\n###"+conjunction);
 			
 			/** in case it's a nested conjunction, flatten the elements of the 
