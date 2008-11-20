@@ -32,7 +32,7 @@ aux0]
 
 **CONSTRAINTS**
 
-reify(sumgeq([t,z], 2), aux0)
-reify(sumgeq([x,y], 2), aux0)
+reify(sumgeq([z,t], 2), aux0)
+reify(sumgeq([y,x], 2), aux0)
 
 **EOF**

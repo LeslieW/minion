@@ -288,5 +288,9 @@ public class Conjunction extends NaryRelationalExpression {
 		this.isNestedInConjunction = turnOn;
 	}
 	
+	public void setArguments(ArrayList<Expression> args ) {
+		this.conjointExpressions = args;
+	}
+	
 }
 

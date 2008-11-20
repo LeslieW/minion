@@ -2368,7 +2368,7 @@ public class Flattener {
 		
 		// 1. ---- first flatten the arguments ----------------------
 		ArrayList<Expression> arguments = conjunction.getArguments();
-		
+		conjunction.orderExpression();
 		// reverse list
 		//for(int i=0; i<arguments.size(); i++) {
 		//		arguments.add(i,arguments.remove(arguments.size()-i-1));
@@ -2376,11 +2376,11 @@ public class Flattener {
 		
 		//System.out.println("####### Arguments of conjunction before reversing: "+arguments);
 		
-		//ArrayList<Expression> args = new ArrayList<Expression>();
-		//for(int i=0; i<arguments.size(); i++) {
-		//			args.add(i,arguments.get(arguments.size()-i-1));
-		//}
-		//arguments = args;
+		ArrayList<Expression> args = new ArrayList<Expression>();
+		for(int i=0; i<arguments.size(); i++) {
+					args.add(i,arguments.get(arguments.size()-i-1));
+		}
+		arguments = args;
 		
 		//System.out.println("####### Arguments of conjunction after reversing: "+arguments);
 		
@@ -2449,6 +2449,9 @@ public class Flattener {
 		
 		if(arguments.size() == 0)
 			return new RelationalAtomExpression(true);
+		
+		
+		conjunction.setArguments(arguments);
 		
 		// 2a. ---- if the conjunction is not nested/will be reified
 		//         then split it into independent constraints
