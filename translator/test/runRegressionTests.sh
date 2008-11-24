@@ -9,10 +9,11 @@ XCSP_DIR=test/regressionTests/xcsp
 
 # test the XCSP instances
 cd ..
-for X in `ls ${XCSP_DIR}/*.xml`;
+for X in `ls ${XCSP_DIR}/*.xml.bz2`;
   do	
   java -Xms128m -Xmx512m -jar tailor.jar -tf -dvr -silent -xcsp $X $X.minion
-  Difference=`diff "${X}.minion" "${X}.minion.expected"`  
+  Base=`echo ${X} | cut -f 1 -d'.'`
+  Difference=`bzdiff "${X}.minion" "${Base}.xml.minion.expected.bz2"`  
   if [ "$Difference" != "" ]; then
       echo "ERROR in translating ${X}"
   else
