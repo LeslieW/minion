@@ -54,6 +54,7 @@ public class TranslationSettings {
 	boolean writeEssencePIntoFile; // for xcsp conversion
 	boolean propagateSingleIntRanges;
 	boolean cseDetails;
+	boolean auxVarDetails;
 	
 	// if set to true, then parse errors, such as m[5][4] are accepted and recovered from
 	boolean allowParseErrorRecovery;
@@ -115,6 +116,7 @@ public class TranslationSettings {
 		this.useGecodeLinearMiniModelPost = false;
 		this.useGecodeBooleanMiniModelPost = false;
 		this.cseDetails = false;
+		this.auxVarDetails = false;
 	}
 	
 	
@@ -502,5 +504,13 @@ public class TranslationSettings {
 	
 	public void setCseDetails(boolean turnOn) {
 		this.cseDetails = turnOn;
+	}
+	
+	public boolean getAuxVarDetails(){
+		return this.auxVarDetails;
+	}
+	
+	public void setAuxVarDetails(boolean turnOn) {
+		this.auxVarDetails = turnOn;
 	}
 }

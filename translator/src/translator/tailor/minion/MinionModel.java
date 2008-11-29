@@ -29,6 +29,7 @@ public class MinionModel {
 	ArrayList<String> variableAliases;
 	ArrayList<Variable> auxVariables;
 	HashMap<String, Domain> auxVarDomains;
+	HashMap<String,Expression> auxVarDetails;
 	Minion solverSettings;
 	int usedCommonSubExpressions;
 	int usedInferredEqualSubExpressions;
@@ -70,6 +71,7 @@ public class MinionModel {
 		this.settings = settings;
 		this.equalAtoms = new HashMap<String,MinionAtom>();
 		this.variableAppearsInDiseqConstraint = new HashMap<String, Boolean>();
+		this.auxVarDetails = new HashMap<String,Expression>();
 	}
 	
 	
@@ -86,6 +88,10 @@ public class MinionModel {
 	
 	public void setVariableAppearsInDisequality(String variableName) {
 		this.variableAppearsInDiseqConstraint.put(variableName, new Boolean(true));
+	}
+	
+	public void setAuxVarDetails(HashMap<String, Expression> hm) {
+		this.auxVarDetails = hm;
 	}
 	
 	public void setObjective(MinionAtom objective, boolean isMaximising) {
@@ -543,8 +549,15 @@ public class MinionModel {
 				rangeString.append("{"+range[0]+".."+range[1]+"}");
 			}
 			
-			s.append(domainString+" "+auxVar.getVariableName()+" "+rangeString+"\n");
+			s.append(domainString+" "+auxVar.getVariableName()+" "+rangeString);
 			
+			if(this.settings.getAuxVarDetails()) {
+				if(this.auxVarDetails.containsKey(auxVar.getVariableName())) {
+					s.append(" # "+this.auxVarDetails.get(auxVar.getVariableName()).toString()+"\n");
+				}
+				else s.append(" # no info available (bug)\n");
+			}
+			else s.append("\n");
 		}
 		
 		

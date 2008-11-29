@@ -46,6 +46,8 @@ public class NormalisedModel {
 	HashMap<String,ArithmeticAtomExpression> equalAtoms;
 	ArrayList<ArithmeticAtomExpression> replaceableVariables;
 	
+	HashMap<String, Expression> auxVarDetails;
+	
 	int usedCommonSubExpressions;
 	int usedEqualSubExpressions;
 	
@@ -73,7 +75,7 @@ public class NormalisedModel {
 		this.subexpressionCount = new HashMap<String,Integer>();
 		this.equalAtoms = new HashMap<String, ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
-		
+		this.auxVarDetails = new HashMap<String, Expression>();
 		this.computeVariableArrayOffsets();
 	}
 	
@@ -96,7 +98,7 @@ public class NormalisedModel {
 		this.subExpressions = new HashMap<String,ArithmeticAtomExpression> ();
 		this.equalAtoms = new HashMap<String, ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
-
+		this.auxVarDetails = new HashMap<String, Expression>();
 		this.computeVariableArrayOffsets();
 	}
 	 
@@ -480,5 +482,17 @@ public StringBuffer toStringBuffer() {
 	
 	public ArrayList<String> getSubexpressionList() {
 		return this.subexpressionList;
+	}
+	
+	public HashMap<String,Expression> getAuxVarDetailsHashMap() {
+		return this.auxVarDetails;
+	}
+	
+	public void setAuxVarDetailsHashMap(HashMap<String, Expression> hm) {
+		this.auxVarDetails = hm;
+	}
+	
+	public void addAuxVarDetail(String auxVarName, Expression e) {
+		this.auxVarDetails.put(auxVarName, e);
 	}
 }

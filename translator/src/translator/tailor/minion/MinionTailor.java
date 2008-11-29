@@ -96,6 +96,10 @@ public class MinionTailor {
 			this.minionModel.applyEqualAtoms();
 		}
 		
+		if(this.settings.getAuxVarDetails()) {
+			this.minionModel.setAuxVarDetails(this.normalisedModel.getAuxVarDetailsHashMap());
+		}
+		
 		return minionModel;
 		
 		
@@ -1251,8 +1255,10 @@ public class MinionTailor {
 		else {
 			auxVariable = new ArithmeticAtomExpression(createAuxVariable(sumConstraint.getSumDomain()[0], 
 					                                                     sumConstraint.getSumDomain()[1]));
-			addToSubExpressions(new Sum(positiveArguments, negativeArguments), auxVariable);
-																					 
+			Sum s = new Sum(positiveArguments, negativeArguments);
+			addToSubExpressions(s, auxVariable);
+			if(this.settings.getAuxVarDetails())
+				this.addToAuxVarDetails(auxVariable.toString(), s);																	 
 		
 			SumConstraint firstSum = new SumConstraint(positiveArguments,
 				                                   negativeArguments,
@@ -1342,6 +1348,9 @@ public class MinionTailor {
 							ArithmeticAtomExpression auxVar = new ArithmeticAtomExpression(this.createAuxVariable(mul.getDomain()[0],
 																												  mul.getDomain()[1]));
 							this.addToSubExpressions(mul, auxVar);
+							if(this.settings.getAuxVarDetails())
+								this.addToAuxVarDetails(auxVar.toString(), mul);	
+							
 							MinionConstraint leftArg = toMinion(mul.getArguments().get(0));
 							MinionConstraint rightArg = toMinion(mul.getArguments().get(1));
 							if(!(leftArg instanceof MinionAtom))
@@ -1370,7 +1379,10 @@ public class MinionTailor {
 						else {
 							ArithmeticAtomExpression auxVar  = new ArithmeticAtomExpression(this.createAuxVariable(-argument.getDomain()[1],
 																												-argument.getDomain()[0]));
-							this.addToSubExpressions(new UnaryMinus(argument), auxVar);
+							UnaryMinus um = new UnaryMinus(argument);
+							this.addToSubExpressions(um, auxVar);
+							if(this.settings.getAuxVarDetails())
+								this.addToAuxVarDetails(auxVar.toString(), um);	
 							this.minionModel.constraintList.add(new MinusEq(toMinion(auxVar.copy()), 
 													                   (MinionAtom) arg));
 							negativeArgs[i] = auxVar;
@@ -1410,8 +1422,17 @@ public class MinionTailor {
 				SumGeqConstraint sum2 = new SumGeqConstraint(arguments, result);
 				
 				MinionAtom auxVariable1 = reifyMinionConstraint(sum1);
-				MinionAtom auxVariable2 = reifyMinionConstraint(sum2);
 				
+				sumConstraint.setOperator(Expression.LEQ);
+				if(this.settings.getAuxVarDetails())
+					this.addToAuxVarDetails(auxVariable1.toString(), sumConstraint.copy());
+				
+				sumConstraint.setOperator(Expression.GEQ);
+				MinionAtom auxVariable2 = reifyMinionConstraint(sum2);
+				if(this.settings.getAuxVarDetails())
+					this.addToAuxVarDetails(auxVariable2.toString(), sumConstraint.copy());
+				
+				sumConstraint.setOperator(Expression.EQ);
 				
 				MinionAtom reifiedVariable;
 				if(this.reifiedSumAuxVar != null) {
@@ -1419,6 +1440,9 @@ public class MinionTailor {
 					this.reifiedSumAuxVar = null;
 				}
 				else reifiedVariable	= createMinionAuxiliaryVariable();
+				
+				if(this.settings.getAuxVarDetails())
+					this.addToAuxVarDetails(reifiedVariable.toString(), sumConstraint);
 				
 				ProductConstraint conjunction = new ProductConstraint(auxVariable1,auxVariable2,reifiedVariable);
 				//this.minionModel.addConstraint(conjunction);
@@ -1655,7 +1679,8 @@ public class MinionTailor {
 					MinionAtom auxVariable2 = reifyMinionConstraint(weightedConstraint2);
 									
 					MinionAtom reifiedVariable = createMinionAuxiliaryVariable();
-									
+					if(this.settings.getAuxVarDetails())
+						this.addToAuxVarDetails(reifiedVariable.toString(), sumConstraint);	
 					ProductConstraint conjunction = new ProductConstraint(auxVariable1,auxVariable2,reifiedVariable);
 					this.minionModel.addConstraint(conjunction);
 									
@@ -1967,6 +1992,7 @@ public class MinionTailor {
 			return getCommonSubExpression(constraint);
 		}
 		else auxVariable = createMinionAuxiliaryVariable();
+	
 		
 		MinionConstraint reifiedConstraint = new Reify(constraint, auxVariable);
 		this.minionModel.addConstraint(reifiedConstraint);
@@ -2142,6 +2168,11 @@ public class MinionTailor {
 		this.minionSubExpressions.put(constraint.toString(), representative);
 	}
 	
+	
+	protected void addToAuxVarDetails(String auxVar, Expression e) {
+		
+			this.normalisedModel.addAuxVarDetail(auxVar, e);
+	}
 	
 	protected ArithmeticAtomExpression getCommonSubExpression(Expression constraint) {
 		this.usedCommonSubExpressions++;

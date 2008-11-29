@@ -455,15 +455,15 @@ public class SumConstraint implements GlobalConstraint {
 		for(int i=0; i<this.negativeArguments.length; i++)
 			sumPart.append(" - "+negativeArguments[i]);
 		
-		String resultPart = (this.result == null) ? "" : this.result.toString();
+		String resultPart = (this.result == null) ? "" : this.result.toString(); 
 		
-	/*	return (resultIsOnLeftSide) ?
-				resultPart+operator+sumPart:
+		
+		return 
 				sumPart+operator+resultPart;
-				*/
+				
 		//return (resultIsOnLeftSide) ? 
 				//operator+"("+resultPart+","+sumPart+")" :
-				return operator+"("+sumPart+","+resultPart+")";
+				/*return operator+"("+sumPart+","+resultPart+")"; */
 	}
 
 	
@@ -623,4 +623,8 @@ public class SumConstraint implements GlobalConstraint {
 			+"' for solver "+solver.getSolverName());
 	}
 
+	
+	public void setOperator(int operator) {
+		this.relationalOperator = operator;
+	}
 }

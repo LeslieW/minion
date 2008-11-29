@@ -36,6 +36,7 @@ public class Flattener {
 	HashMap<String,ArithmeticAtomExpression> equalSubExpressions;
 	HashMap<String,ArithmeticAtomExpression> equalAtomsMap;
 	ArrayList<ArithmeticAtomExpression> replaceableVariables;
+	HashMap<String, Expression> auxVarExpressions;
 	
 	HashMap<String, int[]> constantOffsetsFromZero;
 	
@@ -74,6 +75,7 @@ public class Flattener {
 		this.useEqualSubExpressions = this.settings.useEqualCommonSubExpressions();
 		this.equalAtomsMap = new HashMap<String,ArithmeticAtomExpression>();
 		this.replaceableVariables = new ArrayList<ArithmeticAtomExpression>();
+		this.auxVarExpressions = new HashMap<String, Expression>();
 	}
 	
 	// ========== METHODS ================================
@@ -143,6 +145,9 @@ public class Flattener {
 			this.normalisedModel.setSubexpressionList(this.subexpressionList);
 		}
 			
+		if(this.settings.getAuxVarDetails()) {
+			this.normalisedModel.setAuxVarDetailsHashMap(this.auxVarExpressions);
+		}
 		
 		//System.out.println("Common subexpressions:\n"+this.subExpressions);
 		//System.out.println("Constraints:"+flattenedConstraints);
@@ -655,6 +660,8 @@ public class Flattener {
 			auxVar = new ArithmeticAtomExpression(createAuxVariable(multiplication.getDomain()[0], 
 					                                                multiplication.getDomain()[1]));
 			addToSubExpressions(multiplication, auxVar);
+			if(settings.getAuxVarDetails())
+				this.addToAuxVarList(auxVar.toString(), multiplication);
 			productConstraint.setResult(auxVar);
 			this.constraintBuffer.add(productConstraint);
 		}
@@ -934,6 +941,8 @@ public class Flattener {
 						else {
 							rightPart = new ArithmeticAtomExpression(this.createAuxVariable(rSum.getDomain()[0], rSum.getDomain()[1]));
 							this.addToSubExpressions(rSum, rightPart);
+							if(settings.getAuxVarDetails())
+								this.addToAuxVarList(rightPart.toString(), rSum.copy());
 							
 							Sum rightSum = (Sum) rSum.copy();
 							rightSum.setWillBeConvertedToSumConstraint(true);
@@ -949,6 +958,8 @@ public class Flattener {
 						else {
 							leftPart = new ArithmeticAtomExpression(this.createAuxVariable(lSum.getDomain()[0], lSum.getDomain()[1]));
 							this.addToSubExpressions(lSum, leftPart);
+							if(settings.getAuxVarDetails())
+								this.addToAuxVarList(leftPart.toString(), lSum.copy());
 							
 							Sum leftSum = (Sum) lSum.copy();
 							leftSum.setWillBeConvertedToSumConstraint(true);
@@ -1079,6 +1090,8 @@ public class Flattener {
 						                                                multiplication.getDomain()[1]));
 				}
 				addToSubExpressions(multiplication, auxVar);
+				if(settings.getAuxVarDetails())
+					this.addToAuxVarList(auxVar.toString(), multiplication);
 				productConstraint.setResult(auxVar);
 				this.constraintBuffer.add(productConstraint);
 			}
@@ -1130,6 +1143,8 @@ public class Flattener {
 						}
 						
 						addToSubExpressions(multiplicationRight, auxVar2);
+						if(settings.getAuxVarDetails())
+							this.addToAuxVarList(auxVar2.toString(), multiplicationRight.copy());
 						productConstraintRight.setResult(auxVar2);
 						this.constraintBuffer.add(productConstraintRight);
 					}
@@ -1216,6 +1231,8 @@ public class Flattener {
 				}
 				
 				addToSubExpressions(multiplication, auxVar);
+				if(settings.getAuxVarDetails())
+					this.addToAuxVarList(auxVar.toString(), multiplication);
 			}
 			
 			// aux = Multiplication
@@ -2621,7 +2638,8 @@ public class Flattener {
 				else  {
 					auxVariable = new ArithmeticAtomExpression(createAuxVariable(0, 1));
 					addToSubExpressions(expression, auxVariable);
-				    
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(auxVariable.toString(), expression);
 					// add the flattened constraint to the constraint buffer
 					this.constraintBuffer.add(new Reification(r,auxVariable.toRelationalAtomExpression()));
 				}
@@ -2953,6 +2971,8 @@ public class Flattener {
 		
 		aux = new ArithmeticAtomExpression(this.createAuxVariable(e.getDomain()[0], e.getDomain()[1]));
 		this.addToSubExpressions(e, aux);
+		if(settings.getAuxVarDetails())
+			this.addToAuxVarList(aux.toString(), e);
 		
 		//System.out.println("Expression 's type:"+e.getType()+" of "+e.toString()+" and class:"+e.getClass());
 		
@@ -3023,6 +3043,8 @@ public class Flattener {
 							new ArithmeticAtomExpression(createAuxVariable(lb, ub)
 																	 );
 					this.addToSubExpressions(binaryMultiplication, auxVariable);
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(auxVariable.toString(), multiplication);
 				}
 				ProductConstraint productConstraint = new ProductConstraint(new Expression[] {binaryMultiplication.getArguments().get(0),
 																								binaryMultiplication.getArguments().get(1)}, 
@@ -3099,7 +3121,8 @@ public class Flattener {
 					int ub = mult.getDomain()[1];
 					mult1 = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 					this.addToSubExpressions(mult, mult1);
-				
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(mult1.toString(), mult);
 				
 				productConstraint.setResult(mult1);
 				this.constraintBuffer.add(productConstraint);
@@ -3128,7 +3151,8 @@ public class Flattener {
 					int ub = mult_.getDomain()[1];
 					mult2 = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 					this.addToSubExpressions(mult_, mult2);
-				
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(mult2.toString(), mult_);
 				
 				productConstraint.setResult(mult2);
 				this.constraintBuffer.add(productConstraint);
@@ -3152,6 +3176,8 @@ public class Flattener {
 					int ub = m_.getDomain()[1];
 					auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 					this.addToSubExpressions(m_, auxVariable);
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(auxVariable.toString(), m_);
 				}
 				
 				productConstraint.setResult(auxVariable);
@@ -3194,6 +3220,8 @@ public class Flattener {
 				int ub = m.getDomain()[1];
 				auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 				this.addToSubExpressions(m, auxVariable);
+				if(settings.getAuxVarDetails())
+					this.addToAuxVarList(auxVariable.toString(), m);
 			}
 			
 			productConstraint.setResult(auxVariable);
@@ -3317,6 +3345,8 @@ public class Flattener {
 				//return reifyConstraint(sumConstraint);
 				this.constraintBuffer.add(sumConstraint);
                 addToSubExpressions(sum,auxVariable);
+                if(settings.getAuxVarDetails())
+					this.addToAuxVarList(auxVariable.toString(), sum);
                 //System.out.println("Finished flattening the sum:"+sum);
                 //System.out.println("END");
 				return auxVariable;
@@ -3533,6 +3563,16 @@ public class Flattener {
 			else arg1 = argument;
 			
 			Expression arg2 = positiveArgs.remove(0);
+			
+			// test for common subexpressions
+			Sum sum = new Sum(new Expression[] {arg1, arg2},
+					                 new Expression[0]);
+			if(this.hasCommonSubExpression(sum)) {
+				Expression auxVar = this.getCommonSubExpression(sum);
+				return flattenSumToPartWiseBinarySumConstraint(positiveArgs, auxVar, isPositive);
+			}
+
+			
 			SumConstraint sumConstraint = new SumConstraint(new Expression[] {arg1, arg2},
 					                 new Expression[0]);
 			
@@ -3544,6 +3584,10 @@ public class Flattener {
 			ArithmeticAtomExpression auxVariable = new ArithmeticAtomExpression(createAuxVariable(lb,ub));
 			
 			sumConstraint.setResult(auxVariable, Expression.EQ, true);
+			this.addToSubExpressions(auxVariable, sum);
+			if(settings.getAuxVarDetails())
+				this.addToAuxVarList(auxVariable.toString(), sum);
+			
 			this.constraintBuffer.add(sumConstraint);
 			return flattenSumToPartWiseBinarySumConstraint(positiveArgs, auxVariable, isPositive);
 		}
@@ -3610,6 +3654,8 @@ public class Flattener {
 				else { 
 					aux = new ArithmeticAtomExpression(this.createAuxVariable(uminusExpr.getDomain()[0], uminusExpr.getDomain()[1]));
 					this.addToSubExpressions(uminusExpr, aux);
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(aux.toString(), uminusExpr);
 				}
 				
 				
@@ -3634,6 +3680,8 @@ public class Flattener {
 					aux = new ArithmeticAtomExpression(this.createAuxVariable(expression.getDomain()[0], 
 																	          expression.getDomain()[1]));
 					this.addToSubExpressions(expression, aux);
+					if(settings.getAuxVarDetails())
+						this.addToAuxVarList(aux.toString(), expression);
 				}	
 				
 				this.constraintBuffer.add(new AbsoluteConstraint(argument, 
@@ -4087,6 +4135,8 @@ public class Flattener {
 								int upperBound = baseDomain.getRange()[1];
 								auxVariable = new ArithmeticAtomExpression(createAuxVariable(lowerBound, upperBound));
 								addToSubExpressions(atom,auxVariable);
+								if(settings.getAuxVarDetails())
+									this.addToAuxVarList(auxVariable.toString(), atom.copy());
 							}
 							
 							
@@ -4188,6 +4238,8 @@ public class Flattener {
 										int upperBound = baseDomain.getRange()[1];
 										auxVariable = new ArithmeticAtomExpression(createAuxVariable(lowerBound, upperBound));
 										addToSubExpressions(atom,auxVariable);
+										if(settings.getAuxVarDetails())
+											this.addToAuxVarList(auxVariable.toString(), atom.copy());
 									}
 									
 									// prepare  index expression
@@ -4322,6 +4374,8 @@ public class Flattener {
 										auxVariable = new ArithmeticAtomExpression(createAuxVariable(lowerBound, upperBound));
 										
 										addToSubExpressions(atom,auxVariable);
+										if(settings.getAuxVarDetails())
+											this.addToAuxVarList(auxVariable.toString(), atom.copy());
 									}
 									
 									//System.out.println("have an atom expression: "+atom+" with INT col:"+col+" and row:"+rowIndexExpression);
@@ -5533,7 +5587,8 @@ public class Flattener {
 		else  {
 			auxVariable = new ArithmeticAtomExpression(createAuxVariable(0, 1));
 			addToSubExpressions(constraint, auxVariable);
-		
+			if(settings.getAuxVarDetails())
+				this.addToAuxVarList(auxVariable.toString(), constraint);
 		
 		
 		// add the flattened constraint to the constraint buffer
@@ -5574,8 +5629,10 @@ public class Flattener {
 	}
 	 
 	
-
-	
+	private void addToAuxVarList(String s, Expression e) {
+		if(this.settings.getAuxVarDetails())
+			this.auxVarExpressions.put(s,e);
+	}
 	
 	
 	private Array adaptArrayIndicesToSolver(Array array)

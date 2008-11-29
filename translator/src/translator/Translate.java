@@ -44,6 +44,7 @@ public class Translate {
 	public static final String OUTPUT = "out"; //set the output file name/directory
 	public static final String NO_OF_SOLUTIONS = "sols";
 	public static final String CSE_DETAILS = "cse-info"; // get information about the CSEs
+	public static final String AUX_VAR_DETAILS = "aux-info"; // get information about auxiliary variables
 	
 	private static boolean giveTimeInfo = true;
 	private static boolean giveTranslationInfo = true;
@@ -96,6 +97,10 @@ public class Translate {
 				
 				else if(args[i].equalsIgnoreCase("-"+CSE_DETAILS)) {
 					settings.setCseDetails(true);
+				}
+				
+				else if(args[i].equalsIgnoreCase("-"+AUX_VAR_DETAILS)) {
+					settings.setAuxVarDetails(true);
 				}
 				
 				else if(args[i].equalsIgnoreCase("-"+TIME_OFF)) {
@@ -569,6 +574,10 @@ public class Translate {
 		System.out.println("\tDefault: off");
 		System.out.println("-"+CSE_DETAILS);
 		System.out.println("\tGive detailed information about common subexpression elimination");
+		System.out.println("\tDefault: off.");
+		System.out.println("-"+AUX_VAR_DETAILS);
+		System.out.println("\tFor each auxiliary variable, write the expression it represents");
+		System.out.println("\tnext to its definition in the solver input file");
 		System.out.println("\tDefault: off.");
 
 	}
