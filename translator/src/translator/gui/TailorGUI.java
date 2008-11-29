@@ -757,10 +757,12 @@ public class TailorGUI extends javax.swing.JFrame {
         JMenuItem ecseDetection = new JCheckBoxMenuItem("Elimination of Compound Common Subexpressions");
         JMenuItem directVarReusage = new JCheckBoxMenuItem("Directly Reuse Equivalent Variables");
         JMenuItem propagateIntValues = new JCheckBoxMenuItem("Propagate equalities with integer values");
+        JMenuItem giveAuxVarDetails = new JCheckBoxMenuItem("Give detailed information about auxiliary variables");
         cseDetection.setSelected(this.settings.useCommonSubExpressions());
         ecseDetection.setSelected(this.settings.useEqualCommonSubExpressions());
         directVarReusage.setSelected(this.settings.applyDirectVariableReusage());
         propagateIntValues.setSelected(this.settings.applyStrictCopyPropagation());
+        giveAuxVarDetails.setSelected(this.settings.getAuxVarDetails());
         cseDetection.addActionListener(new java.awt.event.ActionListener() {
 			  public void actionPerformed (ActionEvent e) {
 		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
@@ -785,7 +787,12 @@ public class TailorGUI extends javax.swing.JFrame {
 		          settings.setApplyStrictCopyPropagation(item.isSelected());
 			  }
 			});
-        
+        giveAuxVarDetails.addActionListener(new java.awt.event.ActionListener() {
+			  public void actionPerformed (ActionEvent e) {
+		          JCheckBoxMenuItem item = (JCheckBoxMenuItem) e.getSource();
+		          settings.setAuxVarDetails(item.isSelected());
+			  }
+			});
         //JMenu minionTranslationSettings = new JMenu("Minion");
         
         JMenu gecodeTranslationSettings = new JMenu("Gecode");
@@ -806,6 +813,7 @@ public class TailorGUI extends javax.swing.JFrame {
         translationSettings.add(ecseDetection);
         translationSettings.add(directVarReusage);
         translationSettings.add(propagateIntValues);
+        translationSettings.add(giveAuxVarDetails);
         //settingsMenu.add(translationSettings);
         menuBar.add(translationSettings);
         
