@@ -1336,7 +1336,14 @@ public class MinionTailor {
 				//MinionAtom[] negatives = new MinionAtom[negativeArgs.length];
 				for(int i=0; i<negativeArgs.length; i++) {
 					Expression argument = negativeArgs[i];
-					if(argument instanceof Multiplication) {
+					if(argument.getType() == Expression.INT ) {
+						negativeArgs[i] = new ArithmeticAtomExpression(-((ArithmeticAtomExpression) argument).getConstant());
+					}
+					else if(argument.getType() == Expression.BOOL) {
+						negativeArgs[i] = ((RelationalAtomExpression) argument).getBool() ? 
+								new ArithmeticAtomExpression(-1) : new ArithmeticAtomExpression(0);
+					}
+					else if(argument instanceof Multiplication) {
 						Multiplication mul = (Multiplication) argument;
 						if(mul.getArguments().size() != 2)
 							throw new MinionException("Flattening error. Cannot tailor non-binary multiplication '"+argument

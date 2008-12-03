@@ -1,6 +1,6 @@
 language ESSENCE' 1.b.a
 
-$ Knight's tour
+$ Knight's tour Basic Model
 $
 $ the steps are collected as a sequence of fields,
 $ where the fields on the board are enumerated as 
@@ -19,6 +19,8 @@ $ (div n) returns the row; we get the value with:
 $ column + row * n
 $ The column-values range from (0..n-1) and
 $ the row values range from (0..n-1).
+$
+$ by Andrea Rendl
 
 given n: int
 given startCol,startRow : int(0..n-1)

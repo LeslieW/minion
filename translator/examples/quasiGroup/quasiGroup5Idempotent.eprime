@@ -4,6 +4,7 @@ $ An m order quasigroup  is an mxm multiplication table of integers 1..m,
 $ where each element occurrs exactly once in each row and column and certain 
 $ multiplication axioms hold (in this case, we want axiom 5 to hold). 
 $
+$ by Ian Miguel
 
 ESSENCE' 1.0
 given n : int(1..1000)

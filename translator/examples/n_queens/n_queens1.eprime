@@ -3,9 +3,7 @@ $
 $ Place n queens on a nxn chessboard
 $ without attacking each other
 $
-$ This model introduces a far smaller
-$ amount of auxiliary variables
-$
+
 ESSENCE' 1.0
 given      n : int(1..1000)
 letting    AMOUNT_QUEENS be domain int(0..n-1)

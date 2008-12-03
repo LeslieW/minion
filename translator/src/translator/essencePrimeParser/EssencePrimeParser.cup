@@ -926,6 +926,18 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 					  RESULT = new Minimum( (Expression) e,
 					                         isMaximum ); 
 					 :}
+					 
+				   | MIN LPAREN expression:e1 COMMA expression:e2 RPAREN 
+				     {: 
+				       boolean isMaximum = false;
+				       RESULT = new BinaryMinimum( (Expression) e1, (Expression) e2, isMaximum);	 
+					 :}
+					 
+				   | MAX LPAREN expression:e1 COMMA expression:e2 RPAREN 
+				     {: 
+				       boolean isMaximum = true;
+				       RESULT = new BinaryMinimum( (Expression) e1, (Expression) e2, isMaximum);	 
+					 :}	 
 
 				   | MAX LPAREN variable_array:va RPAREN
 			  		{: 

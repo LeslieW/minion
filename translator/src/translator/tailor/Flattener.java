@@ -1320,7 +1320,23 @@ public class Flattener {
 			return this.flattenDirectMinimum(rightExpression, leftExpression, expression);
 		}
 		
+		else if(rightExpression instanceof BinaryMinimum && 
+				  expression.getOperator() == Expression.EQ && 
+				   (!expression.isGonnaBeFlattenedToVariable() || 
+						   this.targetSolver.supportsReificationOf(Expression.MIN))) {
+			return flattenDirectBinaryMinimum(leftExpression, 
+					                          (BinaryMinimum) rightExpression,
+					                           expression);
+		}
 		
+		else if(leftExpression instanceof BinaryMinimum && 
+				  expression.getOperator() == Expression.EQ && 
+				   (!expression.isGonnaBeFlattenedToVariable() || 
+						   this.targetSolver.supportsReificationOf(Expression.MIN))) {
+			return flattenDirectBinaryMinimum(rightExpression, 
+					                          (BinaryMinimum) leftExpression,
+					                           expression);
+		}
 		
 		// -------------------------------------------
 		
@@ -2240,6 +2256,7 @@ public class Flattener {
 		reducedSum = reducedSum.reduceExpressionTree();
 		reducedSum.orderExpression();
 	
+	
 		if(!quantifiedSum.isNested()) 
 			reducedSum.setIsNotNested();
 		
@@ -2922,8 +2939,13 @@ public class Flattener {
 			return flattenNonCommArithm((NonCommutativeArithmeticBinaryExpression) expression);
 		}
 		
+		if(expression instanceof BinaryMinimum)
+			return flattenBinaryMinimum((BinaryMinimum) expression);
+		
+		
 		return expression;
 	}
+	
 	
 	
 	/**
@@ -3296,6 +3318,9 @@ public class Flattener {
 		sum = flattenQuantifiedSumArguments(sum);
 		//System.out.println("Flattened the sum:"+sum);
 		sum.reduceExpressionTree();
+		//Expression e =  sum.evaluate();
+		//if(e.getType() == Expression.INT) 
+		//  	return e;
 		
 		// convert to a sum constraint
 		if(sum.willBeConvertedToASumConstraint()) {		
@@ -4862,6 +4887,92 @@ public class Flattener {
 		
 		throw new TailorException("Interal error: cannot tailor expression '"+expression+
 				"' to a partwise element-constraint.");
+	}
+	
+	
+	
+	private Expression flattenDirectBinaryMinimum(Expression result, 
+			                           BinaryMinimum minimum,
+			                           Expression expression) 
+	throws TailorException,Exception {
+		
+		result = flattenExpression(result);
+		Expression leftArg = minimum.getLeftArgument();
+		Expression rightArg = minimum.getRightArgument();
+		
+		leftArg.willBeFlattenedToVariable(true);
+		rightArg.willBeFlattenedToVariable(true);
+		
+		leftArg = flattenExpression(leftArg);
+		rightArg = flattenExpression(rightArg);
+		
+		if(!(leftArg instanceof AtomExpression))
+			throw new TailorException("Flattening error: expected atom expression"+
+					" instead of: "+leftArg+" in "+expression);
+		
+		if(!(rightArg instanceof AtomExpression))
+			throw new TailorException("Flattening error: expected atom expression"+
+					" instead of: "+rightArg+" in "+expression);
+		
+		VariableArray array = new VariableArray(new AtomExpression[] {
+											(AtomExpression) leftArg,
+											(AtomExpression) rightArg } );
+		
+		return new MinimumConstraint(array,result,minimum.isMaximum());
+	}
+	
+	
+	/**
+	 * Flattening a minimum/max constraint always results in a 
+	 * variable. Hence this mehtod returns a variable
+	 * 
+	 * @param minimum
+	 * @return
+	 * @throws TailorException
+	 * @throws Exception
+	 */
+	private Expression flattenBinaryMinimum(BinaryMinimum minimum) 
+		throws TailorException, Exception {
+		
+		
+		if(this.hasCommonSubExpression(minimum)) {
+			return this.getCommonSubExpression(minimum);
+		}
+		
+		Expression leftArg = minimum.getLeftArgument();
+		Expression rightArg = minimum.getRightArgument();
+		
+		Expression auxVar = new ArithmeticAtomExpression(this.createAuxVariable(minimum.getDomain()[0], 
+				                                   minimum.getDomain()[1]));
+		
+		this.addToSubExpressions(minimum, auxVar);
+		if(this.settings.getAuxVarDetails())
+			this.addToAuxVarList(auxVar.toString(), minimum);
+		
+		leftArg.willBeFlattenedToVariable(true);
+		rightArg.willBeFlattenedToVariable(true);
+		
+		leftArg = flattenExpression(leftArg);
+		rightArg = flattenExpression(rightArg);
+		
+		if(!(leftArg instanceof AtomExpression))
+			throw new TailorException("Flattening error: expected atom expression"+
+					" instead of: "+leftArg+" in "+minimum);
+		
+		if(!(rightArg instanceof AtomExpression))
+			throw new TailorException("Flattening error: expected atom expression"+
+					" instead of: "+rightArg+" in "+minimum);
+		
+		VariableArray array = new VariableArray(new AtomExpression[] {
+											(AtomExpression) leftArg,
+											(AtomExpression) rightArg } );
+		
+		MinimumConstraint minConstraint = new MinimumConstraint(array,
+				                                                auxVar,
+				                                                minimum.isMaximum());
+		this.constraintBuffer.add(minConstraint);
+		
+		return auxVar;
 	}
 	
 	

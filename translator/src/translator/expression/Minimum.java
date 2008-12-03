@@ -7,6 +7,7 @@ public class Minimum implements UnaryArithmeticExpression {
 	/** just used for parsing */
 	private Expression expression;
 	
+	
 	boolean willBeFlattened = false;
 	boolean isNested = true;
 	
@@ -21,7 +22,8 @@ public class Minimum implements UnaryArithmeticExpression {
 		this.expression = argument;
 		this.isMaximum = isMaximum;
 	}
-			       
+		
+	
 	//=============== INHERITED METHODS ===================
 	
 	public Expression getArgument() {

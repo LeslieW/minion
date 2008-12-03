@@ -83,6 +83,8 @@ public interface Expression {
 	public final int MINUS = 111;
 	public final int MIN = 120;
 	public final int MAX = 121;
+	public final int MIN_BIN = 123;
+	public final int MAX_BIN = 124;
 	
 	//public final int SUM = 200;
 	
