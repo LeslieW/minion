@@ -1375,11 +1375,13 @@ public class MinionTailor {
 					else if(!(argument instanceof AtomExpression)) 
 						throw new MinionException("Flattening error. Cannot tailor non atomic argument '"+argument
 								+"' in sum:"+sumConstraint);
-					else {
+					/*else {
+						
+						
 						MinionConstraint arg = toMinion(argument);
 						if(!(arg instanceof MinionAtom)) 
 							throw new MinionException("Flattening error. Cannot tailor non atomic argument '"+arg
-								+"' in sum:"+sumConstraint);
+								+"' in sum:"+sumConstraint);1
 						if(this.hasCommonSubExpression(new UnaryMinus(argument))) {
 							negativeArgs[i] = this.getCommonSubExpression(new UnaryMinus(argument));
 						}	
@@ -1394,7 +1396,9 @@ public class MinionTailor {
 													                   (MinionAtom) arg));
 							negativeArgs[i] = auxVar;
 						}
-					}
+						
+						
+					}*/
 				}
 				
 				
