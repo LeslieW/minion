@@ -264,8 +264,81 @@ public class GlobalCardinality implements GlobalConstraint {
 		if(this.values != null)
 			this.values = this.values.insertDomainForVariable(domain, variableName);
 		
+		if(this.capacitiesArrayName != null && 
+				this.capacitiesArrayName.equals(variableName)) {
+			this.capacities = createNewVariable(variableName, domain);
+		}
+		else if(this.valuesArrayName != null && 
+				this.valuesArrayName.equals(variableName)) {
+			this.values = createNewVariable(variableName, domain);
+		}
+		
 		return this;
 	}
+	
+	
+	private Expression createNewVariable(String variableName, Domain domain) {
+		
+		
+		if(domain instanceof BoolDomain) {
+			return new RelationalAtomExpression(new SingleVariable(variableName, domain));
+		}
+		
+		else if(domain instanceof ArrayDomain)  {
+			ArrayDomain arrayDomain = (ArrayDomain) domain;
+			Domain[] indexDomains = arrayDomain.getIndexDomains();
+			BasicDomain[] basicDomains = new BasicDomain[arrayDomain.getIndexDomains().length];
+			
+			for(int i=0; i<basicDomains.length; i++) {
+				
+				try {
+					if(indexDomains[i] instanceof BasicDomain)
+						basicDomains[i] = (BasicDomain) indexDomains[i];
+					else throw new Exception("Infeasible array domain: "+domain+". Cannot use domain '"+indexDomains[i]+
+							"' as an index domain. Expected a range or identifier.");
+					} catch (Exception e) {
+						e.printStackTrace(System.out);
+						System.exit(1);
+				}
+					
+			}
+			
+			return new SimpleArray(variableName,
+									basicDomains,
+									arrayDomain.getBaseDomain());
+		}
+		
+		else if(domain instanceof ConstantArrayDomain) {
+			ConstantArrayDomain arrayDomain = (ConstantArrayDomain) domain;
+			Domain[] indexDomains = arrayDomain.getIndexDomains();
+			BasicDomain[] basicDomains = new BasicDomain[arrayDomain.getIndexDomains().length];
+			
+			for(int i=0; i<basicDomains.length; i++) {
+				
+				try {
+					if(indexDomains[i] instanceof BasicDomain)
+						basicDomains[i] = (BasicDomain) indexDomains[i];
+					else throw new Exception("Infeasible array domain: "+domain+". Cannot use domain '"+indexDomains[i]+
+							"' as an index domain. Expected a range or identifier.");
+					} catch (Exception e) {
+						e.printStackTrace(System.out);
+						System.exit(1);
+				}
+					
+			}
+			
+			return new SimpleArray(variableName,
+									basicDomains,
+									arrayDomain.getBaseDomain());
+		}
+		
+		
+		else 
+			return new ArithmeticAtomExpression(new SingleVariable(variableName, domain));
+	}
+		
+	
+	
 
 	public Expression insertValueForVariable(int value, String variableName) {
 		for(int i=0; i<this.capacitiesList.size(); i++)
@@ -356,6 +429,7 @@ public class GlobalCardinality implements GlobalConstraint {
 		
 		if(this.capacitiesArrayName != null && 
 				this.capacitiesArrayName.equals(variableName)) {
+			System.out.println("Replace variable "+variableName+" with expression "+expression);
 			this.capacities = expression;
 			this.capacitiesArrayName = null;
 		}

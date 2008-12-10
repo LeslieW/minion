@@ -341,6 +341,12 @@ public class MinionTailor {
 					
 					return new MinionGCC(vars, vals, caps);
 				}
+				else if(capacities instanceof Array) {
+					MinionArray caps = this.toMinionArray((Array) capacities);
+					
+					return new MinionGCC(vars, vals, caps);
+				}
+				
 			    else throw new MinionException
 					("Cannot tailor "+gcc+" to Minion yet, sorry."+
 							"The capacity values have to be integers at the moment.");
