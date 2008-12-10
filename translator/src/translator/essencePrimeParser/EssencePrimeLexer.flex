@@ -61,6 +61,7 @@ Header  = "ESSENCE'"{WhiteSpace}"1.0"  | "language"{WhiteSpace}"ESSENCE'"{WhiteS
 <YYINITIAL> "false"              { return getSymbol(sym.FALSE); }
 <YYINITIAL> "find"               { return getSymbol(sym.FIND); }
 <YYINITIAL> "forall"             { return getSymbol(sym.FORALL); }
+<YYINITIAL> "gcc"                { return getSymbol(sym.GCC); }
 <YYINITIAL> "given"          	 { return getSymbol(sym.GIVEN); }
 <YYINITIAL> "int"                { return getSymbol(sym.INT); }
 <YYINITIAL> "is domain"          { return getSymbol(sym.BE_DOMAIN); }

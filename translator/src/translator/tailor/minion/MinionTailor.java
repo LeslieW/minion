@@ -317,9 +317,43 @@ public class MinionTailor {
 		if(constraint instanceof MinimumConstraint)
 			return toMinion(( MinimumConstraint) constraint);
 		
+		if(constraint instanceof GlobalCardinality) 
+			return toMinionGCC((GlobalCardinality) constraint);
+		
 		throw new MinionException("Cannot tailor expression of type "+constraint.getClass()+" to Minion yet:"+constraint);
 	}
 	
+	
+	private MinionConstraint toMinionGCC(GlobalCardinality gcc) 
+		throws MinionException {
+		
+		Expression variables = gcc.getVariables();
+		if(variables instanceof Array) {
+			MinionArray vars = this.toMinionArray((Array) variables);
+			
+			Expression values = gcc.getValues();
+			if(values instanceof ConstantVector) {
+				int[] vals = ((ConstantVector) values).getElements();
+				
+				Expression capacities = gcc.getCapacities();
+				if(capacities instanceof ConstantVector) {
+					int[] caps = ((ConstantVector) capacities).getElements();
+					
+					return new MinionGCC(vars, vals, caps);
+				}
+			    else throw new MinionException
+					("Cannot tailor "+gcc+" to Minion yet, sorry."+
+							"The capacity values have to be integers at the moment.");
+			}
+				
+			else throw new MinionException
+				("Cannot tailor "+gcc+" to Minion yet, sorry."+
+						"The values of the 2nd argument have to be integers at the moment.");
+		}
+		
+		
+		throw new MinionException("Cannot tailor "+gcc+" to Minion, sorry.");
+	}
 	
 	/**
 	 * Tailors new table constraints

@@ -150,11 +150,11 @@ parser code {:
 /* keywords */
 terminal	   ALLDIFF, ATLEAST, ATMOST;
 terminal	   BE, BE_DOMAIN, BE_NEW_TYPE;
-terminal	   ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL;
+terminal	   ENUM, EXISTS, ELEMENT, FALSE, FIND, FORALL, GCC;
 terminal 	   GIVEN, HEADER, INT, LETTING, MATRIX_INDEXED_BY;
 terminal	   MAXIMISING, MAX, MINIMISING, MIN, MODULO;
 terminal 	   OCCURRENCE, OF, SUCH_THAT, SUM, TABLE; 
-terminal            TRUE, WHERE;
+terminal       TRUE, WHERE;
 
 
 /* separators  */
@@ -1002,8 +1002,244 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 		                                    );
 		             
 		             :} 
-	           
-;
+		             
+		             /* global cardinality constraint */
+		           /*| GCC LPAREN expression:vars COMMA 
+		                                LBRACK expression_list:values RBRACK 
+		                                             COMMA LBRACK expression_list:capacities RBRACK RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (ArrayList<Expression>) values,
+		                                                (ArrayList<Expression>) capacities);
+		             
+		             :}
+		             */
+		             
+		           /*| GCC LPAREN expression:vars COMMA 
+		                                variable_array:values 
+		                                             COMMA LBRACK expression_list:capacities RBRACK RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (VariableArray) values,
+		                                                (ArrayList<Expression>) capacities);
+		             
+		             :}
+		             */
+		             
+		           /*| GCC LPAREN expression:vars COMMA 
+		                                constant_vector:values 
+		                                             COMMA LBRACK expression_list:capacities RBRACK RPAREN
+		             {: 
+		               ArrayList<Integer> integers = (ArrayList<Integer>) values;
+		               int[] ints = new int[integers.size()];
+		               for(int i=0; i<ints.length; i++) {
+		                  ints[i] = integers.get(i);
+		               }
+		               
+		               ConstantVector constVector = new ConstantVector("hugsi", ints);
+		               
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                constVector,
+		                                                (ArrayList<Expression>) capacities);
+		             
+		             :}
+		             */
+		             //===================================
+		             
+		             
+		           /*| GCC LPAREN expression:vars COMMA 
+		                              IDENTIFIER:values COMMA 
+		                                    LBRACK expression_list:capacities RBRACK RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (String) values,
+		                                                (ArrayList<Expression>) capacities);
+		             
+		             :}
+		             */
+		             
+		           | GCC LPAREN expression:vars COMMA 
+		                              IDENTIFIER:values COMMA 
+		                                    variable_array:capacities RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (String) values,
+		                                                (VariableArray) capacities);
+		             
+		             :}
+		             
+		           
+		           | GCC LPAREN expression:vars COMMA 
+		                              IDENTIFIER:values COMMA 
+		                                    constant_vector:capacities RPAREN
+		             {: 
+		               ArrayList<Integer> integers = (ArrayList<Integer>) capacities;
+		               int[] ints = new int[integers.size()];
+		               for(int i=0; i<ints.length; i++) {
+		                  ints[i] = integers.get(i);
+		               }
+		               
+		               ConstantVector constVector = new ConstantVector("hugsi", ints);
+		             
+		             
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (String) values,
+		                                                constVector);
+		             
+		             :}
+		             
+		           
+		             
+		             //===================================
+		             
+		          /*| GCC LPAREN expression:vars COMMA 
+		                     LBRACK expression_list:values RBRACK COMMA 
+		                                            IDENTIFIER:capacities RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (ArrayList<Expression>)  values,
+		                                                (String) capacities);
+		             
+		             :}
+		          */
+		          | GCC LPAREN expression:vars COMMA 
+		                     variable_array:values COMMA 
+		                                            IDENTIFIER:capacities RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (VariableArray)  values,
+		                                                (String) capacities);
+		             
+		             :}
+		          
+		          
+		          | GCC LPAREN expression:vars COMMA 
+		                     constant_vector:values COMMA 
+		                                            IDENTIFIER:capacities RPAREN
+		             {: 
+		               
+		               ArrayList<Integer> integers = (ArrayList<Integer>) values;
+		               int[] ints = new int[integers.size()];
+		               for(int i=0; i<ints.length; i++) {
+		                  ints[i] = integers.get(i);
+		               }
+		               
+		               ConstantVector constVector = new ConstantVector("hugsi", ints);         
+		               
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                constVector,
+		                                                (String) capacities);
+		             
+		             :}
+		             
+		             //===================================
+		             
+		          | GCC LPAREN expression:vars COMMA 
+		                             IDENTIFIER:values COMMA 
+		                                            IDENTIFIER:capacities RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (String)  values,
+		                                                (String) capacities);
+		             
+		             :}
+		             
+		        /*  | GCC LPAREN expression:vars COMMA 
+		                             variable_array:values COMMA 
+		                                            IDENTIFIER:capacities RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (VariableArray)  values,
+		                                                (String) capacities);
+		             
+		             :}
+		    
+		          | GCC LPAREN expression:vars COMMA 
+		                             expression_list:values COMMA 
+		                                            constant_vector:capacities RPAREN
+		             {: 
+		             
+		               ArrayList<Integer> integers = (ArrayList<Integer>) capacities;
+		               int[] ints = new int[integers.size()];
+		               for(int i=0; i<ints.length; i++) {
+		                  ints[i] = integers.get(i);
+		               }
+		               
+		               ConstantVector constVector = new ConstantVector("hugsi", ints);
+		             
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (ArrayList<Expression>) values,
+		                                                constVector);
+		             
+		             :}
+		          */   
+		         
+		          | GCC LPAREN expression:vars COMMA 
+		                             variable_array:values COMMA 
+		                                            constant_vector:capacities RPAREN
+		             {: 
+		             
+		               ArrayList<Integer> integers = (ArrayList<Integer>) capacities;
+		               int[] ints = new int[integers.size()];
+		               for(int i=0; i<ints.length; i++) {
+		                  ints[i] = integers.get(i);
+		               }
+		               
+		               ConstantVector constVector = new ConstantVector("hugsi", ints);
+		             
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (VariableArray) values,
+		                                                constVector);
+		             
+		             :}
+		             
+		             
+		         | GCC LPAREN expression:vars COMMA 
+		                             constant_vector:values COMMA 
+		                                            variable_array:capacities RPAREN
+		             {: 
+		             
+		               ArrayList<Integer> integers = (ArrayList<Integer>) values;
+		               int[] ints = new int[integers.size()];
+		               for(int i=0; i<ints.length; i++) {
+		                  ints[i] = integers.get(i);
+		               }
+		               
+		               ConstantVector constVector = new ConstantVector("hugsi", ints);
+		             
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                constVector, 
+		                                                (VariableArray) capacities);
+		             
+		             :}
+		             
+		             
+		         | GCC LPAREN expression:vars COMMA 
+		                             constant_vector:values COMMA 
+		                                            constant_vector:capacities RPAREN
+		             {: 
+		               ArrayList<Integer> integers1 = (ArrayList<Integer>) values;
+		               int[] ints1 = new int[integers1.size()];
+		               for(int i=0; i<ints1.length; i++) {
+		                  ints1[i] = integers1.get(i);
+		               }
+		               
+		               ConstantVector constVector1 = new ConstantVector("hugsi1", ints1);
+		               
+		               ArrayList<Integer> integers2 = (ArrayList<Integer>) capacities;
+		               int[] ints2 = new int[integers2.size()];
+		               for(int i=0; i<ints2.length; i++) {
+		                  ints2[i] = integers2.get(i);
+		               }
+		               
+		               ConstantVector constVector2 = new ConstantVector("hugsi2", ints2);
+		               
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                constVector1,
+		                                                constVector2);
+		             
+		             :}
+;//===================================
 
 
 

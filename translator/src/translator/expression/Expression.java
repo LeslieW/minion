@@ -108,6 +108,7 @@ public interface Expression {
 	public final int ATMOST_CONSTRAINT = 223;
 	public final int ATLEAST_CONSTRAINT = 224;
 	public final int OCCURRENCE = 225;
+	public final int GLOBAL_CARDINALITY = 226;
 	
 	public final int REIFICATION = 250;
 	

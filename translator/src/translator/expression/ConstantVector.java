@@ -144,7 +144,8 @@ public class ConstantVector implements ConstantArray {
 	
 	
 	public Expression insertDomainForVariable(Domain domain, String variableName) throws Exception {
-		this.domain = this.domain.replaceVariableWithDomain(variableName, domain);
+		if(this.domain != null)
+			this.domain = this.domain.replaceVariableWithDomain(variableName, domain);
 		return this;
 	}
 	

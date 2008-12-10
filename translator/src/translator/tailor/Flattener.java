@@ -212,6 +212,9 @@ public class Flattener {
 		else if(expression instanceof Array)
 			return expression;  // TODO: here we will need to flatten in case the target solver does not support arrays
 		
+		
+		else if(expression instanceof ConstantArray)
+			return expression;
 		//else if(expression instanceof ArrayVariable) {
 		//	return flattenSimpleArrayVariable((ArrayVariable) expression);
 		//}
@@ -354,6 +357,9 @@ public class Flattener {
 		else if(expression instanceof TableConstraintNew) 
 			return flattenTableConstraintNew(expression);
 		
+		else if(expression instanceof GlobalCardinality) 
+			return flattenGCC((GlobalCardinality) expression);
+		
 		else return expression;
 		//else throw new TailorException("Cannot tailor relational expression yet, or unknown expression:"+expression);
 	}
@@ -438,6 +444,35 @@ public class Flattener {
 		}
 		else throw new TailorException("Cannot tailor TABLE constraint: it is not supported by "+this.targetSolver.getSolverName());
 		
+	}
+	
+	/**
+	 * Flatten the arguments of the Global Cardinality Constraint
+	 * 
+	 * @param gcc
+	 * @return
+	 * @throws TailorException
+	 * @throws Exception
+	 */
+	private Expression flattenGCC(GlobalCardinality gcc) 
+		throws TailorException, Exception {
+		
+		Expression variables = gcc.getVariables();
+		gcc.setVariables(flattenExpression(variables));
+		
+		Expression values = gcc.getValues();
+		if(values == null) 
+			throw new TailorException("Cannot tailor constraint:"+gcc+
+					". The 'values' argument is infeasible.");
+		gcc.setValues(flattenExpression(values));
+		
+		Expression capacities = gcc.getCapacities();
+		if(capacities == null)
+			throw new TailorException("Cannot tailor constraint:"+gcc+
+			". The 'capacity' argument is infeasible.");
+		gcc.setCapacities(flattenExpression(capacities));
+		
+		return gcc;
 	}
 	
 	
