@@ -15,7 +15,7 @@ for X in `ls ${XCSP_DIR}/*.xml.bz2`;
   Base=`echo ${X} | cut -f 1 -d'.'`
   Difference=`bzdiff "${X}.minion" "${Base}.xml.minion.expected.bz2"`  
   if [ "$Difference" != "" ]; then
-      echo "ERROR in translating ${X}"
+      echo "ERROR in translating ${X}" && exit 1
   else
       echo "OK: translating ${X}"
       rm ${X}.minion
@@ -31,7 +31,7 @@ for X in `ls ${TEST_DIR}/*.cm`;
   Difference=`diff "${X}.minion" "${X}.minion.expected"`
   
   if [ "$Difference" != "" ]; then
-      echo "ERROR in translating ${X}"
+      echo "ERROR in translating ${X}" && exit 1
   else 
       echo "OK: translating ${X}"
       rm ${X}.minion
@@ -52,7 +52,7 @@ if [ "$parameters" != "" ]; then
       java -jar tailor.jar  -tf -silent -dvr -out $Y.minion $X $Y 
       Difference=`diff "${Y}.minion" "${Y}.minion.expected"`
       if [ "$Difference" != "" ]; then
-	  echo "ERROR in translating ${Y}"
+	  echo "ERROR in translating ${Y}" && exit 1
       else 
 	  echo "OK: translating ${Y}"
 	  rm ${Y}.minion
@@ -67,7 +67,7 @@ else
     Difference=`diff "${X}.minion" "${X}.minion.expected"` 
     
     if [ "$Difference" != "" ]; then
-	echo "ERROR in translating ${X}"
+	echo "ERROR in translating ${X}" && exit 1
     else 
 	echo "OK: translating ${X}"
         rm ${X}.minion
