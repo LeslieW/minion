@@ -163,44 +163,43 @@ $ ),
 $ ----------------------------------------------------------------
 $ legal transitions
 
-$forall step : int(0..noSteps-1) .
-$      forall f : FIELDS .
+forall step : int(0..noSteps-1) .
+      forall f : FIELDS .
 
-$      (bState[step, f] = bState[step+1,f]) <=>
+      (bState[step, f] = bState[step+1,f]) <=>
 
-$      (forall f1 : FIELDS .
-$            (moves[step] != transitionNumber[f,f1]) /\
-$            (moves[step] != transitionNumber[f1,f]) /\
+      (forall f1 : FIELDS .
+            (moves[step] != transitionNumber[f,f1]) /\
+            (moves[step] != transitionNumber[f1,f]) /\
 
-$            forall f2 : FIELDS .
+            forall f2 : FIELDS .
       
-$            (f1 < f2) =>
+            (f1 < f2) =>
        
-$            ((( transitionNumber[f1,f2] != 0) => 
-$                ((f = transitionStep[transitionNumber[f1,f2],2]) =>
-$                  (moves[step] != transitionNumber[f1,f2])
-$                )
-$             ) /\
+            ((( transitionNumber[f1,f2] != 0) => 
+                ((f = transitionStep[transitionNumber[f1,f2],2]) =>
+                  (moves[step] != transitionNumber[f1,f2])
+                )             ) /\
 
-$           (( transitionNumber[f2,f1] != 0) => 
-$                ( (f = transitionStep[transitionNumber[f2,f1],2]) => 
-$                  (moves[step] != transitionNumber[f2,f1])
-$		)
-$           ))
-$      ),
-
+           (( transitionNumber[f2,f1] != 0) => 
+                ( (f = transitionStep[transitionNumber[f2,f1],2]) => 
+                  (moves[step] != transitionNumber[f2,f1])
+		)
+           ))
+      ),
 
 
 
-$forall step : int(0..noSteps-1) .
-$    forall f : FIELDS .
+
+forall step : int(0..noSteps-1) .
+    forall f : FIELDS .
     
         $ 0 -> 1
-$        (bState[step,f] < bState[step+1,f]) <=>
+        (bState[step,f] < bState[step+1,f]) <=>
       
-$	    exists f1 : FIELDS .
-$            (transitionNumber[f1,f] != 0) /\
-$            (moves[step] = transitionNumber[f1,f]),   
+	    exists f1 : FIELDS .
+            (transitionNumber[f1,f] != 0) /\
+            (moves[step] = transitionNumber[f1,f]),   
 
 
 forall step : int(0..noSteps-1) .

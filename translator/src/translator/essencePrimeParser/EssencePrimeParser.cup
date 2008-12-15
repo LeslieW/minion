@@ -1004,59 +1004,8 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 		             :} 
 		             
 		             /* global cardinality constraint */
-		           /*| GCC LPAREN expression:vars COMMA 
-		                                LBRACK expression_list:values RBRACK 
-		                                             COMMA LBRACK expression_list:capacities RBRACK RPAREN
-		             {: 
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                (ArrayList<Expression>) values,
-		                                                (ArrayList<Expression>) capacities);
-		             
-		             :}
-		             */
-		             
-		           /*| GCC LPAREN expression:vars COMMA 
-		                                variable_array:values 
-		                                             COMMA LBRACK expression_list:capacities RBRACK RPAREN
-		             {: 
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                (VariableArray) values,
-		                                                (ArrayList<Expression>) capacities);
-		             
-		             :}
-		             */
-		             
-		           /*| GCC LPAREN expression:vars COMMA 
-		                                constant_vector:values 
-		                                             COMMA LBRACK expression_list:capacities RBRACK RPAREN
-		             {: 
-		               ArrayList<Integer> integers = (ArrayList<Integer>) values;
-		               int[] ints = new int[integers.size()];
-		               for(int i=0; i<ints.length; i++) {
-		                  ints[i] = integers.get(i);
-		               }
-		               
-		               ConstantVector constVector = new ConstantVector("hugsi", ints);
-		               
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                constVector,
-		                                                (ArrayList<Expression>) capacities);
-		             
-		             :}
-		             */
 		             //===================================
 		             
-		             
-		           /*| GCC LPAREN expression:vars COMMA 
-		                              IDENTIFIER:values COMMA 
-		                                    LBRACK expression_list:capacities RBRACK RPAREN
-		             {: 
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                (String) values,
-		                                                (ArrayList<Expression>) capacities);
-		             
-		             :}
-		             */
 		             
 		           | GCC LPAREN expression:vars COMMA 
 		                              IDENTIFIER:values COMMA 
@@ -1067,6 +1016,17 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 		                                                (VariableArray) capacities);
 		             
 		             :}
+		             
+		           | GCC LPAREN expression:vars COMMA 
+		                              IDENTIFIER:values COMMA 
+		                                    atom_expression:capacities RPAREN
+		             {: 
+		               RESULT =  new GlobalCardinality( (Expression) vars,
+		                                                (String) values,
+		                                                (AtomExpression) capacities);
+		             
+		             :}
+		             
 		             
 		           
 		           | GCC LPAREN expression:vars COMMA 
@@ -1092,16 +1052,6 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 		             
 		             //===================================
 		             
-		          /*| GCC LPAREN expression:vars COMMA 
-		                     LBRACK expression_list:values RBRACK COMMA 
-		                                            IDENTIFIER:capacities RPAREN
-		             {: 
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                (ArrayList<Expression>)  values,
-		                                                (String) capacities);
-		             
-		             :}
-		          */
 		          | GCC LPAREN expression:vars COMMA 
 		                     variable_array:values COMMA 
 		                                            IDENTIFIER:capacities RPAREN
@@ -1144,35 +1094,6 @@ global_constraint ::= ALLDIFF LPAREN atom_expression:e RPAREN
 		             
 		             :}
 		             
-		        /*  | GCC LPAREN expression:vars COMMA 
-		                             variable_array:values COMMA 
-		                                            IDENTIFIER:capacities RPAREN
-		             {: 
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                (VariableArray)  values,
-		                                                (String) capacities);
-		             
-		             :}
-		    
-		          | GCC LPAREN expression:vars COMMA 
-		                             expression_list:values COMMA 
-		                                            constant_vector:capacities RPAREN
-		             {: 
-		             
-		               ArrayList<Integer> integers = (ArrayList<Integer>) capacities;
-		               int[] ints = new int[integers.size()];
-		               for(int i=0; i<ints.length; i++) {
-		                  ints[i] = integers.get(i);
-		               }
-		               
-		               ConstantVector constVector = new ConstantVector("hugsi", ints);
-		             
-		               RESULT =  new GlobalCardinality( (Expression) vars,
-		                                                (ArrayList<Expression>) values,
-		                                                constVector);
-		             
-		             :}
-		          */   
 		         
 		          | GCC LPAREN expression:vars COMMA 
 		                             variable_array:values COMMA 
