@@ -181,8 +181,8 @@ public class GlobalCardinality implements GlobalConstraint {
 		if(this.capacities != null && 
 				this.values != null)
 			return new GlobalCardinality(this.variables.copy(),
-					                     this.capacities.copy(),
-					                     this.values.copy());
+					                     this.values.copy(),
+					                     this.capacities.copy());
 			
 		
 		
