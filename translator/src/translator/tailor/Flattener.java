@@ -1574,7 +1574,7 @@ public class Flattener {
 								arrayVar.setIndexIsAdaptedToSolver(true);
 								
 								rightExpression = new ArithmeticAtomExpression(arrayVar);
-								System.out.println("RIGHT just an array variable: "+rightExpression);
+								//System.out.println("RIGHT just an array variable: "+rightExpression);
 							}
 							
 						}
@@ -1610,14 +1610,18 @@ public class Flattener {
 								leftExpression = flattenExpression(leftExpression);
 								//System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
 								
-								addToSubExpressions(rightExpression, leftExpression);
+								if(!expression.isGonnaBeFlattenedToVariable())
+									addToSubExpressions(rightExpression, leftExpression);
+								
 								elementConstraint.setResultExpression(leftExpression);
-								//System.out.println("Flattened to element constraint: "+elementConstraint);
+								//System.out.println("#### Flattened to element constraint: "+elementConstraint+" and constraint buffer:"+this.constraintBuffer);
 								
 								if(expression.isGonnaBeFlattenedToVariable()) {
 									this.constraintBuffer.add(elementConstraint);
 									return leftExpression;
+									//return this.reifyConstraint(elementConstraint);
 								}
+								
 								else return elementConstraint;
 								
 							} // end else: there are no CSE
@@ -1696,8 +1700,10 @@ public class Flattener {
 										leftExpression.willBeFlattenedToVariable(true);
 									leftExpression = flattenExpression(leftExpression);
 							
-									addToSubExpressions(rightExpression, leftExpression);
+									if(!expression.isGonnaBeFlattenedToVariable())
+										addToSubExpressions(rightExpression, leftExpression);
 									elementConstraint.setResultExpression(leftExpression);
+									
 									if(expression.isGonnaBeFlattenedToVariable()) {
 										this.constraintBuffer.add(elementConstraint);
 										return leftExpression;
@@ -1882,14 +1888,11 @@ public class Flattener {
 			rightExpression.willBeFlattenedToVariable(true);
 		}
 		
-		//leftExpression = flattenExpression(leftExpression);
-		
-		
-		//Expression lExpression  = leftExpression.copy();
-		//Expression rExpression = rightExpression.copy();
-		//leftExpression = leftExpression.reduceExpressionTree();
+		//System.out.println("EXPRESSION: "+expression+" before flattening left part.");
 		leftExpression = flattenExpression(leftExpression);
-		//System.out.println("Constraint Buffer after flattening LEFT:"+leftExpression+" we get last constraint left:"+this.constraintBuffer);
+		//System.out.println("Constraint Buffer after flattening LEFT ("+
+		//		leftExpression+") and constraint buffer is:"+this.constraintBuffer+"\n");
+		
 		
 		
 		
@@ -1956,8 +1959,10 @@ public class Flattener {
 			return new RelationalAtomExpression(true);
 		}
 		
+		//System.out.println("Is expression gonna be flattened? "+expression.isGonnaBeFlattenedToVariable());
 		
-		if((expression.getType() == Expression.EQ || expression.getType() == Expression.IFF) 
+		if(!expression.isGonnaBeFlattenedToVariable() &&
+				(expression.getType() == Expression.EQ || expression.getType() == Expression.IFF) 
 				&& leftReification && rightReification) {
 			
 			Reification l = (Reification) lastConstraintLeft;
