@@ -1531,7 +1531,10 @@ public class Flattener {
 						
 						Expression[] indices = arrayVar.getExpressionIndices();
 						
-						//System.out.println("Right expression 1 "+rightExpression);
+						//System.out.println("### Right expression 1 "+rightExpression+"("+
+						//		rightExpression.getClass().getSimpleName()+
+						//		") and left expression:"+leftExpression+"("+
+						//		leftExpression.getClass().getSimpleName()+")");
 						
 						if(indices != null) {
 							
@@ -1592,8 +1595,17 @@ public class Flattener {
 							if(this.hasCommonSubExpression(arrayVar)) {
 								//System.out.println("The variable has a common subexpression: "+arrayVar);
 								Expression cse = this.getCommonSubExpression(arrayVar);
+								
+								if(!this.targetSolver.supportsConstraintsNestedAsArgumentOf(expression.getOperator()))
+									leftExpression.willBeFlattenedToVariable(true);
+								
 								leftExpression = flattenExpression(leftExpression);
-								return new CommutativeBinaryRelationalExpression(leftExpression, expression.getOperator(),cse);
+								CommutativeBinaryRelationalExpression comm = 
+									new CommutativeBinaryRelationalExpression(leftExpression, expression.getOperator(),cse);
+								
+								if(expression.isGonnaBeFlattenedToVariable())
+									return this.reifyConstraint(comm);
+								else return comm;
 							}
 							else {
 							
@@ -1608,7 +1620,36 @@ public class Flattener {
 								
 								//System.out.println("Left expression is: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
 								leftExpression = flattenExpression(leftExpression);
-								//System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
+								Expression lastFlattenedExpr = this.constraintBuffer.get(this.constraintBuffer.size()-1);
+								//System.out.println("Last flattened expression:"+lastFlattenedExpr+" and type: "+lastFlattenedExpr.getClass().getSimpleName());
+								
+								// check if we have a (element(..,aux1) = element(...,aux2)) case that needs to be reified
+								if(expression.isGonnaBeFlattenedToVariable() &&
+										leftExpression instanceof ArithmeticAtomExpression && 
+										lastFlattenedExpr instanceof ElementConstraint &&
+										((ElementConstraint) lastFlattenedExpr).getValueExpression().toString().equals(leftExpression.toString())) {
+									
+									ArithmeticAtomExpression aux;
+									if(this.hasCommonSubExpression(rightExpression)) {
+										aux = this.getCommonSubExpression(rightExpression);
+									}
+									else {
+										aux = new ArithmeticAtomExpression(this.createAuxVariable(rightExpression.getDomain()[0], 
+												                                                  rightExpression.getDomain()[1]));
+										this.addToSubExpressions(rightExpression, aux);
+										this.addToAuxVarList(aux.toString(), rightExpression);
+									}
+									elementConstraint.setResultExpression(aux);
+									this.constraintBuffer.add(elementConstraint);
+									CommutativeBinaryRelationalExpression comm = new CommutativeBinaryRelationalExpression(leftExpression,
+																															expression.getOperator(),
+																															aux);
+									//System.out.println("Flattened expression to: "+
+									//		comm+" which will be reified");
+									//System.out.println("Constraint buffer is:"+this.constraintBuffer+"\n");
+									return this.reifyConstraint(comm);
+								}
+							//	System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
 								
 								if(!expression.isGonnaBeFlattenedToVariable())
 									addToSubExpressions(rightExpression, leftExpression);
