@@ -396,7 +396,7 @@ public class Translate {
 			
 			String outFileName;
 			if(settings.getSolverInputFileName() == null) {
-				outFileName = parameterFileName+"."+settings.targetSolver.getSolverInputExtension();
+				outFileName = (new File(parameterFileName)).getName()+"."+settings.targetSolver.getSolverInputExtension();
 			}
 			else outFileName = settings.getSolverInputFileName();
 			File solverInputFile = writeStringIntoFile(outFileName,
@@ -632,23 +632,10 @@ public class Translate {
 	
 	private static TranslationSettings readModelName(String filename, TranslationSettings settings) {
 		
-		int positionOfDot = 0;
-		int startOfName = 0;
+		int startOfName = filename.lastIndexOf(File.separatorChar);
+        int endOfName = filename.lastIndexOf('.');
 		
-		for(int i = 0; i < filename.length(); i++) {
-			if(filename.charAt(i) == '/') {
-				startOfName = i;
-			}
-		}
-		
-		
-		for(positionOfDot = 0; positionOfDot < filename.length(); positionOfDot++) {
-			if(filename.charAt(positionOfDot) == '.') {
-				settings.setModelName(filename.substring(startOfName+1,positionOfDot));
-				return settings;
-			}
-		}
-		settings.setModelName(filename.substring(0,positionOfDot));
+		settings.setModelName(filename.substring(startOfName + 1, endOfName));
 		return settings;
 	
 	}
