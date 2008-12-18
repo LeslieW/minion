@@ -1645,12 +1645,12 @@ public class Flattener {
 									CommutativeBinaryRelationalExpression comm = new CommutativeBinaryRelationalExpression(leftExpression,
 																															expression.getOperator(),
 																															aux);
-									System.out.println("Flattened expression to: "+
-											comm+" which will be reified");
-									System.out.println("Constraint buffer is:"+this.constraintBuffer+"\n");
+									//System.out.println("Flattened expression to: "+
+									//		comm+" which will be reified");
+									//System.out.println("Constraint buffer is:"+this.constraintBuffer+"\n");
 									return this.reifyConstraint(comm);
 								}
-								System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
+								//System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
 								
 								if(!expression.isGonnaBeFlattenedToVariable())
 									addToSubExpressions(rightExpression, leftExpression);
