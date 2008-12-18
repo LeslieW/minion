@@ -1624,7 +1624,8 @@ public class Flattener {
 								//System.out.println("Last flattened expression:"+lastFlattenedExpr+" and type: "+lastFlattenedExpr.getClass().getSimpleName());
 								
 								// check if we have a (element(..,aux1) = element(...,aux2)) case that needs to be reified
-								if(expression.isGonnaBeFlattenedToVariable() &&
+								if(( expression.isGonnaBeFlattenedToVariable()
+										 || expression.getOperator() == Expression.NEQ) &&
 										leftExpression instanceof ArithmeticAtomExpression && 
 										lastFlattenedExpr instanceof ElementConstraint &&
 										((ElementConstraint) lastFlattenedExpr).getValueExpression().toString().equals(leftExpression.toString())) {
@@ -1644,12 +1645,12 @@ public class Flattener {
 									CommutativeBinaryRelationalExpression comm = new CommutativeBinaryRelationalExpression(leftExpression,
 																															expression.getOperator(),
 																															aux);
-									//System.out.println("Flattened expression to: "+
-									//		comm+" which will be reified");
-									//System.out.println("Constraint buffer is:"+this.constraintBuffer+"\n");
+									System.out.println("Flattened expression to: "+
+											comm+" which will be reified");
+									System.out.println("Constraint buffer is:"+this.constraintBuffer+"\n");
 									return this.reifyConstraint(comm);
 								}
-							//	System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
+								System.out.println("Flattened Left expression to: "+leftExpression+" of type: "+leftExpression.getClass().getSimpleName());
 								
 								if(!expression.isGonnaBeFlattenedToVariable())
 									addToSubExpressions(rightExpression, leftExpression);
