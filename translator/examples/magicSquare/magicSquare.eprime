@@ -11,9 +11,9 @@ language ESSENCE' 1.b.a
 
 given n : int
 letting N be domain int(1..n)
+letting theSum be (n*(n*n+1))/2
 
 find magicSquare : matrix indexed by [N,N] of int(1..n*n)
-find theSum : int(1..n*n*n)
 
 such that 
 
