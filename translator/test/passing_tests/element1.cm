@@ -1,9 +1,0 @@
-ESSENCE' 1.0
-
-find x : matrix indexed by [int(1..10)] of int(1..10)
-find a,b : int(1..100)
-
-such that
-
-element(x,a,10),
-element(x,a+3, b)

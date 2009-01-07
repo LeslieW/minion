@@ -1,6 +1,0 @@
-ESSENCE' 1.0
-letting RANGE be domain int(0..10)
-given a:RANGE, b:RANGE, c:RANGE
-letting a be 3, b be 4
-find x:RANGE,y:RANGE,z:RANGE
-such that x = a-(b+c)-y, y = a-b+c-z

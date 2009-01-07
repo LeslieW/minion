@@ -1,6 +1,0 @@
-ESSENCE' 1.0
-
-find a,b,c : int(1..10)
-
-such that 
-   a + c + b + 5 + 4 = 10

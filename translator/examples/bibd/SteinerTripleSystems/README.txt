@@ -1,1 +1,0 @@
-Steiner triples are included here, since a Steiner Triple System with n elements is a BIBD(n, n.(n-1)/6, (n-1)/2, 3, 1).

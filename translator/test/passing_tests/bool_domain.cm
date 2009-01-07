@@ -1,4 +1,0 @@
-ESSENCE' 1.0
-given box:int
-find x:int(1..2) , y:bool , z:int(1)
-such that x < 2, y < x

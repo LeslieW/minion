@@ -1,4 +1,0 @@
-ESSENCE' 1.0
-given box:int
-find x:bool , y:bool , z:bool
-such that x = true, x = y, y = false

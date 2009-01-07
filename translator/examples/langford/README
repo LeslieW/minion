@@ -1,9 +1,0 @@
-LANGFORD's NUMBER PROBLEM
-=========================
-
-We have 2 problem models for the Langford 
-Number Problem.
-
-langford2.eprime       special case where length=2
-langfordN.eprime       for general length N
-

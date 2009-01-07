@@ -1,7 +1,0 @@
-language ESSENCE' 1.b.a
-
-letting steps be 9
-
-letting SIZE_A be 10
-letting SIZE_B be 7
-letting SIZE_C be 3

@@ -1,4 +1,0 @@
-ESSENCE' 1.0
-letting RANGE be domain int(1..n)
-find x:RANGE, y:RANGE, z:RANGE
-such that x*y = x+y

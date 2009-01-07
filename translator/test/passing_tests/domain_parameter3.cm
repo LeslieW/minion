@@ -1,7 +1,0 @@
-ESSENCE' 1.0
-given n:int
-letting RANGE be domain bool
-letting A be domain RANGE
-find x:A, y:RANGE
-such that x != y
-

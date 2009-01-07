@@ -1,8 +1,0 @@
-language ESSENCE' 1.b.a
-
-find M : matrix indexed by [int(1..10)] of int(1..30)
-find x : int(1..10)
-
-such that 
-
-element(M,x*2,5)

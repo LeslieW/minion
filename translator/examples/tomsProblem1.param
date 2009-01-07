@@ -1,5 +1,0 @@
-language ESSENCE' 1.b.a
-parameter diagonal is [1,1,1]
-parameter n is 3
-parameter abelian is false
-parameter rank3 is false
