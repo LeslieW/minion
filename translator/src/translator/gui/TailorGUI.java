@@ -39,6 +39,7 @@ import translator.solver.Minion;
 import translator.solver.Gecode;
 import translator.solver.TargetSolver;
 import javax.swing.*;
+import java.util.ArrayList;
 //import java.awt.Color;
 /**
  *
@@ -51,6 +52,21 @@ public class TailorGUI extends javax.swing.JFrame {
 	public final char GECODE_ID = 2;
 	
 	static final long serialVersionUID = 11;
+	
+	// text areas text-format contents (the REAL test)
+	StringBuffer problemText = new StringBuffer();
+	StringBuffer parameterText= new StringBuffer();
+	StringBuffer normalisedText= new StringBuffer();
+	StringBuffer flatText= new StringBuffer();
+	StringBuffer solverText= new StringBuffer();
+	StringBuffer solutionText= new StringBuffer();
+	
+	// Essence keywords to be put into bold font
+	ArrayList<String> essenceBoldKeywords = new ArrayList<String>();
+	ArrayList<String> essenceColourKeywords = new ArrayList<String>();
+	
+	// HTML font string 
+	String HTMLFONT = "<font size = \"3\" face=\"DialogInput, Bookman Old Style, Book Antiqua, Garamond\">";
 	   // actionCommands
 	final String SAVE_PROBLEM = "save_problem";
 	final String SAVE_PARAMETER = "save_parameter";
@@ -279,6 +295,8 @@ public class TailorGUI extends javax.swing.JFrame {
     	String path = "tailorLogo3.png";
     	java.net.URL imgURL = getClass().getResource(path);
     	this.setIconImage(new javax.swing.ImageIcon(imgURL).getImage());
+    	this.initialiseEssenceKeywords();
+    	this.initialiseColourKeywords();
     	
         java.awt.GridBagConstraints gridBagConstraints;
 
@@ -359,13 +377,17 @@ public class TailorGUI extends javax.swing.JFrame {
         problemInputScrollPane.setPreferredSize(new java.awt.Dimension(390, 450));
 
         problemInput.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        problemInput.setContentType("text/plain");
         problemInput.setFont(this.inputFont);
         problemInput.setBackground(this.textAreaColor);
         problemInput.setForeground(this.textAreaFontColor);
         problemInput.setMinimumSize(new java.awt.Dimension(190, 200));
         problemInput.setPreferredSize(new java.awt.Dimension(390, 400));
-        problemInput.setText(this.ESSENCE_PRIME_HEADER+"\n");
-        problemInput.setCaretPosition((this.ESSENCE_PRIME_HEADER+"\n").length());
+        this.problemText = new StringBuffer(this.ESSENCE_PRIME_HEADER+"\n");
+        //String text = new String(problemText);
+        //problemInput.setText(this.createHTMLfromEssence(text));
+        this.problemInput.setText(this.problemText.toString());
+        problemInput.setCaretPosition(problemText.length());
         this.problemInput.addCaretListener( new CaretListener()
 		{
 			public void caretUpdate(CaretEvent e)
@@ -1768,6 +1790,9 @@ protected void translate(String command) {
 	
 	
 	private void writeOnProblemInput(String input) {
+		//this.problemText.replace(0, problemText.length(), input);
+		//String newS = new String(input.toString());
+		//this.problemInput.setText(this.createHTMLfromEssence(newS));
 		this.problemInput.setText(input);
 	}
 	
@@ -1775,6 +1800,29 @@ protected void translate(String command) {
 		this.parameterInput.setText(input);
 	}
 	
+	private String createHTMLfromEssence(String essenceText) {
+		// making all the keywords bold
+		essenceText = this.HTMLFONT+essenceText;
+		essenceText = essenceText.replaceAll("\n", "<br>\n");
+
+		// make keywords bold
+		for(int i=0; i<this.essenceBoldKeywords.size();i++) {
+			String keyword = this.essenceBoldKeywords.get(i);
+			essenceText = essenceText.replaceAll(keyword, "<b>"+keyword+"</b>");
+			//System.out.println("After replacing every occurrence of "+keyword+":"+essenceText);
+		}
+		
+		// make keywords coloury	
+		for(int i=0; i<this.essenceColourKeywords.size(); i++) {
+			String keyword = this.essenceColourKeywords.get(i);
+			essenceText = essenceText.replaceAll(keyword, "<font color=\"#bf1906\">"+keyword+"</font>");
+		}
+		
+		
+		
+		return essenceText;
+	}
+
 	protected void updateLineColPositions(int line, int col) {
 		this.colLineLabelProblem.setText("Line: "+line+"  Column: "+col);
 	}
@@ -1783,11 +1831,59 @@ protected void translate(String command) {
 		this.colLineLabelParameter.setText("Line: "+line+"  Column: "+col);
 	}
 	
+	
+	private void initialiseEssenceKeywords() {
+		this.essenceBoldKeywords.add("alldifferent");
+		this.essenceBoldKeywords.add("alldiff");
+		this.essenceBoldKeywords.add("atmost");
+		this.essenceBoldKeywords.add("atleast");
+		this.essenceBoldKeywords.add("be domain");
+		this.essenceBoldKeywords.add(" be ");
+		this.essenceBoldKeywords.add(" bool ");
+		this.essenceBoldKeywords.add("element");
+		this.essenceBoldKeywords.add("exists");
+		this.essenceBoldKeywords.add("false");
+		this.essenceBoldKeywords.add("find");
+		this.essenceBoldKeywords.add("forall");
+		this.essenceBoldKeywords.add("gcc");
+		this.essenceBoldKeywords.add("given");
+		this.essenceBoldKeywords.add("int");
+		this.essenceBoldKeywords.add("is domain");
+		this.essenceBoldKeywords.add("letting");
+		this.essenceBoldKeywords.add("matrix indexed by");
+		this.essenceBoldKeywords.add("maximising");
+		this.essenceBoldKeywords.add("max");
+		this.essenceBoldKeywords.add("minimising");
+		this.essenceBoldKeywords.add("min");
+		this.essenceBoldKeywords.add("mod");
+		this.essenceBoldKeywords.add("parameter");
+		this.essenceBoldKeywords.add("param");
+		this.essenceBoldKeywords.add("occurrence");
+		this.essenceBoldKeywords.add(" of ");
+		this.essenceBoldKeywords.add("such that");
+		this.essenceBoldKeywords.add("sum");
+		this.essenceBoldKeywords.add("table");
+		this.essenceBoldKeywords.add("true");
+		this.essenceBoldKeywords.add("where");
+		this.essenceBoldKeywords.add("ESSENCE");
+
+	}
+	
+	private void initialiseColourKeywords() {
+		/*this.essenceColourKeywords.add("be");
+		this.essenceColourKeywords.add("int");
+		this.essenceColourKeywords.add("of");
+		this.essenceColourKeywords.add("be domain");
+		this.essenceColourKeywords.add("bool"); */
+	}
+	
     /*private void jMenu1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jMenu1KeyPressed
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenu1KeyPressed
 	*/
 
+	
+	
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         // TODO add your handling code here:
     }//GEN-LAST:event_formComponentResized

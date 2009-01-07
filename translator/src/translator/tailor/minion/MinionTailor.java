@@ -380,7 +380,9 @@ public class MinionTailor {
 			MinionAtom[] variables = new MinionAtom[oldVars.length];
 			for(int i=0; i<oldVars.length; i++) {
 				oldVars[i].willBeFlattenedToVariable(true);
-				variables[i] = toMinion((ArithmeticAtomExpression) oldVars[i]);
+				if(oldVars[i] instanceof ArithmeticAtomExpression)
+					variables[i] = toMinion((ArithmeticAtomExpression) oldVars[i]);
+				else variables[i] = toMinion((RelationalAtomExpression) oldVars[i]);	
 				this.variableIsDiscrete.put(variables[i].getVariableName(), new Boolean(true));
 			}
 			
@@ -2176,7 +2178,7 @@ public class MinionTailor {
 	 * @return
 	 * @throws MinionException
 	 */
-	protected MinionConstraint toMinion(RelationalAtomExpression atom) 
+	protected MinionAtom toMinion(RelationalAtomExpression atom) 
 	throws MinionException {
 	
 	if(atom.getType() == Expression.BOOL)

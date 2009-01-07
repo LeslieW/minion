@@ -223,5 +223,9 @@ public class VariableArray implements SingleArray {
 	public AtomExpression[] getVariables() {
 		return this.variables;
 	}
+	
+	public void setVariables(AtomExpression[] variables) {
+		this.variables = variables;
+	}
 
 }

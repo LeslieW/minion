@@ -222,4 +222,12 @@ public class TableConstraintNew implements RelationalExpression {
 			return (VariableArray) this.variableArray;
 		else return null;
 	}
+	
+	public void setVariables(AtomExpression[] variables) {
+		if(this.variableArray instanceof VariableArray)
+			((VariableArray) this.variableArray).setVariables(variables);
+		else {
+			this.variableArray = new VariableArray(variables);
+		}
+	}
 }

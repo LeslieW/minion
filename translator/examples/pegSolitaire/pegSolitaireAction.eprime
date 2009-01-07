@@ -168,14 +168,15 @@ forall step : int(0..noSteps-1) .
 
                $ and we make that transition, the following holds..
               (  (moves[step] = transitionNumber[f1,f2]) <=>
-
+                   
+                     $ effect and precondition
 	           ( (bState[step, f1] > bState[step+1,f1]) /\ 
 	             (bState[step,transitionStep[transitionNumber[f1,f2],2]] >
                       bState[step+1, transitionStep[transitionNumber[f1,f2],2]])
-                     /\
-
+                     /\ 
 	             (bState[step, f2] < bState[step+1, f2]) /\
 		     
+                     $ frame axiom
                       forall field : FIELDS .
                           ( (field != f1) /\
 			    (field != transitionStep[transitionNumber[f1,f2],2]) /\

@@ -84,6 +84,9 @@ public class Sum extends NaryArithmeticExpression {
 	}
 
 	public Expression copy() {
+		
+		//System.out.println("Copying sum: "+this);
+		
 		ArrayList<Expression> positiveCopies = new ArrayList<Expression>();
 		ArrayList<Expression> negativeCopies = new ArrayList<Expression>();
 		

@@ -374,12 +374,25 @@ public class Flattener {
 			
 			//table.setVariables((VariableArray) flattenExpression(table.getVariableArray()));
 			
+			/*VariableArray array = (VariableArray) table.getVariableArray();
+			if(array!=null) {
+				array = (VariableArray) this.adaptArrayIndicesToSolver(array);
+				table.setVariables(array);
+			}*/
+			
 			AtomExpression[] flattenedVars = table.getVariables();
 			
 			for(int i=0; i<flattenedVars.length; i++) {
 				flattenedVars[i].willBeFlattenedToVariable(true);
-				flattenedVars[i] = ((ArithmeticAtomExpression) flattenExpression(flattenedVars[i]));
+				flattenedVars[i] = (AtomExpression) flattenedVars[i].evaluate();
+				//System.out.println("Flattended variable "+i+":  "+flattenedVars[i]);
+				if(flattenedVars[i] instanceof ArithmeticAtomExpression) 
+					flattenedVars[i] = (AtomExpression) flattenArithmeticAtomExpression((ArithmeticAtomExpression) flattenedVars[i]);
+				else flattenedVars[i] = (AtomExpression) flattenRelationalAtomExpression((RelationalAtomExpression) flattenedVars[i]);
+				//System.out.println("....... to: "+flattenedVars[i]);
 			}
+			//table.setVariables(flattenedVars);
+			//System.out.println("Finished flattening. ###########");
 			
 			if(table.isGonnaBeFlattenedToVariable()) {
 				if( this.targetSolver.supportsReificationOf(Expression.TABLE_CONSTRAINT)) {
@@ -393,7 +406,9 @@ public class Flattener {
 			}
 			
 			else { 
+				//System.out.println("Flattened table "+table+" to table with flattened vars:");
 				table.setVariables(new VariableArray(flattenedVars));
+				//System.out.println("66666666 "+table);
 				return table;
 			}
 			
@@ -2956,6 +2971,7 @@ public class Flattener {
 			ArrayList<Expression> unfoldedExpressions = new ArrayList<Expression>();
 			for(int i=0; i<values.length; i++) {
 				Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
+				//Expression unfoldedExpression = expression.copy().insertValueForVariable(values[i], variableName);
 
 				unfoldedExpressions.add(unfoldedExpression);
 			}
@@ -3400,9 +3416,9 @@ public class Flattener {
 		sum = flattenQuantifiedSumArguments(sum);
 		//System.out.println("Flattened the sum:"+sum);
 		sum.reduceExpressionTree();
-		//Expression e =  sum.evaluate();
-		//if(e.getType() == Expression.INT) 
-		//  	return e;
+		Expression e =  sum.evaluate();
+		if(e.getType() == Expression.INT) 
+		  	return e;
 		
 		// convert to a sum constraint
 		if(sum.willBeConvertedToASumConstraint()) {		
