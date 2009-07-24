@@ -121,6 +121,9 @@ void readInputFromFiles(CSPInstance& instance, vector<string> fnames, bool parse
         reader.instance = MOVE(instance);
         ReadCSP(reader, &infile);
         instance = MOVE(reader.instance);
+        // fix variable names in case we want to write a resume file (which is
+        // in Minion 3 format)
+        instance.add_variable_names();
       }
     }
     catch(parse_exception s)
@@ -140,7 +143,7 @@ void readInputFromFiles(CSPInstance& instance, vector<string> fnames, bool parse
           line_count++;
           start_of_line = cs.get_raw_pos();
           char buf[10000];
-          cs.getline(buf, 10000);
+          cs.getline(buf, 9999);
           current_line = buf;
       }
       while(cs.get_raw_pos() < pos);

@@ -109,7 +109,7 @@ list(APPEND SRCS ${PROJECT_SOURCE_DIR}/minion/BuildVariables.cpp
                  ${PROJECT_SOURCE_DIR}/minion/system/trigger_timer.cpp
                  ${PROJECT_SOURCE_DIR}/minion/help/help.cpp)
 
-set(BINARY ${PROJECT_NAME})
+set(BINARY minion)
 
 find_program(UNAME uname)
 if(UNAME)
@@ -369,10 +369,10 @@ add_executable(${BINARY} ${SRCS} ${PROJECT_SOURCE_DIR}/minion/minion.cpp)
 target_link_libraries(${BINARY} inputfile_parse)
 #target_link_libraries(${BINARY} ${BINARY}-lib)
 
-# when we're building minion-something, add a "minion" target that does the same
-if(NOT ${BINARY} STREQUAL ${PROJECT_NAME})
-    add_custom_target(${PROJECT_NAME} DEPENDS ${BINARY})
-    add_custom_target(${PROJECT_NAME}-lib DEPENDS ${BINARY}-lib)
+# when we're building minion-something, add a "minion" target that does the sa~
+if(NOT ${BINARY} STREQUAL minion)
+    add_custom_target(minion DEPENDS ${BINARY})
+    add_custom_target(minion-lib DEPENDS ${BINARY}-lib)
 endif()
 
 if(Boost_FOUND)
