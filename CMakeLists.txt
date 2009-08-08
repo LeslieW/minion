@@ -5,11 +5,15 @@ project(MinionProject)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake-modules)
 include(CheckIncludeFileCXX)
 include(CheckCXXCompilerFlag)
-include(FindBoost)
-include(constraints)
-include(CheckIncludeFiles)
 
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+
+if(NOT WIN32)
+    include(LocalFindBoost)
+endif()
+
+include(constraints)
+include(CheckIncludeFiles)
 
 set(BUILD_DEF_FILE "${PROJECT_SOURCE_DIR}/minion/BuildDefines.h")
 file(REMOVE ${BUILD_DEF_FILE})
@@ -268,6 +272,10 @@ if(THREADSAFE)
     add_definitions(-DTHREADSAFE)
 endif()
 
+if(WIN32)
+	set(CFLAGS "${CFLAGS} /EHsc")
+endif()
+
 option(PROFILE "" OFF)
 option(GPROF "" OFF)
 if(PROFILE)
@@ -296,11 +304,15 @@ if(UNOPTIMISED)
 else()
     # apparently fomit-frame-pointer is only automatically enabled for O* levels
     # on machines where this doesn't affect debugging
-    set(CFLAGS "${CFLAGS} -O3 -fomit-frame-pointer")
-    check_cxx_compiler_flag("-mdynamic-no-pic" MAC_MDYNAMIC)
-    if(MAC_MDYNAMIC)
-        set(CFLAGS "${CFLAGS} -mdynamic-no-pic")
-    endif()
+	if(WIN32)
+		set(CFLAGS "${CFLAGS} /O2")
+	else()
+		set(CFLAGS "${CFLAGS} -O3 -fomit-frame-pointer")
+		check_cxx_compiler_flag("-mdynamic-no-pic" MAC_MDYNAMIC)
+		if(MAC_MDYNAMIC)
+			set(CFLAGS "${CFLAGS} -mdynamic-no-pic")
+		endif()
+	endif()
 endif()
 
 

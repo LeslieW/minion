@@ -38,6 +38,11 @@
 #define _NOINLINE
 #endif
 
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
+
 // Stupid visual C++ needs a little hacking
 #ifdef _MSC_VER
 // We don't want no stupid safe library warnings
@@ -76,8 +81,6 @@
 #include<stdlib.h>
 #include<memory.h>
 #include<setjmp.h>
-#include<sys/types.h>
-#include<unistd.h>
 
 #include "cxx0x-helper.h"
 
