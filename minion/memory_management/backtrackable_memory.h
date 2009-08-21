@@ -22,7 +22,7 @@
 
 #include "MemoryBlock.h"
 #include "../system/block_cache.h"
-
+#include <utility>
 #ifdef P
 #undef P
 #endif
@@ -40,25 +40,15 @@
 class BackTrackMemory
 {
   NewMemoryBlock new_memory_block;
-#ifdef MALLOC_CACHE
   BlockCache block_cache;
-#endif
   
-#ifdef BACKTRACK_VEC
-  vector<char*> backtrack_data; 
-#else
-  char* backtrack_data; 
-  int current_depth_m;
-  int max_depth;
-#endif
-  bool locked;
+  vector<pair<char*, size_t> > backtrack_data; 
 public:
     
   
   /// Wraps request_bytes of the internal \ref NewMemoryBlock.
   MoveablePointer request_bytes(unsigned byte_count)
   { 
-    D_ASSERT(!locked);
     return new_memory_block.request_bytes(byte_count); 
   }
   
@@ -66,107 +56,36 @@ public:
   template<typename T>
   MoveableArray<T> requestArray(unsigned size)
   { 
-    D_ASSERT(!locked);
     return new_memory_block.requestArray<T>(size);
   }
   
   BackTrackMemory() :
-#ifdef MALLOC_CACHE
-  block_cache(100),
-#endif
-#ifdef BACKTRACK_VEC
-  backtrack_data(10),
-#else
-  backtrack_data(NULL), current_depth_m(0), max_depth(0),
-#endif
-  locked(false)
-  {
-      
-  }
-  
-#ifndef BACKTRACK_VEC
-  /// Extends the number of copies of the backtrackable memory that can be stored.
-  void extend(int new_max)
-  {
-    D_ASSERT(locked);
-    D_ASSERT(new_max > max_depth);
-    unsigned data_size = new_memory_block.getDataSize();
-    
-    char* new_data = (char*)malloc(new_max * data_size);
-    
-    memcpy(new_data, backtrack_data, current_depth_m * data_size);
-    free(backtrack_data);
-    
-    max_depth = new_max;
-    backtrack_data = new_data;
-  }
-#endif
-  
-  void lock()
-  { 
-    new_memory_block.lock(); 
-    locked = true;
-#ifndef BACKTRACK_VEC
-    extend(10);
-#endif
-  }
-  
+  block_cache(100), backtrack_data(10)
+  { }
+ 
   /// Copies the current state of backtrackable memory.
   void world_push()
   {
-    D_ASSERT(locked);
     unsigned data_size = new_memory_block.getDataSize();
-#ifdef BACKTRACK_VEC
-
-#ifdef MALLOC_CACHE
     char *tmp = (char *) block_cache.do_malloc(data_size);//calloc(data_size, sizeof(char));
-#else
-    char *tmp = (char *) malloc(data_size);
-#endif
 
     new_memory_block.storeMem(tmp);
-    backtrack_data.push_back(tmp);
-#else
-    if(current_depth_m == max_depth)
-      extend(max_depth * 2);
-    new_memory_block.storeMem(backtrack_data + current_depth_m * data_size);
-    current_depth_m++;
-#endif
+    backtrack_data.push_back(std::make_pair(tmp, data_size));
   }
   
   /// Restores the state of backtrackable memory to the last stored state.
   void world_pop()
   {
-    D_ASSERT(locked);
-    unsigned data_size = new_memory_block.getDataSize();
-#ifdef BACKTRACK_VEC
     D_ASSERT(backtrack_data.size() > 0);
-    char *tmp = backtrack_data.back();
+    pair<char*, size_t> tmp = backtrack_data.back();
     new_memory_block.retrieveMem(tmp);
     backtrack_data.pop_back();
-
-#ifdef MALLOC_CACHE
-    block_cache.do_free(tmp);//free(tmp);
-#else
-    free(tmp);
-#endif
-
-#else
-    D_ASSERT(current_depth_m > 0);
-    current_depth_m--;
-    new_memory_block.retrieveMem(backtrack_data + current_depth_m * data_size);
-#endif
+    block_cache.do_free(tmp.first);
   }
   
   /// Returns the current number of stored copies of the state.
   int current_depth()
-  {
-#ifdef BACKTRACK_VEC
-    return backtrack_data.size();
-#else
-    return current_depth_m;
-#endif
-  }
+  { return backtrack_data.size(); }
 };
 
 #endif
