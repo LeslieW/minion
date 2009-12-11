@@ -134,7 +134,7 @@ endif()
 
 set(BOOST_COMPONENTS iostreams)
 
-option(NAUTY "" OFF)
+option(NAUTY "" ON)
 if(NAUTY)
   message(STATUS "Please be naughty")
   add_definitions(-DUSE_NAUTY)
@@ -148,7 +148,6 @@ endif()
 
 if(APPLEMAC)
     set(Boost_USE_STATIC_LIBS true)
-    set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk")
     add_definitions(-mmacosx-version-min=10.5)
     set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -mmacosx-version-min=10.5 )
 endif()
