@@ -205,7 +205,7 @@ namespace Controller
   template<typename VarArray, typename BranchList>
   inline bool do_checks(StateObj* stateObj, VarArray& var_array, BranchList& branches)
   {
-    if(getState(stateObj).getNodeCount() == getOptions(stateObj).nodelimit) {
+    if(getState(stateObj).getNodeCount() >= getOptions(stateObj).nodelimit) {
       generateRestartFile(stateObj, var_array, branches);
       return true;
     }
@@ -282,9 +282,9 @@ namespace Controller
     getState(stateObj).setSolutionCount(0);  
     getState(stateObj).setNodeCount(0);
     
-    if(!getOptions(stateObj).noTimers)
+    if(!getOptions(stateObj).noTimers && getOptions(stateObj).search_limit <= 0)
     {
-        getState(stateObj).setupAlarm(getOptions(stateObj).time_limit, getOptions(stateObj).time_limit_is_CPU_time);
+        getState(stateObj).setupAlarm(getOptions(stateObj).timeout_active, getOptions(stateObj).time_limit, getOptions(stateObj).time_limit_is_CPU_time);
         getState(stateObj).setupCtrlc();
     }
     lock(stateObj);

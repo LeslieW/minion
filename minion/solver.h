@@ -158,8 +158,8 @@ public:
   void clearAlarm()
   { alarm_trigger = false; }  
   
-  void setupAlarm(int timeout, bool CPU_time)
-  { activate_trigger(&alarm_trigger, timeout, CPU_time);}
+  void setupAlarm(bool alarm_active, int timeout, bool CPU_time)
+  { activate_trigger(&alarm_trigger, alarm_active, timeout, CPU_time);}
   
   bool isCtrlcPressed()
   { return ctrl_c_pressed; }
@@ -199,7 +199,7 @@ public:
   /// Only for debugging.
   bool nocheck;
   /// Denotes to nodelimit, 0 if none given.
-  unsigned long long nodelimit;
+  long long nodelimit;
   /// Denotes if information about search should be printed to a file.
   bool tableout;
   
@@ -212,9 +212,15 @@ public:
   /// Denotes if solutions should be printed.
   /// Initialised to true.
   bool print_solution;
-    
-  /// Stores the timelimit, 0 if none given.
+  
+  /// Is there a timeout?  
+  bool timeout_active;
+
+  /// Stores the timelimit.
   clock_t time_limit;
+
+  /// solve time limit.
+  clock_t search_limit;
   
   /// Stores if the timelimit is CPU time (yes) or wall-clock time (no)
   bool time_limit_is_CPU_time;
@@ -254,8 +260,9 @@ public:
 #else
     nocheck(false),
 #endif
-    nodelimit(0), tableout(false), solsoutWrite(false), 
-    print_solution(true), time_limit(0), time_limit_is_CPU_time(false),
+    nodelimit(-1), tableout(false), solsoutWrite(false), 
+    print_solution(true), timeout_active(false), time_limit(0), search_limit(0),
+    time_limit_is_CPU_time(false),
     randomise_valvarorder(false), parser_verbose(false), 
     redump(false), graph(false), instance_stats(false), 
     resume(false), noresumefile(false),
