@@ -109,6 +109,7 @@ public:
   {
     cerr << "Static reification is not supported by the " << constraint_name() << " constraint. Sorry" << endl;
     exit(1);
+    return false;
   }
 
   /// Checks incrementaly if constraint cannot be satisfied.
@@ -118,6 +119,7 @@ public:
   {
     cerr << "Static reification is not supported by the " << constraint_name() << " constraint. Sorry" << endl;
     exit(1);
+    return false;
   }
 
   /// Looks for a valid partial assignment to a constraint.
@@ -128,6 +130,7 @@ public:
   {
     cerr << "Finding assignment is not supported by the " << constraint_name() << " constraint. Sorry" << endl;
     exit(1);
+    return false;
   }
 
   /// Returns the reverse of the current constraint
@@ -136,6 +139,7 @@ public:
   {
     cerr << "Negation is not supported by the " << constraint_name() << " constraint. Sorry" << endl;
     exit(1);
+    return NULL;
   }
 
   AbstractConstraint(StateObj* _stateObj) :
@@ -254,6 +258,32 @@ public:
       }
       delete[] t;
       return unsatcounter;   // return tightness i.e. #forbidden tuples out of 1000
+  }
+
+  int getTightnessEstimateVarVal(const size_t var, const DomainInt val)
+  {
+      // Make 100 random tuples and see if they satisfy the constraint
+      vector<AnyVarRef> vars=get_vars();
+      DomainInt* t=new DomainInt[vars.size()];
+      t[var] = val; //fix specified component
+      int unsatcounter=0;
+      srand(12345);
+      for(int i=0; i<100; i++)
+      {
+          for(int j=0; j<vars.size(); j++)
+          {
+	    if(j != var) {
+              int dsize=vars[j].getInitialMax()-vars[j].getInitialMin()+1;
+              t[j]=(rand()%dsize)+vars[j].getInitialMin();
+	    }
+          }
+          if(!check_assignment(t, vars.size()))
+          {
+              unsatcounter++;
+          }
+      }
+      delete[] t;
+      return unsatcounter;   // return tightness i.e. #forbidden tuples out of 100
   }
 };
 

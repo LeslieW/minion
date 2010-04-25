@@ -45,18 +45,36 @@ template<typename Var>
     AbstractConstraint(_stateObj), var(_var), val(_val) {}
 
   int dynamic_trigger_count()
-  { return 0; }
+  { return 1; }
 
   virtual void full_propagate()
   { 
-    var.removeFromDomain(val); 
+    if(var.isBound())
+    {
+        if(var.getMin() == val)
+            var.setMin(val + 1);
+        else if(var.getMax() == val)
+            var.setMax(val - 1);
+        else
+            var.addDynamicTrigger(dynamic_trigger_start(), DomainChanged);
+    }
+    else
+      var.removeFromDomain(val); 
   }
 
 
   virtual void propagate(DynamicTrigger* dt)
   {
     PROP_INFO_ADDONE(WatchInRange);
-    var.removeFromDomain(val); 
+    if(var.isBound())
+    {
+        if(var.getMin() == val)
+            var.setMin(val + 1);
+        else if(var.getMax() == val)
+            var.setMax(val - 1);
+    }
+    else
+      var.removeFromDomain(val); 
   }
 
   virtual BOOL check_assignment(DomainInt* v, int v_size)
@@ -89,6 +107,8 @@ template<typename Var>
     }
     return false;
   }
+
+   AbstractConstraint* reverse_constraint();
 };
 
 struct WatchNotLiteralBoolConstraint : public AbstractConstraint
@@ -136,12 +156,22 @@ struct WatchNotLiteralBoolConstraint : public AbstractConstraint
   
   virtual bool get_satisfying_assignment(box<pair<int,DomainInt> >& assignment)
   {
-    if(var.inDomain(1 - val))
+    if(var.getMin() != val)
     {
-      assignment.push_back(make_pair(0, 1 - val));
-      return true;
+        assignment.push_back(make_pair(0, var.getMin()));
+        return true;
+    }
+    if(var.getMax() != val)
+    {
+        assignment.push_back(make_pair(0, var.getMax()));
+        return true;
     }
     return false;
   }
+
+   AbstractConstraint* reverse_constraint();
 };
+
+// For reverse constraint.
+#include "dynamic_literal.h"
 #endif
