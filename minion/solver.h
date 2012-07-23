@@ -45,6 +45,7 @@ class SearchState
   AnyVarRef* raw_optimise_var;
   DomainInt current_optimise_position;
   bool optimise;
+  bool maximise;
   
   // The variables to print when a solution is found.
   vector<vector<AnyVarRef> > print_matrix;
@@ -104,10 +105,13 @@ public:
   
   DomainInt getOptimiseValue() { return current_optimise_position; }
   void setOptimiseValue(DomainInt optimise_pos) { current_optimise_position = optimise_pos; }
-  
+
   bool isOptimisationProblem() { return optimise; }
   void setOptimisationProblem(bool _optimise) { optimise = _optimise; }
   
+  bool isMaximise() { return maximise; }
+  void setMaximise(bool _maximise) { maximise = _maximise; }
+
   void addConstraint(AbstractConstraint* c);
   vector<AbstractConstraint*>& getConstraintList() { return constraints; }
   
@@ -256,6 +260,9 @@ public:
   // Do not write a resume file.
   bool noresumefile;
 
+  // split search tree in half on time out
+  bool split;
+
   // The format of output used (-1 for default)
   int outputType;
   
@@ -281,7 +288,7 @@ public:
     time_limit_is_CPU_time(false),
     randomise_valvarorder(false), parser_verbose(false), 
     redump(false), graph(false), instance_stats(false), 
-    resume(false), noresumefile(false),
+    resume(false), noresumefile(false), split(false),
     outputType(-1), noTimers(false),
     Xvarmunge(-1), Xsymmunge(-1)
   {}

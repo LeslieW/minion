@@ -172,6 +172,7 @@ namespace Controller
   }
 
 #include <fstream>
+#include "../MILtools/print_CSP.h"
 
   //repeat declaration
   struct triple {
@@ -190,31 +191,94 @@ namespace Controller
     if(getOptions(stateObj).noresumefile) {
         return;
     }
-    string filename = string("minion-resume-") + to_string(getpid());
-    cout << "Output resume file to \"" << filename << "\"" << endl;
-    ofstream fileout(filename.c_str());
-    fileout << "MINION 3" << endl;
-    fileout << "**CONSTRAINTS**" << endl;
-    vector<triple> left_branches_so_far;
-    left_branches_so_far.reserve(branches.size());
-    for(vector<triple>::const_iterator curr = branches.begin(); curr != branches.end(); curr++) {
-      if(curr->isLeft) {
-        left_branches_so_far.push_back(*curr);
-      } else {
-        fileout << "watched-or({";
-        for(vector<triple>::const_iterator lb = left_branches_so_far.begin();
-            lb != left_branches_so_far.end();
-            lb++) {
-          fileout << "w-notliteral(";
-          inputPrint(fileout, stateObj, var_array[lb->var].getBaseVar());
-          fileout << "," << lb->val << "),";
+
+    vector<string> splits;
+    string curvar = "(no split variable)";
+    string opt = "";
+
+    if(getOptions(stateObj).split)
+    {
+        if(getState(stateObj).isOptimisationProblem()) {
+            AnyVarRef *optVarRef = getState(stateObj).getOptimiseVar();
+            string optVar = getState(stateObj).getInstance()->vars.getName(optVarRef->getBaseVar());
+            DomainInt optVal = getState(stateObj).getOptimiseValue();
+            opt += "ineq(";
+            if(getState(stateObj).isMaximise()) {
+                opt += to_string(optVal) + string(", ") + optVar + string(", 0)\n");
+            } else {
+                opt += optVar + string(", ") + to_string(-optVal) + string(", 0)\n");
+            }
         }
-        fileout << "w-notliteral(";
-        inputPrint(fileout, stateObj, var_array[curr->var].getBaseVar());
-        fileout << "," << curr->val << ")})" << endl;
-      }
+        if(branches.empty())
+        {
+            // TODO: We should check if any variable has non-empty domain, but this will do for now.
+            // The most likely case is we have just caught the end of search.
+            splits.push_back("");
+        }
+        else
+        {
+            typedef typename VarArray::value_type VarRef;
+            VarRef& var = var_array[branches.back().var];
+            curvar = getState(stateObj).getInstance()->vars.getName(var.getBaseVar());
+            DomainInt min = var.getMin();
+            DomainInt max = var.getMax();
+            int med = (min+max)/2;
+            string left("ineq(");
+            left += curvar + string(", ") + to_string(med) + string(", 0)\n");
+            splits.push_back(left + opt);
+
+            string right("ineq(");
+            right += to_string(med) + string(", ");
+            right += curvar + string(", -1)\n");
+            splits.push_back(right + opt);
+        }
     }
-    fileout << "**EOF**" << endl;
+    else
+    {
+        splits.push_back("");
+    }
+
+    ProbSpec::MinionInstancePrinter printer(*getState(stateObj).getInstance());
+    printer.build_instance(false);
+    string inst(printer.getInstance());
+
+    int i = 0;
+    for(vector<string>::iterator s = splits.begin(); s != splits.end(); s++) {
+        string basename = getOptions(stateObj).instance_name;
+        size_t mpos = basename.find(".minion");
+        size_t rpos = basename.find("-resume-");
+        if(rpos != string::npos) {
+            basename = basename.substr(0, rpos);
+        } else if(mpos != string::npos) {
+            basename = basename.substr(0, mpos);
+        }
+        string filename = basename + "-resume-" + to_string(time(NULL)) + "-" + to_string(getpid()) + "-" + curvar + "-" + to_string(i++) + ".minion";
+        cout << "Output resume file to \"" << filename << "\"" << endl;
+        ofstream fileout(filename.c_str());
+        fileout << "# original instance: " << getOptions(stateObj).instance_name << endl;
+        fileout << inst;
+        fileout << *s;
+        vector<triple> left_branches_so_far;
+        left_branches_so_far.reserve(branches.size());
+        for(vector<triple>::const_iterator curr = branches.begin(); curr != branches.end(); curr++) {
+          if(curr->isLeft) {
+            left_branches_so_far.push_back(*curr);
+          } else {
+            fileout << "watched-or({";
+            for(vector<triple>::const_iterator lb = left_branches_so_far.begin();
+                lb != left_branches_so_far.end();
+                lb++) {
+              fileout << "w-notliteral(";
+              inputPrint(fileout, stateObj, var_array[lb->var].getBaseVar());
+              fileout << "," << lb->val << "),";
+            }
+            fileout << "w-notliteral(";
+            inputPrint(fileout, stateObj, var_array[curr->var].getBaseVar());
+            fileout << "," << curr->val << ")})" << endl;
+          }
+        }
+        fileout << "**EOF**" << endl;
+    }
   }
    
   /// Check if timelimit has been exceeded.
