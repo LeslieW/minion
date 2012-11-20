@@ -264,6 +264,11 @@ struct SparseBoundVarContainer {
       return std::binary_search( dom.begin(), dom.end(), i );
   }
   
+  DomainInt getDomSize(SparseBoundVarRef_internal<BoundType> d) const
+  {
+    assert(0);
+  }
+
   DomainInt getMin(SparseBoundVarRef_internal<BoundType> d) const
   { LOCK_CON_MUTEX
     D_ASSERT(lock_m);

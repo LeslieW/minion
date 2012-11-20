@@ -71,6 +71,9 @@ struct VarRefType
   BOOL inDomain_noBoundCheck(DomainInt b) const
   { return GET_CONTAINER().inDomain_noBoundCheck(data, b); }
   
+  DomainInt getDomSize() const
+  { return GET_CONTAINER().getDomSize(data); }
+
   DomainInt getMax() const
   { return GET_CONTAINER().getMax(data); }
   
@@ -184,6 +187,9 @@ struct QuickVarRefType
   BOOL inDomain_noBoundCheck(DomainInt b) const
   { LOCK_CON return data.inDomain_noBoundCheck(b); }
 
+  DomainInt getDomSize() const
+  { return data.getDomSize(); }
+  
   DomainInt getMax() const
   { LOCK_CON return data.getMax(); }
   

@@ -135,6 +135,12 @@ struct BoolVarRef_internal
     return getAssignedValue();
   }
   
+  DomainInt getDomSize() const
+  {
+    if(isAssigned()) return 1;
+    else return 2;
+  }
+  
   DomainInt getMax() const
   {
     if(!isAssigned()) return 1;

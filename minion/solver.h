@@ -26,6 +26,8 @@
 
 #include "StateObj_forward.h"
 
+#include "memory_management/GenericBacktracker.h"
+
 // Some advanced definitions, we don't actually need to know anything about these
 // types for SearchState, simply that they exist.
 class AbstractConstraint;
@@ -74,13 +76,18 @@ class SearchState
   volatile bool alarm_trigger;
   
   volatile bool ctrl_c_pressed;
-    
+  
+  GenericBacktracker generic_backtracker;
 public:
 
   std::string storedSolution;
   
   vector<vector<AnyVarRef> >& getPrintMatrix()
   { return print_matrix; }
+  
+  GenericBacktracker& getGenericBacktracker() {
+      return generic_backtracker;
+  }
   
   ProbSpec::CSPInstance* getInstance() { return csp_instance; }
    
