@@ -114,6 +114,8 @@ struct ConstraintBlob
   /// Pointer to a list of short tuples. Only used in Short Table constraints.
   ShortTupleList* short_tuples;
 
+  TupleList* tuples2;
+
   /// A vector of signs. Only used for SAT clause "or" constraint.
   vector<DomainInt> negs;
 
@@ -129,16 +131,19 @@ struct ConstraintBlob
   /// For use in nested constraints.
   vector<ConstraintBlob> internal_constraints;
 
-  ConstraintBlob(ConstraintDef* _con) : constraint(_con)
+  ConstraintBlob()
+  { assert(0); }
+  
+  ConstraintBlob(ConstraintDef* _con) : constraint(_con), tuples(0), tuples2(0)
   {}
 
   ConstraintBlob(ConstraintDef* _con, const vector<vector<Var> >& _vars) : constraint(_con), vars(_vars)
+  , tuples(0), short_tuples(0), tuples2(0)
   {}
 
 
-
   /// A helper constructor for when only a SingleVar is passed.
-  ConstraintBlob(ConstraintDef* _con, vector<Var>& _var) : constraint(_con)
+  ConstraintBlob(ConstraintDef* _con, vector<Var>& _var) : constraint(_con), tuples(0), tuples2(0)
   { vars.push_back(_var); }
 
   set<Var> get_all_vars() const

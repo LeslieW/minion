@@ -2,6 +2,8 @@
 
 from itertools import *
 
+import sys, os, getopt
+
 def increment_list(list, domainsize):
   for i in range(len(list)):
     list[i] += 1
@@ -28,6 +30,16 @@ def print_constraint(TupleList, name, domainsize) :
 #    print TupleList
     varlist = zip(*TupleList)
     print("table([" + ', '.join([print_var(a, domainsize) for a in varlist]) + "], " + name + ")")
+
+    if gentable:
+        print "table([" + ', '.join([print_var(a, domainsize) for a in varlist]) + "], " + name + ")"
+    elif genlighttable:
+        print "lighttable([" + ', '.join([print_var(a, domainsize) for a in varlist]) + "], " + name + ")"
+    elif gentest:
+        print "test([" + ', '.join([print_var(a, domainsize) for a in varlist]) + "])"
+    elif gendecomp:
+        print "Don;t be ksilly"
+
 
 
 
@@ -72,8 +84,49 @@ diff1    = lambda (x,y): abs(x-y) > 1
 xlessy   = lambda (x,y): x < y
 eqoreq = lambda(a,b,c,d) : (a == b) or (c == d)
 eqorneq = lambda(a,b,c,d) : (a == b) or (c != d)
+sumgeqthree= lambda(a,b,c,d,e): (a+b+c+d+e)>=3
+alldiff3 = lambda(a,b,c): (a!=b) and (a!=c) and (b!=c)
+lexleq = lambda(a,b,c,x,y,z) : [a,b,c] <= [x,y,z]
+lexless = lambda(a,b,c,x,y,z,w) : (a+b+c+x+y+z+w) == 0 or (a+b+c+x+y+z+w) == 7
+twotup = lambda(a,b,c,d,e,f,g,h,i,j) : [a,b,c,d,e,f,g,h,i,j] in [[0,0,1,0,1,1,1,0,1,0],[1,0,1,1,0,0,0,1,0,1]]
 
-domsize = 2
+domsize = -1
 
-#generate_indicator([build_table(diff1, 5), build_table(xlessy, 5)], 5, 5)
-generate_indicator([build_table(eqorneq,domsize,4), build_table(eqorneq,domsize,4)], domsize,5, False)
+# check for flags
+
+
+(optargs, other)=getopt.gnu_getopt(sys.argv, "", ["domsize=", "table", "test", "decomp", "lighttable", "random", "arity="])
+
+
+# what type of constraint to print out.
+gentable=False
+gentest=False
+gendecomp=False
+genlighttable=False
+
+arity=-1
+randomct=False
+
+for i in optargs:
+    (a1, a2)=i
+    if a1=="--table":
+        gentable=True
+    if a1=="--lighttable":
+        genlighttable=True
+    elif a1=="--test":
+        gentest=True
+    elif a1=="--decomp":
+        gendecomp=True
+    elif a1=="--random":
+        randomct=True
+    elif a1=="--arity":
+        arity=int(a2)
+    elif a1=="--domsize":
+        domsize=int(a2)
+
+if randomct:
+    print "not yet."
+else:
+    #generate_indicator([build_table(diff1, 5), build_table(xlessy, 5)], 5, 5)
+    generate_indicator([build_table(twotup,domsize,arity)], domsize,5, True)
+
