@@ -5,17 +5,39 @@
    For Licence Information see file LICENSE.txt 
 */
 
+#ifdef _WIN32
+
+template <typename T>
+AbstractConstraint*
+BuildCT_TABLE_VM(StateObj* stateObj,const T& t1, ConstraintBlob& b)
+{ return NULL; }
+
+BUILD_CT(CT_TABLE_VM, 1)
+
+template <typename T>
+AbstractConstraint*
+BuildCT_NEG_TABLE_VM(StateObj* stateObj,const T& t1, ConstraintBlob& b)
+{ return NULL; }
+
+BUILD_CT(CT_NEG_TABLE_VM, 1)
+
+#else
+
 #include "../constraints/vm.h"
 #include "../constraints/constraint_constant.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "../constraints/constraint_GACtable_master.h"
+#include "../inputfile_parse/tiny_constraint_parser.hpp"
 
+#ifdef CHECK_TABLE
+#define READ_TABLE
+#endif
 
-template <typename T>
-AbstractConstraint*
-output_table_vm(StateObj* stateObj,const T& t1, ConstraintBlob& b, char const* type)
-{ 
+template<typename T>
+std::string make_table_string(const T& t1, ConstraintBlob& b, char const* type)
+{
     std::ostringstream oss;
     oss << "{\n";
     oss << "\"doms\" : [";
@@ -49,10 +71,89 @@ output_table_vm(StateObj* stateObj,const T& t1, ConstraintBlob& b, char const* t
 
     oss <<  "\"type\" : \"" << type << "\" }\n";
 
-    std::string s = oss.str();
+    return oss.str();
+}
+
+#ifdef READ_TABLE
+
+
+
+
+template <typename T>
+AbstractConstraint*
+read_table_vm(StateObj* stateObj,const T& t1, ConstraintBlob& b, char const* type)
+{ 
+    // Store a list of vms we have already loaded.
+    static std::map<std::string, std::vector<TupleList*> > cached_vms;
+
+    std::string s = make_table_string(t1, b, type);
 
     std::string hash = sha1_hash(s);
 
+    std::string outname = "vms/table." + hash + ".vm.table";
+
+    vector<TupleList*> vtl;
+
+    if(cached_vms.count(hash) > 0)
+    {
+#ifdef CHECK_TABLE
+        std::cout << "# Match cached table\n";
+#endif
+        vtl = cached_vms[hash];
+    }
+    else
+    {
+        ifstream ifs(outname.c_str(), ios::in);
+        if(!ifs)
+        {
+#ifdef CHECK_TABLE
+            std::cout << "# No table match\n";
+#endif            
+            // Opening file failed
+            if(std::string(type) == "pos")
+                return GACTableCon(stateObj, t1, b.tuples);
+            if(std::string(type) == "neg")
+                return GACNegativeTableCon(stateObj, t1, b.tuples);
+            abort();
+        }
+#ifdef CHECK_TABLE
+        std::cout << "# Match fresh table\n";
+#endif
+
+        vtl = tiny_parser(ifs);
+    }
+
+    cached_vms[hash] = vtl;
+
+    return VMSymCon(stateObj, t1, vtl[0], vtl[1]);
+} 
+
+
+template <typename T>
+AbstractConstraint*
+BuildCT_TABLE_VM(StateObj* stateObj,const T& t1, ConstraintBlob& b)
+{ return read_table_vm(stateObj, t1, b, "pos"); }
+
+BUILD_CT(CT_TABLE_VM, 1)
+
+template <typename T>
+AbstractConstraint*
+BuildCT_NEG_TABLE_VM(StateObj* stateObj,const T& t1, ConstraintBlob& b)
+{ return read_table_vm(stateObj, t1, b, "neg"); }
+
+BUILD_CT(CT_NEG_TABLE_VM, 1)
+
+
+#else
+
+
+template <typename T>
+AbstractConstraint*
+output_table_vm(StateObj* stateObj,const T& t1, ConstraintBlob& b, char const* type)
+{ 
+    std::string s = make_table_string(t1, b, type);
+
+    std::string hash = sha1_hash(s);
 
     std::string outname = "tableout/table." + hash + ".vm";
     std::string countname = "tableout/table." + hash + ".count";
@@ -90,3 +191,7 @@ BuildCT_NEG_TABLE_VM(StateObj* stateObj,const T& t1, ConstraintBlob& b)
 { return output_table_vm(stateObj, t1, b, "neg"); }
 
 BUILD_CT(CT_NEG_TABLE_VM, 1)
+
+#endif // _WIN32
+
+#endif

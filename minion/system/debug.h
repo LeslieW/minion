@@ -51,11 +51,6 @@ inline void CheckNotBoundSingle(const T& t, std::string s, std::string s2 = "")
     }
 }
 
-#ifdef MINION_DEBUG_PRINT
-  #ifndef MINION_DEBUG
-  #define MINION_DEBUG
-  #endif
-#endif
 
 #ifndef MINION_DEBUG
   #ifndef NO_DEBUG
@@ -136,7 +131,9 @@ inline bool DOMAIN_CHECK(BigInt v)
 
 // These are just to catch cases where the user didn't cast to BigInt
 // themselves, which makes the function useless.
+#ifndef _WIN32
 inline void DOMAIN_CHECK(DomainInt);
+#endif
 inline void DOMAIN_CHECK(SysInt);
 inline void DOMAIN_CHECK(UnsignedSysInt);
         

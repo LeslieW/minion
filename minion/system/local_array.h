@@ -38,6 +38,7 @@
 #include <new>
 #include <iterator>
 #include <algorithm>
+#include <exception>
 
   /// @brief  struct array [6.2.2].
   /// NB: Requires complete type _Tp.
@@ -123,16 +124,16 @@
       const_reference 
       at(size_type __n) const
       { 
-    if (__builtin_expect(__n > _Nm, false))
-      std::__throw_out_of_range("array::at");
+    if (__n > _Nm)
+      throw std::runtime_error("Out of bounds access");
     return reinterpret_cast<const_reference>(_M_instance[__n]); 
       }
 
       reference 
       at(size_type __n)
       { 
-    if (__builtin_expect(__n > _Nm, false))
-      std::__throw_out_of_range("array::at");
+    if (__n > _Nm)
+      throw std::runtime_error("Out of bounds access");
     return reinterpret_cast<reference>(_M_instance[__n]); 
       }
 

@@ -22,8 +22,6 @@
 
 
 
-
-
 /// A placeholder type.
 struct EmptyType
 {};
@@ -31,12 +29,17 @@ struct EmptyType
 //#define DOMAINS64
 
 #ifdef DOMAINS64
-typedef long long BigInt;
+#ifdef _WIN32
+// Windoes does not have a 128-bit integer
+typedef Wrapper<int64_t> BigInt;
+#else
+typedef __int128_t BigInt;
+#endif
 typedef int64_t SysInt;
 typedef uint64_t UnsignedSysInt;
 #else
-typedef long long BigInt;
-typedef int SysInt;
+typedef int64_t BigInt;
+typedef int32_t SysInt;
 typedef unsigned int UnsignedSysInt;
 #endif
 
