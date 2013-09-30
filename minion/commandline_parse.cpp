@@ -117,7 +117,7 @@ void parse_command_line(StateObj* stateObj, SearchMethod& args, SysInt argc, cha
     { getOptions(stateObj).find_generators = true; }
     else if(command == string("-crash"))
     { debug_crash = true; }
-  /** @help switches;-quiet Description
+/** @help switches;-quiet Description
 Do not print parser progress (default)
 */
 
@@ -165,7 +165,7 @@ To compress a file 'infile.minion' to a file 'smaller.minion'
       INCREMENT_i(-outputType);
       getOptions(stateObj).outputType = atoi(argv[i]);
     }
-    /** @help switches;-printsols Description
+/** @help switches;-printsols Description
 Print solutions (default).
 */
     else if(command == string("-printsols"))
@@ -182,7 +182,7 @@ Print only solutions and a summary at the end.
 */
     else if(command == string("-printsolsonly"))
     { getOptions(stateObj).silent = true; }
-  /** @help switches;-printonlyoptimal Description
+/** @help switches;-printonlyoptimal Description
 In optimisation problems, only print the optimal value, and
 not intermediate values.
 */
@@ -203,7 +203,7 @@ help switches -quiet
 */
     else if(command == string("-verbose"))
     { getOptions(stateObj).parser_verbose = true; }
-  /** @help switches;-prop-node Description
+/** @help switches;-prop-node Description
 Allows the user to choose the level of consistency to be enforced
 during search.
 
@@ -231,7 +231,7 @@ help switches -preprocess
         exit(1);
       }
     }
- /** @help switches;-map-long-short Description
+/** @help switches;-map-long-short Description
 Automatically generate a short tuple list from each long tuple list.
 
 The methods of compression are:
@@ -259,7 +259,7 @@ keeplong : Make a 'short tuple list' with no short tuples (only for benchmarking
         exit(1);
       }
     }
-    /** @help switches;-preprocess
+/** @help switches;-preprocess
 
 This switch allows the user to choose what level of preprocess is
 applied to their model before search commences.
@@ -326,7 +326,7 @@ search tree. Only available in a DEBUG executable.
     FAIL_EXIT("This version of minion was not built to support the '-fullprop' command. Sorry");
 #endif
     }
-    /** @help switches;-nocheck Description
+/** @help switches;-nocheck Description
 Do not check solutions for correctness before printing them out.
 */
 
@@ -353,7 +353,7 @@ Print out the branching decisions and variable states at each node.
 */
     else if(command == string("-dumptree"))
     { getOptions(stateObj).dumptree = true; }
-  /** @help switches;-nodelimit Description
+/** @help switches;-nodelimit Description
 To stop search after N nodes, do
 
    minion -nodelimit N myinput.minion
@@ -362,7 +362,6 @@ To stop search after N nodes, do
 /** @help switches;-nodelimit References
 help switches -cpulimit
 help switches -timelimit
-help switches -searchlimit
 help switches -sollimit
 */
     else if(command == string("-nodelimit"))
@@ -389,7 +388,6 @@ To stop search after N solutions have been found, do
 /** @help switches;-sollimit References
 help switches -cpulimit
 help switches -nodelimit
-help switches -searchlimit
 help switches -timelimit
 */
     else if(command == string("-sollimit"))
@@ -407,7 +405,7 @@ help switches -timelimit
         exit(1);
       }
     }
-    /** @help switches;-timelimit Description
+/** @help switches;-timelimit Description
 To stop search after N seconds (real time), do
 
    minion -timelimit N myinput.minion
@@ -416,7 +414,6 @@ To stop search after N seconds (real time), do
 /** @help switches;-timelimit References
 help switches -cpulimit
 help switches -nodelimit
-help switches -searchlimit
 help switches -sollimit
 */
     else if(command == string("-timelimit"))
@@ -424,7 +421,7 @@ help switches -sollimit
       INCREMENT_i(-timelimit);
       if(getOptions(stateObj).timeout_active)
       {
-        cout << "Only one '-cpulimit', '-searchlimit' or '-timelimit' per instance" << endl;
+        cout << "Only one '-cpulimit' or '-timelimit' per instance" << endl;
         exit(1);
       }
       getOptions(stateObj).timeout_active = true;
@@ -456,7 +453,7 @@ help switches -sollimit
       INCREMENT_i(-cpulimit);
       if(getOptions(stateObj).timeout_active)
       {
-        cout << "Only one '-cpulimit', '-searchlimit' or '-timelimit' per instance" << endl;
+        cout << "Only one '-cpulimit', or '-timelimit' per instance" << endl;
         exit(1);
       }
       getOptions(stateObj).timeout_active = true;
@@ -622,7 +619,7 @@ splitting.
 The new input files can be run without any special flags.
 
 This flag is intended to be used with the -timelimit, -sollimit, -nodelimit
-,-searchlimit or -cpulimit flags. Please note that changing other flags between
+or -cpulimit flags. Please note that changing other flags between
 runs (such as -varorder) may have unintended consequences.
 
 Implies -makeresume.
